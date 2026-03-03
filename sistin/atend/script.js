@@ -408,7 +408,6 @@ async function salvarCadastro() {
   
   const boleto = document.getElementById("codigoBoleto").value.trim();
 
-  // Validação conforme seu código original
   if(!cpf || !nome || !nascRaw || !boleto) { 
     alert("ERRO: CPF, Nome, Nascimento e Número do Boleto são obrigatórios!"); 
     return; 
@@ -420,47 +419,35 @@ async function salvarCadastro() {
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
-  // --- AQUI ESTÁ A MUDANÇA: USAR URLSEARCHPARAMS PARA ENVIAR COMO GET ---
-  const baseURL = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
-  
-  const params = new URLSearchParams({
-    action: acao,
-    id: idEdicao,
-    cpf: cpf,
-    nome: nome,
-    nasc: nascRaw,
-    municipio: mun,
-    tel: tel,
-    via: via,
-    atendente: user.nome,
-    parceiro: user.parceiro,
-    boleto: boleto
-  });
+  // --- SOLUÇÃO REAL: ENVIAR TUDO PELA URL (IGUAL AO LOGIN) ---
+  const url = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec" +
+    "?action=" + acao +
+    "&id=" + encodeURIComponent(idEdicao) +
+    "&cpf=" + encodeURIComponent(cpf) +
+    "&nome=" + encodeURIComponent(nome) +
+    "&nasc=" + encodeURIComponent(nascRaw) +
+    "&municipio=" + encodeURIComponent(mun) +
+    "&tel=" + encodeURIComponent(tel) +
+    "&via=" + encodeURIComponent(via) +
+    "&atendente=" + encodeURIComponent(user.nome) +
+    "&parceiro=" + encodeURIComponent(user.parceiro) +
+    "&boleto=" + encodeURIComponent(boleto);
 
   try {
-    // IMPORTANTE: Removido o 'method: POST' e o 'body'. 
-    // Agora os dados vão na URL, exatamente como o seu Login que funciona.
-    const response = await fetch(`${baseURL}?${params.toString()}`);
+    // Note que não existe 'method: POST' aqui. O padrão é GET, que não dá erro de CORS.
+    const response = await fetch(url);
     const res = await response.json();
 
     if (res.sucesso) {
-      alert(idEdicao ? "Cadastro atualizado com sucesso!" : "Cadastro realizado com sucesso!");
-      
-      // Limpeza dos campos
-      document.getElementById("cpf").value = "";
-      document.getElementById("nome").value = "";
-      document.getElementById("nascimento").value = "";
-      document.getElementById("municipio").value = "";
-      document.getElementById("telefone").value = "";
-      document.getElementById("codigoBoleto").value = "";
-      
+      alert(idEdicao ? "Atualizado com sucesso!" : "Cadastrado com sucesso!");
+      limparCamposCadastro(); // Certifique-se que essa função existe ou limpe manualmente
       if(typeof voltarMenu === "function") voltarMenu();
     } else {
-      alert("Erro do Servidor: " + (res.erro || "Erro desconhecido"));
+      alert("Erro: " + (res.erro || "Falha no servidor"));
     }
   } catch (error) {
-    console.error("Erro na requisição:", error);
-    alert("Erro de conexão. Certifique-se de que salvou o Script no Google como NOVA VERSÃO.");
+    console.error("Erro fatal:", error);
+    alert("O Google bloqueou a conexão. Verifique se você salvou o script no Google como 'Nova Versão'.");
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
