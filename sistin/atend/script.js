@@ -391,7 +391,7 @@ function prepararEdicao(item) {
   document.getElementById("btnSalvar").innerText = "ATUALIZAR CADASTRO";
 }
 
-// --- SALVAR OU EDITAR CADASTRO (ADAPTADA PARA EVITAR CORS) ---
+// --- SALVAR OU EDITAR CADASTRO (SOLUÇÃO DEFINITIVA PARA CORS) ---
 async function salvarCadastro() {
   const userStr = sessionStorage.getItem("usuario");
   if(!userStr) { alert("Sessão expirada. Faça login novamente."); return; }
@@ -408,22 +408,21 @@ async function salvarCadastro() {
   
   const boleto = document.getElementById("codigoBoleto").value.trim();
 
+  // Validação conforme seu código original
   if(!cpf || !nome || !nascRaw || !boleto) { 
     alert("ERRO: CPF, Nome, Nascimento e Número do Boleto são obrigatórios!"); 
     return; 
   }
 
-  // Pegamos o ID se houver (para saber se é Edição ou Novo Cadastro)
   const idEdicao = document.getElementById("idRegistro") ? document.getElementById("idRegistro").value : "";
   const acao = idEdicao ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
 
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
-  // --- AQUI ESTÁ A SOLUÇÃO: MONTAR TUDO NA URL (GET) ---
+  // --- AQUI ESTÁ A MUDANÇA: USAR URLSEARCHPARAMS PARA ENVIAR COMO GET ---
   const baseURL = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
   
-  // Criamos os parâmetros da URL
   const params = new URLSearchParams({
     action: acao,
     id: idEdicao,
@@ -439,14 +438,15 @@ async function salvarCadastro() {
   });
 
   try {
-    // Enviamos via GET (adicionando os parâmetros após a interrogação ?)
+    // IMPORTANTE: Removido o 'method: POST' e o 'body'. 
+    // Agora os dados vão na URL, exatamente como o seu Login que funciona.
     const response = await fetch(`${baseURL}?${params.toString()}`);
     const res = await response.json();
 
     if (res.sucesso) {
       alert(idEdicao ? "Cadastro atualizado com sucesso!" : "Cadastro realizado com sucesso!");
       
-      // Limpar campos
+      // Limpeza dos campos
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
@@ -460,7 +460,7 @@ async function salvarCadastro() {
     }
   } catch (error) {
     console.error("Erro na requisição:", error);
-    alert("Erro de conexão. O Google barrou a requisição POST, mas agora com GET deve funcionar. Verifique se publicou o Script como 'Nova Versão'.");
+    alert("Erro de conexão. Certifique-se de que salvou o Script no Google como NOVA VERSÃO.");
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
