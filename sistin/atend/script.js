@@ -436,29 +436,27 @@ async function salvarCadastro() {
     if (res.sucesso) {
       alert("Salvo com sucesso!");
 
-      // --- TENTATIVA DE IMPRESSÃO ---
+      // --- CORREÇÃO: CHAMANDO O NOME CORRETO DA FUNÇÃO ---
       try {
-        if (typeof imprimirProtocolo === "function") {
-          imprimirProtocolo(
-            res.id, 
-            res.cpf, 
-            res.nome, 
-            res.nasc, 
-            mun, 
-            via, 
-            user.nome, 
-            user.parceiro, 
-            res.data, 
-            res.boleto
-          );
-        } else {
-          console.error("Função imprimirProtocolo não encontrada no script.js");
-        }
+          if (typeof imprimirProtocolo === "function") {
+            imprimirProtocolo(
+              res.id, 
+              res.cpf, 
+              res.nome, 
+              res.nasc, 
+              mun, 
+              via, 
+              user.nome, 
+              user.parceiro, 
+              res.data, 
+              res.boleto
+            );
+          }
       } catch (errPrint) {
-        console.error("Erro interno na função imprimirProtocolo:", errPrint);
+        console.error("Erro na impressão:", errPrint);
       }
 
-      // --- LIMPEZA OBRIGATÓRIA DOS CAMPOS ---
+      // --- LIMPEZA DOS CAMPOS ---
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
@@ -470,13 +468,12 @@ async function salvarCadastro() {
       alert("Aviso: " + res.erro);
     }
   } catch (error) {
-    console.error("Erro fatal na requisição:", error);
-    alert("Erro de conexão. Verifique se publicou a NOVA VERSÃO no Google.");
+    console.error("Erro fatal:", error);
+    alert("Erro de conexão ao salvar.");
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
 }
-
 // --- IMPRIMIR PROTOCOLO (MANTIDA INTEGRALMENTE) ---
 function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
   const telaPrint = window.open('', '_blank');
