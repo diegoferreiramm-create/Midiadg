@@ -393,34 +393,8 @@ function prepararEdicao(item) {
 
 // --- SALVAR OU EDITAR CADASTRO (ESTRUTURA IGUAL AO LOGIN QUE JÁ FUNCIONA) ---
 async function salvarCadastro() {
-  const userStr = sessionStorage.getItem("usuario");
-  if(!userStr) { alert("Sessão expirada. Faça login novamente."); return; }
-  const user = JSON.parse(userStr);
-  
-  const cpf = document.getElementById("cpf").value;
-  const nome = document.getElementById("nome").value;
-  const nascRaw = document.getElementById("nascimento").value;
-  const mun = document.getElementById("municipio").value;
-  const tel = document.getElementById("telefone").value;
-  
-  const viaEl = document.querySelector('input[name="via"]:checked');
-  const via = viaEl ? viaEl.value : "1ª VIA";
-  
-  const boleto = document.getElementById("codigoBoleto").value.trim();
+  // ... (aqui fica o começo da sua função pegando os valores dos inputs) ...
 
-  // Mantendo suas validações obrigatórias
-  if(!cpf || !nome || !nascRaw || !boleto) { 
-    alert("ERRO: CPF, Nome, Nascimento e Número do Boleto são obrigatórios!"); 
-    return; 
-  }
-
-  const idEdicao = document.getElementById("idRegistro") ? document.getElementById("idRegistro").value : "";
-  const acao = idEdicao ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
-
-  const btn = document.querySelector("button[onclick='salvarCadastro()']");
-  if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
-
-  // AQUI ESTÁ O PONTO: Montamos a URL igualzinha à do Login
   const urlFinal = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec" +
     "?action=" + acao +
     "&cpf=" + encodeURIComponent(cpf) +
@@ -435,28 +409,37 @@ async function salvarCadastro() {
     "&id=" + encodeURIComponent(idEdicao);
 
   try {
-    // Usamos o fetch simples (GET), que é o que o Google aceita sem dar erro de CORS
     const response = await fetch(urlFinal);
-    const res = await response.json();
+    const res = await response.json(); // Aqui o navegador recebe a resposta do Google
 
+    // É EXATAMENTE AQUI QUE VOCÊ COLA O CÓDIGO:
     if (res.sucesso) {
-      alert(idEdicao ? "Cadastro atualizado!" : "Cadastro realizado!");
-      
-      // Limpa os campos após o sucesso
+      alert("Salvo com sucesso!");
+
+      // Limpa os campos para o próximo cadastro
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
       document.getElementById("municipio").value = "";
       document.getElementById("telefone").value = "";
       document.getElementById("codigoBoleto").value = "";
+
+      // Chama a impressão (se a função existir)
+      if (typeof gerarProtocolo === "function") {
+          gerarProtocolo(res); 
+      }
       
+      // Se tiver uma função para voltar ao menu, use aqui
       if(typeof voltarMenu === "function") voltarMenu();
+
     } else {
-      alert("Erro no Script: " + (res.erro || "Falha desconhecida"));
+      // Se o Google retornar erro (como CPF repetido), cai aqui
+      alert("Atenção: " + res.erro);
     }
+
   } catch (error) {
-    console.error("Erro de conexão:", error);
-    alert("Erro de conexão ao salvar. Verifique se o Script no Google foi publicado como NOVA VERSÃO.");
+    console.error("Erro fatal:", error);
+    alert("Erro de conexão ao salvar.");
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
