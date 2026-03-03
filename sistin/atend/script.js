@@ -1,4 +1,9 @@
+// CONFIGURAÇÃO INICIAL - COLOQUE NO TOPO DO SCRIPT.JS
 const urlSistema = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
+
+let modoEdicao = false;
+let idSendoEditado = null;
+let alunoEncontradoGlobal = null;
 
 //atribuições de abrir paginas//
 function abrirTela(id){
