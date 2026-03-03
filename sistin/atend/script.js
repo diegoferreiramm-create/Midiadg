@@ -1,3 +1,5 @@
+const urlSistema = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
+
 //atribuições de abrir paginas//
 function abrirTela(id){
   // Adicionado 'recebimentoLoteBox' na lista abaixo
