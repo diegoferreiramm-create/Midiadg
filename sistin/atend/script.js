@@ -766,9 +766,7 @@ function salvarEntrega() {
   const nomeRecebedor = isTerceiro ? document.getElementById("nomeTerceiro").value : alunoEncontradoGlobal.nome;
   const cpfRecebedor = isTerceiro ? document.getElementById("cpfTerceiro").value : alunoEncontradoGlobal.cpf;
   const vinculo = isTerceiro ? document.getElementById("parentesco").value : "Titular";
-  
-  const viaEl = document.querySelector('input[name="viaEntrega"]:checked');
-  const via = viaEl ? viaEl.value : "1";
+  const via = document.querySelector('input[name="viaEntrega"]:checked').value;
 
   if(isTerceiro && (!nomeRecebedor || !cpfRecebedor || !vinculo)) { 
     alert("Preencha todos os campos do recebedor!"); 
@@ -777,11 +775,7 @@ function salvarEntrega() {
 
   const user = JSON.parse(sessionStorage.getItem("usuario"));
 
-  // Bloqueia o botão para evitar cliques duplos
-  const btn = document.querySelector("button[onclick='salvarEntrega()']");
-  if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
-
-  // --- LÓGICA DE URL IGUAL À DO CADASTRO (MÉTODO GET) ---
+  // --- AQUI ESTÁ A CORREÇÃO PARA O GITHUB (SAI google.script.run, ENTRA fetch) ---
   const urlFinal = `${urlSistema}?action=registrarEntregaAppsScript` +
     `&ctr=${encodeURIComponent(ctr)}` +
     `&cpfAluno=${encodeURIComponent(alunoEncontradoGlobal.cpf)}` +
@@ -793,44 +787,63 @@ function salvarEntrega() {
     `&parceiro=${encodeURIComponent(user.parceiro)}` +
     `&via=${encodeURIComponent(via)}`;
 
-  // Fetch sem o bloco de { method: 'POST' } para não dar erro de CORS
   fetch(urlFinal)
-    .then(res => res.json())
-    .then(res => {
-      if(res.sucesso) {
-        // Imprime o comprovante
-        imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
-        
-        alert("Entrega realizada com sucesso!");
+  .then(res => res.json())
+  .then(res => {
+    if(res.sucesso) {
+      imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
+      alert("Entrega realizada com sucesso!");
 
-        // Limpeza dos campos
-        document.getElementById("codigoCtr").value = "";
-        document.getElementById("infoAlunoEntrega").style.display = "none";
-        
-        if(isTerceiro) {
-          document.getElementById("nomeTerceiro").value = "";
-          document.getElementById("cpfTerceiro").value = "";
-          document.getElementById("parentesco").value = "";
-          document.getElementById("checkTerceiro").checked = false;
-          if(typeof toggleTerceiro === "function") toggleTerceiro();
-        }
-        
-        const via1 = document.getElementById("via1");
-        if(via1) via1.checked = true;
-        
-        alunoEncontradoGlobal = null;
-      } else {
-        alert("Erro ao salvar: " + res.erro);
+      document.getElementById("codigoCtr").value = "";
+      document.getElementById("infoAlunoEntrega").style.display = "none";
+      if(isTerceiro) {
+        document.getElementById("nomeTerceiro").value = "";
+        document.getElementById("cpfTerceiro").value = "";
+        document.getElementById("parentesco").value = "";
+        document.getElementById("checkTerceiro").checked = false;
+        if(typeof toggleTerceiro === "function") toggleTerceiro();
       }
-    })
-    .catch(err => {
-      console.error("Erro na entrega:", err);
-      alert("Erro de conexão com o servidor.");
-    })
-    .finally(() => {
-      if(btn) { btn.disabled = false; btn.innerText = "CONFIRMAR ENTREGA"; }
-    });
+      
+      document.getElementById("via1").checked = true;
+      alunoEncontradoGlobal = null;
+    } else {
+      alert("Erro ao salvar: " + res.erro);
+    }
+  })
+  .catch(err => {
+    console.error("Erro:", err);
+    alert("Erro de conexão com o servidor.");
+  });
 }
+
+// BUSCA ÚNICA (Adaptada para GitHub)
+document.addEventListener('blur', function(e){
+  if(e.target.id === "codigoCtr"){
+    const ctr = e.target.value.trim();
+    if(!ctr) return;
+
+    const userStr = sessionStorage.getItem("usuario");
+    if(!userStr) return;
+    const user = JSON.parse(userStr);
+
+    // Substituindo google.script.run por fetch
+    fetch(`${urlSistema}?action=buscarPorCodigoAppsScript&ctr=${ctr}&parceiro=${user.parceiro}`)
+    .then(res => res.json())
+    .then(aluno => {
+      if(aluno && aluno.encontrado) {
+        alunoEncontradoGlobal = aluno;
+        document.getElementById("resNomeAluno").innerText = aluno.nome;
+        document.getElementById("resCpfAluno").innerText = aluno.cpf; 
+        document.getElementById("infoAlunoEntrega").style.display = "block";
+
+        if(aluno.via) document.getElementById("via" + aluno.via).checked = true;
+      } else {
+        document.getElementById("infoAlunoEntrega").style.display = "none";
+        alunoEncontradoGlobal = null;
+      }
+    });
+  }
+}, true);
 
 // FUNÇÕES DE IMPRESSÃO, ADMIN E MASCARA (MANTIDAS 100%)
 function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, atendente, via) {
