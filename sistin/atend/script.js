@@ -402,21 +402,26 @@ async function salvarCadastro() {
   const nascRaw = document.getElementById("nascimento").value;
   const mun = document.getElementById("municipio").value;
   const tel = document.getElementById("telefone").value;
+  
   const viaEl = document.querySelector('input[name="via"]:checked');
   const via = viaEl ? viaEl.value : "1ª VIA";
+  
   const boleto = document.getElementById("codigoBoleto").value.trim();
 
+  // Validação de campos
   if(!cpf || !nome || !nascRaw || !boleto) { 
     alert("ERRO: CPF, Nome, Nascimento e Número do Boleto são obrigatórios!"); 
     return; 
   }
 
+  // --- A LINHA QUE FALTAVA ESTÁ AQUI ---
   const idEdicao = document.getElementById("idRegistro") ? document.getElementById("idRegistro").value : "";
   const acao = idEdicao ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
 
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
+  // Montagem da URL para o Google
   const urlFinal = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec" +
     "?action=" + acao +
     "&cpf=" + encodeURIComponent(cpf) +
@@ -437,22 +442,34 @@ async function salvarCadastro() {
     if (res.sucesso) {
       alert("Salvo com sucesso!");
 
-      // Chama o seu protocolo que você já tem no .js
-      imprimirProtocolo(res.id, res.cpf, res.nome, res.nasc, mun, via, user.nome, user.parceiro, res.data, res.boleto);
+      // --- CHAMA SEU PROTOCOLO (O QUE VOCÊ ME MANDOU) ---
+      imprimirProtocolo(
+        res.id, 
+        res.cpf, 
+        res.nome, 
+        res.nasc, 
+        mun, 
+        via, 
+        user.nome, 
+        user.parceiro, 
+        res.data, 
+        res.boleto
+      );
 
-      // Limpa os campos
+      // --- LIMPEZA DOS CAMPOS ---
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
       document.getElementById("municipio").value = "";
       document.getElementById("telefone").value = "";
       document.getElementById("codigoBoleto").value = "";
+
     } else {
-      alert("Atenção: " + res.erro);
+      alert("Aviso: " + res.erro);
     }
   } catch (error) {
-    console.error("Erro:", error);
-    alert("Erro de conexão. Certifique-se de que publicou a NOVA VERSÃO no Google.");
+    console.error("Erro fatal:", error);
+    alert("Erro de conexão. Verifique se publicou a NOVA VERSÃO no Google.");
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
