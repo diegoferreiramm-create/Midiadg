@@ -476,12 +476,13 @@ async function salvarCadastro() {
 }
 // --- IMPRIMIR PROTOCOLO (CORRIGIDA PARA EVITAR ERRO DE POP-UP) ---
 function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
+  // Abre a nova janela
   const telaPrint = window.open('', '_blank');
-  
-  // SE O NAVEGADOR BLOQUEAR O POP-UP, telaPrint SERÁ NULL
+
+  // --- VERIFICAÇÃO DE BLOQUEIO DE POP-UP ---
   if (!telaPrint || telaPrint.closed || typeof telaPrint.document === 'undefined') {
-    alert("O Protocolo foi gerado, mas o seu navegador bloqueou a janela de impressão.\n\nPor favor, clique no ícone de bloqueio na barra de endereços e escolha 'Sempre permitir pop-ups'.");
-    return; // Sai da função sem dar erro no console
+    alert("⚠️ O cadastro foi salvo, mas o seu navegador BLOQUEOU a janela de impressão.\n\nVerifique a barra de endereços e clique em 'Sempre permitir pop-ups' para este site.");
+    return; 
   }
 
   telaPrint.document.write(`
@@ -508,9 +509,9 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <span class="id-destaque">Nº BOLETO: ${boleto}</span>
         </div>
         <div class="content">
-          <div class="row"><span><b>NOME:</b> ${nome.toUpperCase()}</span><span><b>DATA:</b> ${data ? data.split(' ')[0] : ''}</span></div>
+          <div class="row"><span><b>NOME:</b> ${nome ? nome.toUpperCase() : ''}</span><span><b>DATA:</b> ${data ? data.split(' ')[0] : ''}</span></div>
           <div class="row"><span><b>CPF:</b> ${cpf}</span><span><b>VIA:</b> ${via}</span></div>
-          <div class="row"><span><b>MUNICÍPIO:</b> ${municipio.toUpperCase()}</span><span><b>ATENDENTE:</b> ${atendente}</span></div>
+          <div class="row"><span><b>MUNICÍPIO:</b> ${municipio ? municipio.toUpperCase() : ''}</span><span><b>ATENDENTE:</b> ${atendente}</span></div>
           
           <div class="lgpd">
             Não nos responsabilizamos por informações no formulário entregue que divergirem dos documentos anexos, conforme Art. 9º da Lei 13.709/2018 (LGPD). A veracidade é de responsabilidade do declarante.
@@ -531,16 +532,16 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         </div>
       </div>
       <script>
-        setTimeout(() => { 
-          window.print(); 
-          // Opcional: window.close(); // Fecha a aba após imprimir
-        }, 500);
+        // Pequeno atraso para garantir que o conteúdo carregue antes de imprimir
+        setTimeout(function() { window.print(); }, 500);
       <\/script>
     </body>
     </html>
   `);
   telaPrint.document.close();
 }
+
+
 // --- TROCAR SENHA (ADAPTADA) ---
 function salvarSenha() {
   const login = document.getElementById("usuarioTroca").value.trim();
