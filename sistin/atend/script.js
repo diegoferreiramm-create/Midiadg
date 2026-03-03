@@ -391,7 +391,7 @@ function prepararEdicao(item) {
   document.getElementById("btnSalvar").innerText = "ATUALIZAR CADASTRO";
 }
 
-// --- SALVAR OU EDITAR CADASTRO (SOLUÇÃO DEFINITIVA PARA CORS) ---
+// --- SALVAR OU EDITAR CADASTRO (ESTRUTURA IGUAL AO LOGIN QUE JÁ FUNCIONA) ---
 async function salvarCadastro() {
   const userStr = sessionStorage.getItem("usuario");
   if(!userStr) { alert("Sessão expirada. Faça login novamente."); return; }
@@ -408,6 +408,7 @@ async function salvarCadastro() {
   
   const boleto = document.getElementById("codigoBoleto").value.trim();
 
+  // Mantendo suas validações obrigatórias
   if(!cpf || !nome || !nascRaw || !boleto) { 
     alert("ERRO: CPF, Nome, Nascimento e Número do Boleto são obrigatórios!"); 
     return; 
@@ -419,10 +420,9 @@ async function salvarCadastro() {
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
-  // --- SOLUÇÃO REAL: ENVIAR TUDO PELA URL (IGUAL AO LOGIN) ---
-  const url = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec" +
+  // AQUI ESTÁ O PONTO: Montamos a URL igualzinha à do Login
+  const urlFinal = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec" +
     "?action=" + acao +
-    "&id=" + encodeURIComponent(idEdicao) +
     "&cpf=" + encodeURIComponent(cpf) +
     "&nome=" + encodeURIComponent(nome) +
     "&nasc=" + encodeURIComponent(nascRaw) +
@@ -431,23 +431,32 @@ async function salvarCadastro() {
     "&via=" + encodeURIComponent(via) +
     "&atendente=" + encodeURIComponent(user.nome) +
     "&parceiro=" + encodeURIComponent(user.parceiro) +
-    "&boleto=" + encodeURIComponent(boleto);
+    "&boleto=" + encodeURIComponent(boleto) +
+    "&id=" + encodeURIComponent(idEdicao);
 
   try {
-    // Note que não existe 'method: POST' aqui. O padrão é GET, que não dá erro de CORS.
-    const response = await fetch(url);
+    // Usamos o fetch simples (GET), que é o que o Google aceita sem dar erro de CORS
+    const response = await fetch(urlFinal);
     const res = await response.json();
 
     if (res.sucesso) {
-      alert(idEdicao ? "Atualizado com sucesso!" : "Cadastrado com sucesso!");
-      limparCamposCadastro(); // Certifique-se que essa função existe ou limpe manualmente
+      alert(idEdicao ? "Cadastro atualizado!" : "Cadastro realizado!");
+      
+      // Limpa os campos após o sucesso
+      document.getElementById("cpf").value = "";
+      document.getElementById("nome").value = "";
+      document.getElementById("nascimento").value = "";
+      document.getElementById("municipio").value = "";
+      document.getElementById("telefone").value = "";
+      document.getElementById("codigoBoleto").value = "";
+      
       if(typeof voltarMenu === "function") voltarMenu();
     } else {
-      alert("Erro: " + (res.erro || "Falha no servidor"));
+      alert("Erro no Script: " + (res.erro || "Falha desconhecida"));
     }
   } catch (error) {
-    console.error("Erro fatal:", error);
-    alert("O Google bloqueou a conexão. Verifique se você salvou o script no Google como 'Nova Versão'.");
+    console.error("Erro de conexão:", error);
+    alert("Erro de conexão ao salvar. Verifique se o Script no Google foi publicado como NOVA VERSÃO.");
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
