@@ -754,9 +754,43 @@ function fecharLotePorParceiro() {
     .catch(err => alert("Erro na conexão ao fechar lote."));
 }
 
-/**
- * FUNÇÃO PARA GRAVAR A ENTREGA - ADAPTADA PARA GITHUB
- */
+// --- BUSCA ÚNICA (Corrigida para GitHub) ---
+document.addEventListener('blur', function(e){
+  if(e.target.id === "codigoCtr"){
+    const ctr = e.target.value.trim();
+    if(!ctr) return;
+
+    const userStr = sessionStorage.getItem("usuario");
+    if(!userStr) return;
+    const user = JSON.parse(userStr);
+
+    // No GitHub, usamos FETCH em vez de google.script.run
+    fetch(`${urlSistema}?action=buscarPorCodigoAppsScript&ctr=${ctr}&parceiro=${user.parceiro}`)
+      .then(res => res.json())
+      .then(aluno => {
+        if(aluno && aluno.encontrado) {
+          alunoEncontradoGlobal = aluno;
+          document.getElementById("resNomeAluno").innerText = aluno.nome;
+          document.getElementById("resCpfAluno").innerText = aluno.cpf; 
+          document.getElementById("infoAlunoEntrega").style.display = "block";
+
+          // Marca o rádio automaticamente conforme a via do cadastro
+          if(aluno.via) {
+            const vLimpa = aluno.via.toString().replace(/\D/g, '');
+            const radioVia = document.getElementById("via" + vLimpa);
+            if(radioVia) radioVia.checked = true;
+          }
+        } else {
+          document.getElementById("infoAlunoEntrega").style.display = "none";
+          alunoEncontradoGlobal = null;
+          alert("CTR não encontrado!");
+        }
+      })
+      .catch(err => console.error("Erro na busca:", err));
+  }
+}, true);
+
+// --- SALVAR ENTREGA (Corrigida para GitHub) ---
 function salvarEntrega() {
   const ctr = document.getElementById("codigoCtr").value;
   const isTerceiro = document.getElementById("checkTerceiro").checked;
@@ -769,9 +803,7 @@ function salvarEntrega() {
   const nomeRecebedor = isTerceiro ? document.getElementById("nomeTerceiro").value : alunoEncontradoGlobal.nome;
   const cpfRecebedor = isTerceiro ? document.getElementById("cpfTerceiro").value : alunoEncontradoGlobal.cpf;
   const vinculo = isTerceiro ? document.getElementById("parentesco").value : "Titular";
-  
-  const viaEl = document.querySelector('input[name="viaEntrega"]:checked');
-  const via = viaEl ? viaEl.value : "1";
+  const via = document.querySelector('input[name="viaEntrega"]:checked').value;
 
   if(isTerceiro && (!nomeRecebedor || !cpfRecebedor || !vinculo)) { 
     alert("Preencha todos os campos do recebedor!"); 
@@ -780,11 +812,7 @@ function salvarEntrega() {
 
   const user = JSON.parse(sessionStorage.getItem("usuario"));
 
-  // Bloqueia o botão para evitar cliques duplos
-  const btn = document.querySelector("button[onclick='salvarEntrega()']");
-  if(btn) { btn.disabled = true; btn.innerText = "Gravando..."; }
-
-  // --- MUDANÇA: Substituindo google.script.run por FETCH (GET) ---
+  // No GitHub, montamos a URL e usamos FETCH (GET)
   const urlFinal = `${urlSistema}?action=registrarEntregaAppsScript` +
     `&ctr=${encodeURIComponent(ctr)}` +
     `&cpfAluno=${encodeURIComponent(alunoEncontradoGlobal.cpf)}` +
@@ -800,12 +828,10 @@ function salvarEntrega() {
     .then(res => res.json())
     .then(res => {
       if(res.sucesso) {
-        // Sua função de impressão
         imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
-        
         alert("Entrega realizada com sucesso!");
 
-        // --- SUA LÓGICA DE LIMPEZA ORIGINAL ---
+        // --- SUA LIMPEZA ORIGINAL ---
         document.getElementById("codigoCtr").value = "";
         document.getElementById("infoAlunoEntrega").style.display = "none";
         if(isTerceiro) {
@@ -815,60 +841,14 @@ function salvarEntrega() {
           document.getElementById("checkTerceiro").checked = false;
           if(typeof toggleTerceiro === "function") toggleTerceiro();
         }
-        
         document.getElementById("via1").checked = true;
         alunoEncontradoGlobal = null;
       } else {
         alert("Erro ao salvar: " + res.erro);
       }
     })
-    .catch(err => {
-      console.error("Erro fatal:", err);
-      alert("Erro de conexão com o servidor.");
-    })
-    .finally(() => {
-      if(btn) { btn.disabled = false; btn.innerText = "CONFIRMAR ENTREGA"; }
-    });
+    .catch(err => alert("Erro de conexão."));
 }
-
-/**
- * BUSCA ÚNICA NO BLUR - ADAPTADA PARA GITHUB
- */
-document.addEventListener('blur', function(e){
-  if(e.target.id === "codigoCtr"){
-    const ctr = e.target.value.trim();
-    if(!ctr) return;
-
-    const userStr = sessionStorage.getItem("usuario");
-    if(!userStr) return;
-    const user = JSON.parse(userStr);
-
-    // --- MUDANÇA: Substituindo google.script.run por FETCH (GET) ---
-    fetch(`${urlSistema}?action=buscarPorCodigoAppsScript&ctr=${ctr}&parceiro=${user.parceiro}`)
-      .then(res => res.json())
-      .then(aluno => {
-        if(aluno && aluno.encontrado) {
-          alunoEncontradoGlobal = aluno;
-          document.getElementById("resNomeAluno").innerText = aluno.nome;
-          document.getElementById("resCpfAluno").innerText = aluno.cpf; 
-          document.getElementById("infoAlunoEntrega").style.display = "block";
-
-          // Marca o rádio automaticamente conforme a via do cadastro
-          if(aluno.via) {
-             // Garante que pegamos apenas o número (ex: transforma "1ª" em "1")
-             const vLimpa = aluno.via.toString().replace(/\D/g, '');
-             const radioVia = document.getElementById("via" + vLimpa);
-             if(radioVia) radioVia.checked = true;
-          }
-
-        } else {
-          document.getElementById("infoAlunoEntrega").style.display = "none";
-          alunoEncontradoGlobal = null;
-        }
-      })
-      .catch(err => console.error("Erro na busca:", err));
-  }
-}, true);
 
 // FUNÇÕES DE IMPRESSÃO, ADMIN E MASCARA (MANTIDAS 100%)
 function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, atendente, via) {
