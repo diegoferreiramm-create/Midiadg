@@ -392,7 +392,7 @@ function prepararEdicao(item) {
 }
 
 // --- SALVAR OU EDITAR CADASTRO (ESTRUTURA IGUAL AO LOGIN QUE JÁ FUNCIONA) ---
-// --- FUNÇÃO PARA SALVAR (CORRIGIDA) ---
+// --- SALVAR OU EDITAR CADASTRO (INTERLIGADO COM SEU PROTOCOLO) ---
 async function salvarCadastro() {
   const userStr = sessionStorage.getItem("usuario");
   if(!userStr) { alert("Sessão expirada. Faça login novamente."); return; }
@@ -420,6 +420,7 @@ async function salvarCadastro() {
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
+  // Envio via URL para matar o erro de CORS
   const urlFinal = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec" +
     "?action=" + acao +
     "&cpf=" + encodeURIComponent(cpf) +
@@ -438,12 +439,24 @@ async function salvarCadastro() {
     const res = await response.json();
 
     if (res.sucesso) {
-      alert("Salvo com sucesso!");
+      alert("Cadastro realizado com sucesso!");
 
-      // --- AQUI ABRE A IMPRESSÃO ---
-      gerarProtocolo(res);
+      // --- AQUI ESTÁ A INTERLIGAÇÃO COM O SEU PROTOCOLO ---
+      // Chamamos a função que você já tem, passando os dados do 'res'
+      imprimirProtocolo(
+        res.id, 
+        res.cpf, 
+        res.nome, 
+        res.nasc,        // Data de nascimento já corrigida pelo Google
+        mun,             // Município que pegamos do formulário
+        via,             // Via que pegamos do formulário
+        user.nome,       // Atendente logado
+        user.parceiro,   // Parceiro logado
+        res.data,        // Data/Hora do salvamento
+        res.boleto       // Número do boleto
+      );
 
-      // --- LIMPEZA MANUAL (PARA NÃO DAR ERRO DE FUNÇÃO INEXISTENTE) ---
+      // --- LIMPEZA DOS CAMPOS ---
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
@@ -456,7 +469,7 @@ async function salvarCadastro() {
     }
   } catch (error) {
     console.error("Erro fatal:", error);
-    alert("Erro de conexão ao salvar.");
+    alert("Erro de conexão. Certifique-se que o Script no Google é uma NOVA VERSÃO.");
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
