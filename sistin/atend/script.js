@@ -392,6 +392,7 @@ function prepararEdicao(item) {
 }
 
 // --- SALVAR OU EDITAR CADASTRO (ESTRUTURA IGUAL AO LOGIN QUE JÁ FUNCIONA) ---
+// --- SALVAR OU EDITAR CADASTRO (VERSÃO FINAL SEM ERRO DE ACAO E SEM CORS) ---
 async function salvarCadastro() {
   const userStr = sessionStorage.getItem("usuario");
   if(!userStr) { alert("Sessão expirada. Faça login novamente."); return; }
@@ -408,20 +409,24 @@ async function salvarCadastro() {
   
   const boleto = document.getElementById("codigoBoleto").value.trim();
 
-  // Validação de campos
+  // Validação básica
   if(!cpf || !nome || !nascRaw || !boleto) { 
     alert("ERRO: CPF, Nome, Nascimento e Número do Boleto são obrigatórios!"); 
     return; 
   }
 
-  // --- A LINHA QUE FALTAVA ESTÁ AQUI ---
-  const idEdicao = document.getElementById("idRegistro") ? document.getElementById("idRegistro").value : "";
+  // --- RESOLVENDO O ERRO 'ACAO IS NOT DEFINED' ---
+  // Verificamos se existe um campo de ID (caso seja uma edição)
+  const campoId = document.getElementById("idRegistro");
+  const idEdicao = campoId ? campoId.value : "";
+  
+  // Aqui definimos a variável 'acao' antes de usá-la na URL
   const acao = idEdicao ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
 
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
-  // Montagem da URL para o Google
+  // Montagem da URL (Usando GET para não dar erro de CORS)
   const urlFinal = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec" +
     "?action=" + acao +
     "&cpf=" + encodeURIComponent(cpf) +
@@ -442,21 +447,23 @@ async function salvarCadastro() {
     if (res.sucesso) {
       alert("Salvo com sucesso!");
 
-      // --- CHAMA SEU PROTOCOLO (O QUE VOCÊ ME MANDOU) ---
-      imprimirProtocolo(
-        res.id, 
-        res.cpf, 
-        res.nome, 
-        res.nasc, 
-        mun, 
-        via, 
-        user.nome, 
-        user.parceiro, 
-        res.data, 
-        res.boleto
-      );
+      // --- CHAMA O SEU PROTOCOLO ( CTR ) ---
+      if (typeof imprimirProtocolo === "function") {
+          imprimirProtocolo(
+            res.id, 
+            res.cpf, 
+            res.nome, 
+            res.nasc, 
+            mun, 
+            via, 
+            user.nome, 
+            user.parceiro, 
+            res.data, 
+            res.boleto
+          );
+      }
 
-      // --- LIMPEZA DOS CAMPOS ---
+      // Limpeza dos campos
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
@@ -465,11 +472,11 @@ async function salvarCadastro() {
       document.getElementById("codigoBoleto").value = "";
 
     } else {
-      alert("Aviso: " + res.erro);
+      alert("Aviso do Servidor: " + res.erro);
     }
   } catch (error) {
     console.error("Erro fatal:", error);
-    alert("Erro de conexão. Verifique se publicou a NOVA VERSÃO no Google.");
+    alert("Erro de conexão. Verifique o console ou a versão do Google Script.");
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
