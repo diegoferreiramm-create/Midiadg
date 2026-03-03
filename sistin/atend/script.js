@@ -391,8 +391,6 @@ function prepararEdicao(item) {
   document.getElementById("btnSalvar").innerText = "ATUALIZAR CADASTRO";
 }
 
-// --- SALVAR OU EDITAR CADASTRO (ESTRUTURA IGUAL AO LOGIN QUE JÁ FUNCIONA) ---
-// --- SALVAR OU EDITAR CADASTRO (INTERLIGADO COM SEU PROTOCOLO) ---
 async function salvarCadastro() {
   const userStr = sessionStorage.getItem("usuario");
   if(!userStr) { alert("Sessão expirada. Faça login novamente."); return; }
@@ -403,10 +401,8 @@ async function salvarCadastro() {
   const nascRaw = document.getElementById("nascimento").value;
   const mun = document.getElementById("municipio").value;
   const tel = document.getElementById("telefone").value;
-  
   const viaEl = document.querySelector('input[name="via"]:checked');
   const via = viaEl ? viaEl.value : "1ª VIA";
-  
   const boleto = document.getElementById("codigoBoleto").value.trim();
 
   if(!cpf || !nome || !nascRaw || !boleto) { 
@@ -420,7 +416,6 @@ async function salvarCadastro() {
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
-  // Envio via URL para matar o erro de CORS
   const urlFinal = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec" +
     "?action=" + acao +
     "&cpf=" + encodeURIComponent(cpf) +
@@ -439,24 +434,31 @@ async function salvarCadastro() {
     const res = await response.json();
 
     if (res.sucesso) {
-      alert("Cadastro realizado com sucesso!");
+      alert("Salvo com sucesso!");
 
-      // --- AQUI ESTÁ A INTERLIGAÇÃO COM O SEU PROTOCOLO ---
-      // Chamamos a função que você já tem, passando os dados do 'res'
-      imprimirProtocolo(
-        res.id, 
-        res.cpf, 
-        res.nome, 
-        res.nasc,        // Data de nascimento já corrigida pelo Google
-        mun,             // Município que pegamos do formulário
-        via,             // Via que pegamos do formulário
-        user.nome,       // Atendente logado
-        user.parceiro,   // Parceiro logado
-        res.data,        // Data/Hora do salvamento
-        res.boleto       // Número do boleto
-      );
+      // --- TENTATIVA DE IMPRESSÃO ---
+      try {
+        if (typeof imprimirProtocolo === "function") {
+          imprimirProtocolo(
+            res.id, 
+            res.cpf, 
+            res.nome, 
+            res.nasc, 
+            mun, 
+            via, 
+            user.nome, 
+            user.parceiro, 
+            res.data, 
+            res.boleto
+          );
+        } else {
+          console.error("Função imprimirProtocolo não encontrada no script.js");
+        }
+      } catch (errPrint) {
+        console.error("Erro interno na função imprimirProtocolo:", errPrint);
+      }
 
-      // --- LIMPEZA DOS CAMPOS ---
+      // --- LIMPEZA OBRIGATÓRIA DOS CAMPOS ---
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
@@ -465,11 +467,11 @@ async function salvarCadastro() {
       document.getElementById("codigoBoleto").value = "";
 
     } else {
-      alert("Atenção: " + res.erro);
+      alert("Aviso: " + res.erro);
     }
   } catch (error) {
-    console.error("Erro fatal:", error);
-    alert("Erro de conexão. Certifique-se que o Script no Google é uma NOVA VERSÃO.");
+    console.error("Erro fatal na requisição:", error);
+    alert("Erro de conexão. Verifique se publicou a NOVA VERSÃO no Google.");
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
