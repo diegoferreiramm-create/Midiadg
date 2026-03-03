@@ -767,7 +767,6 @@ function salvarEntrega() {
   const cpfRecebedor = isTerceiro ? document.getElementById("cpfTerceiro").value : alunoEncontradoGlobal.cpf;
   const vinculo = isTerceiro ? document.getElementById("parentesco").value : "Titular";
   
-  // Captura a via (1 ou 2)
   const viaEl = document.querySelector('input[name="viaEntrega"]:checked');
   const via = viaEl ? viaEl.value : "1";
 
@@ -778,12 +777,10 @@ function salvarEntrega() {
 
   const user = JSON.parse(sessionStorage.getItem("usuario"));
 
-  // --- TRAVA DO BOTÃO ---
   const btn = document.querySelector("button[onclick='salvarEntrega()']");
-  if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
+  if(btn) { btn.disabled = true; btn.innerText = "Gravando..."; }
 
-  // --- MONTAGEM DA URL (MÉTODO GET) PARA MATAR O CORS ---
-  // IMPORTANTE: Os nomes das variáveis (&cpfAluno=, &nomeRec=) batem com o seu .gs
+  // --- MONTAGEM DA URL (Lógica que mata o erro de CORS) ---
   const urlFinal = `${urlSistema}?action=registrarEntregaAppsScript` +
     `&ctr=${encodeURIComponent(ctr)}` +
     `&cpfAluno=${encodeURIComponent(alunoEncontradoGlobal.cpf)}` +
@@ -795,20 +792,17 @@ function salvarEntrega() {
     `&parceiro=${encodeURIComponent(user.parceiro)}` +
     `&via=${encodeURIComponent(via)}`;
 
-  // --- FETCH SEM O BLOCO DE METHOD 'POST' ---
+  // --- FETCH SIMPLES (IGUAL AO DO CADASTRO) ---
   fetch(urlFinal)
   .then(res => res.json())
   .then(res => {
     if(res.sucesso) {
-      // Chama a função de impressão que você já tem no arquivo
       imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
-      
       alert("Entrega realizada com sucesso!");
 
       // --- LIMPEZA DOS CAMPOS ---
       document.getElementById("codigoCtr").value = "";
       document.getElementById("infoAlunoEntrega").style.display = "none";
-      
       if(isTerceiro) {
         document.getElementById("nomeTerceiro").value = "";
         document.getElementById("cpfTerceiro").value = "";
@@ -816,18 +810,15 @@ function salvarEntrega() {
         document.getElementById("checkTerceiro").checked = false;
         if(typeof toggleTerceiro === "function") toggleTerceiro();
       }
-      
-      const via1 = document.getElementById("via1");
-      if(via1) via1.checked = true;
-      
+      document.getElementById("via1").checked = true;
       alunoEncontradoGlobal = null;
     } else {
       alert("Erro ao salvar: " + res.erro);
     }
   })
   .catch(err => {
-    console.error("Erro fatal na entrega:", err);
-    alert("Erro de conexão. Verifique se publicou a NOVA VERSÃO no Google Script.");
+    console.error("Erro na entrega:", err);
+    alert("Erro de conexão. Verifique se publicou a Nova Versão no Google.");
   })
   .finally(() => {
     if(btn) { btn.disabled = false; btn.innerText = "CONFIRMAR ENTREGA"; }
