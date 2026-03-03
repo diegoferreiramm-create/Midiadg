@@ -754,6 +754,9 @@ function fecharLotePorParceiro() {
     .catch(err => alert("Erro na conexão ao fechar lote."));
 }
 
+/**
+ * FUNÇÃO PARA GRAVAR A ENTREGA - ADAPTADA PARA GITHUB
+ */
 function salvarEntrega() {
   const ctr = document.getElementById("codigoCtr").value;
   const isTerceiro = document.getElementById("checkTerceiro").checked;
@@ -766,7 +769,9 @@ function salvarEntrega() {
   const nomeRecebedor = isTerceiro ? document.getElementById("nomeTerceiro").value : alunoEncontradoGlobal.nome;
   const cpfRecebedor = isTerceiro ? document.getElementById("cpfTerceiro").value : alunoEncontradoGlobal.cpf;
   const vinculo = isTerceiro ? document.getElementById("parentesco").value : "Titular";
-  const via = document.querySelector('input[name="viaEntrega"]:checked').value;
+  
+  const viaEl = document.querySelector('input[name="viaEntrega"]:checked');
+  const via = viaEl ? viaEl.value : "1";
 
   if(isTerceiro && (!nomeRecebedor || !cpfRecebedor || !vinculo)) { 
     alert("Preencha todos os campos do recebedor!"); 
@@ -775,7 +780,11 @@ function salvarEntrega() {
 
   const user = JSON.parse(sessionStorage.getItem("usuario"));
 
-  // --- AQUI ESTÁ A CORREÇÃO PARA O GITHUB (SAI google.script.run, ENTRA fetch) ---
+  // Bloqueia o botão para evitar cliques duplos
+  const btn = document.querySelector("button[onclick='salvarEntrega()']");
+  if(btn) { btn.disabled = true; btn.innerText = "Gravando..."; }
+
+  // --- MUDANÇA: Substituindo google.script.run por FETCH (GET) ---
   const urlFinal = `${urlSistema}?action=registrarEntregaAppsScript` +
     `&ctr=${encodeURIComponent(ctr)}` +
     `&cpfAluno=${encodeURIComponent(alunoEncontradoGlobal.cpf)}` +
@@ -788,35 +797,43 @@ function salvarEntrega() {
     `&via=${encodeURIComponent(via)}`;
 
   fetch(urlFinal)
-  .then(res => res.json())
-  .then(res => {
-    if(res.sucesso) {
-      imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
-      alert("Entrega realizada com sucesso!");
+    .then(res => res.json())
+    .then(res => {
+      if(res.sucesso) {
+        // Sua função de impressão
+        imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
+        
+        alert("Entrega realizada com sucesso!");
 
-      document.getElementById("codigoCtr").value = "";
-      document.getElementById("infoAlunoEntrega").style.display = "none";
-      if(isTerceiro) {
-        document.getElementById("nomeTerceiro").value = "";
-        document.getElementById("cpfTerceiro").value = "";
-        document.getElementById("parentesco").value = "";
-        document.getElementById("checkTerceiro").checked = false;
-        if(typeof toggleTerceiro === "function") toggleTerceiro();
+        // --- SUA LÓGICA DE LIMPEZA ORIGINAL ---
+        document.getElementById("codigoCtr").value = "";
+        document.getElementById("infoAlunoEntrega").style.display = "none";
+        if(isTerceiro) {
+          document.getElementById("nomeTerceiro").value = "";
+          document.getElementById("cpfTerceiro").value = "";
+          document.getElementById("parentesco").value = "";
+          document.getElementById("checkTerceiro").checked = false;
+          if(typeof toggleTerceiro === "function") toggleTerceiro();
+        }
+        
+        document.getElementById("via1").checked = true;
+        alunoEncontradoGlobal = null;
+      } else {
+        alert("Erro ao salvar: " + res.erro);
       }
-      
-      document.getElementById("via1").checked = true;
-      alunoEncontradoGlobal = null;
-    } else {
-      alert("Erro ao salvar: " + res.erro);
-    }
-  })
-  .catch(err => {
-    console.error("Erro:", err);
-    alert("Erro de conexão com o servidor.");
-  });
+    })
+    .catch(err => {
+      console.error("Erro fatal:", err);
+      alert("Erro de conexão com o servidor.");
+    })
+    .finally(() => {
+      if(btn) { btn.disabled = false; btn.innerText = "CONFIRMAR ENTREGA"; }
+    });
 }
 
-// BUSCA ÚNICA (Adaptada para GitHub)
+/**
+ * BUSCA ÚNICA NO BLUR - ADAPTADA PARA GITHUB
+ */
 document.addEventListener('blur', function(e){
   if(e.target.id === "codigoCtr"){
     const ctr = e.target.value.trim();
@@ -826,22 +843,30 @@ document.addEventListener('blur', function(e){
     if(!userStr) return;
     const user = JSON.parse(userStr);
 
-    // Substituindo google.script.run por fetch
+    // --- MUDANÇA: Substituindo google.script.run por FETCH (GET) ---
     fetch(`${urlSistema}?action=buscarPorCodigoAppsScript&ctr=${ctr}&parceiro=${user.parceiro}`)
-    .then(res => res.json())
-    .then(aluno => {
-      if(aluno && aluno.encontrado) {
-        alunoEncontradoGlobal = aluno;
-        document.getElementById("resNomeAluno").innerText = aluno.nome;
-        document.getElementById("resCpfAluno").innerText = aluno.cpf; 
-        document.getElementById("infoAlunoEntrega").style.display = "block";
+      .then(res => res.json())
+      .then(aluno => {
+        if(aluno && aluno.encontrado) {
+          alunoEncontradoGlobal = aluno;
+          document.getElementById("resNomeAluno").innerText = aluno.nome;
+          document.getElementById("resCpfAluno").innerText = aluno.cpf; 
+          document.getElementById("infoAlunoEntrega").style.display = "block";
 
-        if(aluno.via) document.getElementById("via" + aluno.via).checked = true;
-      } else {
-        document.getElementById("infoAlunoEntrega").style.display = "none";
-        alunoEncontradoGlobal = null;
-      }
-    });
+          // Marca o rádio automaticamente conforme a via do cadastro
+          if(aluno.via) {
+             // Garante que pegamos apenas o número (ex: transforma "1ª" em "1")
+             const vLimpa = aluno.via.toString().replace(/\D/g, '');
+             const radioVia = document.getElementById("via" + vLimpa);
+             if(radioVia) radioVia.checked = true;
+          }
+
+        } else {
+          document.getElementById("infoAlunoEntrega").style.display = "none";
+          alunoEncontradoGlobal = null;
+        }
+      })
+      .catch(err => console.error("Erro na busca:", err));
   }
 }, true);
 
