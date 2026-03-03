@@ -391,11 +391,12 @@ function prepararEdicao(item) {
   document.getElementById("btnSalvar").innerText = "ATUALIZAR CADASTRO";
 }
 
-// --- SALVAR OU EDITAR CADASTRO (ADAPTADA) ---
+// --- SALVAR OU EDITAR CADASTRO (ADAPTADA PARA EVITAR CORS) ---
 async function salvarCadastro() {
   const userStr = sessionStorage.getItem("usuario");
   if(!userStr) { alert("Sessão expirada. Faça login novamente."); return; }
   const user = JSON.parse(userStr);
+  
   const cpf = document.getElementById("cpf").value;
   const nome = document.getElementById("nome").value;
   const nascRaw = document.getElementById("nascimento").value;
@@ -412,6 +413,59 @@ async function salvarCadastro() {
     return; 
   }
 
+  // Pegamos o ID se for uma edição (ajuste conforme seu HTML se tiver campo ID)
+  const idEdicao = document.getElementById("idRegistro") ? document.getElementById("idRegistro").value : "";
+  
+  // Define qual função chamar no Apps Script baseado na presença de um ID
+  const acao = idEdicao ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
+
+  const btn = document.querySelector("button[onclick='salvarCadastro()']");
+  if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
+
+  // MONTANDO A URL COM TODOS OS PARÂMETROS (SOLUÇÃO PARA O CORS)
+  const baseURL = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
+  
+  const params = new URLSearchParams({
+    action: acao,
+    id: idEdicao, // Se vazio, o script de salvar ignora
+    cpf: cpf,
+    nome: nome,
+    nasc: nascRaw,
+    municipio: mun,
+    tel: tel,
+    via: via,
+    atendente: user.nome,
+    parceiro: user.parceiro,
+    boleto: boleto
+  });
+
+  try {
+    // Usando GET (padrão do fetch) para evitar o bloqueio de CORS do Google
+    const response = await fetch(`${baseURL}?${params.toString()}`);
+    const res = await response.json();
+
+    if (res.sucesso) {
+      alert(idEdicao ? "Cadastro atualizado com sucesso!" : "Cadastro realizado com sucesso! ID: " + res.id);
+      
+      // Limpar campos após sucesso
+      document.getElementById("cpf").value = "";
+      document.getElementById("nome").value = "";
+      document.getElementById("nascimento").value = "";
+      document.getElementById("municipio").value = "";
+      document.getElementById("telefone").value = "";
+      document.getElementById("codigoBoleto").value = "";
+      
+      if(typeof voltarMenu === "function") voltarMenu();
+    } else {
+      alert("Erro ao salvar: " + (res.erro || "Erro desconhecido"));
+    }
+  } catch (error) {
+    console.error("Erro na requisição:", error);
+    alert("Erro de conexão com o servidor. Verifique o console.");
+  } finally {
+    if(btn) { btn.disabled = false; btn.innerText = idEdicao ? "SALVAR EDIÇÃO" : "CADASTRAR"; }
+  }
+}
   const partes = nascRaw.split("-");
   const nascFormatado = `${partes[2]}/${partes[1]}/${partes[0]}`;
   document.getElementById("btnSalvar").innerText = "Processando...";
