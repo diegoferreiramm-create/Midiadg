@@ -413,21 +413,20 @@ async function salvarCadastro() {
     return; 
   }
 
-  // Pegamos o ID se for uma edição (ajuste conforme seu HTML se tiver campo ID)
+  // Pegamos o ID se houver (para saber se é Edição ou Novo Cadastro)
   const idEdicao = document.getElementById("idRegistro") ? document.getElementById("idRegistro").value : "";
-  
-  // Define qual função chamar no Apps Script baseado na presença de um ID
   const acao = idEdicao ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
 
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
-  // MONTANDO A URL COM TODOS OS PARÂMETROS (SOLUÇÃO PARA O CORS)
+  // --- AQUI ESTÁ A SOLUÇÃO: MONTAR TUDO NA URL (GET) ---
   const baseURL = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
   
+  // Criamos os parâmetros da URL
   const params = new URLSearchParams({
     action: acao,
-    id: idEdicao, // Se vazio, o script de salvar ignora
+    id: idEdicao,
     cpf: cpf,
     nome: nome,
     nasc: nascRaw,
@@ -440,14 +439,14 @@ async function salvarCadastro() {
   });
 
   try {
-    // Usando GET (padrão do fetch) para evitar o bloqueio de CORS do Google
+    // Enviamos via GET (adicionando os parâmetros após a interrogação ?)
     const response = await fetch(`${baseURL}?${params.toString()}`);
     const res = await response.json();
 
     if (res.sucesso) {
-      alert(idEdicao ? "Cadastro atualizado com sucesso!" : "Cadastro realizado com sucesso! ID: " + res.id);
+      alert(idEdicao ? "Cadastro atualizado com sucesso!" : "Cadastro realizado com sucesso!");
       
-      // Limpar campos após sucesso
+      // Limpar campos
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
@@ -457,77 +456,13 @@ async function salvarCadastro() {
       
       if(typeof voltarMenu === "function") voltarMenu();
     } else {
-      alert("Erro ao salvar: " + (res.erro || "Erro desconhecido"));
+      alert("Erro do Servidor: " + (res.erro || "Erro desconhecido"));
     }
   } catch (error) {
     console.error("Erro na requisição:", error);
-    alert("Erro de conexão com o servidor. Verifique o console.");
+    alert("Erro de conexão. O Google barrou a requisição POST, mas agora com GET deve funcionar. Verifique se publicou o Script como 'Nova Versão'.");
   } finally {
-    if(btn) { btn.disabled = false; btn.innerText = idEdicao ? "SALVAR EDIÇÃO" : "CADASTRAR"; }
-  }
-}
-  const partes = nascRaw.split("-");
-  const nascFormatado = `${partes[2]}/${partes[1]}/${partes[0]}`;
-  document.getElementById("btnSalvar").innerText = "Processando...";
-  document.getElementById("btnSalvar").disabled = true;
-
-  // Objeto com os dados para enviar para o seu .gs de 600 linhas
-  const dadosParaEnviar = {
-    cpf: cpf,
-    nome: nome,
-    nasc: nascFormatado,
-    mun: mun,
-    tel: tel,
-    via: via,
-    atendente: user.nome,
-    parceiro: user.parceiro,
-    boleto: boleto
-  };
-
-  if (modoEdicao) {
-    dadosParaEnviar.action = "editarCadastroAppsScript";
-    dadosParaEnviar.id = idSendoEditado;
-
-    fetch(urlSistema, {
-      method: 'POST',
-      body: JSON.stringify(dadosParaEnviar)
-    })
-    .then(res => res.json())
-    .then(res => {
-      if(res.sucesso) {
-        ["cpf", "nome", "nascimento", "municipio", "telefone", "codigoBoleto"].forEach(id => {
-          const el = document.getElementById(id);
-          if(el) el.value = "";
-        });
-        document.getElementById("msgCPF").innerText = "";
-        abrirTela('listasBox');
-      } else { alert("Erro ao editar: " + res.erro); }
-      document.getElementById("btnSalvar").disabled = false;
-      document.getElementById("btnSalvar").innerText = "Salvar e Gerar Protocolo";
-    })
-    .catch(err => alert("Erro de conexão ao editar"));
-
-  } else {
-    dadosParaEnviar.action = "salvarCadastroAppsScript";
-
-    fetch(urlSistema, {
-      method: 'POST',
-      body: JSON.stringify(dadosParaEnviar)
-    })
-    .then(res => res.json())
-    .then(res => { 
-      if(res.sucesso){ 
-        imprimirProtocolo(res.id, cpf, nome, nascFormatado, mun, via, user.nome, user.parceiro, res.data, boleto);
-        ["cpf", "nome", "nascimento", "municipio", "telefone", "codigoBoleto"].forEach(id => {
-          const el = document.getElementById(id);
-          if(el) el.value = "";
-        });
-        document.getElementById("msgCPF").innerText = "";
-      } else { alert("Erro: " + res.erro); }
-      document.getElementById("btnSalvar").innerText = "Salvar e Gerar Protocolo";
-      document.getElementById("btnSalvar").disabled = false;
-    })
-    .catch(err => alert("Erro de conexão ao salvar"));
+    if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
 }
 
