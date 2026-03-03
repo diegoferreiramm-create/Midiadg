@@ -402,13 +402,10 @@ async function salvarCadastro() {
   const nascRaw = document.getElementById("nascimento").value;
   const mun = document.getElementById("municipio").value;
   const tel = document.getElementById("telefone").value;
-  
   const viaEl = document.querySelector('input[name="via"]:checked');
   const via = viaEl ? viaEl.value : "1ª VIA";
-  
   const boleto = document.getElementById("codigoBoleto").value.trim();
 
-  // Validação de campos obrigatórios
   if(!cpf || !nome || !nascRaw || !boleto) { 
     alert("ERRO: CPF, Nome, Nascimento e Número do Boleto são obrigatórios!"); 
     return; 
@@ -420,7 +417,6 @@ async function salvarCadastro() {
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
-  // URL para evitar erro de CORS
   const urlFinal = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec" +
     "?action=" + acao +
     "&cpf=" + encodeURIComponent(cpf) +
@@ -441,35 +437,22 @@ async function salvarCadastro() {
     if (res.sucesso) {
       alert("Salvo com sucesso!");
 
-      // --- CHAMADA DO SEU PROTOCOLO MANTIDA INTEGRALMENTE ---
-      // A ordem abaixo segue exatamente os parênteses da sua function imprimirProtocolo
-      imprimirProtocolo(
-        res.id,           // id
-        res.cpf,          // cpf
-        res.nome,         // nome
-        res.nasc,         // nascimento (já vem dd/mm/aaaa do Google)
-        mun,              // municipio
-        via,              // via
-        user.nome,        // atendente
-        user.parceiro,    // parceiro
-        res.data,         // data (data e hora do registro)
-        res.boleto        // boleto
-      );
+      // Chama o seu protocolo que você já tem no .js
+      imprimirProtocolo(res.id, res.cpf, res.nome, res.nasc, mun, via, user.nome, user.parceiro, res.data, res.boleto);
 
-      // --- LIMPEZA DOS CAMPOS ---
+      // Limpa os campos
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
       document.getElementById("municipio").value = "";
       document.getElementById("telefone").value = "";
       document.getElementById("codigoBoleto").value = "";
-
     } else {
-      alert("Aviso: " + res.erro);
+      alert("Atenção: " + res.erro);
     }
   } catch (error) {
     console.error("Erro:", error);
-    alert("Erro de conexão. Verifique se o Script no Google foi publicado como NOVA VERSÃO.");
+    alert("Erro de conexão. Certifique-se de que publicou a NOVA VERSÃO no Google.");
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
