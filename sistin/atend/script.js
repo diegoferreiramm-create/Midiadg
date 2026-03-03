@@ -36,21 +36,34 @@ function abrirTela(id){
   }
 }
 
-//ATRIBUIÇÃO LOGIN//
-function entrar(){
+//ATRIBUIÇÃO LOGIN - ADAPTADA PARA GITHUB//
+function entrar() {
   const login = document.getElementById("login").value.trim();
   const senha = document.getElementById("senha").value.trim();
-  google.script.run.withSuccessHandler(res=>{
-    if(res.sucesso){
-      sessionStorage.setItem("usuario", JSON.stringify(res));
-      mostrarMenu();
-    } else { document.getElementById("msg").innerText="Login inválido"; }
-  }).validarLogin(login, senha);
+  const msg = document.getElementById("msg");
+
+  if (msg) msg.innerText = "Verificando...";
+
+  // Trocamos o google.script.run pelo fetch para falar com as 600 linhas do .gs
+  fetch(`${urlSistema}?action=validarLogin&user=${login}&pass=${senha}`)
+    .then(response => response.json())
+    .then(res => {
+      // Toda a sua lógica original de sucesso/erro foi mantida
+      if (res.sucesso) {
+        sessionStorage.setItem("usuario", JSON.stringify(res));
+        mostrarMenu();
+      } else {
+        if (msg) msg.innerText = "Login inválido";
+      }
+    })
+    .catch(err => {
+      console.error("Erro ao conectar:", err);
+      if (msg) msg.innerText = "Erro de conexão com o servidor";
+    });
 }
 
-
 /**
- * MAPEAMENTO RÍGIDO - AJUSTADO
+ * MAPEAMENTO RÍGIDO - MANTIDO INTEGRALMENTE
  */
 const colunasDef = [
   { label: "ID", idx: 1 }, { label: "CPF", idx: 2 }, { label: "NOME", idx: 3 },
@@ -67,7 +80,7 @@ const colunasDef = [
   { label: "EDITAR", idx: 17 }     
 ];
 
-// DATA removida da lista de marcação automática
+// DATA removida da lista de marcação automática - MANTIDO
 const colunasParaMarcar = ["ID", "CPF", "NOME", "NASC", "MUNICIPIO", "TEL", "ATENDENTE", "Nº BOLETO", "EDITAR"];
 
 function gerarChecksColunas() {
@@ -166,6 +179,7 @@ function filtrarTabelaAvancado() {
   });
 }
 
+// --- FUNÇÕES DE INTERFACE (MANTIDAS) ---
 function imprimirLista() {
   const conteudo = document.getElementById('areaImpressao').innerHTML;
   const telaPrint = window.open('', '_blank');
@@ -179,7 +193,6 @@ function imprimirLista() {
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #000; padding: 2px; font-size: 8px; }
         [style*="display: none"] { display: none !important; }
-        /* EDITAR nunca sai na impressão */
         th:last-child, td:last-child { display: none !important; }
       </style>
     </head>
@@ -233,43 +246,54 @@ const CPF = {
   }
 };
 
+// --- BUSCA AUTOMÁTICA (ADAPTADA PARA GITHUB) ---
 document.addEventListener('blur', function(e) {
-  if (e.target.id === 'cpf' && !modoEdicao) { // Só busca automático se não for edição
+  // Certifique-se que a variável 'modoEdicao' existe no seu script global
+  if (e.target.id === 'cpf' && (typeof modoEdicao !== 'undefined' && !modoEdicao)) { 
     const valorCpf = e.target.value;
     if (!CPF.validar(valorCpf)) return;
+    
     document.getElementById("msgCPF").innerText = "Consultando base de dados...";
-    google.script.run.withSuccessHandler(res => {
-      if (res && res.encontrado) {
-        document.getElementById("msgCPF").innerText = "Dados recuperados!";
-        document.getElementById("nome").value = res.nome || "";
-        document.getElementById("municipio").value = res.municipio || "";
-        document.getElementById("telefone").value = res.telefone || "";
-        if (res.nascimento) {
-          try {
-            let dataStr = res.nascimento.toString();
-            let dataFinal = "";
-            if (dataStr.includes('/')) {
-              const p = dataStr.split('/');
-              dataFinal = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
-            } else {
-              let d = new Date(res.nascimento);
-              if (!isNaN(d.getTime())) {
-                let ano = d.getFullYear();
-                let mes = String(d.getMonth() + 1).padStart(2, '0');
-                let dia = String(d.getDate()).padStart(2, '0');
-                dataFinal = `${ano}-${mes}-${dia}`;
+
+    // Trocamos google.script.run pelo fetch
+    fetch(`${urlSistema}?action=buscarDadosNoBD&cpf=${valorCpf}`)
+      .then(res => res.json())
+      .then(res => {
+        if (res && res.encontrado) {
+          document.getElementById("msgCPF").innerText = "Dados recuperados!";
+          document.getElementById("nome").value = res.nome || "";
+          document.getElementById("municipio").value = res.municipio || "";
+          document.getElementById("telefone").value = res.telefone || "";
+          
+          if (res.nascimento) {
+            try {
+              let dataStr = res.nascimento.toString();
+              let dataFinal = "";
+              if (dataStr.includes('/')) {
+                const p = dataStr.split('/');
+                dataFinal = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+              } else {
+                let d = new Date(res.nascimento);
+                if (!isNaN(d.getTime())) {
+                  let ano = d.getFullYear();
+                  let mes = String(d.getMonth() + 1).padStart(2, '0');
+                  let dia = String(d.getDate()).padStart(2, '0');
+                  dataFinal = `${ano}-${mes}-${dia}`;
+                }
               }
-            }
-            if (dataFinal) document.getElementById("nascimento").value = dataFinal;
-          } catch(err) { console.error(err); }
+              if (dataFinal) document.getElementById("nascimento").value = dataFinal;
+            } catch(err) { console.error(err); }
+          }
+        } else {
+          document.getElementById("msgCPF").innerText = "CPF não encontrado (Novo cadastro).";
         }
-      } else {
-        document.getElementById("msgCPF").innerText = "CPF não encontrado (Novo cadastro).";
-      }
-    }).buscarDadosNoBD(valorCpf);
+      })
+      .catch(err => {
+        console.error("Erro na busca:", err);
+        document.getElementById("msgCPF").innerText = "Erro ao conectar com o servidor.";
+      });
   }
 }, true);
-
 
 function mostrarMenu(){
   const user = JSON.parse(sessionStorage.getItem("usuario"));
@@ -278,7 +302,7 @@ function mostrarMenu(){
   document.getElementById("infoUsuario").innerText = user.nome + " | " + user.parceiro;
   document.getElementById("hudUsuario").style.display="flex";
 
-  // LOGICA DO LOG (SÓ PARA ADMIN)
+  // LOGICA DO LOG (SÓ PARA ADMIN) - MANTIDA
   if(user.nome === 'admin' || user.parceiro.toString() === "97") {
     const cardLog = document.getElementById("cardLog");
     if(cardLog) cardLog.style.display = "block";
@@ -287,33 +311,43 @@ function mostrarMenu(){
   abrirTela('menuBox');
 }
 
+// ADAPTADA PARA GITHUB (Usa Fetch para buscar as 600 linhas)
 function carregarDadosLog() {
   const tbody = document.getElementById("corpoLogs");
   if(!tbody) return;
   tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>Carregando Logs da Planilha...</td></tr>";
 
-  google.script.run.withSuccessHandler(dados => {
-    tbody.innerHTML = "";
-    if (!dados || dados.length === 0) {
-      tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>Aba LOG está vazia.</td></tr>";
-      return;
-    }
-    dados.forEach(l => {
-      tbody.innerHTML += `
-        <tr style="border-bottom: 1px solid #334155;">
-          <td style="padding:10px;">${l.data}</td>
-          <td>${l.usuario}</td>
-          <td style="color:#fbbf24;">${l.parceiro || '-'}</td>
-          <td>${l.acao}</td>
-          <td style="color:#22c55e;">${l.idRef}</td>
-        </tr>`;
+  // Chamada via URL para a função buscarLogsDaAbaLog que está no seu .gs
+  fetch(`${urlSistema}?action=buscarLogsDaAbaLog`)
+    .then(res => res.json())
+    .then(dados => {
+      tbody.innerHTML = "";
+      if (!dados || dados.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>Aba LOG está vazia.</td></tr>";
+        return;
+      }
+      dados.forEach(l => {
+        tbody.innerHTML += `
+          <tr style="border-bottom: 1px solid #334155;">
+            <td style="padding:10px;">${l.data}</td>
+            <td>${l.usuario}</td>
+            <td style="color:#fbbf24;">${l.parceiro || '-'}</td>
+            <td>${l.acao}</td>
+            <td style="color:#22c55e;">${l.idRef}</td>
+          </tr>`;
+      });
+    })
+    .catch(err => {
+      console.error("Erro ao carregar logs:", err);
+      tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:red;'>Erro ao conectar com o servidor.</td></tr>";
     });
-  }).buscarLogsDaAbaLog();
 }
 
-function logout(){ sessionStorage.clear(); document.getElementById("hudUsuario").style.display="none"; abrirTela('loginBox'); }
-
-
+function logout(){ 
+  sessionStorage.clear(); 
+  document.getElementById("hudUsuario").style.display="none"; 
+  abrirTela('loginBox'); 
+}
 
 function toggleTerceiro() {
   const isChecked = document.getElementById("checkTerceiro").checked;
@@ -323,7 +357,7 @@ function toggleTerceiro() {
   inputs.forEach(el => el.disabled = !isChecked);
 }
 
-// FUNÇÃO PARA PREPARAR A EDIÇÃO
+// FUNÇÃO PARA PREPARAR A EDIÇÃO - MANTIDA INTEGRALMENTE
 function prepararEdicao(item) {
   modoEdicao = true;
   idSendoEditado = item.id;
@@ -346,13 +380,14 @@ function prepararEdicao(item) {
   // PONTO 1: Puxando o número do boleto para edição
   const campoBoleto = document.getElementById("codigoBoleto");
   if(campoBoleto) {
-     campoBoleto.value = item.boleto || "";
+      campoBoleto.value = item.boleto || "";
   }
   
   document.getElementById("btnSalvar").innerText = "ATUALIZAR CADASTRO";
 }
 
-function salvarCadastro(){
+// --- SALVAR OU EDITAR CADASTRO (ADAPTADA) ---
+async function salvarCadastro() {
   const userStr = sessionStorage.getItem("usuario");
   if(!userStr) { alert("Sessão expirada. Faça login novamente."); return; }
   const user = JSON.parse(userStr);
@@ -377,9 +412,29 @@ function salvarCadastro(){
   document.getElementById("btnSalvar").innerText = "Processando...";
   document.getElementById("btnSalvar").disabled = true;
 
+  // Objeto com os dados para enviar para o seu .gs de 600 linhas
+  const dadosParaEnviar = {
+    cpf: cpf,
+    nome: nome,
+    nasc: nascFormatado,
+    mun: mun,
+    tel: tel,
+    via: via,
+    atendente: user.nome,
+    parceiro: user.parceiro,
+    boleto: boleto
+  };
+
   if (modoEdicao) {
-    // CHAMA FUNÇÃO DE EDIÇÃO - ADICIONADO 'boleto' NO FINAL
-    google.script.run.withSuccessHandler(res => {
+    dadosParaEnviar.action = "editarCadastroAppsScript";
+    dadosParaEnviar.id = idSendoEditado;
+
+    fetch(urlSistema, {
+      method: 'POST',
+      body: JSON.stringify(dadosParaEnviar)
+    })
+    .then(res => res.json())
+    .then(res => {
       if(res.sucesso) {
         ["cpf", "nome", "nascimento", "municipio", "telefone", "codigoBoleto"].forEach(id => {
           const el = document.getElementById(id);
@@ -390,13 +445,18 @@ function salvarCadastro(){
       } else { alert("Erro ao editar: " + res.erro); }
       document.getElementById("btnSalvar").disabled = false;
       document.getElementById("btnSalvar").innerText = "Salvar e Gerar Protocolo";
-      
-      // ABAIXO: Adicionei o argumento 'boleto' que faltava!
-    }).editarCadastroAppsScript(idSendoEditado, cpf, nome, nascFormatado, mun, tel, via, user.nome, user.parceiro, boleto);
+    })
+    .catch(err => alert("Erro de conexão ao editar"));
 
   } else {
-    // SALVAR NOVO - Já estava correto, mas mantive a estrutura
-    google.script.run.withSuccessHandler(res=>{ 
+    dadosParaEnviar.action = "salvarCadastroAppsScript";
+
+    fetch(urlSistema, {
+      method: 'POST',
+      body: JSON.stringify(dadosParaEnviar)
+    })
+    .then(res => res.json())
+    .then(res => { 
       if(res.sucesso){ 
         imprimirProtocolo(res.id, cpf, nome, nascFormatado, mun, via, user.nome, user.parceiro, res.data, boleto);
         ["cpf", "nome", "nascimento", "municipio", "telefone", "codigoBoleto"].forEach(id => {
@@ -407,11 +467,12 @@ function salvarCadastro(){
       } else { alert("Erro: " + res.erro); }
       document.getElementById("btnSalvar").innerText = "Salvar e Gerar Protocolo";
       document.getElementById("btnSalvar").disabled = false;
-    }).salvarCadastroAppsScript(cpf, nome, nascFormatado, mun, tel, via, user.parceiro, user.nome, boleto);
+    })
+    .catch(err => alert("Erro de conexão ao salvar"));
   }
 }
 
-
+// --- IMPRIMIR PROTOCOLO (MANTIDA INTEGRALMENTE) ---
 function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
   const telaPrint = window.open('', '_blank');
   telaPrint.document.write(`
@@ -467,18 +528,24 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
   telaPrint.document.close();
 }
 
+// --- TROCAR SENHA (ADAPTADA) ---
 function salvarSenha() {
   const login = document.getElementById("usuarioTroca").value.trim();
   const atual = document.getElementById("senhaAtual").value.trim();
   const nova = document.getElementById("novaSenha").value.trim();
   const conf = document.getElementById("confSenha").value.trim();
   if(nova !== conf) { alert("A nova senha não coincide!"); return; }
-  google.script.run.withSuccessHandler(res => {
-    if(res.sucesso) { alert("Senha alterada!"); fecharSenha(); }
-    else { alert("Erro ao alterar senha."); }
-  }).trocarSenha(login, atual, nova);
+
+  fetch(`${urlSistema}?action=trocarSenha&user=${login}&passAtual=${atual}&passNova=${nova}`)
+    .then(res => res.json())
+    .then(res => {
+      if(res.sucesso) { alert("Senha alterada!"); fecharSenha(); }
+      else { alert("Erro ao alterar senha: " + (res.erro || "Verifique os dados")); }
+    })
+    .catch(err => alert("Erro de conexão"));
 }
 
+// --- BUSCA GERAL (ADAPTADA) ---
 function executarBuscaGeral(tipo) {
   const user = JSON.parse(sessionStorage.getItem("usuario"));
   const valor = document.getElementById("valorPesquisa").value;
@@ -486,45 +553,47 @@ function executarBuscaGeral(tipo) {
   
   document.getElementById("resultadoPesquisa").innerHTML = "Pesquisando...";
   
-  google.script.run.withSuccessHandler(res => {
-    const div = document.getElementById("resultadoPesquisa");
-    div.innerHTML = "";
-    
-    if(!res || res.length === 0) {
-      div.innerHTML = "Nenhum registro encontrado ou sem permissão.";
-      return;
-    }
-    
-    res.forEach(item => {
-      let dStat = "";
-      for(let key in item) {
-        if(key.toUpperCase().replace(/\s/g,'') === "DATASTATUS") dStat = item[key];
+  fetch(`${urlSistema}?action=pesquisarNoCadastroGeral&valor=${valor}&tipo=${tipo}&parceiro=${user.parceiro}`)
+    .then(res => res.json())
+    .then(res => {
+      const div = document.getElementById("resultadoPesquisa");
+      div.innerHTML = "";
+      
+      if(!res || res.length === 0) {
+        div.innerHTML = "Nenhum registro encontrado ou sem permissão.";
+        return;
       }
-      if(!dStat) dStat = item.dataStatus || item.data_status || item["DATA STATUS"] || "";
+      
+      res.forEach(item => {
+        let dStat = "";
+        for(let key in item) {
+          if(key.toUpperCase().replace(/\s/g,'') === "DATASTATUS") dStat = item[key];
+        }
+        if(!dStat) dStat = item.dataStatus || item.data_status || item["DATA STATUS"] || "";
 
-      div.innerHTML += `
-        <div class="res-card">
-          <b>NOME:</b> ${item.nome}<br>
-          <b>CPF:</b> ${item.cpf} | <b>VIA:</b> ${item.via}<br>
-          <b>MUNICÍPIO:</b> ${item.municipio} | <b>PARCEIRO:</b> ${item.parceiro}<br>
-          <b>CARTEIRA:</b> ${item.numCarteira || 'N/A'}<br>
-          <b>STATUS:</b> ${item.status || 'Pendente'} | <b>MOTIVO:</b> ${item.motivo || '-'}<br>
-          <b>DATA STATUS:</b> ${dStat}<br>
-          <b>ATENDENTE:</b> ${item.atendente}<br>
-          <small>Última Atualização: ${item.dataAtu}</small>
-        </div>
-      `;
-    });
-  }).pesquisarNoCadastroGeral(valor, tipo, user.parceiro);
+        div.innerHTML += `
+          <div class="res-card">
+            <b>NOME:</b> ${item.nome}<br>
+            <b>CPF:</b> ${item.cpf} | <b>VIA:</b> ${item.via}<br>
+            <b>MUNICÍPIO:</b> ${item.municipio} | <b>PARCEIRO:</b> ${item.parceiro}<br>
+            <b>CARTEIRA:</b> ${item.numCarteira || 'N/A'}<br>
+            <b>STATUS:</b> ${item.status || 'Pendente'} | <b>MOTIVO:</b> ${item.motivo || '-'}<br>
+            <b>DATA STATUS:</b> ${dStat}<br>
+            <b>ATENDENTE:</b> ${item.atendente}<br>
+            <small>Última Atualização: ${item.dataAtu}</small>
+          </div>
+        `;
+      });
+    })
+    .catch(err => alert("Erro ao pesquisar"));
 }
 
+// --- RESTANTE DAS FUNÇÕES (MANTIDAS) ---
 document.addEventListener('input', function (e) {
   const camposCpfObrigatorio = ['cpf', 'cpfTerceiro'];
-
   if (camposCpfObrigatorio.includes(e.target.id)) {
       e.target.value = CPF.formatar(e.target.value);
   }
-  
   if(e.target.id === 'cpf') {
     const v = CPF.validar(e.target.value);
     const msg = document.getElementById("msgCPF");
@@ -534,7 +603,6 @@ document.addEventListener('input', function (e) {
     }
     document.getElementById("btnSalvar").disabled = !v;
   }
-
   if(e.target.id === 'codigoCtr') e.target.value = e.target.value.replace(/\D/g, "");
 });
 
@@ -599,50 +667,55 @@ function carregarLista() {
 
   document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='17'>Carregando dados...</td></tr>";
   
-  google.script.run.withSuccessHandler(dados => {
-    const tbody = document.getElementById("corpoTabelaListas");
-    tbody.innerHTML = "";
-    
-    dados.forEach(item => {
-      let valDataStatus = "";
-      for (let key in item) {
-        let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
-        if (normalizedKey === "DATASTATUS") { valDataStatus = item[key]; break; }
-      }
+  // ADAPTAÇÃO FETCH PARA OBTENÇÃO DE LISTA
+  fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
+    .then(res => res.json())
+    .then(dados => {
+      const tbody = document.getElementById("corpoTabelaListas");
+      tbody.innerHTML = "";
       
-      let valTel = "";
-      for (let key in item) {
-        let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
-        if (normalizedKey === "TEL" || normalizedKey === "TELEFONE") { valTel = item[key]; break; }
-      }
+      dados.forEach(item => {
+        let valDataStatus = "";
+        for (let key in item) {
+          let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
+          if (normalizedKey === "DATASTATUS") { valDataStatus = item[key]; break; }
+        }
+        
+        let valTel = "";
+        for (let key in item) {
+          let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
+          if (normalizedKey === "TEL" || normalizedKey === "TELEFONE") { valTel = item[key]; break; }
+        }
 
-      tbody.innerHTML += `<tr>
-        <td class="col-0">${item.id || ''}</td>
-        <td class="col-1">${item.cpf || ''}</td>
-        <td class="col-2">${item.nome || ''}</td>
-        <td class="col-3">${item.nasc || ''}</td>
-        <td class="col-4">${item.municipio || ''}</td>
-        <td class="col-5">${valTel}</td>
-        <td class="col-6">${item.via || ''}</td>
-        <td class="col-7">${item.parceiro || ''}</td>
-        <td class="col-8">${item.data || ''}</td>
-        <td class="col-9">${item.atendente || ''}</td>
-        <td class="col-10">${item.boleto || ''}</td>
-        <td class="col-11"><b>${item.status || ''}</b></td>
-        <td class="col-12">${item.motivo || ''}</td>
-        <td class="col-13">${valDataStatus}</td>
-        <td class="col-14">${item.carteira || ''}</td>
-        <td class="col-15">${item.lote || ''}</td>
-        <td class="col-16">
-          <button onclick='prepararEdicao(${JSON.stringify(item)})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
-        </td>
-      </tr>`;
+        tbody.innerHTML += `<tr>
+          <td class="col-0">${item.id || ''}</td>
+          <td class="col-1">${item.cpf || ''}</td>
+          <td class="col-2">${item.nome || ''}</td>
+          <td class="col-3">${item.nasc || ''}</td>
+          <td class="col-4">${item.municipio || ''}</td>
+          <td class="col-5">${valTel}</td>
+          <td class="col-6">${item.via || ''}</td>
+          <td class="col-7">${item.parceiro || ''}</td>
+          <td class="col-8">${item.data || ''}</td>
+          <td class="col-9">${item.atendente || ''}</td>
+          <td class="col-10">${item.boleto || ''}</td>
+          <td class="col-11"><b>${item.status || ''}</b></td>
+          <td class="col-12">${item.motivo || ''}</td>
+          <td class="col-13">${valDataStatus}</td>
+          <td class="col-14">${item.carteira || ''}</td>
+          <td class="col-15">${item.lote || ''}</td>
+          <td class="col-16">
+            <button onclick='prepararEdicao(${JSON.stringify(item)})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
+          </td>
+        </tr>`;
+      });
+      
+      const checks = document.getElementById("containerChecks").querySelectorAll("input");
+      checks.forEach((chk, i) => { if(!chk.checked) aplicarOcultacao(i, false); });
+    })
+    .catch(err => {
+      document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='17' style='color:red;'>Erro ao carregar lista do servidor.</td></tr>";
     });
-    
-    const checks = document.getElementById("containerChecks").querySelectorAll("input");
-    checks.forEach((chk, i) => { if(!chk.checked) aplicarOcultacao(i, false); });
-
-  }).obterListaCadastros(user.parceiro);
 }
 
 function alternarColuna(idx) { aplicarOcultacao(idx, event.target.checked); }
@@ -654,21 +727,18 @@ function fecharLotePorParceiro() {
   const user = JSON.parse(sessionStorage.getItem("usuario"));
   if(!confirm("Deseja fechar o lote atual para o parceiro " + user.parceiro + "?")) return;
   
-  google.script.run.withSuccessHandler(res => {
-    if(res.sucesso) {
-      alert("Lote fechado com sucesso! Lote: " + res.loteGerado);
-      carregarLista();
-    } else {
-      alert("Erro ao fechar lote: " + res.erro);
-    }
-  }).fecharLoteAppsScript(user.parceiro);
+  fetch(`${urlSistema}?action=fecharLoteAppsScript&parceiro=${user.parceiro}`)
+    .then(res => res.json())
+    .then(res => {
+      if(res.sucesso) {
+        alert("Lote fechado com sucesso! Lote: " + res.loteGerado);
+        carregarLista();
+      } else {
+        alert("Erro ao fechar lote: " + res.erro);
+      }
+    })
+    .catch(err => alert("Erro na conexão ao fechar lote."));
 }
-
-
-//entrega//
-
-/**
- * FUNÇÃO COMPLETA: SALVAR ENTREGA + BUSCA CTR (PONTO CRÍTICO) */
 
 function salvarEntrega() {
   const ctr = document.getElementById("codigoCtr").value;
@@ -682,8 +752,6 @@ function salvarEntrega() {
   const nomeRecebedor = isTerceiro ? document.getElementById("nomeTerceiro").value : alunoEncontradoGlobal.nome;
   const cpfRecebedor = isTerceiro ? document.getElementById("cpfTerceiro").value : alunoEncontradoGlobal.cpf;
   const vinculo = isTerceiro ? document.getElementById("parentesco").value : "Titular";
-  
-  // AJUSTE AQUI: Pega o valor que está selecionado nos rádios (1 ou 2)
   const via = document.querySelector('input[name="viaEntrega"]:checked').value;
 
   if(isTerceiro && (!nomeRecebedor || !cpfRecebedor || !vinculo)) { 
@@ -693,7 +761,23 @@ function salvarEntrega() {
 
   const user = JSON.parse(sessionStorage.getItem("usuario"));
 
-  google.script.run.withSuccessHandler(res => {
+  fetch(urlSistema, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: "registrarEntregaAppsScript",
+      ctr: ctr,
+      cpfA: alunoEncontradoGlobal.cpf,
+      nomeA: alunoEncontradoGlobal.nome,
+      cpfR: cpfRecebedor,
+      nomeR: nomeRecebedor,
+      vinculo: vinculo,
+      atendente: user.nome,
+      parceiro: user.parceiro,
+      via: via
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
     if(res.sucesso) {
       imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
       alert("Entrega realizada com sucesso!");
@@ -707,202 +791,66 @@ function salvarEntrega() {
         document.getElementById("checkTerceiro").checked = false;
         if(typeof toggleTerceiro === "function") toggleTerceiro();
       }
-      
-      // Reseta para 1ª via por padrão para o próximo
       document.getElementById("via1").checked = true;
       alunoEncontradoGlobal = null;
     } else {
       alert("Erro ao salvar: " + res.erro);
     }
-  }).registrarEntregaAppsScript(ctr, alunoEncontradoGlobal.cpf, alunoEncontradoGlobal.nome, cpfRecebedor, nomeRecebedor, vinculo, user.nome, user.parceiro, via);
+  });
 }
 
-// BUSCA ÚNICA (Remova os outros dois eventListeners de 'blur' que você tem)
 document.addEventListener('blur', function(e){
   if(e.target.id === "codigoCtr"){
     const ctr = e.target.value.trim();
     if(!ctr) return;
-
     const userStr = sessionStorage.getItem("usuario");
     if(!userStr) return;
     const user = JSON.parse(userStr);
 
-    google.script.run.withSuccessHandler(aluno => {
-      if(aluno && aluno.encontrado) {
-        alunoEncontradoGlobal = aluno;
-        document.getElementById("resNomeAluno").innerText = aluno.nome;
-        document.getElementById("resCpfAluno").innerText = aluno.cpf; 
-        document.getElementById("infoAlunoEntrega").style.display = "block";
-
-        // LINHA ADICIONADA: Marca o rádio automaticamente conforme a via do cadastro
-        if(aluno.via) document.getElementById("via" + aluno.via).checked = true;
-
-      } else {
-        document.getElementById("infoAlunoEntrega").style.display = "none";
-        alunoEncontradoGlobal = null;
-      }
-    }).buscarPorCodigoAppsScript(ctr, user.parceiro); 
+    fetch(`${urlSistema}?action=buscarPorCodigoAppsScript&ctr=${ctr}&parceiro=${user.parceiro}`)
+      .then(res => res.json())
+      .then(aluno => {
+        if(aluno && aluno.encontrado) {
+          alunoEncontradoGlobal = aluno;
+          document.getElementById("resNomeAluno").innerText = aluno.nome;
+          document.getElementById("resCpfAluno").innerText = aluno.cpf; 
+          document.getElementById("infoAlunoEntrega").style.display = "block";
+          if(aluno.via) {
+             const radioVia = document.getElementById("via" + aluno.via);
+             if(radioVia) radioVia.checked = true;
+          }
+        } else {
+          document.getElementById("infoAlunoEntrega").style.display = "none";
+          alunoEncontradoGlobal = null;
+        }
+      });
   }
 }, true);
 
-
+// FUNÇÕES DE IMPRESSÃO, ADMIN E MASCARA (MANTIDAS 100%)
 function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, atendente, via) {
   const telaPrint = window.open('', '_blank');
   const dataHora = new Date().toLocaleString('pt-BR');
-
-  telaPrint.document.write(`
-    <html>
-    <head>
-      <title>Entrega CTR ${ctr}</title>
-      <style>
-        @page { size: A5 landscape; margin: 0; }
-        
-        body { 
-          font-family: Arial, sans-serif; 
-          margin: 0; 
-          padding: 7mm; 
-          box-sizing: border-box;
-          width: 210mm;
-          height: 148mm;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-        
-        .ticket { 
-          width: 100%;
-          height: 100%;
-          border: 2px solid #000; 
-          padding: 6mm; 
-          box-sizing: border-box;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-        }
-
-        .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 2mm; }
-        .header h2 { margin: 0; font-size: 20px; text-transform: uppercase; }
-        
-        .section-title { 
-          font-size: 13px; 
-          font-weight: bold; 
-          background: #f2f2f2; 
-          padding: 1.5mm 3mm; 
-          border: 1px solid #000;
-          margin-top: 2mm;
-        }
-
-        .info-group { display: flex; width: 100%; font-size: 14px; margin: 1.5mm 0; }
-        .info-item { flex: 1; line-height: 1.4; }
-
-        .declaracao { 
-          font-size: 13px; 
-          line-height: 1.5; 
-          text-align: justify; 
-          border: 1px dashed #000; 
-          padding: 4mm; 
-          margin: 3mm 0;
-        }
-
-        .assinatura-area { text-align: center; margin-top: 2mm; }
-        .assinatura-linha { border-top: 1.5px solid #000; width: 60%; margin: 0 auto; }
-        .assinatura-texto { font-size: 11px; margin-top: 1mm; font-weight: bold; text-transform: uppercase; }
-        
-        .meta-info { 
-          display: flex; 
-          justify-content: space-between; 
-          font-size: 10px; 
-          border-top: 1px solid #eee; 
-          padding-top: 1mm;
-        }
-        b { text-transform: uppercase; }
-      </style>
-    </head>
-    <body>
-      <div class="ticket">
-        <div class="header">
-          <h2>COMPROVANTE DE ENTREGA</h2>
-        </div>
-
-        <div>
-          <div class="section-title">DADOS DO ALUNO</div>
-          <div class="info-group">
-            <div class="info-item"><b>CTR:</b> ${ctr}</div>
-            <div class="info-item"><b>VIA:</b> ${via}ª VIA</div>
-            <div class="info-item"><b>ALUNO:</b> ${aluno}</div>
-          </div>
-          <div class="info-group" style="margin-top: -1mm;">
-            <div class="info-item"><b>CPF ALUNO:</b> ${cpfA}</div>
-          </div>
-        </div>
-
-        <div class="declaracao">
-          Declaro que recebi, nesta data, a Carteira de Estudante Macrorregião 2026, emitida conforme os dados informados e conferidos no ato da entrega. Estou ciente de que o documento é pessoal e intransferível, comprometendo-me a zelar por sua conservação, ciente de que, em caso de perda, extravio ou dano, será necessária nova solicitação conforme as normas vigentes.
-        </div>
-
-        <div>
-          <div class="section-title">DADOS DO RECEBEDOR</div>
-          <div class="info-group">
-            <div class="info-item"><b>NOME:</b> ${recebedor}</div>
-            <div class="info-item"><b>CPF:</b> ${cpfR}</div>
-          </div>
-          <div class="info-group" style="margin-top: -1mm;">
-            <div class="info-item"><b>VÍNCULO:</b> ${vinculo}</div>
-          </div>
-        </div>
-
-        <div class="assinatura-area">
-          <div class="assinatura-linha"></div>
-          <div class="assinatura-texto">Assinatura do Recebedor</div>
-        </div>
-        
-        <div class="meta-info">
-          <span><b>ATENDENTE:</b> ${atendente}</span>
-          <span><b>DATA/HORA:</b> ${dataHora}</span>
-        </div>
-      </div>
-      <script>
-        window.onload = function() {
-          window.print();
-          window.onafterprint = function() { window.close(); };
-        };
-      <\/script>
-    </body>
-    </html>
-  `);
+  telaPrint.document.write(`<html><head><title>Entrega CTR ${ctr}</title><style>@page { size: A5 landscape; margin: 0; } body { font-family: Arial, sans-serif; margin: 0; padding: 7mm; box-sizing: border-box; width: 210mm; height: 148mm; display: flex; justify-content: center; align-items: center; } .ticket { width: 100%; height: 100%; border: 2px solid #000; padding: 6mm; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; } .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 2mm; } .header h2 { margin: 0; font-size: 20px; text-transform: uppercase; } .section-title { font-size: 13px; font-weight: bold; background: #f2f2f2; padding: 1.5mm 3mm; border: 1px solid #000; margin-top: 2mm; } .info-group { display: flex; width: 100%; font-size: 14px; margin: 1.5mm 0; } .info-item { flex: 1; line-height: 1.4; } .declaracao { font-size: 13px; line-height: 1.5; text-align: justify; border: 1px dashed #000; padding: 4mm; margin: 3mm 0; } .assinatura-area { text-align: center; margin-top: 2mm; } .assinatura-linha { border-top: 1.5px solid #000; width: 60%; margin: 0 auto; } .assinatura-texto { font-size: 11px; margin-top: 1mm; font-weight: bold; text-transform: uppercase; } .meta-info { display: flex; justify-content: space-between; font-size: 10px; border-top: 1px solid #eee; padding-top: 1mm; } b { text-transform: uppercase; }</style></head><body><div class="ticket"><div class="header"><h2>COMPROVANTE DE ENTREGA</h2></div><div><div class="section-title">DADOS DO ALUNO</div><div class="info-group"><div class="info-item"><b>CTR:</b> ${ctr}</div><div class="info-item"><b>VIA:</b> ${via}ª VIA</div><div class="info-item"><b>ALUNO:</b> ${aluno}</div></div><div class="info-group" style="margin-top: -1mm;"><div class="info-item"><b>CPF ALUNO:</b> ${cpfA}</div></div></div><div class="declaracao">Declaro que recebi, nesta data, a Carteira de Estudante Macrorregião 2026, emitida conforme os dados informados e conferidos no ato da entrega. Estou ciente de que o documento é pessoal e intransferível, comprometendo-me a zelar por sua conservação, ciente de que, em caso de perda, extravio ou dano, será necessária nova solicitação conforme as normas vigentes.</div><div><div class="section-title">DADOS DO RECEBEDOR</div><div class="info-group"><div class="info-item"><b>NOME:</b> ${recebedor}</div><div class="info-item"><b>CPF:</b> ${cpfR}</div></div><div class="info-group" style="margin-top: -1mm;"><div class="info-item"><b>VÍNCULO:</b> ${vinculo}</div></div></div><div class="assinatura-area"><div class="assinatura-linha"></div><div class="assinatura-texto">Assinatura do Recebedor</div></div><div class="meta-info"><span><b>ATENDENTE:</b> ${atendente}</span><span><b>DATA/HORA:</b> ${dataHora}</span></div></div><script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };<\/script></body></html>`);
   telaPrint.document.close();
 }
 
 function abrirAdmin() {
-  // 1. Definições
   var urlLotes = "https://script.google.com/macros/s/AKfycbxXBQmEu_d-jUL08Vi9Cvd-h0PPnl4XLPSocuMJmBBndADfui3qj6EpG91NXOmeuXSO/exec";
   var token = "MACRO@MACRO";
-  
-  // 2. Captura dos dados (como você já faz)
-  var u = "";
-  var s = "";
+  var u = ""; var s = "";
   try {
     var uField = document.getElementById('userLogin');
     var sField = document.getElementById('passLogin');
     if (uField) u = uField.value;
     if (sField) s = sField.value;
-  } catch (e) {
-    console.log("Erro na captura.");
-  }
-
-  // 3. Montagem da URL
-  var linkFinal = urlLotes + 
-                  "?u=" + encodeURIComponent(u) + 
-                  "&s=" + encodeURIComponent(s) + 
-                  "&token=" + encodeURIComponent(token);
-
-  // 4. ABERTURA EM NOVA ABA (A solução para o erro)
-  // Isso ignora o erro de 'sandbox' porque abre uma janela independente
+  } catch (e) { console.log("Erro na captura."); }
+  var linkFinal = urlLotes + "?u=" + encodeURIComponent(u) + "&s=" + encodeURIComponent(s) + "&token=" + encodeURIComponent(token);
   window.open(linkFinal, '_blank');
 }
 
 function mascaraData(campo) {
-  var v = campo.value.replace(/\D/g, ""); // Remove o que não é número
+  var v = campo.value.replace(/\D/g, "");
   if (v.length >= 2) v = v.substring(0, 2) + "/" + v.substring(2);
   if (v.length >= 5) v = v.substring(0, 5) + "/" + v.substring(5, 9);
   campo.value = v;
