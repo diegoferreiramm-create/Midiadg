@@ -767,7 +767,7 @@ function salvarEntrega() {
   const cpfRecebedor = isTerceiro ? document.getElementById("cpfTerceiro").value : alunoEncontradoGlobal.cpf;
   const vinculo = isTerceiro ? document.getElementById("parentesco").value : "Titular";
   
-  // Pega a via selecionada (1 ou 2)
+  // Captura a via (1 ou 2)
   const viaEl = document.querySelector('input[name="viaEntrega"]:checked');
   const via = viaEl ? viaEl.value : "1";
 
@@ -782,8 +782,8 @@ function salvarEntrega() {
   const btn = document.querySelector("button[onclick='salvarEntrega()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
-  // --- MONTAGEM DA URL (LÓGICA DO GET) ---
-  // IMPORTANTE: Usei os nomes exatos que sua função .gs espera
+  // --- MONTAGEM DA URL (MÉTODO GET) PARA MATAR O CORS ---
+  // IMPORTANTE: Os nomes das variáveis (&cpfAluno=, &nomeRec=) batem com o seu .gs
   const urlFinal = `${urlSistema}?action=registrarEntregaAppsScript` +
     `&ctr=${encodeURIComponent(ctr)}` +
     `&cpfAluno=${encodeURIComponent(alunoEncontradoGlobal.cpf)}` +
@@ -795,12 +795,12 @@ function salvarEntrega() {
     `&parceiro=${encodeURIComponent(user.parceiro)}` +
     `&via=${encodeURIComponent(via)}`;
 
-  // --- FETCH IGUAL AO DO CADASTRO ---
+  // --- FETCH SEM O BLOCO DE METHOD 'POST' ---
   fetch(urlFinal)
   .then(res => res.json())
   .then(res => {
     if(res.sucesso) {
-      // Abre o recibo de entrega
+      // Chama a função de impressão que você já tem no arquivo
       imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
       
       alert("Entrega realizada com sucesso!");
@@ -817,18 +817,17 @@ function salvarEntrega() {
         if(typeof toggleTerceiro === "function") toggleTerceiro();
       }
       
-      // Reseta o rádio da via para a 1ª
       const via1 = document.getElementById("via1");
       if(via1) via1.checked = true;
       
       alunoEncontradoGlobal = null;
     } else {
-      alert("Atenção: " + res.erro);
+      alert("Erro ao salvar: " + res.erro);
     }
   })
   .catch(err => {
-    console.error("Erro na entrega:", err);
-    alert("Erro de comunicação com o Google. Verifique a Nova Versão do Script.");
+    console.error("Erro fatal na entrega:", err);
+    alert("Erro de conexão. Verifique se publicou a NOVA VERSÃO no Google Script.");
   })
   .finally(() => {
     if(btn) { btn.disabled = false; btn.innerText = "CONFIRMAR ENTREGA"; }
