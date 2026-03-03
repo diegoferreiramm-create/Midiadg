@@ -474,9 +474,16 @@ async function salvarCadastro() {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
 }
-// --- IMPRIMIR PROTOCOLO (MANTIDA INTEGRALMENTE) ---
+// --- IMPRIMIR PROTOCOLO (CORRIGIDA PARA EVITAR ERRO DE POP-UP) ---
 function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
   const telaPrint = window.open('', '_blank');
+  
+  // SE O NAVEGADOR BLOQUEAR O POP-UP, telaPrint SERÁ NULL
+  if (!telaPrint || telaPrint.closed || typeof telaPrint.document === 'undefined') {
+    alert("O Protocolo foi gerado, mas o seu navegador bloqueou a janela de impressão.\n\nPor favor, clique no ícone de bloqueio na barra de endereços e escolha 'Sempre permitir pop-ups'.");
+    return; // Sai da função sem dar erro no console
+  }
+
   telaPrint.document.write(`
     <html>
     <head>
@@ -501,7 +508,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <span class="id-destaque">Nº BOLETO: ${boleto}</span>
         </div>
         <div class="content">
-          <div class="row"><span><b>NOME:</b> ${nome.toUpperCase()}</span><span><b>DATA:</b> ${data.split(' ')[0]}</span></div>
+          <div class="row"><span><b>NOME:</b> ${nome.toUpperCase()}</span><span><b>DATA:</b> ${data ? data.split(' ')[0] : ''}</span></div>
           <div class="row"><span><b>CPF:</b> ${cpf}</span><span><b>VIA:</b> ${via}</span></div>
           <div class="row"><span><b>MUNICÍPIO:</b> ${municipio.toUpperCase()}</span><span><b>ATENDENTE:</b> ${atendente}</span></div>
           
@@ -523,13 +530,17 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <div style="font-size:12px;">Via do Aluno / ${parceiro} / CTR: ${id}</div>
         </div>
       </div>
-      <script>window.print();<\/script>
+      <script>
+        setTimeout(() => { 
+          window.print(); 
+          // Opcional: window.close(); // Fecha a aba após imprimir
+        }, 500);
+      <\/script>
     </body>
     </html>
   `);
   telaPrint.document.close();
 }
-
 // --- TROCAR SENHA (ADAPTADA) ---
 function salvarSenha() {
   const login = document.getElementById("usuarioTroca").value.trim();
