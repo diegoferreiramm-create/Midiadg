@@ -777,12 +777,12 @@ function salvarEntrega() {
 
   const user = JSON.parse(sessionStorage.getItem("usuario"));
 
-  // --- BOTÃO EM ESTADO DE PROCESSAMENTO ---
+  // --- TRAVA DO BOTÃO PARA EVITAR CLIQUES DUPLOS ---
   const btn = document.querySelector("button[onclick='salvarEntrega()']");
   if(btn) { btn.disabled = true; btn.innerText = "Gravando..."; }
 
-  // --- MONTAGEM DA URL (GET) PARA EVITAR ERRO DE CORS ---
-  // Os nomes das variáveis (&nomeAluno=...) seguem exatamente o que está no seu .gs
+  // --- MONTAGEM DA URL (LÓGICA DO CADASTRO QUE FUNCIONOU) ---
+  // IMPORTANTE: Usei os nomes que o seu .gs espera: cpfAluno, nomeAluno, cpfRec, nomeRec
   const urlFinal = `${urlSistema}?action=registrarEntregaAppsScript` +
     `&ctr=${encodeURIComponent(ctr)}` +
     `&cpfAluno=${encodeURIComponent(alunoEncontradoGlobal.cpf)}` +
@@ -794,11 +794,12 @@ function salvarEntrega() {
     `&parceiro=${encodeURIComponent(user.parceiro)}` +
     `&via=${encodeURIComponent(via)}`;
 
+  // --- FETCH USANDO GET (SEM BODY) PARA MATAR O ERRO DE CORS ---
   fetch(urlFinal)
   .then(res => res.json())
   .then(res => {
     if(res.sucesso) {
-      // Chama sua função de impressão
+      // Abre o protocolo de entrega (Como você já liberou pop-up, vai abrir direto)
       imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
       
       alert("Entrega realizada com sucesso!");
@@ -824,10 +825,11 @@ function salvarEntrega() {
     }
   })
   .catch(err => {
-    console.error("Erro na entrega:", err);
-    alert("Erro de conexão com o servidor.");
+    console.error("Erro fatal na entrega:", err);
+    alert("Erro de conexão. Verifique se o Google Script foi publicado como NOVA VERSÃO.");
   })
   .finally(() => {
+    // Reativa o botão após o processo
     if(btn) { btn.disabled = false; btn.innerText = "CONFIRMAR ENTREGA"; }
   });
 }
