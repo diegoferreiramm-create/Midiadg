@@ -1,1 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mtech | Sistema de Carteiras</title>
 
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+<div id="hudUsuario">
+  <div id="dataHoraHud">00/00/0000 00:00:00</div>
+  <div id="infoUsuario"></div>
+  <div class="btns-hud">
+    <button onclick="logout()">Sair</button>
+  </div>
+</div>
+
+<div id="loginBox">
+  <div class="box">
+    <h2>Sistema Carteiras</h2>
+    <input id="login" placeholder="Usuário">
+    <input id="senha" type="password" placeholder="Senha">
+    <button onclick="entrar()">Entrar</button>
+    <button class="sec" onclick="abrirSenha()">Trocar Senha</button>
+    <div id="msg"></div>
+  </div>
+</div>
+
+<div id="menuBox" style="display:none;">
+  <div class="container">
+    <div class="card" onclick="abrirTela('cadastrarBox')">Cadastrar</div>
+    <div class="card" onclick="abrirTela('pesquisarBox')">Pesquisar</div>
+    <div class="card" onclick="abrirTela('entregarBox')">Entregar</div>
+    <div class="card" onclick="abrirTela('listasBox')">Listas</div>
+  </div> 
+  <div style="position: absolute; left: 30px; bottom: 30px;">
+    <button onclick="abrirAdmin()" style="
+      width: auto; 
+      background: #8b5cf6; 
+      color: white; 
+      font-size: 13px; 
+      padding: 10px 25px; 
+      border: none; 
+      border-radius: 50px; 
+      font-weight: bold; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;">
+      <span style="font-size: 15px;">⚙️</span> ÁREA ADMIN
+    </button>
+  </div> 
+</div>
+
+<div id="cadastrarBox" style="display:none;">
+  <div class="box">
+    <h2>Cadastro de Carteira</h2>
+    <input id="cpf" placeholder="CPF (xxx.xxx.xxx-xx)" maxlength="14">
+    <div id="msgCPF"></div>
+    <input id="nome" placeholder="Nome completo">
+    <input id="nascimento" type="tel" placeholder="Data de Nascimento (dd/mm/aaaa)" maxlength="10" oninput="mascaraData(this)">
+    <input id="municipio" placeholder="Município">
+    <input id="telefone" placeholder="Telefone (xx) xxxxx-xxxx">
+    
+    <div class="via-container">
+      <label class="via-option">
+        <input type="radio" name="via" id="via1" value="1ª" checked> 1ª Via
+      </label>
+      <label class="via-option">
+        <input type="radio" name="via" id="via2" value="2ª"> 2ª Via
+      </label>
+    </div>
+
+    <input id="codigoBoleto" placeholder="Código do boleto (OBRIGATÓRIO)">
+    <button id="btnSalvar" onclick="salvarCadastro()">Salvar e Gerar Protocolo</button>
+    <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
+    <div id="msgCadastro"></div>
+  </div>
+</div>
+
+<div id="corrigirBox" style="display:none;">
+  <div class="box">
+    <h2 style="color: #eab308;">Corrigir / Editar Registro</h2>
+    
+    <div style="background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eab308; display: flex; gap: 5px;">
+      <input type="text" id="buscaCorrecao" placeholder="ID ou CPF para buscar" style="margin:0; flex-grow:1;">
+      <button onclick="buscarParaCorrigir()" style="background:#eab308; color:black; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; margin:0; width: auto; font-weight:bold;">BUSCAR</button>
+    </div>
+
+    <input id="edit_cpf" placeholder="CPF (xxx.xxx.xxx-xx)" maxlength="14">
+    <input id="edit_nome" placeholder="Nome completo">
+    <input id="edit_nascimento" type="date">
+    <input id="edit_municipio" placeholder="Município">
+    <input id="edit_telefone" placeholder="Telefone (xx) xxxxx-xxxx">
+    
+    <div class="via-container">
+      <label class="via-option">
+        <input type="radio" name="edit_via" id="edit_via1" value="1ª" checked> 1ª Via
+      </label>
+      <label class="via-option">
+        <input type="radio" name="edit_via" id="edit_via2" value="2ª"> 2ª Via
+      </label>
+    </div>
+
+    <input id="edit_codigoBoleto" placeholder="Código do boleto">
+    
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+       <button id="btnSalvarCorrecao" onclick="salvarCadastro()" style="display:none;">Salvar</button> 
+       <button onclick="executarEdicao()" style="background: #eab308; color: black; font-weight: bold;">EDITAR / CORRIGIR</button>
+       <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
+    </div>
+    
+    <div id="msgCorrecao"></div>
+  </div>
+</div>
+
+<div id="entregarBox" style="display:none;">
+  <div class="box">
+    <h2>Registrar Entrega</h2>
+    <input id="codigoCtr" placeholder="Código CTR (Somente números)" inputmode="numeric">
+    
+    <div id="infoAlunoEntrega">
+      <b>Aluno:</b> <span id="resNomeAluno">...</span><br>
+      <b>CPF:</b> <span id="resCpfAluno">...</span>
+    </div>
+
+    <div class="via-container">
+      <label class="via-option">
+        <input type="radio" name="viaEntrega" id="via1" value="1" checked> 1ª VIA
+      </label>
+      <label class="via-option">
+        <input type="radio" name="viaEntrega" id="via2" value="2"> 2ª VIA
+      </label>
+    </div>
+
+    <div style="margin:15px 0; text-align: left; font-size: 14px; background: #0f172a; padding: 10px; border-radius: 8px;">
+      <label><input type="checkbox" id="checkTerceiro" onchange="toggleTerceiro()"> Entregar para Terceiro?</label>
+    </div>
+
+    <div id="camposTerceiro" class="area-terceiro" style="opacity: 0.5;">
+      <input id="nomeTerceiro" placeholder="Nome Completo do Recebedor" disabled>
+      <input id="cpfTerceiro" placeholder="CPF do Recebedor" maxlength="14" disabled>
+      
+      <select id="parentesco" disabled>
+        <option value="">Vínculo / Parentesco</option>
+        <option value="Pai/Mãe">Pai/Mãe</option>
+        <option value="Irmãos/filhos">Irmãos/filhos</option>
+        <option value="Tios/primos/terceiros">Tios/primos/terceiros</option>
+      </select>
+    </div>
+
+    <button onclick="salvarEntrega()">Confirmar e Imprimir</button>
+    <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
+    <div id="msgEntrega" style="margin-top:10px; font-size:13px;"></div>
+  </div>
+</div>
+
+<div id="modalSenha">
+  <div>
+    <h3>Trocar Senha</h3>
+    <input id="usuarioTroca" placeholder="Usuário">
+    <input id="senhaAtual" type="password" placeholder="Senha atual">
+    <input id="novaSenha" type="password" placeholder="Nova senha">
+    <input id="confSenha" type="password" placeholder="Confirmar nova senha">
+    <button onclick="salvarSenha()">Salvar</button>
+    <button class="cancel" onclick="fecharSenha()">Cancelar</button>
+  </div>
+</div>
+
+<div id="pesquisarBox" style="display:none;">
+  <div class="box" style="width: 500px;">
+    <h2>Pesquisar Carteira</h2>
+    <input id="valorPesquisa" placeholder="Digite CPF ou Nome para buscar">
+    <div style="display:flex; gap:10px;">
+      <button onclick="executarBuscaGeral('cpf')">Buscar por CPF</button>
+      <button class="sec" onclick="executarBuscaGeral('nome')">Buscar por Nome</button>
+    </div>
+    <div id="resultadoPesquisa"></div>
+    <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
+  </div>
+</div>
+
+<div id="listasBox" style="display:none; flex-direction:column; width:100%; align-items:center;">
+  <div class="box" style="width: 98%; max-width: 1400px; margin: 0 auto;">
+    
+    <h2>Relatório Geral de Cadastros</h2>
+    
+    <div class="filtros-lista" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; background: #0f172a; padding: 15px; border-radius: 8px;">
+      
+      <input type="text" id="fNome" placeholder="NOME..." onkeyup="filtrarTabelaAvancado()" style="width: 180px;">
+      
+      <select id="fStatus" onchange="filtrarTabelaAvancado()" style="width: 150px;">
+        <option value="">STATUS (TODOS)</option>
+        <option value="PENDENTE">PENDENTE</option>
+        <option value="APROVADO">APROVADO</option>
+        <option value="REPROVADO">REPROVADO</option>
+        <option value="ENTREGUE">ENTREGUE</option>
+      </select>
+
+      <div id="filtrosAdmin" style="display: none; gap: 10px; flex-wrap: wrap;">
+        <input type="text" id="fParceiro" placeholder="PARCEIRO" onkeyup="filtrarTabelaAvancado()" style="width: 110px;">
+        <input type="text" id="fMun" placeholder="MUNICÍPIO" onkeyup="filtrarTabelaAvancado()" style="width: 130px;">
+        <input type="text" id="fAtend" placeholder="ATENDENTE" onkeyup="filtrarTabelaAvancado()" style="width: 120px;">
+        
+        <select id="fVia" onchange="filtrarTabelaAvancado()" style="width: 100px;">
+          <option value="">VIA</option>
+          <option value="1ª">1ª Via</option>
+          <option value="2ª">2ª Via</option>
+        </select>
+
+        <input type="text" id="fLote" placeholder="LOTE" onkeyup="filtrarTabelaAvancado()" style="width: 80px;">
+        <input type="text" id="fData" placeholder="DATA" onkeyup="filtrarTabelaAvancado()" style="width: 120px;">
+      </div>
+    </div>
+      
+    <div id="logBox" style="display:none; flex-direction:column; width:100%; min-height:100vh; align-items:center; background:#0f172a; padding:20px;">
+      <div class="box" style="width: 98%; max-width: 1100px; background:#1e293b; border: 1px solid #334155;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #f87171; padding-bottom:15px; margin-bottom:15px;">
+          <h2 style="color:#f87171; margin:0;">AUDITORIA DE LOGS</h2>
+          <div style="display:flex; gap:10px;">
+            <button onclick="window.print()" style="background:#3b82f6; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">IMPRIMIR</button>
+            <button onclick="abrirTela('menuBox')" style="background:#64748b; color:white; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">VOLTAR</button>
+          </div>
+        </div>
+        <div style="overflow-y:auto; max-height:70vh;">
+          <table style="width:100%; border-collapse:collapse; font-size:12px; color:white;">
+            <thead>
+              <tr style="background:#020617; color:#f87171; text-align:left;">
+                <th style="padding:12px; border:1px solid #334155;">DATA/HORA</th>
+                <th style="padding:12px; border:1px solid #334155;">USUÁRIO</th>
+                <th style="padding:12px; border:1px solid #334155;">AÇÃO</th>
+                <th style="padding:12px; border:1px solid #334155;">ID / CPF</th>
+              </tr>
+            </thead>
+            <tbody id="corpoLogs"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="containerChecks" style="display:flex; flex-wrap:wrap; gap:10px; padding:10px; background:#1e293b; border-radius:8px; margin-bottom:10px; font-size:11px; color:#22c55e; border:1px solid #334155;">
+      <div style="width:100%; color:white; font-weight:bold; margin-bottom:5px;">Exibir/Ocultar Colunas:</div>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(0)"> ID</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(1)"> CPF</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(2)"> NOME</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(3)"> NASC</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(4)"> MUNICIPIO</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(5)"> TEL</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(6)"> VIA</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(7)"> PARCEIRO</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(8)"> DATA</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(9)"> ATENDENTE</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(10)"> STATUS</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(11)"> MOTIVO</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(12)"> DATA STATUS</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(13)"> NUM CARTEIRA</label>
+      <label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(14)"> LOTE</label>
+    </div>
+
+    <div class="tabela-container" id="areaImpressao">
+      <table id="tabelaListas" style="font-size: 11px;">
+        <thead>
+          <tr id="cabecalhoTabela"></tr>
+        </thead>
+        <tbody id="corpoTabelaListas"></tbody>
+      </table>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; width: 100%;">
+      <div id="contadorLinhas" style="font-weight: bold; color: #22c55e; font-size: 14px; background: #0f172a; padding: 10px 15px; border-radius: 8px; border: 1px solid #334155;">
+        Registros: <span id="numLinhas">0</span>
+      </div>
+      <div style="display: flex; gap: 15px;">
+        <button onclick="imprimirLista()" style="width: 150px; background: #3b82f6; margin:0;">Imprimir Lista</button>
+        <button class="cancel" onclick="abrirTela('menuBox')" style="width: 150px; margin:0;">Voltar ao Menu</button>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; border-top: 1px solid #334155; padding-top: 15px;">
+       <button onclick="fecharLotePorParceiro()" style="background:#ef4444; width: 200px; font-size: 12px; margin: 0 auto; display: block;">FECHAR LOTE ATUAL</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
