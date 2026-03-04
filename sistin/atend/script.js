@@ -398,7 +398,7 @@ async function salvarCadastro() {
   
   const cpf = document.getElementById("cpf").value;
   const nome = document.getElementById("nome").value;
-  const nascRaw = document.getElementById("nascimento").value; // O valor do input date vem como YYYY-MM-DD
+  const nascRaw = document.getElementById("nascimento").value; 
   const mun = document.getElementById("municipio").value;
   const tel = document.getElementById("telefone").value;
   const viaEl = document.querySelector('input[name="via"]:checked');
@@ -410,16 +410,18 @@ async function salvarCadastro() {
     return; 
   }
 
-  // --- TRATAMENTO DA DATA PARA O PADRÃO DD/MM/AAAA ---
+  // --- TRATAMENTO DA DATA PARA DD/MM/AAAA ---
   let nascFormatada = nascRaw;
   if(nascRaw.includes("-")) {
     const partes = nascRaw.split("-");
     nascFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
   }
 
-  // Captura o ID para saber se é EDIÇÃO ou NOVO
-  const idEdicao = document.getElementById("idRegistro") ? document.getElementById("idRegistro").value : (typeof idSendoEditado !== 'undefined' ? idSendoEditado : "");
-  const acao = idEdicao ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
+  // --- O PONTO DO CONSERTO ---
+  // Se veio da lista, a variável 'idSendoEditado' tem o ID da linha.
+  // Se ela tiver valor, a action DEVE ser 'editarCadastroAppsScript' para o Apps Script não barrar no CPF.
+  const acao = (typeof idSendoEditado !== 'undefined' && idSendoEditado) ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
+  const idFinal = (typeof idSendoEditado !== 'undefined' && idSendoEditado) ? idSendoEditado : "";
 
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
@@ -428,27 +430,27 @@ async function salvarCadastro() {
     "?action=" + acao +
     "&cpf=" + encodeURIComponent(cpf) +
     "&nome=" + encodeURIComponent(nome) +
-    "&nasc=" + encodeURIComponent(nascFormatada) + // Enviando DD/MM/AAAA para o .gs
+    "&nasc=" + encodeURIComponent(nascFormatada) +
     "&municipio=" + encodeURIComponent(mun) +
     "&tel=" + encodeURIComponent(tel) +
     "&via=" + encodeURIComponent(via) +
     "&atendente=" + encodeURIComponent(user.nome) +
     "&parceiro=" + encodeURIComponent(user.parceiro) +
     "&boleto=" + encodeURIComponent(boleto) +
-    "&id=" + encodeURIComponent(idEdicao);
+    "&id=" + encodeURIComponent(idFinal);
 
   try {
     const response = await fetch(urlFinal);
     const res = await response.json();
 
     if (res.sucesso) {
-      alert(idEdicao ? "✅ Registro atualizado com sucesso!" : "✅ Salvo com sucesso!");
+      alert(idFinal ? "✅ Registro ATUALIZADO com sucesso!" : "✅ Cadastro SALVO com sucesso!");
 
       // --- SEU PROTOCOLO MANTIDO INTEGRALMENTE ---
       try {
           if (typeof imprimirProtocolo === "function") {
             imprimirProtocolo(
-              res.id || idEdicao, 
+              res.id || idFinal, 
               res.cpf || cpf, 
               res.nome || nome, 
               res.nasc || nascFormatada, 
@@ -464,7 +466,7 @@ async function salvarCadastro() {
         console.error("Erro na impressão:", errPrint);
       }
 
-      // --- SUA LIMPEZA DE CAMPOS (MANTIDA PARA NÃO DAR ERRO) ---
+      // --- SUA LIMPEZA DE CAMPOS MANTIDA INTEGRALMENTE ---
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
@@ -472,11 +474,12 @@ async function salvarCadastro() {
       document.getElementById("telefone").value = "";
       document.getElementById("codigoBoleto").value = "";
       
-      // Limpa o ID para que o próximo clique não tente editar a mesma linha
-      if(document.getElementById("idRegistro")) document.getElementById("idRegistro").value = "";
+      // Limpa o controle de edição para o próximo clique ser um novo cadastro
       if(typeof idSendoEditado !== 'undefined') idSendoEditado = null;
+      if(typeof modoEdicao !== 'undefined') modoEdicao = false;
 
     } else {
+      // Se ele avisar que o CPF já existe aqui, é porque a 'acao' foi errada.
       alert("Aviso: " + res.erro);
     }
   } catch (error) {
