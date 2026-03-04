@@ -32,59 +32,46 @@
     <div id="rodape-placeholder"></div>
 
   <script>
-    async function incluirComponentes() {
-        // 1. Carregar Cabeçalho
-        try {
-            const respCab = await fetch('cabecalho.html');
-            if (respCab.ok) {
-                const htmlCab = await respCab.text();
-                document.getElementById('cabecalho-placeholder').innerHTML = htmlCab;
-            }
-        } catch (e) { console.error("Erro no cabeçalho"); }
+    function incluirComponentes() {
+        // Carrega Cabeçalho (usando o caminho que você já usava)
+        fetch('../cabecalho.html')
+            .then(r => r.text())
+            .then(d => { document.getElementById('cabecalho-placeholder').innerHTML = d; })
+            .catch(e => console.error("Erro no cabeçalho"));
 
-        // 2. Carregar Rodapé
-        try {
-            const respRod = await fetch('rodape.html');
-            if (respRod.ok) {
-                const htmlRod = await respRod.text();
-                document.getElementById('rodape-placeholder').innerHTML = htmlRod;
-            }
-        } catch (e) { console.error("Erro no rodapé"); }
+        // Carrega Rodapé
+        fetch('../rodape.html')
+            .then(r => r.text())
+            .then(d => { document.getElementById('rodape-placeholder').innerHTML = d; })
+            .catch(e => console.error("Erro no rodapé"));
 
-        // 3. Carregar Sidebar e Sortear
-        try {
-            const respSid = await fetch('sidebar.html');
-            if (respSid.ok) {
-                const htmlSid = await respSid.text();
-                const container = document.getElementById('sidebar-placeholder');
+        // Carrega a Sidebar de forma independente
+        fetch('../sidebar.html')
+            .then(r => r.text())
+            .then(html => {
+                const sb = document.getElementById('sidebar-placeholder');
+                const temp = document.createElement('div');
+                temp.innerHTML = html;
                 
-                // Criar um elemento temporário para ler o conteúdo
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = htmlSid;
-
-                // Aqui está o segredo: ele aceita tanto .card quanto .sidebar-item
-                const itens = Array.from(tempDiv.querySelectorAll('.card, .sidebar-item'));
-
+                // Busca os cards que você colou no sidebar.html
+                const itens = Array.from(temp.querySelectorAll('.card'));
+                
                 if (itens.length > 0) {
-                    // Embaralha
+                    // Sorteia os cards
                     itens.sort(() => Math.random() - 0.5);
                     
-                    // Pega o título se existir, senão cria um
-                    const tituloOriginal = tempDiv.querySelector('.sidebar-title');
-                    container.innerHTML = tituloOriginal ? tituloOriginal.outerHTML : '<div class="sidebar-title">Sugestões</div>';
-                    
-                    // Adiciona apenas 3
-                    itens.slice(0, 3).forEach(item => container.appendChild(item));
+                    // Coloca o título e os 3 cards sorteados
+                    const titulo = temp.querySelector('.sidebar-title');
+                    sb.innerHTML = titulo ? titulo.outerHTML : '<div class="sidebar-title">Outros Assuntos</div>';
+                    itens.slice(0, 3).forEach(card => sb.appendChild(card));
                 } else {
-                    // Se não tiver cards, apenas joga o conteúdo puro para não ficar branco
-                    container.innerHTML = htmlSid;
+                    // Se não tiver cards, só joga o conteúdo do arquivo
+                    sb.innerHTML = html;
                 }
-            }
-        } catch (e) { console.error("Erro na sidebar"); }
+            })
+            .catch(e => console.error("Erro na sidebar"));
     }
-
-    // Executa a função
-    incluirComponentes();
+    window.onload = incluirComponentes;
 </script>
 </body>
 </html>
