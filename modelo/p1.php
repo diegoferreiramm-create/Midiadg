@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Engenharia Impossível - MidiaDG</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <?php 
+        // Como o p1.php está dentro da pasta 'modelo', 
+        // ele sobe um nível (../) para buscar os componentes
+        include_once("../cabecalho.php"); 
+    ?>
+
+    <div class="main-wrapper">
+        <main class="article-content">
+            <span class="category-label">Pirâmides • Parte 1 de 10</span>
+            <h1>A Engenharia Impossível das Pirâmides</h1>
+            <img src="https://images.pexels.com/photos/259915/pexels-photo-259915.jpeg?auto=compress&cs=tinysrgb&w=800" class="featured-img" alt="Pirâmides">
+            
+            <div class="text-body">
+                <p>As pirâmides de Gizé desafiam a lógica moderna. Como 2,3 milhões de blocos foram movidos com precisão milimétrica?</p>
+            </div>
+
+            <a href="p2.php" style="display: block; background: #1a1a1a; color: white; text-align: center; padding: 18px; text-decoration: none; font-weight: bold; border-radius: 8px; margin-top: 30px;">O Mistério do Alinhamento ➔</a>
+        </main>
+
+        <aside class="sidebar">
+            <div class="sidebar-title">Outros Assuntos</div>
+            <a href="#" class="sidebar-item">
+                <img src="https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&w=200" class="sidebar-img">
+                <div class="sidebar-info">
+                    <h4>Receita Low Carb: Morango Cremoso</h4>
+                    <span><i class="far fa-clock"></i> 02/03/2026</span>
+                </div>
+            </a>
+        </aside>
+    </div>
+
+    <?php 
+        // Busca o rodapé na pasta pai
+        include_once("../rodape.php"); 
+    ?>
+
+</body>
+</html>
