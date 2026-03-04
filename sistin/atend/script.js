@@ -388,7 +388,13 @@ function prepararEdicao(item) {
       campoBoleto.value = item.boleto || "";
   }
   
-  document.getElementById("btnSalvar").innerText = "ATUALIZAR CADASTRO";
+  // --- O AJUSTE QUE FALTA NO SEU .JS ---
+  const btn = document.getElementById("btnSalvar");
+  btn.innerText = "ATUALIZAR CADASTRO";
+  
+  // Aqui está o segredo: mudar a função para 'executarConserto'
+  // Assim ele para de tentar salvar um novo e passa a apenas editar
+  btn.setAttribute("onclick", "executarConserto()");
 }
 
 async function salvarCadastro() {
@@ -914,3 +920,89 @@ function mascaraData(campo) {
   if (v.length >= 5) v = v.substring(0, 5) + "/" + v.substring(5, 9);
   campo.value = v;
 }
+
+async function executarConserto() {
+  const userStr = sessionStorage.getItem("usuario");
+  if(!userStr) { alert("Sessão expirada!"); return; }
+  const user = JSON.parse(userStr);
+  
+  const id = idSendoEditado;
+  const cpf = document.getElementById("cpf").value;
+  const nome = document.getElementById("nome").value;
+  const nascRaw = document.getElementById("nascimento").value;
+  const mun = document.getElementById("municipio").value;
+  const tel = document.getElementById("telefone").value;
+  const boleto = document.getElementById("codigoBoleto").value.trim();
+  
+  const viaEl = document.querySelector('input[name="via"]:checked');
+  const via = viaEl ? viaEl.value : "1ª VIA";
+
+  if(!cpf || !nome || !nascRaw || !boleto) { 
+    alert("ERRO: CPF, Nome, Nascimento e Número do Boleto são obrigatórios!"); 
+    return; 
+  }
+
+  // Formata data para o padrão dd/mm/aaaa antes de enviar
+  let nascParaEnvio = nascRaw;
+  if(nascRaw.includes("-")) {
+    const p = nascRaw.split("-");
+    nascParaEnvio = `${p[2]}/${p[1]}/${p[0]}`;
+  }
+
+  // LÓGICA DA SENHA: Envia action de editar e o ID da linha
+  const urlFinal = urlSistema + 
+    "?action=editarCadastroAppsScript" +
+    "&id=" + encodeURIComponent(id) + 
+    "&cpf=" + encodeURIComponent(cpf) +
+    "&nome=" + encodeURIComponent(nome) +
+    "&nasc=" + encodeURIComponent(nascParaEnvio) +
+    "&municipio=" + encodeURIComponent(mun) +
+    "&tel=" + encodeURIComponent(tel) +
+    "&via=" + encodeURIComponent(via) +
+    "&atendente=" + encodeURIComponent(user.nome) +
+    "&parceiro=" + encodeURIComponent(user.parceiro) +
+    "&boleto=" + encodeURIComponent(boleto);
+
+  const btn = document.querySelector("button[onclick='executarConserto()']");
+  if(btn) { btn.disabled = true; btn.innerText = "ATUALIZANDO..."; }
+
+  try {
+    const response = await fetch(urlFinal);
+    const res = await response.json();
+
+    if (res.sucesso) {
+      alert("✅ Registro consertado com sucesso!");
+
+      // --- SEU PROTOCOLO MANTIDO INTEGRALMENTE ---
+      if (typeof imprimirProtocolo === "function") {
+          imprimirProtocolo(id, cpf, nome, nascParaEnvio, mun, via, user.nome, user.parceiro, res.data, boleto);
+      }
+
+      // --- SUA LIMPEZA DE CAMPOS MANTIDA INTEGRALMENTE ---
+      document.getElementById("cpf").value = "";
+      document.getElementById("nome").value = "";
+      document.getElementById("nascimento").value = "";
+      document.getElementById("municipio").value = "";
+      document.getElementById("telefone").value = "";
+      document.getElementById("codigoBoleto").value = "";
+      
+      // RESET DO BOTÃO: Volta ao estado original de Cadastro Novo
+      if(btn) {
+        btn.innerText = "CADASTRAR";
+        btn.setAttribute("onclick", "salvarCadastro()");
+        btn.style.backgroundColor = ""; 
+      }
+      idSendoEditado = null;
+      modoEdicao = false;
+
+    } else {
+      alert("Aviso do Servidor: " + res.erro);
+    }
+  } catch (error) {
+    console.error("Erro fatal:", error);
+    alert("Erro de conexão ao consertar.");
+  } finally {
+    if(btn) btn.disabled = false;
+  }
+}
+
