@@ -7,45 +7,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        /* ESTRUTURA ORIGINAL PRESERVADA */
+        /* CSS ORIGINAL PRESERVADO */
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fcfcfc; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
-        
-        .header-top { 
-            background-color: white; 
-            padding: 10px 10%; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            border-bottom: 1px solid #eee;
-        }
-
-        /* SOLUÇÃO PARA LIMPAR O QUADRICULADO DA IMAGEM */
-        .logo img { 
-            max-width: 250px; 
-            height: auto; 
-            display: block;
-            /* O comando abaixo faz o branco e o cinza claro do quadriculado "sumirem" */
-            mix-blend-mode: multiply; 
-            filter: contrast(110%); /* Dá uma leve clareada para garantir que o fundo suma */
-        }
-        
+        .header-top { background-color: white; padding: 10px 10%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .logo img { max-width: 250px; height: auto; display: block; mix-blend-mode: multiply; filter: contrast(110%); }
         .header-top-right { display: flex; align-items: center; gap: 20px; }
         .social-icons a { color: #555; font-size: 1.1rem; text-decoration: none; margin-right: 10px; }
         .search-input { padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; background-color: #f9f9f9; width: 150px; }
-        
         .header-menu { background-color: #f5f5f5; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: center; padding: 12px 0; }
         .nav-links { list-style: none; margin: 0; padding: 0; display: flex; gap: 30px; }
         .nav-links a { text-decoration: none; color: #444; font-size: 0.95rem; font-weight: 500; }
         .nav-links a.active { color: #ff5722; font-weight: 600; }
-        
-        /* GRID DE 9 CARDS */
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
         .card { text-decoration: none; position: relative; overflow: hidden; border-radius: 8px; height: 220px; display: flex; align-items: flex-end; background-size: cover; background-position: center; transition: transform 0.3s; }
         .card:hover { transform: scale(1.02); }
         .card-overlay { width: 100%; padding: 15px; color: white; background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%); box-sizing: border-box; }
         .card h3 { margin: 0; font-size: 1.1rem; }
-
-        /* RODAPÉ */
         footer { background-color: #1a1a1a; color: #ffffff; padding: 50px 10% 20px 10%; margin-top: 60px; width: 100%; box-sizing: border-box; }
         .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px; }
         .footer-col h3, .footer-col h4 { color: #ffffff; margin-bottom: 20px; margin-top: 0; }
@@ -59,28 +36,7 @@
 </head>
 <body>
 
-    <header class="header-top">
-        <a href="index.html" class="logo">
-            <img src="imag/logosite.png" alt="MidiaDG">
-        </a>
-        
-        <div class="header-top-right">
-            <div class="social-icons">
-                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-            </div>
-            <input type="text" class="search-input" placeholder="Pesquisar...">
-        </div>
-    </header>
-
-    <nav class="header-menu">
-        <ul class="nav-links">
-            <li><a href="index.html" class="active">Home</a></li>
-            <li><a href="#">Sobre</a></li>
-            <li><a href="#">Categorias</a></li>
-            <li><a href="#">Contato</a></li>
-        </ul>
-    </nav>
+    <?php include_once("cabecalho.php"); ?>
 
     <main style="flex: 1; max-width: 1200px; margin: 30px auto; padding: 0 20px; width: 100%; box-sizing: border-box;">
         
@@ -91,7 +47,7 @@
             <div style="background: #e1f5fe; padding: 20px; border-left: 5px solid #03a9f4; border-radius: 4px;">
                 <strong style="color: #0277bd; display: block; margin-bottom: 5px;">🔥 Destaque da Semana:</strong>
                 <p style="margin: 0; font-size: 0.95rem; color: #444;">
-                    Comece agora a leitura de <a href="historia1-p1.html" style="color: #ff5722; font-weight: bold; text-decoration: none;">O Mistério das Pirâmides</a>. Uma jornada de 10 capítulos imperdível!
+                    Comece agora a leitura de <a href="modelo/p1.php" style="color: #ff5722; font-weight: bold; text-decoration: none;">O Mistério das Pirâmides</a>. Uma jornada de 10 capítulos imperdível!
                 </p>
             </div>
         </section>
@@ -101,7 +57,7 @@
         </h2>
 
         <div class="grid-container">
-            <a href="modelo/p1.html" class="card" style="background-image: url('https://images.pexels.com/photos/259915/pexels-photo-259915.jpeg?auto=compress&cs=tinysrgb&w=400')">
+            <a href="modelo/p1.php" class="card" style="background-image: url('https://images.pexels.com/photos/259915/pexels-photo-259915.jpeg?auto=compress&cs=tinysrgb&w=400')">
                 <div class="card-overlay"><h3>O Mistério das Pirâmides</h3></div>
             </a>
             <a href="#" class="card" style="background-image: url('https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=400')">
@@ -131,30 +87,7 @@
         </div>
     </main>
 
-    <footer>
-        <div class="footer-grid">
-            <div class="footer-col">
-                <img src="imag/logosite.png" alt="MidiaDG" style="width: 150px; height: auto; margin-bottom: 20px; mix-blend-mode: screen;">
-                <p>Explore os maiores mistérios do mundo, curiosidades científicas e histórias fascinantes em um só lugar.</p>
-            </div>
-            <div class="footer-col">
-                <h4>Navegação</h4>
-                <ul>
-                    <li><a href="index.html">Página Inicial</a></li>
-                    <li><a href="#">Sobre Nós</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>Legal</h4>
-                <ul>
-                    <li><a href="#">Política de Privacidade</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="copyright">
-            <p>&copy; 2026 MidiaDG - Todos os direitos reservados.</p>
-        </div>
-    </footer>
+    <?php include_once("rodape.php"); ?>
 
 </body>
 </html>
