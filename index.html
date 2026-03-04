@@ -15,29 +15,38 @@
             background-color: white; 
             padding: 20px 10%; 
             display: flex; 
-            flex-direction: column; /* Coloca a logo em cima e os ícones embaixo se necessário */
+            flex-direction: column; 
             align-items: center; 
             gap: 20px;
             border-bottom: 1px solid #eee;
         }
 
-        /* Container que organiza os itens na horizontal em telas grandes */
         .header-container {
             width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap; /* Permite quebrar linha suavemente em telas menores */
+            flex-wrap: wrap; 
             gap: 20px;
         }
         
-        /* CONTROLE TOTAL DA LOGO */
-        .logo { display: flex; align-items: center; text-decoration: none; }
+        /* AJUSTE PARA CORTAR O VAZIO DA SUA IMAGEM */
+        .logo { 
+            display: flex; 
+            align-items: center; 
+            text-decoration: none;
+            width: 280px; /* Largura da logo na tela */
+            height: 80px;  /* Altura da logo na tela */
+            overflow: hidden; /* Corta o excesso da imagem */
+            border: none;
+        }
+
         .logo img { 
-            height: auto; 
-            width: 280px; /* Aumentei para 280px para ficar bem visível */
-            max-width: 100%; /* Garante que não estoure a tela do celular */
+            width: 100%;
+            height: 280%; /* Aumenta a imagem dentro da caixa para sumir o vazio */
             display: block;
+            object-fit: contain;
+            object-position: center 85%; /* Foca o zoom na parte de baixo da imagem */
         }
         
         .header-top-right { display: flex; align-items: center; gap: 20px; }
@@ -149,7 +158,9 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <img src="imagem/logosite.png" alt="MidiaDG" style="width: 200px; height: auto; margin-bottom: 20px;">
+                <div style="width: 200px; height: 60px; overflow: hidden;">
+                    <img src="imagem/logosite.png" alt="MidiaDG" style="width: 100%; height: 280%; object-fit: contain; object-position: center 85%;">
+                </div>
                 <p>Explore os maiores mistérios do mundo, curiosidades científicas e histórias fascinantes em um só lugar. Conteúdo novo todos os dias.</p>
             </div>
 
