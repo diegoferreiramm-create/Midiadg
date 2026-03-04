@@ -401,6 +401,8 @@ async function salvarCadastro() {
   const nascRaw = document.getElementById("nascimento").value;
   const mun = document.getElementById("municipio").value;
   const tel = document.getElementById("telefone").value;
+  
+  // Aqui pegamos se é 1ª ou 2ª VIA - o critério que você mencionou
   const viaEl = document.querySelector('input[name="via"]:checked');
   const via = viaEl ? viaEl.value : "1ª VIA";
   const boleto = document.getElementById("codigoBoleto").value.trim();
@@ -410,43 +412,58 @@ async function salvarCadastro() {
     return; 
   }
 
-  // --- IGUAL À TROCA DE SENHA: DEFINIR A AÇÃO ---
-  // Se idSendoEditado tem valor, a action é EDITAR.
-  // Se não tem, a action é SALVAR NOVO.
+  // --- LÓGICA IGUAL À TROCA DE SENHA (MULTICRITÉRIO) ---
+  // Se idSendoEditado existe, enviamos a ação de EDITAR.
+  // O servidor vai usar o ID + CPF + VIA para garantir que está editando a VIA certa.
   const idFinal = (typeof idSendoEditado !== 'undefined' && idSendoEditado) ? idSendoEditado : "";
   const acao = idFinal ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
 
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
-  // Montagem da URL igual à trocarSenha, passando a action e o ID para localizar a linha
-  const urlFinal = `${urlSistema}?action=${acao}` +
-    `&id=${encodeURIComponent(idFinal)}` +
-    `&cpf=${encodeURIComponent(cpf)}` +
-    `&nome=${encodeURIComponent(nome)}` +
-    `&nasc=${encodeURIComponent(nascRaw)}` +
-    `&municipio=${encodeURIComponent(mun)}` +
-    `&tel=${encodeURIComponent(tel)}` +
-    `&via=${encodeURIComponent(via)}` +
-    `&atendente=${encodeURIComponent(user.nome)}` +
-    `&parceiro=${encodeURIComponent(user.parceiro)}` +
-    `&boleto=${encodeURIComponent(boleto)}`;
+  // Montamos a URL enviando o COMBO (ID, CPF e VIA)
+  // Assim o Apps Script localiza a linha exata (ex: a 2ª via daquele CPF)
+  const urlFinal = urlSistema + 
+    "?action=" + acao +
+    "&id=" + encodeURIComponent(idFinal) + 
+    "&cpf=" + encodeURIComponent(cpf) +
+    "&nome=" + encodeURIComponent(nome) +
+    "&nasc=" + encodeURIComponent(nascRaw) +
+    "&municipio=" + encodeURIComponent(mun) +
+    "&tel=" + encodeURIComponent(tel) +
+    "&via=" + encodeURIComponent(via) + // Crucial para diferenciar 1ª de 2ª via
+    "&atendente=" + encodeURIComponent(user.nome) +
+    "&parceiro=" + encodeURIComponent(user.parceiro) +
+    "&boleto=" + encodeURIComponent(boleto);
 
   try {
     const response = await fetch(urlFinal);
     const res = await response.json();
 
     if (res.sucesso) {
-      alert(idFinal ? "✅ Registro ATUALIZADO com sucesso!" : "✅ Cadastro SALVO com sucesso!");
+      alert(idFinal ? `✅ ${via} ATUALIZADA com sucesso!` : "✅ Cadastro SALVO com sucesso!");
 
-      // --- SEU PROTOCOLO MANTIDO INTEGRALMENTE ---
+      // --- SEU PROTOCOLO (MANTIDO 100% INTEGRAL) ---
       try {
           if (typeof imprimirProtocolo === "function") {
-            imprimirProtocolo(res.id || idFinal, res.cpf || cpf, res.nome || nome, res.nasc || nascRaw, mun, via, user.nome, user.parceiro, res.data, res.boleto || boleto);
+            imprimirProtocolo(
+              res.id || idFinal, 
+              res.cpf || cpf, 
+              res.nome || nome, 
+              res.nasc || nascRaw, 
+              mun, 
+              via, 
+              user.nome, 
+              user.parceiro, 
+              res.data, 
+              res.boleto || boleto
+            );
           }
-      } catch (errPrint) { console.error("Erro na impressão:", errPrint); }
+      } catch (errPrint) {
+        console.error("Erro na impressão:", errPrint);
+      }
 
-      // --- SUA LIMPEZA DE CAMPOS MANTIDA INTEGRALMENTE ---
+      // --- SUA LIMPEZA DE CAMPOS (MANTIDA 100% INTEGRAL) ---
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
@@ -454,11 +471,11 @@ async function salvarCadastro() {
       document.getElementById("telefone").value = "";
       document.getElementById("codigoBoleto").value = "";
       
-      // Reseta o ID para o próximo não ser edição (Igual ao fecharSenha)
+      // Reseta para o próximo não ser edição
       if(typeof idSendoEditado !== 'undefined') idSendoEditado = null;
 
     } else {
-      // Se for duplicado, o servidor avisa aqui
+      // Se der erro de CPF/VIA já existente, o aviso vem daqui
       alert("Aviso: " + res.erro);
     }
   } catch (error) {
@@ -467,7 +484,7 @@ async function salvarCadastro() {
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
-} 
+}
 
 // --- IMPRIMIR PROTOCOLO (CORRIGIDA PARA EVITAR ERRO DE POP-UP) ---
 function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
