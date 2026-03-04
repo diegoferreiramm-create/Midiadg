@@ -36,7 +36,7 @@
 </head>
 <body>
 
-    <?php include_once("cabecalho.php"); ?>
+    <div id="cabecalho-placeholder"></div>
 
     <main style="flex: 1; max-width: 1200px; margin: 30px auto; padding: 0 20px; width: 100%; box-sizing: border-box;">
         
@@ -47,7 +47,7 @@
             <div style="background: #e1f5fe; padding: 20px; border-left: 5px solid #03a9f4; border-radius: 4px;">
                 <strong style="color: #0277bd; display: block; margin-bottom: 5px;">🔥 Destaque da Semana:</strong>
                 <p style="margin: 0; font-size: 0.95rem; color: #444;">
-                    Comece agora a leitura de <a href="modelo/p1.php" style="color: #ff5722; font-weight: bold; text-decoration: none;">O Mistério das Pirâmides</a>. Uma jornada de 10 capítulos imperdível!
+                    Comece agora a leitura de <a href="modelo/p1.html" style="color: #ff5722; font-weight: bold; text-decoration: none;">O Mistério das Pirâmides</a>. Uma jornada de 10 capítulos imperdível!
                 </p>
             </div>
         </section>
@@ -57,7 +57,7 @@
         </h2>
 
         <div class="grid-container">
-            <a href="modelo/p1.php" class="card" style="background-image: url('https://images.pexels.com/photos/259915/pexels-photo-259915.jpeg?auto=compress&cs=tinysrgb&w=400')">
+            <a href="modelo/p1.html" class="card" style="background-image: url('https://images.pexels.com/photos/259915/pexels-photo-259915.jpeg?auto=compress&cs=tinysrgb&w=400')">
                 <div class="card-overlay"><h3>O Mistério das Pirâmides</h3></div>
             </a>
             <a href="#" class="card" style="background-image: url('https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=400')">
@@ -87,7 +87,22 @@
         </div>
     </main>
 
-    <?php include_once("rodape.php"); ?>
+    <div id="rodape-placeholder"></div>
+
+    <script>
+        function incluirComponentes() {
+            // Carrega Cabeçalho
+            fetch('/cabecalho.html')
+                .then(response => response.text())
+                .then(data => document.getElementById('cabecalho-placeholder').innerHTML = data);
+
+            // Carrega Rodapé
+            fetch('/rodape.html')
+                .then(response => response.text())
+                .then(data => document.getElementById('rodape-placeholder').innerHTML = data);
+        }
+        window.onload = incluirComponentes;
+    </script>
 
 </body>
 </html>
