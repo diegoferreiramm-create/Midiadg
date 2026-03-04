@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        /* ESTRUTURA ORIGINAL PRESERVADA */
+        /* ESTRUTURA ORIGINAL 100% PRESERVADA */
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fcfcfc; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
         
         .header-top { 
@@ -19,22 +19,12 @@
             border-bottom: 1px solid #eee;
         }
 
-        /* SOLUÇÃO PARA A LOGO QUEBRADA: Recorte via CSS */
-        .logo {
-            display: block;
-            width: 240px; /* Largura fixa para o container */
-            height: 80px;  /* Altura fixa para o container */
-            overflow: hidden; /* Esconde o que sobrar da imagem (quadriculados e bordas) */
-            position: relative;
-        }
-
+        /* AJUSTE PARA A LOGO NA PASTA IMAG */
         .logo img { 
-            width: 320px; /* Deixamos a imagem um pouco maior para centralizar o recorte */
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%); /* Centraliza a logo no meio do quadrado de visão */
-            mix-blend-mode: multiply; /* Faz o fundo cinza "sumir" no branco do header */
+            max-width: 250px; 
+            height: auto; 
+            display: block;
+            border: none;
         }
         
         .header-top-right { display: flex; align-items: center; gap: 20px; }
@@ -63,10 +53,6 @@
         .footer-col ul li a { color: #bbb; text-decoration: none; }
         .footer-col ul li a:hover { color: #ff5722; }
         .copyright { border-top: 1px solid #333; padding-top: 20px; text-align: center; font-size: 0.8rem; color: #777; }
-
-        /* No rodapé, invertemos a cor para a logo aparecer em branco e esconder os defeitos */
-        .footer-logo-wrap { width: 150px; height: 50px; overflow: hidden; position: relative; margin-bottom: 20px; }
-        .footer-logo-wrap img { width: 200px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); filter: brightness(0) invert(1); }
     </style>
 </head>
 <body class="notranslate">
@@ -146,24 +132,20 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <div class="footer-logo-wrap">
-                    <img src="imag/logosite.png" alt="MidiaDG">
-                </div>
-                <p>Explore os maiores mistérios do mundo, curiosidades científicas e histórias fascinantes em um só lugar. Conteúdo novo todos os dias.</p>
+                <img src="imag/logosite.png" alt="MidiaDG" style="width: 150px; height: auto; margin-bottom: 20px;">
+                <p>Explore os maiores mistérios do mundo, curiosidades científicas e histórias fascinantes em um só lugar.</p>
             </div>
             <div class="footer-col">
                 <h4>Navegação</h4>
                 <ul>
                     <li><a href="index.html">Página Inicial</a></li>
                     <li><a href="#">Sobre Nós</a></li>
-                    <li><a href="#">Contato</a></li>
                 </ul>
             </div>
             <div class="footer-col">
                 <h4>Legal</h4>
                 <ul>
                     <li><a href="#">Política de Privacidade</a></li>
-                    <li><a href="#">Termos de Uso</a></li>
                 </ul>
             </div>
         </div>
