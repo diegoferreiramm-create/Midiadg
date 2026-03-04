@@ -32,27 +32,36 @@
     <div id="rodape-placeholder"></div>
 
     <script>
-        function incluirComponentes() {
-            // Puxa o Topo
-            fetch('cabecalho.html').then(r => r.text()).then(d => document.getElementById('cabecalho-placeholder').innerHTML = d);
+    function incluirComponentes() {
+        // Puxa o Topo e Rodapé
+        fetch('cabecalho.html').then(r => r.text()).then(d => document.getElementById('cabecalho-placeholder').innerHTML = d);
+        fetch('rodape.html').then(r => r.text()).then(d => document.getElementById('rodape-placeholder').innerHTML = d);
+        
+        // Puxa a Sidebar
+        fetch('sidebar.html').then(r => r.text()).then(d => {
+            const sb = document.getElementById('sidebar-placeholder');
             
-            // Puxa o Rodapé
-            fetch('rodape.html').then(r => r.text()).then(d => document.getElementById('rodape-placeholder').innerHTML = d);
+            // Criamos um elemento temporário para processar o HTML da sidebar
+            const temp = document.createElement('div');
+            temp.innerHTML = d;
             
-            // Puxa a Sidebar (O comando que faz a mágica)
-            fetch('sidebar.html').then(r => r.text()).then(d => {
-                const sb = document.getElementById('sidebar-placeholder');
-                sb.innerHTML = d;
-                
-                // Opcional: Embaralha os itens para não serem sempre os mesmos
-                const itens = Array.from(sb.querySelectorAll('.sidebar-item'));
-                itens.sort(() => Math.random() - 0.5);
-                const titulo = sb.querySelector('.sidebar-title').outerHTML;
-                sb.innerHTML = titulo;
-                itens.slice(0, 3).forEach(item => sb.appendChild(item));
+            // AGORA PROCURAMOS POR '.card' (que é o que você colou lá)
+            const itens = Array.from(temp.querySelectorAll('.card'));
+            
+            // Embaralha
+            itens.sort(() => Math.random() - 0.5);
+            
+            // Pega o título e limpa a lateral
+            const tituloHtml = temp.querySelector('.sidebar-title').outerHTML;
+            sb.innerHTML = tituloHtml;
+            
+            // Adiciona apenas 3 cards sorteados
+            itens.slice(0, 3).forEach(item => {
+                sb.appendChild(item);
             });
-        }
-        window.onload = incluirComponentes;
-    </script>
+        }).catch(err => console.log("Erro ao carregar sidebar: ", err));
+    }
+    window.onload = incluirComponentes;
+</script>
 </body>
 </html>
