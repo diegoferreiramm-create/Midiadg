@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        /* ESTILO ORIGINAL DO USUÁRIO - SEM ALTERAÇÕES DE ESTRUTURA */
+        /* ESTRUTURA ORIGINAL PRESERVADA */
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fcfcfc; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
         
         .header-top { 
@@ -19,11 +19,13 @@
             border-bottom: 1px solid #eee;
         }
 
-        /* TRAVA PARA A LOGO NÃO FICAR GIGANTE COMO NO SEU PRINT */
+        /* CORREÇÃO DO FOCO NA LOGO (IGNORA O VAZIO DO PNG) */
         .logo img { 
             width: 250px; 
-            height: auto; 
+            height: 80px; 
             display: block;
+            object-fit: cover; /* Faz o recorte automático do vazio */
+            object-position: center; /* Centraliza no desenho da logo */
         }
         
         .header-top-right { display: flex; align-items: center; gap: 20px; }
@@ -81,19 +83,18 @@
         
         <section style="margin-bottom: 40px;">
             <h2 style="font-weight: 300; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; color: #777; text-transform: uppercase; font-size: 1.2rem;">
-                Check Our Latest Assunts
+                CHECK OUR LATEST ASSUNTS
             </h2>
             <div style="background: #e1f5fe; padding: 20px; border-left: 5px solid #03a9f4; border-radius: 4px;">
                 <strong style="color: #0277bd; display: block; margin-bottom: 5px;">🔥 Destaque da Semana:</strong>
                 <p style="margin: 0; font-size: 0.95rem; color: #444;">
-                    Comece agora a leitura de <a href="historia1-p1.html" style="color: #ff5722; font-weight: bold; text-decoration: none;">O Mistério das Pirâmides</a>. 
-                    Uma jornada de 10 capítulos imperdível!
+                    Comece agora a leitura de <a href="historia1-p1.html" style="color: #ff5722; font-weight: bold; text-decoration: none;">O Mistério das Pirâmides</a>. Uma jornada de 10 capítulos imperdível!
                 </p>
             </div>
         </section>
 
         <h2 style="font-size: 1.1rem; color: #777; border-left: 4px solid #ff5722; padding-left: 10px; margin-bottom: 20px; text-transform: uppercase; font-weight: 600;">
-            Últimas Histórias
+            ÚLTIMAS HISTÓRIAS
         </h2>
 
         <div class="grid-container">
@@ -130,7 +131,7 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <img src="imag/logosite.png" alt="MidiaDG" style="width: 150px; height: auto; margin-bottom: 20px;">
+                <img src="imag/logosite.png" alt="MidiaDG" style="width: 150px; height: 60px; object-fit: cover; margin-bottom: 20px;">
                 <p>Explore os maiores mistérios do mundo, curiosidades científicas e histórias fascinantes em um só lugar. Conteúdo novo todos os dias.</p>
             </div>
             <div class="footer-col">
