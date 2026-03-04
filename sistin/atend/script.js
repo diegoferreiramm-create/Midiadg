@@ -410,63 +410,43 @@ async function salvarCadastro() {
     return; 
   }
 
-  // --- MANTENDO SEU PADRÃO DE DATA dd/mm/aaaa ---
-  let nascParaEnvio = nascRaw;
-  if(nascRaw.includes("-")) {
-    const p = nascRaw.split("-");
-    nascParaEnvio = `${p[2]}/${p[1]}/${p[0]}`;
-  }
-
-  // --- O PONTO CHAVE: SELECIONAR A FUNÇÃO DE EDITAR ---
-  // Se idSendoEditado tiver valor, ele chama a função que você postou acima.
-  // Se não tiver, ele salva um novo (e aí a trava de CPF funciona).
+  // --- IGUAL À TROCA DE SENHA: DEFINIR A AÇÃO ---
+  // Se idSendoEditado tem valor, a action é EDITAR.
+  // Se não tem, a action é SALVAR NOVO.
   const idFinal = (typeof idSendoEditado !== 'undefined' && idSendoEditado) ? idSendoEditado : "";
   const acao = idFinal ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
 
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
 
-  const urlFinal = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec" +
-    "?action=" + acao +
-    "&cpf=" + encodeURIComponent(cpf) +
-    "&nome=" + encodeURIComponent(nome) +
-    "&nasc=" + encodeURIComponent(nascParaEnvio) +
-    "&municipio=" + encodeURIComponent(mun) +
-    "&tel=" + encodeURIComponent(tel) +
-    "&via=" + encodeURIComponent(via) +
-    "&atendente=" + encodeURIComponent(user.nome) +
-    "&parceiro=" + encodeURIComponent(user.parceiro) +
-    "&boleto=" + encodeURIComponent(boleto) +
-    "&id=" + encodeURIComponent(idFinal);
+  // Montagem da URL igual à trocarSenha, passando a action e o ID para localizar a linha
+  const urlFinal = `${urlSistema}?action=${acao}` +
+    `&id=${encodeURIComponent(idFinal)}` +
+    `&cpf=${encodeURIComponent(cpf)}` +
+    `&nome=${encodeURIComponent(nome)}` +
+    `&nasc=${encodeURIComponent(nascRaw)}` +
+    `&municipio=${encodeURIComponent(mun)}` +
+    `&tel=${encodeURIComponent(tel)}` +
+    `&via=${encodeURIComponent(via)}` +
+    `&atendente=${encodeURIComponent(user.nome)}` +
+    `&parceiro=${encodeURIComponent(user.parceiro)}` +
+    `&boleto=${encodeURIComponent(boleto)}`;
 
   try {
     const response = await fetch(urlFinal);
     const res = await response.json();
 
     if (res.sucesso) {
-      alert(idFinal ? "✅ Registro ATUALIZADO (consertado) com sucesso!" : "✅ Salvo com sucesso!");
+      alert(idFinal ? "✅ Registro ATUALIZADO com sucesso!" : "✅ Cadastro SALVO com sucesso!");
 
-      // --- SEU PROTOCOLO (MANTIDO INTEGRALMENTE) ---
+      // --- SEU PROTOCOLO MANTIDO INTEGRALMENTE ---
       try {
           if (typeof imprimirProtocolo === "function") {
-            imprimirProtocolo(
-              res.id || idFinal, 
-              res.cpf || cpf, 
-              res.nome || nome, 
-              res.nasc || nascParaEnvio, 
-              mun, 
-              via, 
-              user.nome, 
-              user.parceiro, 
-              res.data, 
-              res.boleto || boleto
-            );
+            imprimirProtocolo(res.id || idFinal, res.cpf || cpf, res.nome || nome, res.nasc || nascRaw, mun, via, user.nome, user.parceiro, res.data, res.boleto || boleto);
           }
-      } catch (errPrint) {
-        console.error("Erro na impressão:", errPrint);
-      }
+      } catch (errPrint) { console.error("Erro na impressão:", errPrint); }
 
-      // --- SUA LIMPEZA DE CAMPOS (MANTIDA INTEGRALMENTE) ---
+      // --- SUA LIMPEZA DE CAMPOS MANTIDA INTEGRALMENTE ---
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
@@ -474,20 +454,21 @@ async function salvarCadastro() {
       document.getElementById("telefone").value = "";
       document.getElementById("codigoBoleto").value = "";
       
-      // Reseta o estado para o próximo não ser edição por erro
+      // Reseta o ID para o próximo não ser edição (Igual ao fecharSenha)
       if(typeof idSendoEditado !== 'undefined') idSendoEditado = null;
 
     } else {
-      // Se der erro de CPF aqui, é porque o JS mandou 'salvarCadastroAppsScript' em vez de editar
+      // Se for duplicado, o servidor avisa aqui
       alert("Aviso: " + res.erro);
     }
   } catch (error) {
     console.error("Erro fatal:", error);
-    alert("Erro de conexão ao salvar.");
+    alert("Erro de conexão.");
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
-}
+} 
+
 // --- IMPRIMIR PROTOCOLO (CORRIGIDA PARA EVITAR ERRO DE POP-UP) ---
 function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
   // Abre a nova janela
