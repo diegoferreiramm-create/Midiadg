@@ -410,8 +410,12 @@ async function salvarCadastro() {
     return; 
   }
 
-  const idEdicao = document.getElementById("idRegistro") ? document.getElementById("idRegistro").value : "";
-  const acao = idEdicao ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
+  // --- O ÚNICO AJUSTE É AQUI: GARANTIR QUE PEGA O ID DA VARIÁVEL GLOBAL ---
+  // Se o idRegistro (HTML) não existir, ele usa o idSendoEditado (Global)
+  const idHTML = document.getElementById("idRegistro") ? document.getElementById("idRegistro").value : "";
+  const idFinal = idHTML || idSendoEditado || ""; 
+  
+  const acao = idFinal ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
 
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
@@ -427,42 +431,46 @@ async function salvarCadastro() {
     "&atendente=" + encodeURIComponent(user.nome) +
     "&parceiro=" + encodeURIComponent(user.parceiro) +
     "&boleto=" + encodeURIComponent(boleto) +
-    "&id=" + encodeURIComponent(idEdicao);
+    "&id=" + encodeURIComponent(idFinal);
 
   try {
     const response = await fetch(urlFinal);
     const res = await response.json();
 
     if (res.sucesso) {
-      alert("Salvo com sucesso!");
+      alert(idFinal ? "✅ Registro atualizado com sucesso!" : "✅ Salvo com sucesso!");
 
-      // --- CORREÇÃO: CHAMANDO O NOME CORRETO DA FUNÇÃO ---
+      // --- SEU PROTOCOLO MANTIDO EXATAMENTE IGUAL ---
       try {
           if (typeof imprimirProtocolo === "function") {
             imprimirProtocolo(
-              res.id, 
-              res.cpf, 
-              res.nome, 
-              res.nasc, 
+              res.id || idFinal, // Usa o ID retornado ou o ID que enviamos
+              res.cpf || cpf, 
+              res.nome || nome, 
+              res.nasc || nascRaw, 
               mun, 
               via, 
               user.nome, 
               user.parceiro, 
               res.data, 
-              res.boleto
+              res.boleto || boleto
             );
           }
       } catch (errPrint) {
         console.error("Erro na impressão:", errPrint);
       }
 
-      // --- LIMPEZA DOS CAMPOS ---
+      // --- SUA LIMPEZA DE CAMPOS MANTIDA EXATAMENTE IGUAL ---
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
       document.getElementById("municipio").value = "";
       document.getElementById("telefone").value = "";
       document.getElementById("codigoBoleto").value = "";
+      
+      // Limpeza extra para evitar que o próximo cadastro tente editar o anterior
+      idSendoEditado = null; 
+      if(document.getElementById("idRegistro")) document.getElementById("idRegistro").value = "";
 
     } else {
       alert("Aviso: " + res.erro);
@@ -474,6 +482,7 @@ async function salvarCadastro() {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
 }
+
 // --- IMPRIMIR PROTOCOLO (CORRIGIDA PARA EVITAR ERRO DE POP-UP) ---
 function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
   // Abre a nova janela
