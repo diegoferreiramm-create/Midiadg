@@ -362,39 +362,78 @@ function toggleTerceiro() {
   inputs.forEach(el => el.disabled = !isChecked);
 }
 
-// FUNÇÃO PARA PREPARAR A EDIÇÃO - MANTIDA INTEGRALMENTE
+// Função disparada quando você clica em "Editar" na lista
 function prepararEdicao(item) {
-  modoEdicao = true;
-  idSendoEditado = item.id;
-  
-  abrirTela('cadastrarBox');
-  
-  document.getElementById("cpf").value = item.cpf || "";
-  document.getElementById("nome").value = item.nome || "";
-  
-  if(item.nasc) {
-    const p = item.nasc.split('/');
-    if(p.length === 3) {
-      document.getElementById("nascimento").value = `${p[2]}-${p[1]}-${p[0]}`;
+    idSendoEditado = item.id; // Salva o ID da Coluna A
+    
+    // Mostra o Box de correção sobreposto
+    document.getElementById('corrigirBox').style.display = 'block';
+    
+    // Preenche os campos específicos da correção (prefixo edit_)
+    document.getElementById("edit_cpf").value = item.cpf || "";
+    document.getElementById("edit_nome").value = item.nome || "";
+    
+    // Trata a data para o formato yyyy-mm-dd do input date
+    if(item.nasc) {
+        const p = item.nasc.split('/');
+        if(p.length === 3) document.getElementById("edit_nascimento").value = `${p[2]}-${p[1]}-${p[0]}`;
     }
-  }
-  
-  document.getElementById("municipio").value = item.municipio || "";
-  document.getElementById("telefone").value = item.tel || "";
-  
-  // PONTO 1: Puxando o número do boleto para edição
-  const campoBoleto = document.getElementById("codigoBoleto");
-  if(campoBoleto) {
-      campoBoleto.value = item.boleto || "";
-  }
-  
-  // --- O AJUSTE QUE FALTA NO SEU .JS ---
-  const btn = document.getElementById("btnSalvar");
-  btn.innerText = "ATUALIZAR CADASTRO";
-  
-  // Aqui está o segredo: mudar a função para 'executarConserto'
-  // Assim ele para de tentar salvar um novo e passa a apenas editar
-  btn.setAttribute("onclick", "executarConserto()");
+    
+    document.getElementById("edit_municipio").value = item.municipio || "";
+    document.getElementById("edit_telefone").value = item.tel || "";
+    document.getElementById("edit_codigoBoleto").value = item.boleto || "";
+
+    // Marca a Via correta
+    if(item.via === "1ª") document.getElementById("edit_via1").checked = true;
+    if(item.via === "2ª") document.getElementById("edit_via2").checked = true;
+}
+
+// Função que salva no Apps Script (Igual à troca de senha)
+async function executarEdicao() {
+    const user = JSON.parse(sessionStorage.getItem("usuario"));
+    
+    const id = idSendoEditado; 
+    const cpf = document.getElementById("edit_cpf").value;
+    const nome = document.getElementById("edit_nome").value;
+    const nasc = document.getElementById("edit_nascimento").value;
+    const mun = document.getElementById("edit_municipio").value;
+    const tel = document.getElementById("edit_telefone").value;
+    const boleto = document.getElementById("edit_codigoBoleto").value;
+    const viaEl = document.querySelector('input[name="edit_via"]:checked');
+    const via = viaEl ? viaEl.value : "";
+
+    // Formata data dd/mm/aaaa para mandar pro Google Script
+    let dF = nasc;
+    if(nasc.includes("-")) {
+        const p = nasc.split("-");
+        dF = `${p[2]}/${p[1]}/${p[0]}`;
+    }
+
+    // A URL vai direto para a action que já funciona no seu .gs
+    const url = `${urlSistema}?action=editarCadastroAppsScript` +
+        `&id=${encodeURIComponent(id)}` +
+        `&cpf=${encodeURIComponent(cpf)}` +
+        `&nome=${encodeURIComponent(nome)}` +
+        `&nasc=${encodeURIComponent(dF)}` +
+        `&municipio=${encodeURIComponent(mun)}` +
+        `&tel=${encodeURIComponent(tel)}` +
+        `&via=${encodeURIComponent(via)}` +
+        `&boleto=${encodeURIComponent(boleto)}` +
+        `&atendente=${encodeURIComponent(user.nome)}` +
+        `&parceiro=${encodeURIComponent(user.parceiro)}`;
+
+    try {
+        const res = await fetch(url).then(r => r.json());
+        if(res.sucesso) {
+            alert("✅ Registro editado com sucesso!");
+            document.getElementById('corrigirBox').style.display = 'none';
+            if(typeof listarCadastros === "function") listarCadastros(); // Recarrega a lista por baixo
+        } else {
+            alert("Erro: " + res.erro);
+        }
+    } catch (e) {
+        alert("Erro de comunicação com o servidor.");
+    }
 }
 
 async function salvarCadastro() {
