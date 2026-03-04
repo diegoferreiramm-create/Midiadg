@@ -42,9 +42,14 @@
 
     <script>
         function incluirComponentes() {
-            // Puxa o cabeçalho e rodapé da raiz automaticamente
-            fetch('../cabecalho.html').then(r => r.text()).then(d => document.getElementById('cabecalho-placeholder').innerHTML = d);
-            fetch('../rodape.html').then(r => r.text()).then(d => document.getElementById('rodape-placeholder').innerHTML = d);
+            // Puxa o cabeçalho e rodapé da raiz subindo um nível (../)
+            fetch('../cabecalho.html')
+                .then(r => r.text())
+                .then(d => document.getElementById('cabecalho-placeholder').innerHTML = d);
+            
+            fetch('../rodape.html')
+                .then(r => r.text())
+                .then(d => document.getElementById('rodape-placeholder').innerHTML = d);
         }
         window.onload = incluirComponentes;
     </script>
