@@ -31,43 +31,41 @@
 
     <div id="rodape-placeholder"></div>
 
-    <script>
+   <script>
     function incluirComponentes() {
-        // 1. Carrega Topo e Rodapé
-        fetch('cabecalho.html').then(r => r.text()).then(d => document.getElementById('cabecalho-placeholder').innerHTML = d);
-        fetch('rodape.html').then(r => r.text()).then(d => document.getElementById('rodape-placeholder').innerHTML = d);
-        
-        // 2. Carrega a Sidebar
-        fetch('sidebar.html')
-            .then(response => {
-                if (!response.ok) throw new Error('Arquivo sidebar.html não encontrado');
-                return response.text();
-            })
-            .then(data => {
-                const container = document.getElementById('sidebar-placeholder');
-                
-                // Criamos um elemento invisível para organizar os cards
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = data;
-                
-                // Buscamos os cards que você colou no sidebar.html
-                const cards = Array.from(tempDiv.querySelectorAll('.card'));
-                
-                if (cards.length > 0) {
-                    // Embaralha os cards
-                    cards.sort(() => Math.random() - 0.5);
-                    
-                    // Pega o título "Outros Assuntos"
-                    const titulo = tempDiv.querySelector('.sidebar-title');
-                    container.innerHTML = titulo ? titulo.outerHTML : '<div class="sidebar-title">Sugestões</div>';
-                    
-                    // Adiciona apenas os 3 primeiros sorteados
-                    cards.slice(0, 3).forEach(card => {
-                        container.appendChild(card);
-                    });
-                }
-            })
-            .catch(err => console.error('Erro na sidebar:', err));
+        // Função interna para carregar cada parte
+        const carregar = (arquivo, id) => {
+            fetch(arquivo) // Sem '../' e sem 'modelo/'
+                .then(response => {
+                    if (!response.ok) throw new Error('Não achou ' + arquivo);
+                    return response.text();
+                })
+                .then(html => {
+                    const placeholder = document.getElementById(id);
+                    if (placeholder) {
+                        placeholder.innerHTML = html;
+                        
+                        // Lógica especial se for a Sidebar
+                        if (id === 'sidebar-placeholder') {
+                            const temp = document.createElement('div');
+                            temp.innerHTML = html;
+                            const cards = Array.from(temp.querySelectorAll('.card'));
+                            if (cards.length > 0) {
+                                cards.sort(() => Math.random() - 0.5);
+                                const titulo = temp.querySelector('.sidebar-title');
+                                placeholder.innerHTML = titulo ? titulo.outerHTML : '';
+                                cards.slice(0, 3).forEach(c => placeholder.appendChild(c));
+                            }
+                        }
+                    }
+                })
+                .catch(err => console.error('Erro 404 no arquivo:', arquivo));
+        };
+
+        // Chama os arquivos - GARANTA QUE OS NOMES ESTEJAM IGUAIS NO GITHUB
+        carregar('cabecalho.html', 'cabecalho-placeholder');
+        carregar('rodape.html', 'rodape-placeholder');
+        carregar('sidebar.html', 'sidebar-placeholder');
     }
     window.onload = incluirComponentes;
 </script>
