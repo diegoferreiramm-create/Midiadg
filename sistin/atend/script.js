@@ -362,78 +362,80 @@ function toggleTerceiro() {
   inputs.forEach(el => el.disabled = !isChecked);
 }
 
-// Função disparada quando você clica em "Editar" na lista
+// FUNÇÃO 1: Preenche os dados e faz a tela aparecer sobre a lista
 function prepararEdicao(item) {
-    idSendoEditado = item.id; // Salva o ID da Coluna A
-    
-    // Mostra o Box de correção sobreposto
-    document.getElementById('corrigirBox').style.display = 'block';
-    
-    // Preenche os campos específicos da correção (prefixo edit_)
-    document.getElementById("edit_cpf").value = item.cpf || "";
-    document.getElementById("edit_nome").value = item.nome || "";
-    
-    // Trata a data para o formato yyyy-mm-dd do input date
-    if(item.nasc) {
-        const p = item.nasc.split('/');
-        if(p.length === 3) document.getElementById("edit_nascimento").value = `${p[2]}-${p[1]}-${p[0]}`;
-    }
-    
-    document.getElementById("edit_municipio").value = item.municipio || "";
-    document.getElementById("edit_telefone").value = item.tel || "";
-    document.getElementById("edit_codigoBoleto").value = item.boleto || "";
+  idSendoEditado = item.id; 
+  
+  // Forçamos a tela de correção a aparecer como um "Pop-up"
+  const telaCorrigir = document.getElementById('corrigirBox');
+  telaCorrigir.style.display = 'block';
+  telaCorrigir.style.position = 'fixed';
+  telaCorrigir.style.top = '0';
+  telaCorrigir.style.left = '0';
+  telaCorrigir.style.width = '100%';
+  telaCorrigir.style.height = '100%';
+  telaCorrigir.style.backgroundColor = 'rgba(0,0,0,0.8)'; // Fundo escuro atrás
+  telaCorrigir.style.zIndex = '10000'; // Fica na frente de tudo
 
-    // Marca a Via correta
-    if(item.via === "1ª") document.getElementById("edit_via1").checked = true;
-    if(item.via === "2ª") document.getElementById("edit_via2").checked = true;
+  // Preenche os campos da tela de correção
+  document.getElementById("edit_cpf").value = item.cpf || "";
+  document.getElementById("edit_nome").value = item.nome || "";
+  
+  // Formata data para o calendário (yyyy-mm-dd)
+  if(item.nasc) {
+    const p = item.nasc.split('/');
+    if(p.length === 3) {
+      document.getElementById("edit_nascimento").value = `${p[2]}-${p[1]}-${p[0]}`;
+    }
+  }
+  
+  document.getElementById("edit_municipio").value = item.municipio || "";
+  document.getElementById("edit_telefone").value = item.tel || "";
+  document.getElementById("edit_codigoBoleto").value = item.boleto || "";
+
+  // Marca se é 1ª ou 2ª via
+  if(item.via === "1ª") document.getElementById("edit_via1").checked = true;
+  if(item.via === "2ª") document.getElementById("edit_via2").checked = true;
 }
 
-// Função que salva no Apps Script (Igual à troca de senha)
+// FUNÇÃO 2: Envia os dados corrigidos para o Apps Script (Lógica da Senha)
 async function executarEdicao() {
-    const user = JSON.parse(sessionStorage.getItem("usuario"));
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  const id = idSendoEditado;
+  
+  const cpf = document.getElementById("edit_cpf").value;
+  const nome = document.getElementById("edit_nome").value;
+  const nasc = document.getElementById("edit_nascimento").value;
+  const mun = document.getElementById("edit_municipio").value;
+  const tel = document.getElementById("edit_telefone").value;
+  const boleto = document.getElementById("edit_codigoBoleto").value;
+  const viaEl = document.querySelector('input[name="edit_via"]:checked');
+  const via = viaEl ? viaEl.value : "";
+
+  // Converte data para o formato da planilha (dd/mm/aaaa)
+  let dataPlanilha = nasc;
+  if(nasc.includes("-")) {
+    const p = nasc.split("-");
+    dataPlanilha = `${p[2]}/${p[1]}/${p[0]}`;
+  }
+
+  // URL direta para a função de EDITAR do seu .gs
+  const url = `${urlSistema}?action=editarCadastroAppsScript&id=${id}&cpf=${cpf}&nome=${encodeURIComponent(nome)}&nasc=${dataPlanilha}&municipio=${encodeURIComponent(mun)}&tel=${tel}&via=${via}&atendente=${encodeURIComponent(user.nome)}&parceiro=${encodeURIComponent(user.parceiro)}&boleto=${boleto}`;
+
+  try {
+    const response = await fetch(url);
+    const res = await response.json();
     
-    const id = idSendoEditado; 
-    const cpf = document.getElementById("edit_cpf").value;
-    const nome = document.getElementById("edit_nome").value;
-    const nasc = document.getElementById("edit_nascimento").value;
-    const mun = document.getElementById("edit_municipio").value;
-    const tel = document.getElementById("edit_telefone").value;
-    const boleto = document.getElementById("edit_codigoBoleto").value;
-    const viaEl = document.querySelector('input[name="edit_via"]:checked');
-    const via = viaEl ? viaEl.value : "";
-
-    // Formata data dd/mm/aaaa para mandar pro Google Script
-    let dF = nasc;
-    if(nasc.includes("-")) {
-        const p = nasc.split("-");
-        dF = `${p[2]}/${p[1]}/${p[0]}`;
+    if(res.sucesso) {
+      alert("✅ Registro corrigido com sucesso!");
+      document.getElementById('corrigirBox').style.display = 'none'; // Fecha o Pop-up
+      if(typeof listarCadastros === "function") listarCadastros(); // Atualiza a lista
+    } else {
+      alert("Erro: " + res.erro);
     }
-
-    // A URL vai direto para a action que já funciona no seu .gs
-    const url = `${urlSistema}?action=editarCadastroAppsScript` +
-        `&id=${encodeURIComponent(id)}` +
-        `&cpf=${encodeURIComponent(cpf)}` +
-        `&nome=${encodeURIComponent(nome)}` +
-        `&nasc=${encodeURIComponent(dF)}` +
-        `&municipio=${encodeURIComponent(mun)}` +
-        `&tel=${encodeURIComponent(tel)}` +
-        `&via=${encodeURIComponent(via)}` +
-        `&boleto=${encodeURIComponent(boleto)}` +
-        `&atendente=${encodeURIComponent(user.nome)}` +
-        `&parceiro=${encodeURIComponent(user.parceiro)}`;
-
-    try {
-        const res = await fetch(url).then(r => r.json());
-        if(res.sucesso) {
-            alert("✅ Registro editado com sucesso!");
-            document.getElementById('corrigirBox').style.display = 'none';
-            if(typeof listarCadastros === "function") listarCadastros(); // Recarrega a lista por baixo
-        } else {
-            alert("Erro: " + res.erro);
-        }
-    } catch (e) {
-        alert("Erro de comunicação com o servidor.");
-    }
+  } catch (e) {
+    alert("Erro de conexão.");
+  }
 }
 
 async function salvarCadastro() {
