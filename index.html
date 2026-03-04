@@ -10,8 +10,10 @@
         /* Estilos da sua Home Original */
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fcfcfc; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
         .header-top { background-color: white; padding: 15px 10%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
-        .logo { font-size: 1.8rem; font-weight: bold; color: #1a1a1a; text-decoration: none; }
-        .logo span { color: #f44336; }
+        
+        /* Ajuste para a logo não ficar gigante */
+        .logo img { height: 50px; width: auto; display: block; }
+        
         .header-top-right { display: flex; align-items: center; gap: 20px; }
         .social-icons a { color: #555; font-size: 1.1rem; text-decoration: none; margin-right: 10px; }
         .search-input { padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; background-color: #f9f9f9; width: 150px; }
@@ -42,7 +44,10 @@
 <body>
 
     <header class="header-top">
-        <a href="index.html" class="logo">MidiaDG<span>.</span></a>
+        <a href="index.html" class="logo">
+            <img src="imagem/logosite.png" alt="MidiaDG">
+        </a>
+        
         <div class="header-top-right">
             <div class="social-icons">
                 <a href="#"><i class="fab fa-facebook-f"></i></a>
@@ -114,7 +119,7 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <h3>MidiaDG<span style="color: #ff5722;">.</span></h3>
+                <img src="imagem/logosite.png" alt="MidiaDG" style="height: 40px; width: auto; margin-bottom: 20px;">
                 <p>Explore os maiores mistérios do mundo, curiosidades científicas e histórias fascinantes em um só lugar. Conteúdo novo todos os dias.</p>
             </div>
 
