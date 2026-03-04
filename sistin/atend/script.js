@@ -398,7 +398,7 @@ async function salvarCadastro() {
   
   const cpf = document.getElementById("cpf").value;
   const nome = document.getElementById("nome").value;
-  const nascRaw = document.getElementById("nascimento").value;
+  const nascRaw = document.getElementById("nascimento").value; // O valor do input date vem como YYYY-MM-DD
   const mun = document.getElementById("municipio").value;
   const tel = document.getElementById("telefone").value;
   const viaEl = document.querySelector('input[name="via"]:checked');
@@ -410,12 +410,16 @@ async function salvarCadastro() {
     return; 
   }
 
-  // --- O ÚNICO AJUSTE É AQUI: GARANTIR QUE PEGA O ID DA VARIÁVEL GLOBAL ---
-  // Se o idRegistro (HTML) não existir, ele usa o idSendoEditado (Global)
-  const idHTML = document.getElementById("idRegistro") ? document.getElementById("idRegistro").value : "";
-  const idFinal = idHTML || idSendoEditado || ""; 
-  
-  const acao = idFinal ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
+  // --- TRATAMENTO DA DATA PARA O PADRÃO DD/MM/AAAA ---
+  let nascFormatada = nascRaw;
+  if(nascRaw.includes("-")) {
+    const partes = nascRaw.split("-");
+    nascFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+
+  // Captura o ID para saber se é EDIÇÃO ou NOVO
+  const idEdicao = document.getElementById("idRegistro") ? document.getElementById("idRegistro").value : (typeof idSendoEditado !== 'undefined' ? idSendoEditado : "");
+  const acao = idEdicao ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
 
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
@@ -424,30 +428,30 @@ async function salvarCadastro() {
     "?action=" + acao +
     "&cpf=" + encodeURIComponent(cpf) +
     "&nome=" + encodeURIComponent(nome) +
-    "&nasc=" + encodeURIComponent(nascRaw) +
+    "&nasc=" + encodeURIComponent(nascFormatada) + // Enviando DD/MM/AAAA para o .gs
     "&municipio=" + encodeURIComponent(mun) +
     "&tel=" + encodeURIComponent(tel) +
     "&via=" + encodeURIComponent(via) +
     "&atendente=" + encodeURIComponent(user.nome) +
     "&parceiro=" + encodeURIComponent(user.parceiro) +
     "&boleto=" + encodeURIComponent(boleto) +
-    "&id=" + encodeURIComponent(idFinal);
+    "&id=" + encodeURIComponent(idEdicao);
 
   try {
     const response = await fetch(urlFinal);
     const res = await response.json();
 
     if (res.sucesso) {
-      alert(idFinal ? "✅ Registro atualizado com sucesso!" : "✅ Salvo com sucesso!");
+      alert(idEdicao ? "✅ Registro atualizado com sucesso!" : "✅ Salvo com sucesso!");
 
-      // --- SEU PROTOCOLO MANTIDO EXATAMENTE IGUAL ---
+      // --- SEU PROTOCOLO MANTIDO INTEGRALMENTE ---
       try {
           if (typeof imprimirProtocolo === "function") {
             imprimirProtocolo(
-              res.id || idFinal, // Usa o ID retornado ou o ID que enviamos
+              res.id || idEdicao, 
               res.cpf || cpf, 
               res.nome || nome, 
-              res.nasc || nascRaw, 
+              res.nasc || nascFormatada, 
               mun, 
               via, 
               user.nome, 
@@ -460,7 +464,7 @@ async function salvarCadastro() {
         console.error("Erro na impressão:", errPrint);
       }
 
-      // --- SUA LIMPEZA DE CAMPOS MANTIDA EXATAMENTE IGUAL ---
+      // --- SUA LIMPEZA DE CAMPOS (MANTIDA PARA NÃO DAR ERRO) ---
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
@@ -468,9 +472,9 @@ async function salvarCadastro() {
       document.getElementById("telefone").value = "";
       document.getElementById("codigoBoleto").value = "";
       
-      // Limpeza extra para evitar que o próximo cadastro tente editar o anterior
-      idSendoEditado = null; 
+      // Limpa o ID para que o próximo clique não tente editar a mesma linha
       if(document.getElementById("idRegistro")) document.getElementById("idRegistro").value = "";
+      if(typeof idSendoEditado !== 'undefined') idSendoEditado = null;
 
     } else {
       alert("Aviso: " + res.erro);
