@@ -398,7 +398,7 @@ async function salvarCadastro() {
   
   const cpf = document.getElementById("cpf").value;
   const nome = document.getElementById("nome").value;
-  const nascRaw = document.getElementById("nascimento").value; 
+  const nascRaw = document.getElementById("nascimento").value;
   const mun = document.getElementById("municipio").value;
   const tel = document.getElementById("telefone").value;
   const viaEl = document.querySelector('input[name="via"]:checked');
@@ -410,18 +410,18 @@ async function salvarCadastro() {
     return; 
   }
 
-  // --- TRATAMENTO DA DATA PARA DD/MM/AAAA ---
-  let nascFormatada = nascRaw;
+  // --- MANTENDO SEU PADRÃO DE DATA dd/mm/aaaa ---
+  let nascParaEnvio = nascRaw;
   if(nascRaw.includes("-")) {
-    const partes = nascRaw.split("-");
-    nascFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+    const p = nascRaw.split("-");
+    nascParaEnvio = `${p[2]}/${p[1]}/${p[0]}`;
   }
 
-  // --- O PONTO DO CONSERTO ---
-  // Se veio da lista, a variável 'idSendoEditado' tem o ID da linha.
-  // Se ela tiver valor, a action DEVE ser 'editarCadastroAppsScript' para o Apps Script não barrar no CPF.
-  const acao = (typeof idSendoEditado !== 'undefined' && idSendoEditado) ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
+  // --- O PONTO CHAVE: SELECIONAR A FUNÇÃO DE EDITAR ---
+  // Se idSendoEditado tiver valor, ele chama a função que você postou acima.
+  // Se não tiver, ele salva um novo (e aí a trava de CPF funciona).
   const idFinal = (typeof idSendoEditado !== 'undefined' && idSendoEditado) ? idSendoEditado : "";
+  const acao = idFinal ? "editarCadastroAppsScript" : "salvarCadastroAppsScript";
 
   const btn = document.querySelector("button[onclick='salvarCadastro()']");
   if(btn) { btn.disabled = true; btn.innerText = "Processando..."; }
@@ -430,7 +430,7 @@ async function salvarCadastro() {
     "?action=" + acao +
     "&cpf=" + encodeURIComponent(cpf) +
     "&nome=" + encodeURIComponent(nome) +
-    "&nasc=" + encodeURIComponent(nascFormatada) +
+    "&nasc=" + encodeURIComponent(nascParaEnvio) +
     "&municipio=" + encodeURIComponent(mun) +
     "&tel=" + encodeURIComponent(tel) +
     "&via=" + encodeURIComponent(via) +
@@ -444,16 +444,16 @@ async function salvarCadastro() {
     const res = await response.json();
 
     if (res.sucesso) {
-      alert(idFinal ? "✅ Registro ATUALIZADO com sucesso!" : "✅ Cadastro SALVO com sucesso!");
+      alert(idFinal ? "✅ Registro ATUALIZADO (consertado) com sucesso!" : "✅ Salvo com sucesso!");
 
-      // --- SEU PROTOCOLO MANTIDO INTEGRALMENTE ---
+      // --- SEU PROTOCOLO (MANTIDO INTEGRALMENTE) ---
       try {
           if (typeof imprimirProtocolo === "function") {
             imprimirProtocolo(
               res.id || idFinal, 
               res.cpf || cpf, 
               res.nome || nome, 
-              res.nasc || nascFormatada, 
+              res.nasc || nascParaEnvio, 
               mun, 
               via, 
               user.nome, 
@@ -466,7 +466,7 @@ async function salvarCadastro() {
         console.error("Erro na impressão:", errPrint);
       }
 
-      // --- SUA LIMPEZA DE CAMPOS MANTIDA INTEGRALMENTE ---
+      // --- SUA LIMPEZA DE CAMPOS (MANTIDA INTEGRALMENTE) ---
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
@@ -474,12 +474,11 @@ async function salvarCadastro() {
       document.getElementById("telefone").value = "";
       document.getElementById("codigoBoleto").value = "";
       
-      // Limpa o controle de edição para o próximo clique ser um novo cadastro
+      // Reseta o estado para o próximo não ser edição por erro
       if(typeof idSendoEditado !== 'undefined') idSendoEditado = null;
-      if(typeof modoEdicao !== 'undefined') modoEdicao = false;
 
     } else {
-      // Se ele avisar que o CPF já existe aqui, é porque a 'acao' foi errada.
+      // Se der erro de CPF aqui, é porque o JS mandou 'salvarCadastroAppsScript' em vez de editar
       alert("Aviso: " + res.erro);
     }
   } catch (error) {
@@ -489,7 +488,6 @@ async function salvarCadastro() {
     if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
   }
 }
-
 // --- IMPRIMIR PROTOCOLO (CORRIGIDA PARA EVITAR ERRO DE POP-UP) ---
 function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
   // Abre a nova janela
