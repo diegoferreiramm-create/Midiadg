@@ -32,47 +32,59 @@
     <div id="rodape-placeholder"></div>
 
   <script>
-    function carregarComponente(arquivo, id, callback) {
-        fetch(arquivo)
-            .then(response => {
-                if (!response.ok) throw new Error('Erro 404: ' + arquivo);
-                return response.text();
-            })
-            .then(data => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.innerHTML = data;
-                    if (callback) callback(el, data);
-                }
-            })
-            .catch(err => console.error(err));
-    }
-
-    function incluirComponentes() {
-        // Carrega cada um de forma isolada (se um der erro, o outro funciona)
-        carregarComponente('cabecalho.html', 'cabecalho-placeholder');
-        carregarComponente('rodape.html', 'rodape-placeholder');
-        
-        carregarComponente('sidebar.html', 'sidebar-placeholder', (container, html) => {
-            // Lógica do sorteio da Sidebar
-            const temp = document.createElement('div');
-            temp.innerHTML = html;
-            
-            // PROCURA POR .card OU .sidebar-item (ajustado para os dois)
-            const itens = Array.from(temp.querySelectorAll('.card, .sidebar-item'));
-            
-            if (itens.length > 0) {
-                itens.sort(() => Math.random() - 0.5);
-                const titulo = temp.querySelector('.sidebar-title');
-                container.innerHTML = titulo ? titulo.outerHTML : '';
-                
-                // Pega 3 aleatórios
-                itens.slice(0, 3).forEach(card => container.appendChild(card));
+    async function incluirComponentes() {
+        // 1. Carregar Cabeçalho
+        try {
+            const respCab = await fetch('cabecalho.html');
+            if (respCab.ok) {
+                const htmlCab = await respCab.text();
+                document.getElementById('cabecalho-placeholder').innerHTML = htmlCab;
             }
-        });
+        } catch (e) { console.error("Erro no cabeçalho"); }
+
+        // 2. Carregar Rodapé
+        try {
+            const respRod = await fetch('rodape.html');
+            if (respRod.ok) {
+                const htmlRod = await respRod.text();
+                document.getElementById('rodape-placeholder').innerHTML = htmlRod;
+            }
+        } catch (e) { console.error("Erro no rodapé"); }
+
+        // 3. Carregar Sidebar e Sortear
+        try {
+            const respSid = await fetch('sidebar.html');
+            if (respSid.ok) {
+                const htmlSid = await respSid.text();
+                const container = document.getElementById('sidebar-placeholder');
+                
+                // Criar um elemento temporário para ler o conteúdo
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = htmlSid;
+
+                // Aqui está o segredo: ele aceita tanto .card quanto .sidebar-item
+                const itens = Array.from(tempDiv.querySelectorAll('.card, .sidebar-item'));
+
+                if (itens.length > 0) {
+                    // Embaralha
+                    itens.sort(() => Math.random() - 0.5);
+                    
+                    // Pega o título se existir, senão cria um
+                    const tituloOriginal = tempDiv.querySelector('.sidebar-title');
+                    container.innerHTML = tituloOriginal ? tituloOriginal.outerHTML : '<div class="sidebar-title">Sugestões</div>';
+                    
+                    // Adiciona apenas 3
+                    itens.slice(0, 3).forEach(item => container.appendChild(item));
+                } else {
+                    // Se não tiver cards, apenas joga o conteúdo puro para não ficar branco
+                    container.innerHTML = htmlSid;
+                }
+            }
+        } catch (e) { console.error("Erro na sidebar"); }
     }
 
-    window.onload = incluirComponentes;
+    // Executa a função
+    incluirComponentes();
 </script>
 </body>
 </html>
