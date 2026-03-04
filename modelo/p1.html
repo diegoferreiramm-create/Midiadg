@@ -5,73 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A Engenharia Impossível - MidiaDG</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-</head>
+    <link rel="stylesheet" href="../style.css"> </head>
 <body>
 
     <div id="cabecalho-placeholder"></div>
 
     <div class="main-wrapper">
-
-
         <main class="article-content">
             <span class="category-label">Pirâmides • Parte 1 de 10</span>
             <h1>A Engenharia Impossível das Pirâmides</h1>
             <img src="https://images.pexels.com/photos/259915/pexels-photo-259915.jpeg?auto=compress&cs=tinysrgb&w=800" class="featured-img" alt="Pirâmides">
             <div class="text-body">
-                <p>As pirâmides de Gizé desafiam a lógica moderna. Como 2,3 milhões de blocos foram movidos com precisão milimétrica?</p>
+                <p>As pirâmides de Gizé desafiam a lógica moderna...</p>
             </div>
             <a href="p2.html" style="display: block; background: #1a1a1a; color: white; text-align: center; padding: 18px; text-decoration: none; font-weight: bold; border-radius: 8px; margin-top: 30px;">O Mistério do Alinhamento ➔</a>
         </main>
 
-
-
-        <aside class="sidebar" id="sidebar-placeholder"></aside>
+        <aside class="sidebar" id="sidebar-placeholder">
+            </aside>
     </div>
 
     <div id="rodape-placeholder"></div>
 
-  <script>
-    function incluirComponentes() {
-        // Carrega Cabeçalho (usando o caminho que você já usava)
-        fetch('../cabecalho.html')
-            .then(r => r.text())
-            .then(d => { document.getElementById('cabecalho-placeholder').innerHTML = d; })
-            .catch(e => console.error("Erro no cabeçalho"));
+    <script>
+        function incluirComponentes() {
+            // Volta para os caminhos que você disse que estavam funcionando (../)
+            fetch('../cabecalho.html').then(r => r.text()).then(d => document.getElementById('cabecalho-placeholder').innerHTML = d);
+            fetch('../rodape.html').then(r => r.text()).then(d => document.getElementById('rodape-placeholder').innerHTML = d);
 
-        // Carrega Rodapé
-        fetch('../rodape.html')
-            .then(r => r.text())
-            .then(d => { document.getElementById('rodape-placeholder').innerHTML = d; })
-            .catch(e => console.error("Erro no rodapé"));
+            // Carrega a sidebar e faz o sorteio dos cards que você copiou
+            fetch('../sidebar.html').then(r => r.text()).then(html => {
+                const container = document.getElementById('sidebar-placeholder');
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
 
-        // Carrega a Sidebar de forma independente
-        fetch('../sidebar.html')
-            .then(r => r.text())
-            .then(html => {
-                const sb = document.getElementById('sidebar-placeholder');
-                const temp = document.createElement('div');
-                temp.innerHTML = html;
-                
-                // Busca os cards que você colou no sidebar.html
-                const itens = Array.from(temp.querySelectorAll('.card'));
-                
-                if (itens.length > 0) {
-                    // Sorteia os cards
-                    itens.sort(() => Math.random() - 0.5);
+                // Procura os cards dentro do arquivo sidebar.html
+                const cards = Array.from(tempDiv.querySelectorAll('.card'));
+
+                if (cards.length > 0) {
+                    // Embaralha
+                    cards.sort(() => Math.random() - 0.5);
                     
-                    // Coloca o título e os 3 cards sorteados
-                    const titulo = temp.querySelector('.sidebar-title');
-                    sb.innerHTML = titulo ? titulo.outerHTML : '<div class="sidebar-title">Outros Assuntos</div>';
-                    itens.slice(0, 3).forEach(card => sb.appendChild(card));
-                } else {
-                    // Se não tiver cards, só joga o conteúdo do arquivo
-                    sb.innerHTML = html;
+                    // Pega o título "Outros Assuntos"
+                    const titulo = tempDiv.querySelector('.sidebar-title');
+                    container.innerHTML = titulo ? titulo.outerHTML : '<div class="sidebar-title">Outros Assuntos</div>';
+                    
+                    // Coloca apenas 3 cards para não esticar a página
+                    cards.slice(0, 3).forEach(card => container.appendChild(card));
                 }
-            })
-            .catch(e => console.error("Erro na sidebar"));
-    }
-    window.onload = incluirComponentes;
-</script>
+            });
+        }
+        window.onload = incluirComponentes;
+    </script>
 </body>
 </html>
