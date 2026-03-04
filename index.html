@@ -10,27 +10,36 @@
         /* Estilos da sua Home Original */
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fcfcfc; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* AJUSTE NO HEADER: Agora ele aceita logos maiores sem quebrar */
+        /* AJUSTE FINAL DO HEADER: Espaçamento automático para logos grandes */
         .header-top { 
             background-color: white; 
-            padding: 10px 10%; 
+            padding: 10px 5%; /* Diminuí o recuo lateral para dar mais espaço */
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             border-bottom: 1px solid #eee;
-            flex-wrap: nowrap; /* Impede que os itens pulem de linha */
+            min-height: 100px; /* Garante altura mínima para a logo */
         }
         
-        /* AJUSTE DA LOGO: Aumentei para 100px, mas com limite de largura */
-        .logo { display: flex; align-items: center; flex-shrink: 1; }
+        /* CONTROLE DA LOGO: Ajuste aqui o tamanho */
+        .logo { 
+            display: flex; 
+            align-items: center; 
+            text-decoration: none;
+        }
         .logo img { 
-            height: 100px; /* Teste com 100px agora */
-            width: auto; 
-            max-width: 250px; /* Não deixa a logo dominar a tela toda */
-            display: block; 
+            height: auto; /* Deixa a altura se ajustar sozinha */
+            width: 200px; /* DEFINA AQUI A LARGURA: Aumente para 250px ou 300px se quiser maior */
+            max-height: 120px; /* Limite de altura para não virar um outdoor */
+            display: block;
+            object-fit: contain;
         }
         
-        .header-top-right { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+        .header-top-right { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+        }
         .social-icons a { color: #555; font-size: 1.1rem; text-decoration: none; margin-right: 10px; }
         .search-input { padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; background-color: #f9f9f9; width: 150px; }
         
@@ -56,6 +65,12 @@
         .footer-col ul li a { color: #bbb; text-decoration: none; }
         .footer-col ul li a:hover { color: #ff5722; }
         .copyright { border-top: 1px solid #333; padding-top: 20px; text-align: center; font-size: 0.8rem; color: #777; }
+
+        /* Ajuste para Celular: Se a tela for pequena, a logo diminui para não quebrar */
+        @media (max-width: 600px) {
+            .header-top { flex-direction: column; gap: 15px; }
+            .logo img { width: 150px; }
+        }
     </style>
 </head>
 <body class="notranslate">
@@ -136,7 +151,7 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <img src="imagem/logosite.png" alt="MidiaDG" style="height: 80px; width: auto; margin-bottom: 20px;">
+                <img src="imagem/logosite.png" alt="MidiaDG" style="width: 150px; height: auto; margin-bottom: 20px;">
                 <p>Explore os maiores mistérios do mundo, curiosidades científicas e histórias fascinantes em um só lugar. Conteúdo novo todos os dias.</p>
             </div>
 
