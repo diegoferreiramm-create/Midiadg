@@ -803,7 +803,9 @@ function salvarEntrega() {
   const nomeRecebedor = isTerceiro ? document.getElementById("nomeTerceiro").value : alunoEncontradoGlobal.nome;
   const cpfRecebedor = isTerceiro ? document.getElementById("cpfTerceiro").value : alunoEncontradoGlobal.cpf;
   const vinculo = isTerceiro ? document.getElementById("parentesco").value : "Titular";
-  const via = document.querySelector('input[name="viaEntrega"]:checked').value;
+  
+  const viaEl = document.querySelector('input[name="viaEntrega"]:checked');
+  const via = viaEl ? viaEl.value : "1";
 
   if(isTerceiro && (!nomeRecebedor || !cpfRecebedor || !vinculo)) { 
     alert("Preencha todos os campos do recebedor!"); 
@@ -812,7 +814,9 @@ function salvarEntrega() {
 
   const user = JSON.parse(sessionStorage.getItem("usuario"));
 
-  // No GitHub, montamos a URL e usamos FETCH (GET)
+  const btn = document.querySelector("button[onclick='salvarEntrega()']");
+  if(btn) { btn.disabled = true; btn.innerText = "Gravando..."; }
+
   const urlFinal = `${urlSistema}?action=registrarEntregaAppsScript` +
     `&ctr=${encodeURIComponent(ctr)}` +
     `&cpfAluno=${encodeURIComponent(alunoEncontradoGlobal.cpf)}` +
@@ -825,32 +829,43 @@ function salvarEntrega() {
     `&via=${encodeURIComponent(via)}`;
 
   fetch(urlFinal)
-  .then(res => res.json())
-  .then(res => {
-    if(res.sucesso) {
-      // 1. PRIMEIRO: Avisa que deu certo
-      alert("✅ Entrega realizada com sucesso!");
+    .then(res => res.json())
+    .then(res => {
+      if(res.sucesso) {
+        // ORDEM CORRETA: PRIMEIRO O ALERTA
+        alert("✅ Entrega realizada com sucesso!");
 
-      // 2. DEPOIS: Dispara a impressão (só vai rodar após o seu OK no alert)
-      imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
+        // SEGUNDO: DISPARA A IMPRESSÃO
+        imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
 
-      // 3. POR ÚLTIMO: Limpa a tela
-      document.getElementById("codigoCtr").value = "";
-      document.getElementById("infoAlunoEntrega").style.display = "none";
-      if(isTerceiro) {
-        document.getElementById("nomeTerceiro").value = "";
-        document.getElementById("cpfTerceiro").value = "";
-        document.getElementById("parentesco").value = "";
-        document.getElementById("checkTerceiro").checked = false;
-        if(typeof toggleTerceiro === "function") toggleTerceiro();
+        // TERCEIRO: LIMPEZA DOS CAMPOS
+        document.getElementById("codigoCtr").value = "";
+        document.getElementById("infoAlunoEntrega").style.display = "none";
+        
+        if(isTerceiro) {
+          document.getElementById("nomeTerceiro").value = "";
+          document.getElementById("cpfTerceiro").value = "";
+          document.getElementById("parentesco").value = "";
+          document.getElementById("checkTerceiro").checked = false;
+          if(typeof toggleTerceiro === "function") toggleTerceiro();
+        }
+        
+        const v1 = document.getElementById("via1");
+        if(v1) v1.checked = true;
+        
+        alunoEncontradoGlobal = null;
+      } else {
+        alert("❌ Erro ao salvar: " + res.erro);
       }
-      document.getElementById("via1").checked = true;
-      alunoEncontradoGlobal = null;
-      
-    } else {
-      alert("❌ Erro ao salvar: " + res.erro);
-    }
-  })
+    })
+    .catch(err => {
+      console.error("Erro na entrega:", err);
+      alert("Erro de conexão com o servidor.");
+    })
+    .finally(() => {
+      if(btn) { btn.disabled = false; btn.innerText = "CONFIRMAR ENTREGA"; }
+    });
+}
 
 // FUNÇÕES DE IMPRESSÃO, ADMIN E MASCARA (MANTIDAS 100%)
 function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, atendente, via) {
