@@ -825,30 +825,32 @@ function salvarEntrega() {
     `&via=${encodeURIComponent(via)}`;
 
   fetch(urlFinal)
-    .then(res => res.json())
-    .then(res => {
-      if(res.sucesso) {
-        imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
-        alert("Entrega realizada com sucesso!");
+  .then(res => res.json())
+  .then(res => {
+    if(res.sucesso) {
+      // 1. PRIMEIRO: Avisa que deu certo
+      alert("✅ Entrega realizada com sucesso!");
 
-        // --- SUA LIMPEZA ORIGINAL ---
-        document.getElementById("codigoCtr").value = "";
-        document.getElementById("infoAlunoEntrega").style.display = "none";
-        if(isTerceiro) {
-          document.getElementById("nomeTerceiro").value = "";
-          document.getElementById("cpfTerceiro").value = "";
-          document.getElementById("parentesco").value = "";
-          document.getElementById("checkTerceiro").checked = false;
-          if(typeof toggleTerceiro === "function") toggleTerceiro();
-        }
-        document.getElementById("via1").checked = true;
-        alunoEncontradoGlobal = null;
-      } else {
-        alert("Erro ao salvar: " + res.erro);
+      // 2. DEPOIS: Dispara a impressão (só vai rodar após o seu OK no alert)
+      imprimirProtocoloEntrega(ctr, alunoEncontradoGlobal.nome, alunoEncontradoGlobal.cpf, nomeRecebedor, cpfRecebedor, vinculo, user.nome, via);
+
+      // 3. POR ÚLTIMO: Limpa a tela
+      document.getElementById("codigoCtr").value = "";
+      document.getElementById("infoAlunoEntrega").style.display = "none";
+      if(isTerceiro) {
+        document.getElementById("nomeTerceiro").value = "";
+        document.getElementById("cpfTerceiro").value = "";
+        document.getElementById("parentesco").value = "";
+        document.getElementById("checkTerceiro").checked = false;
+        if(typeof toggleTerceiro === "function") toggleTerceiro();
       }
-    })
-    .catch(err => alert("Erro de conexão."));
-}
+      document.getElementById("via1").checked = true;
+      alunoEncontradoGlobal = null;
+      
+    } else {
+      alert("❌ Erro ao salvar: " + res.erro);
+    }
+  })
 
 // FUNÇÕES DE IMPRESSÃO, ADMIN E MASCARA (MANTIDAS 100%)
 function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, atendente, via) {
