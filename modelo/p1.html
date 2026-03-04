@@ -9,7 +9,7 @@
 <body>
 
     <div id="cabecalho-placeholder"></div>
-
+    <div id="ads-topo-placeholder" style="max-width: 1200px; margin: 10px auto; text-align: center;"></div>
     <div class="main-wrapper">
         <main class="article-content">
             <span class="category-label">Pirâmides • Parte 1 de 10</span>
@@ -28,34 +28,37 @@
     <div id="rodape-placeholder"></div>
 
     <script>
-        function incluirComponentes() {
-            // Volta para os caminhos que você disse que estavam funcionando (../)
-            fetch('../cabecalho.html').then(r => r.text()).then(d => document.getElementById('cabecalho-placeholder').innerHTML = d);
-            fetch('../rodape.html').then(r => r.text()).then(d => document.getElementById('rodape-placeholder').innerHTML = d);
+    function incluirComponentes() {
+        // Carrega o Cabeçalho e o Rodapé (seus caminhos originais)
+        fetch('../cabecalho.html').then(r => r.text()).then(d => document.getElementById('cabecalho-placeholder').innerHTML = d);
+        fetch('../rodape.html').then(r => r.text()).then(d => document.getElementById('rodape-placeholder').innerHTML = d);
 
-            // Carrega a sidebar e faz o sorteio dos cards que você copiou
-            fetch('../sidebar.html').then(r => r.text()).then(html => {
-                const container = document.getElementById('sidebar-placeholder');
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = html;
+        // --- NOVIDADE: Carrega o Anúncio antes do título ---
+        fetch('../ads.html').then(r => r.text()).then(d => {
+            const adsDiv = document.getElementById('ads-placeholder');
+            if (adsDiv) adsDiv.innerHTML = d;
+        }).catch(e => console.log("Aguardando anúncio..."));
+        // --------------------------------------------------
 
-                // Procura os cards dentro do arquivo sidebar.html
-                const cards = Array.from(tempDiv.querySelectorAll('.card'));
+        // Carrega a sidebar e faz o sorteio dos cards (sua lógica perfeita)
+        fetch('../sidebar.html').then(r => r.text()).then(html => {
+            const container = document.getElementById('sidebar-placeholder');
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
 
-                if (cards.length > 0) {
-                    // Embaralha
-                    cards.sort(() => Math.random() - 0.5);
-                    
-                    // Pega o título "Outros Assuntos"
-                    const titulo = tempDiv.querySelector('.sidebar-title');
-                    container.innerHTML = titulo ? titulo.outerHTML : '<div class="sidebar-title">Outros Assuntos</div>';
-                    
-                    // Coloca apenas 3 cards para não esticar a página
-                    cards.slice(0, 3).forEach(card => container.appendChild(card));
-                }
-            });
-        }
-        window.onload = incluirComponentes;
-    </script>
+            const cards = Array.from(tempDiv.querySelectorAll('.card'));
+
+            if (cards.length > 0) {
+                cards.sort(() => Math.random() - 0.5);
+                
+                const titulo = tempDiv.querySelector('.sidebar-title');
+                container.innerHTML = titulo ? titulo.outerHTML : '<div class="sidebar-title">Outros Assuntos</div>';
+                
+                cards.slice(0, 3).forEach(card => container.appendChild(card));
+            }
+        });
+    }
+    window.onload = incluirComponentes;
+</script>
 </body>
 </html>
