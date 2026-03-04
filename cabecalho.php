@@ -1,0 +1,21 @@
+<header class="header-top">
+    <a href="/index.php" class="logo">
+        <img src="/imag/logosite.png" alt="MidiaDG">
+    </a>
+    <div class="header-top-right">
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+        <input type="text" class="search-input" placeholder="Pesquisar...">
+    </div>
+</header>
+
+<nav class="header-menu">
+    <ul class="nav-links">
+        <li><a href="/index.php">Home</a></li>
+        <li><a href="#">Sobre</a></li>
+        <li><a href="#">Categorias</a></li>
+        <li><a href="#">Contato</a></li>
+    </ul>
+</nav>
