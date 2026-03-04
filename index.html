@@ -19,13 +19,13 @@
             border-bottom: 1px solid #eee;
         }
 
-        /* CORREÇÃO DO FOCO NA LOGO (IGNORA O VAZIO DO PNG) */
+        /* TRUQUE CSS: LIMPA O QUADRICULADO DA SUA IMAGEM ATUAL */
         .logo img { 
             width: 250px; 
-            height: 80px; 
+            height: auto; 
             display: block;
-            object-fit: cover; /* Faz o recorte automático do vazio */
-            object-position: center; /* Centraliza no desenho da logo */
+            mix-blend-mode: multiply; /* Faz o fundo cinza/branco sumir no fundo branco do site */
+            filter: contrast(110%);   /* Deixa as cores da logo mais vivas */
         }
         
         .header-top-right { display: flex; align-items: center; gap: 20px; }
@@ -52,13 +52,21 @@
         .footer-col ul li a { color: #bbb; text-decoration: none; }
         .footer-col ul li a:hover { color: #ff5722; }
         .copyright { border-top: 1px solid #333; padding-top: 20px; text-align: center; font-size: 0.8rem; color: #777; }
+
+        /* AJUSTE PARA O RODAPÉ: TRANSFORMA A LOGO EM BRANCO PARA NÃO APARECER O QUADRICULADO */
+        .footer-logo {
+            width: 150px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: brightness(0) invert(1); 
+        }
     </style>
 </head>
 <body class="notranslate">
 
     <header class="header-top">
         <a href="index.html" class="logo">
-            <img src="imag/logosite.png" alt="MidiaDG">
+            <img src="imagem/logosite.png" alt="MidiaDG">
         </a>
         
         <div class="header-top-right">
@@ -131,7 +139,7 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <img src="imag/logosite.png" alt="MidiaDG" style="width: 150px; height: 60px; object-fit: cover; margin-bottom: 20px;">
+                <img src="imagem/logosite.png" alt="MidiaDG" class="footer-logo">
                 <p>Explore os maiores mistérios do mundo, curiosidades científicas e histórias fascinantes em um só lugar. Conteúdo novo todos os dias.</p>
             </div>
             <div class="footer-col">
