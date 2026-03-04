@@ -7,55 +7,40 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        /* Estilos Base */
+        /* ESTILO ORIGINAL DO USUÁRIO - SEM ALTERAÇÕES DE ESTRUTURA */
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fcfcfc; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* HEADER REESTRUTURADO */
         .header-top { 
             background-color: white; 
-            padding: 20px 10%; 
+            padding: 10px 10%; 
             display: flex; 
-            flex-direction: column; 
+            justify-content: space-between; 
             align-items: center; 
-            gap: 20px;
             border-bottom: 1px solid #eee;
         }
 
-        .header-container {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap; 
-            gap: 20px;
-        }
-        
-        .logo { display: flex; align-items: center; text-decoration: none; }
+        /* TRAVA PARA A LOGO NÃO FICAR GIGANTE COMO NO SEU PRINT */
         .logo img { 
+            width: 250px; 
             height: auto; 
-            width: 280px; 
-            max-width: 100%; 
             display: block;
         }
         
         .header-top-right { display: flex; align-items: center; gap: 20px; }
         .social-icons a { color: #555; font-size: 1.1rem; text-decoration: none; margin-right: 10px; }
-        .search-input { padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; background-color: #f9f9f9; width: 180px; }
+        .search-input { padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; background-color: #f9f9f9; width: 150px; }
         
-        /* Menu de Navegação */
         .header-menu { background-color: #f5f5f5; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: center; padding: 12px 0; }
         .nav-links { list-style: none; margin: 0; padding: 0; display: flex; gap: 30px; }
         .nav-links a { text-decoration: none; color: #444; font-size: 0.95rem; font-weight: 500; }
         .nav-links a.active { color: #ff5722; font-weight: 600; }
         
-        /* Grid de Cards */
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
         .card { text-decoration: none; position: relative; overflow: hidden; border-radius: 8px; height: 220px; display: flex; align-items: flex-end; background-size: cover; background-position: center; transition: transform 0.3s; }
         .card:hover { transform: scale(1.02); }
         .card-overlay { width: 100%; padding: 15px; color: white; background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%); box-sizing: border-box; }
         .card h3 { margin: 0; font-size: 1.1rem; }
 
-        /* Rodapé */
         footer { background-color: #1a1a1a; color: #ffffff; padding: 50px 10% 20px 10%; margin-top: 60px; width: 100%; box-sizing: border-box; }
         .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px; }
         .footer-col h3, .footer-col h4 { color: #ffffff; margin-bottom: 20px; margin-top: 0; }
@@ -70,18 +55,16 @@
 <body class="notranslate">
 
     <header class="header-top">
-        <div class="header-container">
-            <a href="index.html" class="logo">
-                <img src="imag/logosite.png" alt="MidiaDG">
-            </a>
-            
-            <div class="header-top-right">
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                </div>
-                <input type="text" class="search-input" placeholder="Pesquisar...">
+        <a href="index.html" class="logo">
+            <img src="imag/logosite.png" alt="MidiaDG">
+        </a>
+        
+        <div class="header-top-right">
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
             </div>
+            <input type="text" class="search-input" placeholder="Pesquisar...">
         </div>
     </header>
 
@@ -147,10 +130,9 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <img src="imag/logosite.png" alt="MidiaDG" style="width: 200px; height: auto; margin-bottom: 20px;">
+                <img src="imag/logosite.png" alt="MidiaDG" style="width: 150px; height: auto; margin-bottom: 20px;">
                 <p>Explore os maiores mistérios do mundo, curiosidades científicas e histórias fascinantes em um só lugar. Conteúdo novo todos os dias.</p>
             </div>
-
             <div class="footer-col">
                 <h4>Navegação</h4>
                 <ul>
@@ -159,7 +141,6 @@
                     <li><a href="#">Contato</a></li>
                 </ul>
             </div>
-
             <div class="footer-col">
                 <h4>Legal</h4>
                 <ul>
@@ -168,7 +149,6 @@
                 </ul>
             </div>
         </div>
-
         <div class="copyright">
             <p>&copy; 2026 MidiaDG - Todos os direitos reservados.</p>
         </div>
