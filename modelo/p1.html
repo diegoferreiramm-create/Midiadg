@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A Engenharia Impossível - MidiaDG</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="cabecalho-placeholder"></div>
 
     <div class="main-wrapper">
+
+
         <main class="article-content">
             <span class="category-label">Pirâmides • Parte 1 de 10</span>
             <h1>A Engenharia Impossível das Pirâmides</h1>
@@ -23,24 +24,33 @@
             <a href="p2.html" style="display: block; background: #1a1a1a; color: white; text-align: center; padding: 18px; text-decoration: none; font-weight: bold; border-radius: 8px; margin-top: 30px;">O Mistério do Alinhamento ➔</a>
         </main>
 
-        <aside class="sidebar">
-            <div class="sidebar-title">Outros Assuntos</div>
-            <a href="#" class="sidebar-item">
-                <img src="https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg?auto=compress&cs=tinysrgb&w=200" class="sidebar-img">
-                <div class="sidebar-info">
-                    <h4>Receita Low Carb: Morango Cremoso</h4>
-                    <span><i class="far fa-clock"></i> 02/03/2026</span>
-                </div>
-            </a>
-        </aside>
+
+
+        <aside class="sidebar" id="sidebar-placeholder"></aside>
     </div>
 
     <div id="rodape-placeholder"></div>
 
     <script>
         function incluirComponentes() {
-            fetch('../cabecalho.html').then(r => r.text()).then(d => document.getElementById('cabecalho-placeholder').innerHTML = d);
-            fetch('../rodape.html').then(r => r.text()).then(d => document.getElementById('rodape-placeholder').innerHTML = d);
+            // Puxa o Topo
+            fetch('cabecalho.html').then(r => r.text()).then(d => document.getElementById('cabecalho-placeholder').innerHTML = d);
+            
+            // Puxa o Rodapé
+            fetch('rodape.html').then(r => r.text()).then(d => document.getElementById('rodape-placeholder').innerHTML = d);
+            
+            // Puxa a Sidebar (O comando que faz a mágica)
+            fetch('sidebar.html').then(r => r.text()).then(d => {
+                const sb = document.getElementById('sidebar-placeholder');
+                sb.innerHTML = d;
+                
+                // Opcional: Embaralha os itens para não serem sempre os mesmos
+                const itens = Array.from(sb.querySelectorAll('.sidebar-item'));
+                itens.sort(() => Math.random() - 0.5);
+                const titulo = sb.querySelector('.sidebar-title').outerHTML;
+                sb.innerHTML = titulo;
+                itens.slice(0, 3).forEach(item => sb.appendChild(item));
+            });
         }
         window.onload = incluirComponentes;
     </script>
