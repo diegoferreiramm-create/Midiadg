@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        /* CSS ORIGINAL PRESERVADO */
+        /* CSS ORIGINAL PRESERVADO INTEGRALMENTE */
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fcfcfc; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
         .header-top { background-color: white; padding: 10px 10%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
         .logo img { max-width: 250px; height: auto; display: block; mix-blend-mode: multiply; filter: contrast(110%); }
@@ -38,6 +38,8 @@
 
     <div id="cabecalho-placeholder"></div>
 
+    <div id="ads-topo-placeholder" style="max-width: 1200px; margin: 10px auto; text-align: center;"></div>
+
     <main style="flex: 1; max-width: 1200px; margin: 30px auto; padding: 0 20px; width: 100%; box-sizing: border-box;">
         
         <section style="margin-bottom: 40px;">
@@ -51,6 +53,8 @@
                 </p>
             </div>
         </section>
+
+        <div id="ads-meio-placeholder" style="margin-bottom: 30px; text-align: center;"></div>
 
         <h2 style="font-size: 1.1rem; color: #777; border-left: 4px solid #ff5722; padding-left: 10px; margin-bottom: 20px; text-transform: uppercase; font-weight: 600;">
             ÚLTIMAS HISTÓRIAS
@@ -87,6 +91,8 @@
         </div>
     </main>
 
+    <div id="ads-rodape-placeholder" style="max-width: 1200px; margin: 20px auto; text-align: center;"></div>
+
     <div id="rodape-placeholder"></div>
 
     <script>
@@ -100,6 +106,15 @@
             fetch('/rodape.html')
                 .then(response => response.text())
                 .then(data => document.getElementById('rodape-placeholder').innerHTML = data);
+
+            // Carrega Anúncios (puxando do arquivo ads.html)
+            fetch('/ads.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('ads-topo-placeholder').innerHTML = data;
+                    document.getElementById('ads-meio-placeholder').innerHTML = data;
+                    document.getElementById('ads-rodape-placeholder').innerHTML = data;
+                }).catch(err => console.log("Aguardando arquivo ads.html..."));
         }
         window.onload = incluirComponentes;
     </script>
