@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        /* ESTRUTURA ORIGINAL 100% PRESERVADA */
+        /* ESTRUTURA ORIGINAL PRESERVADA */
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fcfcfc; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
         
         .header-top { 
@@ -19,12 +19,14 @@
             border-bottom: 1px solid #eee;
         }
 
-        /* AJUSTE PARA A LOGO NA PASTA IMAG */
+        /* SOLUÇÃO PARA LIMPAR O QUADRICULADO DA IMAGEM */
         .logo img { 
             max-width: 250px; 
             height: auto; 
             display: block;
-            border: none;
+            /* O comando abaixo faz o branco e o cinza claro do quadriculado "sumirem" */
+            mix-blend-mode: multiply; 
+            filter: contrast(110%); /* Dá uma leve clareada para garantir que o fundo suma */
         }
         
         .header-top-right { display: flex; align-items: center; gap: 20px; }
@@ -55,7 +57,7 @@
         .copyright { border-top: 1px solid #333; padding-top: 20px; text-align: center; font-size: 0.8rem; color: #777; }
     </style>
 </head>
-<body class="notranslate">
+<body>
 
     <header class="header-top">
         <a href="index.html" class="logo">
@@ -132,7 +134,7 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <img src="imag/logosite.png" alt="MidiaDG" style="width: 150px; height: auto; margin-bottom: 20px;">
+                <img src="imag/logosite.png" alt="MidiaDG" style="width: 150px; height: auto; margin-bottom: 20px; mix-blend-mode: screen;">
                 <p>Explore os maiores mistérios do mundo, curiosidades científicas e histórias fascinantes em um só lugar.</p>
             </div>
             <div class="footer-col">
