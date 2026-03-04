@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        /* ESTRUTURA ORIGINAL 100% PRESERVADA */
+        /* ESTRUTURA ORIGINAL PRESERVADA */
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fcfcfc; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
         
         .header-top { 
@@ -19,11 +19,22 @@
             border-bottom: 1px solid #eee;
         }
 
-        /* AJUSTE PARA A LOGO JPG (FUNDO BRANCO) */
-        .logo img { 
-            max-width: 250px; 
-            height: auto; 
+        /* SOLUÇÃO PARA A LOGO QUEBRADA: Recorte via CSS */
+        .logo {
             display: block;
+            width: 240px; /* Largura fixa para o container */
+            height: 80px;  /* Altura fixa para o container */
+            overflow: hidden; /* Esconde o que sobrar da imagem (quadriculados e bordas) */
+            position: relative;
+        }
+
+        .logo img { 
+            width: 320px; /* Deixamos a imagem um pouco maior para centralizar o recorte */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Centraliza a logo no meio do quadrado de visão */
+            mix-blend-mode: multiply; /* Faz o fundo cinza "sumir" no branco do header */
         }
         
         .header-top-right { display: flex; align-items: center; gap: 20px; }
@@ -35,14 +46,14 @@
         .nav-links a { text-decoration: none; color: #444; font-size: 0.95rem; font-weight: 500; }
         .nav-links a.active { color: #ff5722; font-weight: 600; }
         
-        /* GRID DE 9 CARDS - COMPLETO */
+        /* GRID DE 9 CARDS */
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
         .card { text-decoration: none; position: relative; overflow: hidden; border-radius: 8px; height: 220px; display: flex; align-items: flex-end; background-size: cover; background-position: center; transition: transform 0.3s; }
         .card:hover { transform: scale(1.02); }
         .card-overlay { width: 100%; padding: 15px; color: white; background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%); box-sizing: border-box; }
         .card h3 { margin: 0; font-size: 1.1rem; }
 
-        /* RODAPÉ INTEGRAL */
+        /* RODAPÉ */
         footer { background-color: #1a1a1a; color: #ffffff; padding: 50px 10% 20px 10%; margin-top: 60px; width: 100%; box-sizing: border-box; }
         .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px; }
         .footer-col h3, .footer-col h4 { color: #ffffff; margin-bottom: 20px; margin-top: 0; }
@@ -53,8 +64,9 @@
         .footer-col ul li a:hover { color: #ff5722; }
         .copyright { border-top: 1px solid #333; padding-top: 20px; text-align: center; font-size: 0.8rem; color: #777; }
 
-        /* Logo no Rodapé com moldura para não sumir no escuro */
-        .footer-logo { width: 150px; height: auto; margin-bottom: 20px; border: 1px solid #333; }
+        /* No rodapé, invertemos a cor para a logo aparecer em branco e esconder os defeitos */
+        .footer-logo-wrap { width: 150px; height: 50px; overflow: hidden; position: relative; margin-bottom: 20px; }
+        .footer-logo-wrap img { width: 200px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); filter: brightness(0) invert(1); }
     </style>
 </head>
 <body class="notranslate">
@@ -134,7 +146,9 @@
     <footer>
         <div class="footer-grid">
             <div class="footer-col">
-                <img src="imagem/logosite.png" alt="MidiaDG" class="footer-logo">
+                <div class="footer-logo-wrap">
+                    <img src="imagem/logosite.png" alt="MidiaDG">
+                </div>
                 <p>Explore os maiores mistérios do mundo, curiosidades científicas e histórias fascinantes em um só lugar. Conteúdo novo todos os dias.</p>
             </div>
             <div class="footer-col">
