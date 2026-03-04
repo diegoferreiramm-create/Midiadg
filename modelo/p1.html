@@ -33,33 +33,41 @@
 
     <script>
     function incluirComponentes() {
-        // Puxa o Topo e Rodapé
+        // 1. Carrega Topo e Rodapé
         fetch('cabecalho.html').then(r => r.text()).then(d => document.getElementById('cabecalho-placeholder').innerHTML = d);
         fetch('rodape.html').then(r => r.text()).then(d => document.getElementById('rodape-placeholder').innerHTML = d);
         
-        // Puxa a Sidebar
-        fetch('sidebar.html').then(r => r.text()).then(d => {
-            const sb = document.getElementById('sidebar-placeholder');
-            
-            // Criamos um elemento temporário para processar o HTML da sidebar
-            const temp = document.createElement('div');
-            temp.innerHTML = d;
-            
-            // AGORA PROCURAMOS POR '.card' (que é o que você colou lá)
-            const itens = Array.from(temp.querySelectorAll('.card'));
-            
-            // Embaralha
-            itens.sort(() => Math.random() - 0.5);
-            
-            // Pega o título e limpa a lateral
-            const tituloHtml = temp.querySelector('.sidebar-title').outerHTML;
-            sb.innerHTML = tituloHtml;
-            
-            // Adiciona apenas 3 cards sorteados
-            itens.slice(0, 3).forEach(item => {
-                sb.appendChild(item);
-            });
-        }).catch(err => console.log("Erro ao carregar sidebar: ", err));
+        // 2. Carrega a Sidebar
+        fetch('sidebar.html')
+            .then(response => {
+                if (!response.ok) throw new Error('Arquivo sidebar.html não encontrado');
+                return response.text();
+            })
+            .then(data => {
+                const container = document.getElementById('sidebar-placeholder');
+                
+                // Criamos um elemento invisível para organizar os cards
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = data;
+                
+                // Buscamos os cards que você colou no sidebar.html
+                const cards = Array.from(tempDiv.querySelectorAll('.card'));
+                
+                if (cards.length > 0) {
+                    // Embaralha os cards
+                    cards.sort(() => Math.random() - 0.5);
+                    
+                    // Pega o título "Outros Assuntos"
+                    const titulo = tempDiv.querySelector('.sidebar-title');
+                    container.innerHTML = titulo ? titulo.outerHTML : '<div class="sidebar-title">Sugestões</div>';
+                    
+                    // Adiciona apenas os 3 primeiros sorteados
+                    cards.slice(0, 3).forEach(card => {
+                        container.appendChild(card);
+                    });
+                }
+            })
+            .catch(err => console.error('Erro na sidebar:', err));
     }
     window.onload = incluirComponentes;
 </script>
