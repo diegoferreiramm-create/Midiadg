@@ -29,37 +29,46 @@
     <div id="ads-rodape-placeholder"></div>
     <div id="rodape-placeholder"></div>
 
-    <script>
+   <script>
     function incluirComponentes() {
-        // 1. Carrega o Cabeçalho e o Rodapé
+        // 1. Cabeçalho e Rodapé
         fetch('../cabecalho.html').then(r => r.text()).then(d => document.getElementById('cabecalho-placeholder').innerHTML = d);
         fetch('../rodape.html').then(r => r.text()).then(d => document.getElementById('rodape-placeholder').innerHTML = d);
 
-        // 2. Carrega o Anúncio e entrega nos DOIS lugares (Topo e Rodapé)
+        // 2. Carrega o ads.html e entrega no TOPO e no RODAPÉ
         fetch('../ads.html').then(r => r.text()).then(d => {
-            // Entrega no topo
             const adsTopo = document.getElementById('ads-topo-placeholder');
             if (adsTopo) adsTopo.innerHTML = d;
 
-            // Entrega no rodapé (A linha que você queria)
             const adsRodape = document.getElementById('ads-rodape-placeholder');
             if (adsRodape) adsRodape.innerHTML = d;
             
+            // Guardamos o conteúdo do anúncio para usar na Sidebar depois
+            window.conteudoAnuncio = d; 
         }).catch(e => console.log("Aguardando anúncio..."));
 
-        // 3. Carrega a sidebar e faz o sorteio dos cards (sua lógica que está perfeita)
+        // 3. Sidebar com Sorteio + ANÚNCIO NA LATERAL
         fetch('../sidebar.html').then(r => r.text()).then(html => {
             const container = document.getElementById('sidebar-placeholder');
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
-
             const cards = Array.from(tempDiv.querySelectorAll('.card'));
 
             if (cards.length > 0) {
                 cards.sort(() => Math.random() - 0.5);
                 const titulo = tempDiv.querySelector('.sidebar-title');
                 container.innerHTML = titulo ? titulo.outerHTML : '<div class="sidebar-title">Outros Assuntos</div>';
+                
+                // Mostra os 3 cards sorteados
                 cards.slice(0, 3).forEach(card => container.appendChild(card));
+
+                // AGORA: Adiciona o anúncio logo abaixo dos cards na sidebar
+                if (window.conteudoAnuncio) {
+                    const adLateral = document.createElement('div');
+                    adLateral.style.marginTop = "20px";
+                    adLateral.innerHTML = window.conteudoAnuncio;
+                    container.appendChild(adLateral);
+                }
             }
         });
     }
