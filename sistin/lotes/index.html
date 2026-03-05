@@ -1,1 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema Carteiras - Projeto B</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+  <div id="loginBox">
+    <div class="box">
+      <h2>SISTEMA CARTEIRAS</h2>
+      <input type="text" id="userLogin" placeholder="Usuário">
+      <input type="password" id="passLogin" placeholder="Senha">
+      <button onclick="entrar()">ENTRAR</button>
+      <div id="msg"></div>
+    </div>
+  </div>
+
+  <div id="menuBox">
+    <h1>MENU PRINCIPAL</h1>
+    <button class="btn-menu" onclick="recebimentoLotes()">
+      <span class="icon-menu">📦</span> RECEBIMENTO DE LOTES
+    </button>
+    <button class="btn-menu" onclick="entregaParceiros()">
+      <span class="icon-menu">🤝</span> ENTREGA DE CARTEIRA A PARCEIROS
+    </button>
+    <button class="btn-menu" onclick="entradaCarteiras()">
+      <span class="icon-menu">📥</span> ENTRADA DE CARTEIRAS
+    </button>
+    <button class="btn-menu" onclick="abrirMalote()" >
+      <span class="icon-menu">🚚</span> ENVIO DE MALOTE
+    </button>
+    <button onclick="abrirCadastroUsuarios()" style="background: #8b5cf6; margin-bottom: 10px;">👤 CADASTRO DE USUÁRIOS</button>
+  </div>
+
+  <div id="recebimentoBox">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 style="margin: 0; color: #22c55e;">📦 RECEBIMENTO DE LOTES</h2>
+      <button onclick="voltarParaMenu()" style="width: auto; margin: 0; background: #64748b; padding: 8px 15px;">VOLTAR AO MENU</button>
+    </div>
+
+    <div class="grid-filtros">
+      <div>
+        <label style="font-size: 11px; color: #94a3b8;">CÓD. PARCEIRO (COL H)</label>
+        <input type="text" id="filtroCodParceiro" placeholder="Ex: 88" style="margin: 0;">
+      </div>
+      <div>
+        <label style="font-size: 11px; color: #94a3b8;">NÚMERO DO LOTE (COL L)</label>
+        <input type="text" id="filtroLote" placeholder="Ex: 01" style="margin: 0;">
+      </div>
+      <div>
+        <label style="font-size: 11px; color: #94a3b8;">NOME DO PARCEIRO (GRAVAÇÃO)</label>
+        <input type="text" id="filtroNomeParceiro" placeholder="Digite o nome para o histórico" style="margin: 0;">
+      </div>
+      <div style="display: flex; gap: 10px; align-items: flex-end;">
+        <button onclick="buscarLotes()" style="margin: 0; padding: 10px 20px; width: auto; background: #3b82f6; flex: 1;">BUSCAR</button>
+        <button onclick="abrirReimpressao()" style="margin: 0; padding: 10px 20px; width: auto; background: #64748b; flex: 1; white-space: nowrap;">🖨️ REIMPRESSÃO</button>
+      </div>
+    </div>
+
+    <div class="container-tabela">
+      <table id="tabelaResultados">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>CPF</th>
+            <th>NOME</th>
+            <th>MUNICIPIO</th>
+            <th>LOTE</th>
+            <th>PARCEIRO</th>
+          </tr>
+        </thead>
+        <tbody id="corpoTabela"></tbody>
+      </table>
+    </div>
+
+    <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+      <div id="contadorLinhas" style="color: #94a3b8; font-size: 14px;">Total: 0 registros</div>
+      <button id="btnSalvarLote" onclick="salvarRecebimento()" style="width: auto; padding: 10px 40px; background: #22c55e; display: none; margin: 0;">SALVAR RECEBIMENTO</button>
+    </div>
+  </div>
+
+  <div id="hudUsuario">
+    <div id="dataHoraHud"></div>
+    <div id="infoUsuario"></div>
+    <button onclick="resetarParaLogin()" style="background:#ef4444; width:auto; padding:5px 10px; font-size:10px; margin-top:8px; cursor:pointer;">SAIR DO SISTEMA</button>
+  </div>
+ 
+  <div id="areaImpressao" style="display:none; color: black; background: white; padding: 20px; font-family: 'Courier New', Courier, monospace;">
+    <div style="border: 2px solid black; padding: 10px; margin-bottom: 20px;">
+      <h2 style="text-align: center; margin: 0;">RECEBIMENTO DE LOTES PARCEIRO</h2>
+      <div style="display: flex; justify-content: space-between; border-top: 1px solid black; margin-top: 10px; padding-top: 5px; font-size: 12px;">
+        <span id="impParceiroLote"></span>
+        <span id="impProtocolo"></span>
+        <span id="impDataHora"></span>
+      </div>
+      <div style="font-size: 12px; margin-top: 5px;" id="impNomeParceiro"></div>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; word-wrap: break-word;">
+      <thead>
+        <tr style="border-bottom: 2px solid black;">
+          <th style="text-align: left; width: 15px;">ID</th>
+          <th style="text-align: left;">CPF</th>
+          <th style="text-align: left;">NOME</th>
+          <th style="text-align: left;">NASC.</th>
+          <th style="text-align: left;">MUNICÍPIO</th>
+          <th style="text-align: left;">TEL</th>
+          <th style="text-align: left; width: 15px;">VIA</th>
+          <th style="text-align: left;">DATA</th>
+          <th style="text-align: left;">ATENDENTE</th>
+          <th style="text-align: left;">BOLETO</th>
+        </tr>
+      </thead>
+      <tbody id="corpoImpressao"></tbody>
+    </table>
+
+    <div style="margin-top: 50px; display: flex; justify-content: space-around;">
+      <div style="text-align: center; width: 250px;">
+        <div style="border-top: 1px solid black; margin-top: 20px;">Assinatura (Quem Entrega)</div>
+      </div>
+      <div style="text-align: center; width: 250px;">
+        <div id="impNomeAtendente" style="font-weight: bold;"></div>
+        <div style="border-top: 1px solid black;">Atendente Logado</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="reimpressaoBox" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; background: #1e293b; padding: 25px; border-radius: 12px; border: 2px solid #3b82f6; z-index: 2000; box-shadow: 0 0 50px rgba(0,0,0,0.8);">
+    <h3 style="color: #3b82f6; margin-top: 0;">🖨️ REIMPRESSÃO</h3>
+    <label style="font-size: 11px; color: #94a3b8;">BUSCAR POR PROTOCOLO</label>
+    <input type="text" id="reimpProtocolo" placeholder="Ex: REC67-01">
+    <div style="text-align: center; margin: 10px 0; color: #64748b;">— OU —</div>
+    <label style="font-size: 11px; color: #94a3b8;">CÓD. PARCEIRO</label>
+    <input type="text" id="reimpCod" placeholder="Ex: 67">
+    <label style="font-size: 11px; color: #94a3b8;">LOTE</label>
+    <input type="text" id="reimpLote" placeholder="Ex: 01">
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button onclick="buscarReimpressao()" style="background: #3b82f6; margin: 0;">BUSCAR E IMPRIMIR</button>
+      <button onclick="document.getElementById('reimpressaoBox').style.display='none'" style="background: #ef4444; margin: 0;">FECHAR</button>
+    </div>
+  </div>
+
+  <div id="cadastroUsuarioBox" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; background: #1e293b; padding: 25px; border-radius: 12px; border: 2px solid #8b5cf6; z-index: 2100; box-shadow: 0 0 50px rgba(0,0,0,0.9);">
+    <h3 style="color: #8b5cf6; margin-top: 0;">👤 NOVO USUÁRIO</h3>
+    <label style="font-size: 11px; color: #94a3b8;">USUÁRIO (LOGIN)</label>
+    <input type="text" id="new_user" placeholder="Ex: joao.silva">
+    <label style="font-size: 11px; color: #94a3b8;">SENHA</label>
+    <input type="password" id="new_pass" placeholder="****">
+    <label style="font-size: 11px; color: #94a3b8;">NOME COMPLETO</label>
+    <input type="text" id="new_nome" placeholder="Ex: João Silva">
+    <label style="font-size: 11px; color: #94a3b8;">CÓD. PARCEIRO</label>
+    <input type="number" id="new_parceiro" placeholder="Ex: 97">
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button onclick="salvarNovoUsuario()" style="background: #8b5cf6; margin: 0;">SALVAR</button>
+      <button onclick="document.getElementById('cadastroUsuarioBox').style.display='none'" style="background: #ef4444; margin: 0;">CANCELAR</button>
+    </div>
+  </div>
+
+  <div id="maloteBox" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 style="margin: 0; color: #f59e0b;">🚚 ENVIO DE MALOTE</h2>
+      <button onclick="voltarParaMenu()" style="width: auto; margin: 0; background: #64748b; padding: 8px 15px;">VOLTAR AO MENU</button>
+    </div>
+    <div class="grid-filtros">
+      <div>
+        <label style="font-size: 11px; color: #94a3b8;">CÓD. PARCEIRO (COL H)</label>
+        <input type="text" id="maloteCod" placeholder="Ex: 88" style="margin: 0;">
+      </div>
+      <div>
+        <label style="font-size: 11px; color: #94a3b8;">NÚMERO DO LOTE (COL L)</label>
+        <input type="text" id="maloteLote" placeholder="Ex: 01" style="margin: 0;">
+      </div>
+      <div>
+        <label style="font-size: 11px; color: #94a3b8;">DESTINO (GRAVAÇÃO)</label>
+        <input type="text" id="maloteDestino" placeholder="Digite o destino para o malote" style="margin: 0;">
+      </div>
+      <div style="display: flex; gap: 10px; align-items: flex-end;">
+        <button onclick="buscarParaMalote()" style="margin: 0; padding: 10px 20px; width: auto; background: #3b82f6; flex: 1;">BUSCAR</button>
+        <button onclick="abrirReimpressaoMalote()" style="margin: 0; padding: 10px 20px; width: auto; background: #64748b; flex: 1; white-space: nowrap;">🖨️ REIMPRESSÃO</button>
+      </div>
+    </div>
+    <div class="container-tabela">
+      <table id="tabelaMalote">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>CPF</th>
+            <th>NOME</th>
+            <th>VIA</th>
+            <th>AÇÃO</th>
+          </tr>
+        </thead>
+        <tbody id="corpoMalote"></tbody>
+      </table>
+    </div>
+    <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+      <div id="contadorMalote" style="color: #94a3b8; font-size: 14px;">Total: 0 registros</div>
+      <button id="btnSalvarMalote" onclick="salvarMalote()" style="width: auto; padding: 10px 40px; background: #22c55e; display: none; margin: 0;">GERAR PROTOCOLO DE MALOTE</button>
+    </div>
+  </div>
+
+  <div id="reimpressaoMaloteBox" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; background: #1e293b; padding: 25px; border-radius: 12px; border: 2px solid #f59e0b; z-index: 2000; box-shadow: 0 0 50px rgba(0,0,0,0.8);">
+    <h3 style="color: #f59e0b; margin-top: 0;">🖨️ REIMPRESSÃO MALOTE</h3>
+    <label style="font-size: 11px; color: #94a3b8;">BUSCAR POR PROTOCOLO</label>
+    <input type="text" id="reimpProtocoloMalote" placeholder="Ex: ENV670001">
+    <div style="text-align: center; margin: 10px 0; color: #64748b;">— OU —</div>
+    <label style="font-size: 11px; color: #94a3b8;">CÓD. PARCEIRO</label>
+    <input type="text" id="reimpCodMalote" placeholder="Ex: 67">
+    <label style="font-size: 11px; color: #94a3b8;">LOTE</label>
+    <input type="text" id="reimpLoteMalote" placeholder="Ex: 01">
+    <div id="areaConsultaReimp" style="display: none; margin-top: 15px; background: #0f172a; border: 1px solid #334155; max-height: 150px; overflow-y: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 10px; color: white;">
+        <thead>
+          <tr style="background: #334155;">
+            <th style="padding: 5px; text-align: left;">CPF</th>
+            <th style="padding: 5px; text-align: left;">NOME</th>
+            <th style="padding: 5px; text-align: left;">DESTINO</th>
+            <th style="padding: 5px; text-align: left;">PROT.</th>
+          </tr>
+        </thead>
+        <tbody id="corpoConsultaReimp"></tbody>
+      </table>
+    </div>
+    <div style="display: flex; gap: 5px; margin-top: 20px;">
+      <button onclick="consultarLote()" style="background: #3b82f6; margin: 0; color: white; flex: 1;">BUSCAR</button>
+      <button onclick="imprimirProtocolo()" style="background: #f59e0b; margin: 0; color: white; flex: 1;">IMPRIMIR</button>
+      <button onclick="document.getElementById('reimpressaoMaloteBox').style.display='none'" style="background: #ef4444; margin: 0; flex: 1;">FECHAR</button>
+    </div>
+  </div>
+
+  <div id="entradaBox" style="display: none; flex-direction: column; gap: 20px; padding: 20px; width: 100%; max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 style="margin: 0; color: #38bdf8;">📥 ENTRADA DE CARTEIRAS</h2>
+      <button onclick="voltarParaMenu()" style="width: auto; margin: 0; background: #64748b; padding: 8px 15px;">VOLTAR AO MENU</button>
+    </div>
+    <div class="grid-filtros" style="grid-template-columns: 1fr 1fr 1fr;">
+      <div>
+        <label style="font-size: 11px; color: #94a3b8;">FILTRAR PARCEIRO (CONFERÊNCIA)</label>
+        <input type="text" id="entParceiroConf" placeholder="Ex: 88" style="margin: 0;">
+      </div>
+      <div>
+        <label style="font-size: 11px; color: #94a3b8;">FILTRAR MUNICÍPIO (CONFERÊNCIA)</label>
+        <input type="text" id="entMunicipioConf" placeholder="Ex: FORTALEZA" style="margin: 0;">
+      </div>
+      <div>
+        <label style="font-size: 11px; color: #94a3b8;">Nº REMESSA / LOTE</label>
+        <input type="text" id="entRemessa" placeholder="Ex: 05" style="margin: 0;">
+      </div>
+    </div>
+    <div style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #38bdf8;">
+      <label style="font-weight: bold; color: #38bdf8;">BIPAR CÓDIGO (CTR):</label>
+      <input type="tel" id="inputBipagem" placeholder="Sincronizando..." style="font-size: 24px; border-color: #38bdf8; text-align: center; width: 100%;" oninput="this.value = this.value.replace(/[^0-9]/g, ''); autoBip(this.value)" maxlength="8" disabled autocomplete="off">
+    </div>
+    <div class="container-tabela">
+      <table id="tabelaEntrada">
+        <thead>
+          <tr>
+            <th>CTR (ID)</th>
+            <th>CPF</th>
+            <th>NOME</th>
+            <th>NASCIMENTO</th>
+            <th>MUNICÍPIO</th>
+            <th>PARCEIRO</th>
+            <th>AÇÃO</th>
+          </tr>
+        </thead>
+        <tbody id="corpoEntrada"></tbody>
+      </table>
+    </div>
+    <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; gap: 20px;">
+        <div id="contadorGeralEntrada" style="color: #38bdf8; font-weight: bold;">Total Geral: 0</div>
+        <div id="contadorLoteEntrada" style="color: #fbbf24; font-weight: bold;">Lote (30): 0/30</div>
+      </div>
+      <button id="btnSalvarEntrada" onclick="salvarEntradaCarteiras()" style="width: auto; padding: 10px 40px; background: #22c55e; margin: 0;">SALVAR ENTRADA E IMPRIMIR</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
