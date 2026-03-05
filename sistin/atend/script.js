@@ -820,7 +820,7 @@ function carregarLista() {
       divChecks.innerHTML += `<label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(${idx})"> ${name}</label>`;
     });
     
-    divChecks.innerHTML += `<button onclick="fecharLotePorParceiro()" style="margin-left:auto; background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">FECHAR LOTE</button>`;
+    
     
     document.getElementById("listasBox").prepend(divChecks);
   }
