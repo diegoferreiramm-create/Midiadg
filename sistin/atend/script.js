@@ -111,13 +111,16 @@ function filtrarTabelaAvancado() {
   const user = JSON.parse(sessao);
   const isAdmin = (user.parceiro.toString() === "97");
 
-  // Captura dos valores digitados
+  // Captura dos valores digitados - CPF ADICIONADO E MUNICIPIO REMOVIDO
+  const fCpf = document.getElementById("fCpf") ? document.getElementById("fCpf").value.trim() : "";
   const fNome = document.getElementById("fNome").value.toUpperCase();
-  const fStatus = document.getElementById("fStatus").value.toUpperCase();
+  
+  // STATUS mantido sem toUpperCase para bater com a sua nova lista de frases
+  const fStatus = document.getElementById("fStatus").value.trim();
+  
   const fLote = document.getElementById("fLote") ? document.getElementById("fLote").value.trim() : "";
  
   const fParc = isAdmin ? document.getElementById("fParceiro").value.toUpperCase() : "";
-  const fMun = isAdmin ? document.getElementById("fMun").value.toUpperCase() : "";
   const fAtend = isAdmin ? document.getElementById("fAtend").value.toUpperCase() : "";
   const fVia = (isAdmin && document.getElementById("fVia")) ? document.getElementById("fVia").value.toUpperCase() : "";
 
@@ -131,17 +134,20 @@ function filtrarTabelaAvancado() {
 
     let mostrar = true;
 
+    // --- NOVO FILTRO CPF (Coluna 2 -> td[1]) ---
+    if (fCpf && td[1] && td[1].innerText.indexOf(fCpf) === -1) mostrar = false;
+
     // --- FILTRO NOME (Coluna 3 -> td[2]) ---
     if (fNome && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
 
     // --- FILTRO STATUS (Coluna 12 -> td[11]) ---
-    if (fStatus && td[11] && td[11].innerText.toUpperCase().trim() !== fStatus) mostrar = false;
+    // Comparação exata para aceitar as frases longas que você configurou
+    if (fStatus && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
 
-    // --- FILTRO LOTE (Ajuste de Mira) ---
-    // Tentamos ler a coluna 17 (td[16]), se não bater, testamos a 16 (td[15])
+    // --- FILTRO LOTE (MAPEAMENTO RÍGIDO MANTIDO) ---
     let txtLote = td[16] ? td[16].innerText.trim() : "";
     if (fLote && txtLote !== fLote) {
-        // Se não bateu na 16, tenta na 15 por segurança
+        // Se não bateu na 16, tenta na 15 por segurança (Sua lógica original)
         if (td[15] && td[15].innerText.trim() === fLote) {
             mostrar = true; 
         } else {
@@ -156,8 +162,7 @@ function filtrarTabelaAvancado() {
       // PARCEIRO (Coluna 8 -> td[7])
       if (fParc && td[7] && td[7].innerText.toUpperCase().indexOf(fParc) === -1) mostrar = false;
       
-      // MUNICIPIO (Coluna 5 -> td[4])
-      if (fMun && td[4] && td[4].innerText.toUpperCase().indexOf(fMun) === -1) mostrar = false;
+      // MUNICIPIO REMOVIDO DAQUI
       
       // ATENDENTE (Coluna 10 -> td[9])
       if (fAtend && td[9] && td[9].innerText.toUpperCase().indexOf(fAtend) === -1) mostrar = false;
@@ -171,7 +176,7 @@ function filtrarTabelaAvancado() {
   const elNumLinhas = document.getElementById("numLinhas");
   if (elNumLinhas) elNumLinhas.innerText = contadorVisiveis;
 
-  // --- OCULTAR COLUNAS (Lógica das Caixas) ---
+  // --- OCULTAR COLUNAS (Lógica das Caixas - MANTIDO INTEGRALMENTE) ---
   const checks = document.querySelectorAll('#containerChecks input[type="checkbox"]');
   checks.forEach((input) => {
     const idx = input.getAttribute('data-idx');
