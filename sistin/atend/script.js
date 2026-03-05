@@ -803,6 +803,7 @@ document.addEventListener('input', function (e) {
   // Limpeza de caracteres não numéricos para o código CTR
   if(e.target.id === 'codigoCtr') e.target.value = e.target.value.replace(/\D/g, "");
 });
+
 function abrirSenha(){ document.getElementById("modalSenha").style.display="flex"; }
 function fecharSenha(){ document.getElementById("modalSenha").style.display="none"; }
 
