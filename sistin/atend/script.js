@@ -116,8 +116,6 @@ function filtrarTabelaAvancado() {
   const fCpf = document.getElementById("fCpf") ? document.getElementById("fCpf").value.trim() : "";
   const fNome = document.getElementById("fNome").value.toUpperCase();
   const fStatus = document.getElementById("fStatus").value.trim();
-  
-  // Aqui está o segredo: pegamos o valor como TEXTO puro
   const fLote = document.getElementById("fLote") ? document.getElementById("fLote").value.trim() : "";
  
   const fParc = isAdmin ? document.getElementById("fParceiro").value.toUpperCase() : "";
@@ -134,7 +132,7 @@ function filtrarTabelaAvancado() {
 
     let mostrar = true;
 
-    // Filtros de CPF, Nome e Status (Mantidos)
+    // Filtros padrão (CPF, Nome, Status)
     if (fCpf && td[1]) {
       const cpfLimpoTabela = td[1].innerText.replace(/\D/g, "");
       if (cpfLimpoTabela.indexOf(fCpf) === -1) mostrar = false;
@@ -142,26 +140,21 @@ function filtrarTabelaAvancado() {
     if (fNome && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
     if (fStatus && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
 
-    // --- FILTRO LOTE (Lógica à prova de falhas) ---
+    // --- FILTRO LOTE (COLUNA Q -> td[16]) ---
     let txtLote = td[16] ? td[16].innerText.trim() : "";
     
-    // Se o campo de busca NÃO estiver vazio (incluindo se for "0")
-    if (fLote.length > 0) {
+    if (fLote !== "") {
         if (fLote === "0") {
-            // Se eu digitei 0, eu SÓ quero o que está VAZIO.
-            // Se a célula tiver qualquer texto, eu escondo.
-            if (txtLote !== "") {
+            // Se digitou 0, vamos esconder apenas quem tem NÚMERO de lote (1, 2, 3...)
+            // Se a célula tiver apenas texto, traço ou estiver vazia, ela MOSTRA.
+            let temNumero = /\d/.test(txtLote); 
+            if (temNumero) {
                 mostrar = false;
             }
         } else {
-            // Se eu digitei 1, 2, 3... busca normal
-            if (txtLote !== fLote) {
-                // Checa a coluna 15 também, como no seu original
-                if (td[15] && td[15].innerText.trim() === fLote) {
-                    mostrar = true; 
-                } else {
-                    mostrar = false;
-                }
+            // Busca normal para lotes específicos (1, 5, 10...)
+            if (txtLote !== fLote && (td[15] && td[15].innerText.trim() !== fLote)) {
+                mostrar = false;
             }
         }
     }
@@ -179,15 +172,14 @@ function filtrarTabelaAvancado() {
   const elNumLinhas = document.getElementById("numLinhas");
   if (elNumLinhas) elNumLinhas.innerText = contadorVisiveis;
 
-  // Correção do erro de QuerySelector que travava o script
+  // Proteção para o erro de colunas que você teve
   const checks = document.querySelectorAll('#containerChecks input[type="checkbox"]');
   checks.forEach((input) => {
     const idx = input.getAttribute('data-idx');
     if (idx && idx !== "null" && idx !== "") {
-        const visivel = input.checked;
         try {
             const colunas = tabela.querySelectorAll(`tr > *:nth-child(${idx})`);
-            colunas.forEach(cel => { cel.style.display = visivel ? "" : "none"; });
+            colunas.forEach(cel => { cel.style.display = input.checked ? "" : "none"; });
         } catch(e) {}
     }
   });
