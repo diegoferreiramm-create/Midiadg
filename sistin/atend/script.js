@@ -116,6 +116,8 @@ function filtrarTabelaAvancado() {
   const fCpf = document.getElementById("fCpf") ? document.getElementById("fCpf").value.trim() : "";
   const fNome = document.getElementById("fNome").value.toUpperCase();
   const fStatus = document.getElementById("fStatus").value.trim();
+  
+  // Pegamos o valor do lote exatamente como foi digitado
   const fLote = document.getElementById("fLote") ? document.getElementById("fLote").value.trim() : "";
  
   const fParc = isAdmin ? document.getElementById("fParceiro").value.toUpperCase() : "";
@@ -147,12 +149,16 @@ function filtrarTabelaAvancado() {
     // --- FILTRO LOTE (COLUNA Q -> td[16]) ---
     let txtLote = td[16] ? td[16].innerText.trim() : "";
     
-    if (fLote) {
+    // SÓ ENTRA AQUI SE O CAMPO NÃO ESTIVER VAZIO
+    if (fLote !== "") {
         if (fLote === "0") {
-            // Se digitar 0, mostra o que NÃO tem números (vazio ou traço)
-            if (/\d/.test(txtLote)) mostrar = false;
+            // Se você digitou "0", só mostramos se a célula estiver REALMENTE vazia
+            // Se houver qualquer número ou letra, nós escondemos (mostrar = false)
+            if (txtLote !== "" && txtLote !== "-") {
+                mostrar = false;
+            }
         } else {
-            // Busca normal (1, 2, 3...)
+            // Busca normal (1, 2, 3...): Mantém sua lógica original
             if (txtLote !== fLote) {
                 if (td[15] && td[15].innerText.trim() === fLote) {
                     mostrar = true; 
@@ -177,13 +183,12 @@ function filtrarTabelaAvancado() {
   const elNumLinhas = document.getElementById("numLinhas");
   if (elNumLinhas) elNumLinhas.innerText = contadorVisiveis;
 
-  // --- CORREÇÃO DO ERRO 'tr > *:nth-child(null)' ---
+  // --- CORREÇÃO DO ERRO DE COLUNA NULL ---
   const checks = document.querySelectorAll('#containerChecks input[type="checkbox"]');
   checks.forEach((input) => {
     const idx = input.getAttribute('data-idx');
-    
-    // SÓ EXECUTA SE O IDX EXISTIR (Evita o erro que você recebeu)
-    if (idx && idx !== "null") {
+    // Só tenta ocultar se o idx for um número válido (não null)
+    if (idx && idx !== "null" && idx !== "") {
         const visivel = input.checked;
         const colunas = tabela.querySelectorAll(`tr > *:nth-child(${idx})`);
         colunas.forEach(cel => {
