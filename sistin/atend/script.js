@@ -112,13 +112,10 @@ function filtrarTabelaAvancado() {
   const user = JSON.parse(sessao);
   const isAdmin = (user.parceiro.toString() === "97");
 
-  // Captura dos valores digitados - CPF ADICIONADO E MUNICIPIO REMOVIDO
+  // Captura dos valores digitados
   const fCpf = document.getElementById("fCpf") ? document.getElementById("fCpf").value.trim() : "";
   const fNome = document.getElementById("fNome").value.toUpperCase();
-  
-  // STATUS mantido sem toUpperCase para bater com a sua nova lista de frases
   const fStatus = document.getElementById("fStatus").value.trim();
-  
   const fLote = document.getElementById("fLote") ? document.getElementById("fLote").value.trim() : "";
  
   const fParc = isAdmin ? document.getElementById("fParceiro").value.toUpperCase() : "";
@@ -152,13 +149,10 @@ function filtrarTabelaAvancado() {
     
     if (fLote) {
         if (fLote === "0") {
-            // LÓGICA INFALÍVEL PARA O ZERO:
-            // Se a coluna Q tiver QUALQUER número (\d), ela NÃO está em aberto. Então esconde.
-            if (/\d/.test(txtLote)) {
-                mostrar = false;
-            }
+            // Se digitar 0, mostra o que NÃO tem números (vazio ou traço)
+            if (/\d/.test(txtLote)) mostrar = false;
         } else {
-            // LÓGICA PARA NÚMEROS (1, 2, 3...): Continua igualzinho ao seu original
+            // Busca normal (1, 2, 3...)
             if (txtLote !== fLote) {
                 if (td[15] && td[15].innerText.trim() === fLote) {
                     mostrar = true; 
@@ -183,15 +177,19 @@ function filtrarTabelaAvancado() {
   const elNumLinhas = document.getElementById("numLinhas");
   if (elNumLinhas) elNumLinhas.innerText = contadorVisiveis;
 
-  // --- OCULTAR COLUNAS (Lógica das Caixas - MANTIDO INTEGRALMENTE) ---
+  // --- CORREÇÃO DO ERRO 'tr > *:nth-child(null)' ---
   const checks = document.querySelectorAll('#containerChecks input[type="checkbox"]');
   checks.forEach((input) => {
     const idx = input.getAttribute('data-idx');
-    const visivel = input.checked;
-    const colunas = tabela.querySelectorAll(`tr > *:nth-child(${idx})`);
-    colunas.forEach(cel => {
-      cel.style.display = visivel ? "" : "none";
-    });
+    
+    // SÓ EXECUTA SE O IDX EXISTIR (Evita o erro que você recebeu)
+    if (idx && idx !== "null") {
+        const visivel = input.checked;
+        const colunas = tabela.querySelectorAll(`tr > *:nth-child(${idx})`);
+        colunas.forEach(cel => {
+          cel.style.display = visivel ? "" : "none";
+        });
+    }
   });
 }
 
