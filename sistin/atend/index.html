@@ -169,8 +169,7 @@
           <option value="2ª">2ª Via</option>
         </select>
         <input type="text" id="fLote" placeholder="LOTE" onkeyup="filtrarTabelaAvancado()" style="width: 70px; height: 38px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
-        
-        </div>
+      </div>
     </div>
       
     <div class="tabela-container" id="areaImpressao" style="margin-top: 5px;">
@@ -189,7 +188,8 @@
       </div>
 
       <div style="display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap;">
-        <button id="btnFecharLote" onclick="fecharLote()" style="width: 150px; background: #e11d48; margin:0; padding: 8px 0;">Fechar Lote</button>
+        
+        <button onclick="fecharLotePorParceiro()" style="width: 150px; background: #ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; padding: 8px 0;">FECHAR LOTE</button>
         
         <button onclick="imprimirLista()" style="width: 150px; background: #3b82f6; margin:0; padding: 8px 0;">Imprimir Lista</button>
         
