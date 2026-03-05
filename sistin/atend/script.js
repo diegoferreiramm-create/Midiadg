@@ -364,28 +364,35 @@ function toggleTerceiro() {
 
 // FUNÇÃO 1: Preenche os dados e faz a tela aparecer sobre a lista
 function prepararEdicao(item) {
+  // 1. Bloqueia o ID para saber quem estamos editando
   idSendoEditado = item.id; 
   
-  // Forçamos a tela de correção a aparecer como um "Pop-up"
-  const telaCorrigir = document.getElementById('corrigirBox');
-  telaCorrigir.style.display = 'block';
-  telaCorrigir.style.position = 'fixed';
-  telaCorrigir.style.top = '0';
-  telaCorrigir.style.left = '0';
-  telaCorrigir.style.width = '100%';
-  telaCorrigir.style.height = '100%';
-  telaCorrigir.style.backgroundColor = 'rgba(0,0,0,0.8)'; // Fundo escuro atrás
-  telaCorrigir.style.zIndex = '10000'; // Fica na frente de tudo
+  // 2. IMPORTANTE: Não chamamos abrirTela() aqui! 
+  // Apenas forçamos o pop-up amarelo a aparecer
+  const popUp = document.getElementById('corrigirBox');
+  
+  if (popUp) {
+    popUp.style.display = 'block'; // Faz aparecer
+    popUp.style.position = 'fixed';
+    popUp.style.zIndex = '10000'; // Garante que fica na frente de tudo
+  } else {
+    alert("Erro: Tela de correção (corrigirBox) não encontrada no HTML!");
+    return;
+  }
 
-  // Preenche os campos da tela de correção
+  // 3. Limpa qualquer mensagem de erro anterior
+  const msg = document.getElementById("msgCorrecao");
+  if(msg) msg.innerText = "";
+
+  // 4. Preenche os campos do Pop-up (edit_...)
   document.getElementById("edit_cpf").value = item.cpf || "";
   document.getElementById("edit_nome").value = item.nome || "";
   
-  // Formata data para o calendário (yyyy-mm-dd)
+  // Converte a data do formato brasileiro (dd/mm/aaaa) para o calendário (yyyy-mm-dd)
   if(item.nasc) {
-    const p = item.nasc.split('/');
-    if(p.length === 3) {
-      document.getElementById("edit_nascimento").value = `${p[2]}-${p[1]}-${p[0]}`;
+    const partes = item.nasc.split('/');
+    if(partes.length === 3) {
+      document.getElementById("edit_nascimento").value = `${partes[2]}-${partes[1]}-${partes[0]}`;
     }
   }
   
@@ -393,7 +400,7 @@ function prepararEdicao(item) {
   document.getElementById("edit_telefone").value = item.tel || "";
   document.getElementById("edit_codigoBoleto").value = item.boleto || "";
 
-  // Marca se é 1ª ou 2ª via
+  // Marca a Via correta (1ª ou 2ª)
   if(item.via === "1ª") document.getElementById("edit_via1").checked = true;
   if(item.via === "2ª") document.getElementById("edit_via2").checked = true;
 }
