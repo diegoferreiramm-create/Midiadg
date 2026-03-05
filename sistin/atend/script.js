@@ -152,15 +152,14 @@ function filtrarTabelaAvancado() {
     
     if (fLote) {
         if (fLote === "0") {
-            // REGRA DO ZERO: Se o lote na tabela NÃO for vazio, então esconde.
-            // (Isso faz sobrar apenas os vazios na tela)
-            if (txtLote !== "") {
+            // LÓGICA INFALÍVEL PARA O ZERO:
+            // Se a coluna Q tiver QUALQUER número (\d), ela NÃO está em aberto. Então esconde.
+            if (/\d/.test(txtLote)) {
                 mostrar = false;
             }
         } else {
-            // REGRA DOS NÚMEROS (1, 2, 3...): Mantém sua lógica original que já funciona
+            // LÓGICA PARA NÚMEROS (1, 2, 3...): Continua igualzinho ao seu original
             if (txtLote !== fLote) {
-                // Tenta na 15 por segurança, como você tinha antes
                 if (td[15] && td[15].innerText.trim() === fLote) {
                     mostrar = true; 
                 } else {
