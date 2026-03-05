@@ -138,14 +138,25 @@
     <h2>Relatório Geral de Cadastros</h2>
     
     <div class="filtros-lista" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; background: #0f172a; padding: 15px; border-radius: 8px;">
-      <input type="text" id="fNome" placeholder="NOME..." onkeyup="filtrarTabelaAvancado()" style="width: 180px;">
-      <select id="fStatus" onchange="filtrarTabelaAvancado()" style="width: 150px;">
+    <input type="text" id="fNome" placeholder="NOME..." onkeyup="filtrarTabelaAvancado()" style="width: 180px;">
+    
+    <select id="fStatus" onchange="filtrarTabelaAvancado()" style="width: 250px;">
         <option value="">STATUS (TODOS)</option>
-        <option value="PENDENTE">PENDENTE</option>
-        <option value="APROVADO">APROVADO</option>
-        <option value="REPROVADO">REPROVADO</option>
-        <option value="ENTREGUE">ENTREGUE</option>
-      </select>
+        <option value="PEDIDO ENTREGUE PELA ENTIDADE À ARCE">Pedido entregue pela Entidade à ARCE</option>
+        <option value="EM ANÁLISE PELA ARCE">Em análise pela ARCE</option>
+        <option value="SOLICITAÇÃO INDEFERIDA PELA ARCE">Solicitação Indeferida pela ARCE</option>
+        <option value="SOLICITAÇÃO INDEFERIDA NA ENTIDADE ESTUDANTIL">Solicitação Indeferida na Entidade Estudantil</option>
+        <option value="AGUARDANDO FECHAMENTO DO LOTE PELA ARCE">Aguardando Fechamento do Lote pela ARCE</option>
+        <option value="LOTE DISPONÍVEL PARA GRÁFICA">Lote Disponível para Gráfica</option>
+        <option value="LOTE RECEBIDO PELA GRÁFICA">Lote Recebido pela Gráfica</option>
+        <option value="LOTE ENVIADO AO SINDIÔNIBUS">Lote Enviado ao Sindiônibus</option>
+        <option value="LOTE RECEBIDO PELO SINDIÔNIBUS">Lote Recebido pelo Sindiônibus</option>
+        <option value="LOTE ENVIADO PARA A ENTIDADE ESTUDANTIL">Lote Enviado para a Entidade Estudantil</option>
+        <option value="LOTE RECEBIDO PELA ENTIDADE ESTUDANTIL">Lote Recebido pela Entidade Estudantil</option>
+        <option value="CARTEIRA PRONTA PARA ENTREGA">Carteira Pronta para Entrega</option>
+        <option value="CARTEIRA RECEBIDA PELO ALUNO">Carteira Recebida pelo Aluno</option>
+    </select>
+</div>
 
       <div id="filtrosAdmin" style="display: none; gap: 10px; flex-wrap: wrap;">
         <input type="text" id="fParceiro" placeholder="PARCEIRO" onkeyup="filtrarTabelaAvancado()" style="width: 110px;">
