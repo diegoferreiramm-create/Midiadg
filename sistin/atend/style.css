@@ -281,3 +281,7 @@ button:hover{ background:#16a34a; }
   #logBox { position: absolute; left: 0; top: 0; width: 100%; }
   button { display: none !important; } /* Esconde os botões na impressão */
 }
+
+input {
+  text-transform: uppercase;
+}
