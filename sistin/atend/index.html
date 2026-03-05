@@ -137,37 +137,41 @@
     
     <h2>Relatório Geral de Cadastros</h2>
     
-    <div class="filtros-lista" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; background: #0f172a; padding: 15px; border-radius: 8px;">
-    <input type="text" id="fNome" placeholder="NOME..." onkeyup="filtrarTabelaAvancado()" style="width: 180px;">
-    
-    <select id="fStatus" onchange="filtrarTabelaAvancado()" style="width: 280px;">
-        <option value="">STATUS (TODOS)</option>
-        <option value="Pedido entregue pela Entidade à ARCE">Pedido entregue pela Entidade à ARCE</option>
-        <option value="Em análise pela ARCE">Em análise pela ARCE</option>
-        <option value="Solicitação Indeferida pela ARCE">Solicitação Indeferida pela ARCE</option>
-        <option value="Solicitação Indeferida na Entidade Estudantil">Solicitação Indeferida na Entidade Estudantil</option>
-        <option value="Aguardando Fechamento do Lote pela ARCE">Aguardando Fechamento do Lote pela ARCE</option>
-        <option value="Lote Disponível para Gráfica">Lote Disponível para Gráfica</option>
-        <option value="Lote Recebido pela Gráfica">Lote Recebido pela Gráfica</option>
-        <option value="Lote Enviado ao Sindiônibus">Lote Enviado ao Sindiônibus</option>
-        <option value="Lote Recebido pelo Sindiônibus">Lote Recebido pelo Sindiônibus</option>
-        <option value="Lote Enviado para a Entidade Estudantil">Lote Enviado para a Entidade Estudantil</option>
-        <option value="Lote Recebido pela Entidade Estudantil">Lote Recebido pela Entidade Estudantil</option>
-        <option value="Carteira Pronta para Entrega">Carteira Pronta para Entrega</option>
-        <option value="Carteira Recebida pelo Aluno">Carteira Recebida pelo Aluno</option>
-    </select>
-</div>
+    <div class="filtros-lista" style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; justify-content: flex-start; align-items: center; background: #0f172a; padding: 12px; border-radius: 8px; overflow-x: auto;">
+      
+      <input type="text" id="fCpf" placeholder="CPF..." onkeyup="filtrarTabelaAvancado()" style="width: 130px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
 
-      <div id="filtrosAdmin" style="display: none; gap: 10px; flex-wrap: wrap;">
-        <input type="text" id="fParceiro" placeholder="PARCEIRO" onkeyup="filtrarTabelaAvancado()" style="width: 110px;">
-        <input type="text" id="fMun" placeholder="MUNICÍPIO" onkeyup="filtrarTabelaAvancado()" style="width: 130px;">
-        <input type="text" id="fAtend" placeholder="ATENDENTE" onkeyup="filtrarTabelaAvancado()" style="width: 120px;">
-        <select id="fVia" onchange="filtrarTabelaAvancado()" style="width: 100px;">
+      <input type="text" id="fNome" placeholder="NOME..." onkeyup="filtrarTabelaAvancado()" style="width: 180px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
+      
+      <select id="fStatus" onchange="filtrarTabelaAvancado()" style="width: 280px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; cursor: pointer;">
+          <option value="">STATUS (TODOS)</option>
+          <option value="Pedido entregue pela Entidade à ARCE">Pedido entregue pela Entidade à ARCE</option>
+          <option value="Em análise pela ARCE">Em análise pela ARCE</option>
+          <option value="Solicitação Indeferida pela ARCE">Solicitação Indeferida pela ARCE</option>
+          <option value="Solicitação Indeferida na Entidade Estudantil">Solicitação Indeferida na Entidade Estudantil</option>
+          <option value="Aguardando Fechamento do Lote pela ARCE">Aguardando Fechamento do Lote pela ARCE</option>
+          <option value="Lote Disponível para Gráfica">Lote Disponível para Gráfica</option>
+          <option value="Lote Recebido pela Gráfica">Lote Recebido pela Gráfica</option>
+          <option value="Lote Enviado ao Sindiônibus">Lote Enviado ao Sindiônibus</option>
+          <option value="Lote Recebido pelo Sindiônibus">Lote Recebido pelo Sindiônibus</option>
+          <option value="Lote Enviado para a Entidade Estudantil">Lote Enviado para a Entidade Estudantil</option>
+          <option value="Lote Recebido pela Entidade Estudantil">Lote Recebido pela Entidade Estudantil</option>
+          <option value="Carteira Pronta para Entrega">Carteira Pronta para Entrega</option>
+          <option value="Carteira Recebida pelo Aluno">Carteira Recebida pelo Aluno</option>
+      </select>
+
+      <div id="filtrosAdmin" style="display: none; flex-direction: row; gap: 8px; align-items: center;">
+        <input type="text" id="fParceiro" placeholder="PARCEIRO" onkeyup="filtrarTabelaAvancado()" style="width: 100px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
+        
+        <input type="text" id="fAtend" placeholder="ATENDENTE" onkeyup="filtrarTabelaAvancado()" style="width: 110px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
+        
+        <select id="fVia" onchange="filtrarTabelaAvancado()" style="width: 80px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
           <option value="">VIA</option>
           <option value="1ª">1ª Via</option>
           <option value="2ª">2ª Via</option>
         </select>
-        <input type="text" id="fLote" placeholder="LOTE" onkeyup="filtrarTabelaAvancado()" style="width: 80px;">
+        
+        <input type="text" id="fLote" placeholder="LOTE" onkeyup="filtrarTabelaAvancado()" style="width: 70px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
       </div>
     </div>
       
@@ -191,7 +195,6 @@
     </div>
   </div>
 </div>
-
 <div id="corrigirBox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; display:none; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
   <div style="width:100%; max-width:480px; background:#1e293b; border:1px solid #334155; padding:30px; border-radius:16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
     
