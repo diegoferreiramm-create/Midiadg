@@ -367,20 +367,24 @@ function prepararEdicao(item) {
   idSendoEditado = item.id; 
   
   const popUp = document.getElementById('corrigirBox');
-  if(popUp) popUp.style.display = 'flex';
+  if(popUp) {
+    // Mudamos para 'flex' para que o box fique bem no centro da tela
+    popUp.style.display = 'flex'; 
+  }
 
-  // Preenche os campos que podem ser mexidos
+  // Preenche os campos
   document.getElementById("edit_cpf").value = item.cpf || "";
   document.getElementById("edit_nome").value = item.nome || "";
   document.getElementById("edit_municipio").value = item.municipio || "";
   document.getElementById("edit_telefone").value = item.tel || "";
   document.getElementById("edit_codigoBoleto").value = item.boleto || "";
 
-  // Apenas exibe o texto da Via para o usuário ler (não mexe em nada)
-  const labelVia = document.getElementById("edit_label_via");
-  if(labelVia) labelVia.innerText = (item.via || "1ª VIA").toUpperCase();
+  // Via Imutável
+  const viaValor = item.via || "1ª VIA";
+  document.getElementById("edit_label_via").innerText = viaValor.toUpperCase();
+  document.getElementById("edit_via_hidden").value = viaValor;
 
-  // Data (Sua lógica padrão)
+  // Data
   if(item.nasc) {
     const p = item.nasc.split('/');
     if(p.length === 3) {
@@ -408,8 +412,11 @@ function prepararEdicao(item) {
 
 // FUNÇÃO 2: Envia os dados corrigidos para o Apps Script (Lógica da Senha)
 async function executarEdicao() {
-  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  const userStr = sessionStorage.getItem("usuario");
+  if(!userStr) return alert("Sessão expirada. Faça login novamente.");
+  const user = JSON.parse(userStr);
   
+  // Captura dos dados da tela de correção
   const id = idSendoEditado;
   const cpf = document.getElementById("edit_cpf").value;
   const nome = document.getElementById("edit_nome").value;
@@ -417,38 +424,55 @@ async function executarEdicao() {
   const mun = document.getElementById("edit_municipio").value;
   const tel = document.getElementById("edit_telefone").value;
   const boleto = document.getElementById("edit_codigoBoleto").value;
+  
+  // --- AQUI ESTÁ O SEGREDO ---
+  // Pegamos a via do campo 'hidden' que preenchemos na função prepararEdicao
+  const via = document.getElementById("edit_via_hidden").value;
 
-  // Formata data de volta para BR
-  let dBR = nasc;
-  if(nasc.includes("-")) {
-    const p = nasc.split("-");
-    dBR = `${p[2]}/${p[1]}/${p[0]}`;
+  // Se por algum motivo estiver vazio, não deixa salvar para não apagar na planilha
+  if(!via) {
+    alert("Erro crítico: A Via não foi detectada. Tente abrir o editor novamente.");
+    return;
   }
 
-  // URL LIMPA: Atualiza tudo, exceto a VIA
-  const url = `${urlSistema}?action=editarCadastroAppsScript` +
-              `&id=${id}` +
-              `&cpf=${cpf}` + 
-              `&nome=${encodeURIComponent(nome)}` +
-              `&nasc=${dBR}` +
-              `&municipio=${encodeURIComponent(mun)}` +
-              `&tel=${tel}` +
-              `&atendente=${encodeURIComponent(user.nome)}` +
-              `&parceiro=${encodeURIComponent(user.parceiro)}` +
-              `&boleto=${boleto}`;
+  // Formata data para o padrão da planilha (DD/MM/AAAA)
+  let dataFormatada = nasc;
+  if(nasc.includes("-")) {
+    const p = nasc.split("-");
+    dataFormatada = `${p[2]}/${p[1]}/${p[0]}`;
+  }
+
+  const btn = document.querySelector("button[onclick='executarEdicao()']");
+  if(btn) { btn.disabled = true; btn.innerText = "SALVANDO..."; }
+
+  const urlFinal = `${urlSistema}?action=editarCadastroAppsScript` +
+    `&id=${encodeURIComponent(id)}` +
+    `&cpf=${encodeURIComponent(cpf)}` +
+    `&nome=${encodeURIComponent(nome)}` +
+    `&nasc=${encodeURIComponent(dataFormatada)}` +
+    `&municipio=${encodeURIComponent(mun)}` +
+    `&tel=${encodeURIComponent(tel)}` +
+    `&via=${encodeURIComponent(via)}` + // Agora a via vai preenchida corretamente!
+    `&atendente=${encodeURIComponent(user.nome)}` +
+    `&parceiro=${encodeURIComponent(user.parceiro)}` +
+    `&boleto=${encodeURIComponent(boleto)}`;
 
   try {
-    const response = await fetch(url);
+    const response = await fetch(urlFinal);
     const res = await response.json();
-    if(res.sucesso) {
-      alert("✅ Dados atualizados com sucesso!");
+
+    if (res.sucesso) {
+      alert("✅ Registro de " + via + " atualizado com sucesso!");
       document.getElementById('corrigirBox').style.display = 'none';
-      carregarLista(); 
+      if(typeof carregarLista === "function") carregarLista();
     } else {
       alert("Erro ao salvar: " + res.erro);
     }
-  } catch(e) {
-    alert("Erro de conexão.");
+  } catch (error) {
+    console.error("Erro:", error);
+    alert("Erro de conexão com o servidor.");
+  } finally {
+    if(btn) { btn.disabled = false; btn.innerText = "SALVAR DADOS"; }
   }
 }
 
