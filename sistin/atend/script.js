@@ -373,25 +373,28 @@ function prepararEdicao(item) {
   }
 
   // Preenche os campos
-  document.getElementById("edit_cpf").value = item.cpf || "";
-  document.getElementById("edit_nome").value = item.nome || "";
-  document.getElementById("edit_municipio").value = item.municipio || "";
-  document.getElementById("edit_telefone").value = item.tel || "";
-  document.getElementById("edit_codigoBoleto").value = item.boleto || "";
+  if(document.getElementById("edit_cpf")) document.getElementById("edit_cpf").value = item.cpf || "";
+  if(document.getElementById("edit_nome")) document.getElementById("edit_nome").value = item.nome || "";
+  if(document.getElementById("edit_municipio")) document.getElementById("edit_municipio").value = item.municipio || "";
+  if(document.getElementById("edit_telefone")) document.getElementById("edit_telefone").value = item.tel || "";
+  if(document.getElementById("edit_codigoBoleto")) document.getElementById("edit_codigoBoleto").value = item.boleto || "";
 
-  // Via Imutável
+  // Via Imutável (Apenas exibe e guarda no hidden)
   const viaValor = item.via || "1ª VIA";
-  document.getElementById("edit_label_via").innerText = viaValor.toUpperCase();
-  document.getElementById("edit_via_hidden").value = viaValor;
+  const labelVia = document.getElementById("edit_label_via");
+  if(labelVia) labelVia.innerText = viaValor.toUpperCase();
+  
+  const hiddenVia = document.getElementById("edit_via_hidden");
+  if(hiddenVia) hiddenVia.value = viaValor;
 
-  // Data
-  if(item.nasc) {
+  // Formata Data para o input
+  if(item.nasc && document.getElementById("edit_nascimento")) {
     const p = item.nasc.split('/');
     if(p.length === 3) {
       document.getElementById("edit_nascimento").value = `${p[2]}-${p[1]}-${p[0]}`;
     }
   }
-}
+} // <--- FECHAMENTO CORRETO DA prepararEdicao
   
   document.getElementById("edit_municipio").value = item.municipio || "";
   document.getElementById("edit_telefone").value = item.tel || "";
@@ -410,7 +413,7 @@ function prepararEdicao(item) {
   if(hiddenVia) hiddenVia.value = viaValor;
 }
 
-// FUNÇÃO 2: Envia os dados corrigidos para o Apps Script (Lógica da Senha)
+// FUNÇÃO 2: Envia os dados corrigidos para o Apps Script
 async function executarEdicao() {
   const userStr = sessionStorage.getItem("usuario");
   if(!userStr) return alert("Sessão expirada. Faça login novamente.");
@@ -424,20 +427,16 @@ async function executarEdicao() {
   const mun = document.getElementById("edit_municipio").value;
   const tel = document.getElementById("edit_telefone").value;
   const boleto = document.getElementById("edit_codigoBoleto").value;
-  
-  // --- AQUI ESTÁ O SEGREDO ---
-  // Pegamos a via do campo 'hidden' que preenchemos na função prepararEdicao
   const via = document.getElementById("edit_via_hidden").value;
 
-  // Se por algum motivo estiver vazio, não deixa salvar para não apagar na planilha
   if(!via) {
-    alert("Erro crítico: A Via não foi detectada. Tente abrir o editor novamente.");
+    alert("Erro crítico: A Via não foi detectada.");
     return;
   }
 
   // Formata data para o padrão da planilha (DD/MM/AAAA)
   let dataFormatada = nasc;
-  if(nasc.includes("-")) {
+  if(nasc && nasc.includes("-")) {
     const p = nasc.split("-");
     dataFormatada = `${p[2]}/${p[1]}/${p[0]}`;
   }
@@ -452,7 +451,7 @@ async function executarEdicao() {
     `&nasc=${encodeURIComponent(dataFormatada)}` +
     `&municipio=${encodeURIComponent(mun)}` +
     `&tel=${encodeURIComponent(tel)}` +
-    `&via=${encodeURIComponent(via)}` + // Agora a via vai preenchida corretamente!
+    `&via=${encodeURIComponent(via)}` + 
     `&atendente=${encodeURIComponent(user.nome)}` +
     `&parceiro=${encodeURIComponent(user.parceiro)}` +
     `&boleto=${encodeURIComponent(boleto)}`;
@@ -462,7 +461,7 @@ async function executarEdicao() {
     const res = await response.json();
 
     if (res.sucesso) {
-      alert("✅ Registro de " + via + " atualizado com sucesso!");
+      alert("✅ Registro atualizado com sucesso!");
       document.getElementById('corrigirBox').style.display = 'none';
       if(typeof carregarLista === "function") carregarLista();
     } else {
@@ -474,7 +473,7 @@ async function executarEdicao() {
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "SALVAR DADOS"; }
   }
-}
+} // <--- FECHAMENTO CORRETO DA executarEdicao
 
 async function salvarCadastro() {
   const userStr = sessionStorage.getItem("usuario");
