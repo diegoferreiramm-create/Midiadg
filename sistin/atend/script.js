@@ -675,7 +675,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
 
         <div class="footer">
           <div style="border-top:1px solid #000; width:250px; text-align:center; font-size:12px; margin-top: 20px;">Assinatura do Requerente</div>
-          <div style="font-size:12px;">Via do Aluno / ${parceiro} / CTR: ${id}</div>
+          <div style="font-size:12px;">Via do Aluno / ${parceiro} / ID: ${id}</div>
         </div>
       </div>
       <script>
