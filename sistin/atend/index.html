@@ -133,17 +133,15 @@
 </div>
 
 <div id="listasBox" style="display:none; flex-direction:column; width:100%; align-items:center;">
-  <div class="box" style="width: 98%; max-width: 1400px; margin: 0 auto;">
+  <div class="box" style="width: 98%; max-width: 1400px; margin: 0 auto; padding: 10px;"> <h2 style="margin: 5px 0 10px 0; text-align: center;">Relatório Geral de Cadastros</h2>
     
-    <h2>Relatório Geral de Cadastros</h2>
-    
-    <div class="filtros-lista" style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 8px; justify-content: flex-start; align-items: center; background: #0f172a; padding: 12px; border-radius: 8px; overflow-x: auto;">
+    <div class="filtros-lista" style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 5px; justify-content: flex-start; align-items: center; background: #0f172a; padding: 6px; border-radius: 8px; overflow-x: auto;">
       
-      <input type="text" id="fCpf" placeholder="CPF..." onkeyup="filtrarTabelaAvancado()" style="width: 130px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
+      <input type="text" id="fCpf" placeholder="CPF..." onkeyup="filtrarTabelaAvancado()" style="width: 130px; padding: 4px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
 
-      <input type="text" id="fNome" placeholder="NOME..." onkeyup="filtrarTabelaAvancado()" style="width: 180px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
+      <input type="text" id="fNome" placeholder="NOME..." onkeyup="filtrarTabelaAvancado()" style="width: 180px; padding: 4px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
       
-      <select id="fStatus" onchange="filtrarTabelaAvancado()" style="width: 280px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; cursor: pointer;">
+      <select id="fStatus" onchange="filtrarTabelaAvancado()" style="width: 280px; padding: 4px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; cursor: pointer;">
           <option value="">STATUS (TODOS)</option>
           <option value="Pedido entregue pela Entidade à ARCE">Pedido entregue pela Entidade à ARCE</option>
           <option value="Em análise pela ARCE">Em análise pela ARCE</option>
@@ -160,22 +158,22 @@
           <option value="Carteira Recebida pelo Aluno">Carteira Recebida pelo Aluno</option>
       </select>
 
-      <div id="filtrosAdmin" style="display: none; flex-direction: row; gap: 8px; align-items: center;">
-        <input type="text" id="fParceiro" placeholder="PARCEIRO" onkeyup="filtrarTabelaAvancado()" style="width: 100px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
+      <div id="filtrosAdmin" style="display: none; flex-direction: row; gap: 5px; align-items: center;">
+        <input type="text" id="fParceiro" placeholder="PARCEIRO" onkeyup="filtrarTabelaAvancado()" style="width: 100px; padding: 4px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
         
-        <input type="text" id="fAtend" placeholder="ATENDENTE" onkeyup="filtrarTabelaAvancado()" style="width: 110px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
+        <input type="text" id="fAtend" placeholder="ATENDENTE" onkeyup="filtrarTabelaAvancado()" style="width: 110px; padding: 4px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
         
-        <select id="fVia" onchange="filtrarTabelaAvancado()" style="width: 80px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
+        <select id="fVia" onchange="filtrarTabelaAvancado()" style="width: 80px; padding: 4px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
           <option value="">VIA</option>
           <option value="1ª">1ª Via</option>
           <option value="2ª">2ª Via</option>
         </select>
         
-        <input type="text" id="fLote" placeholder="LOTE" onkeyup="filtrarTabelaAvancado()" style="width: 70px; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
+        <input type="text" id="fLote" placeholder="LOTE" onkeyup="filtrarTabelaAvancado()" style="width: 70px; padding: 4px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white;">
       </div>
     </div>
       
-    <div class="tabela-container" id="areaImpressao">
+    <div class="tabela-container" id="areaImpressao" style="margin-top: 10px;">
       <table id="tabelaListas" style="font-size: 11px;">
         <thead>
           <tr id="cabecalhoTabela"></tr>
@@ -184,17 +182,21 @@
       </table>
     </div>
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; width: 100%;">
-      <div id="contadorLinhas" style="font-weight: bold; color: #22c55e; font-size: 14px; background: #0f172a; padding: 10px 15px; border-radius: 8px; border: 1px solid #334155;">
+    <div style="display: flex; flex-direction: column; align-items: center; margin-top: 15px; width: 100%; gap: 10px;">
+      
+      <div id="contadorLinhas" style="font-weight: bold; color: #22c55e; font-size: 14px; background: #0f172a; padding: 8px 15px; border-radius: 8px; border: 1px solid #334155;">
         Registros: <span id="numLinhas">0</span>
       </div>
-      <div style="display: flex; gap: 15px;">
+
+      <div style="display: flex; gap: 15px; justify-content: center; width: 100%;">
         <button onclick="imprimirLista()" style="width: 150px; background: #3b82f6; margin:0;">Imprimir Lista</button>
         <button class="cancel" onclick="abrirTela('menuBox')" style="width: 150px; margin:0;">Voltar ao Menu</button>
       </div>
+
     </div>
   </div>
 </div>
+  
 <div id="corrigirBox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; display:none; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
   <div style="width:100%; max-width:480px; background:#1e293b; border:1px solid #334155; padding:30px; border-radius:16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
     
