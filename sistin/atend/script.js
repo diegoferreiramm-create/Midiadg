@@ -362,25 +362,22 @@ function toggleTerceiro() {
   inputs.forEach(el => el.disabled = !isChecked);
 }
 
-// FUNÇÃO 1: Preenche os dados e faz a tela aparecer sobre a lista
-// --- FUNÇÕES DE EDIÇÃO (CORRIGIDAS E BLINDADAS) ---
 
+// --- FUNÇÃO PARA ABRIR O BOX DE EDIÇÃO ---
 function prepararEdicao(item) {
   idSendoEditado = item.id; 
   
   const popUp = document.getElementById('corrigirBox');
-  if(popUp) {
-    popUp.style.display = 'flex'; 
-  }
+  if(popUp) popUp.style.display = 'flex'; 
 
-  // Preenche os campos de texto
+  // Preenchimento seguro dos campos
   if(document.getElementById("edit_cpf")) document.getElementById("edit_cpf").value = item.cpf || "";
   if(document.getElementById("edit_nome")) document.getElementById("edit_nome").value = item.nome || "";
   if(document.getElementById("edit_municipio")) document.getElementById("edit_municipio").value = item.municipio || "";
   if(document.getElementById("edit_telefone")) document.getElementById("edit_telefone").value = item.tel || "";
   if(document.getElementById("edit_codigoBoleto")) document.getElementById("edit_codigoBoleto").value = item.boleto || "";
 
-  // Tratamento da VIA: Mostra o texto e guarda o valor escondido
+  // Via Imutável (Mostra no rótulo e guarda no campo oculto)
   const viaValor = item.via || "1ª VIA";
   const labelVia = document.getElementById("edit_label_via");
   if(labelVia) labelVia.innerText = viaValor.toUpperCase();
@@ -388,7 +385,7 @@ function prepararEdicao(item) {
   const hiddenVia = document.getElementById("edit_via_hidden");
   if(hiddenVia) hiddenVia.value = viaValor;
 
-  // Formata a data para o input (AAAA-MM-DD)
+  // Formata Data para o input date (yyyy-mm-dd)
   if(item.nasc && document.getElementById("edit_nascimento")) {
     const p = item.nasc.split('/');
     if(p.length === 3) {
@@ -397,6 +394,7 @@ function prepararEdicao(item) {
   }
 }
 
+// --- FUNÇÃO PARA SALVAR A EDIÇÃO ---
 async function executarEdicao() {
   const userStr = sessionStorage.getItem("usuario");
   if(!userStr) return alert("Sessão expirada. Faça login novamente.");
@@ -416,7 +414,7 @@ async function executarEdicao() {
     return;
   }
 
-  // Converte data de AAAA-MM-DD para DD/MM/AAAA
+  // Converte data de AAAA-MM-DD para DD/MM/AAAA para a planilha
   let dataFormatada = nasc;
   if(nasc && nasc.includes("-")) {
     const p = nasc.split("-");
@@ -441,7 +439,6 @@ async function executarEdicao() {
   try {
     const response = await fetch(urlFinal);
     const res = await response.json();
-
     if (res.sucesso) {
       alert("✅ Atualizado com sucesso!");
       document.getElementById('corrigirBox').style.display = 'none';
@@ -450,12 +447,12 @@ async function executarEdicao() {
       alert("Erro ao salvar: " + res.erro);
     }
   } catch (error) {
-    console.error("Erro:", error);
-    alert("Erro de conexão.");
+    alert("Erro de conexão com o servidor.");
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = "SALVAR ALTERAÇÕES"; }
   }
 }
+
 // FUNÇÃO 2: Envia os dados corrigidos para o Apps Script
 async function executarEdicao() {
   const userStr = sessionStorage.getItem("usuario");
