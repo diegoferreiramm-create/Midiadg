@@ -367,24 +367,25 @@ function prepararEdicao(item) {
   idSendoEditado = item.id; 
   
   const popUp = document.getElementById('corrigirBox');
-  if(popUp) popUp.style.display = 'block';
+  if(popUp) popUp.style.display = 'flex';
 
-  // Preenche os dados normais
+  // Preenche os campos que podem ser mexidos
   document.getElementById("edit_cpf").value = item.cpf || "";
   document.getElementById("edit_nome").value = item.nome || "";
   document.getElementById("edit_municipio").value = item.municipio || "";
   document.getElementById("edit_telefone").value = item.tel || "";
   document.getElementById("edit_codigoBoleto").value = item.boleto || "";
 
-  // TRATAMENTO DA VIA: Mostra o texto e guarda o valor escondido
-  const viaEncontrada = item.via || "1ª VIA";
-  document.getElementById("edit_label_via").innerText = viaEncontrada.toUpperCase();
-  document.getElementById("edit_via_hidden").value = viaEncontrada;
+  // Apenas exibe o texto da Via para o usuário ler (não mexe em nada)
+  const labelVia = document.getElementById("edit_label_via");
+  if(labelVia) labelVia.innerText = (item.via || "1ª VIA").toUpperCase();
 
-  // Data (MANTIDA SUA LÓGICA)
+  // Data (Sua lógica padrão)
   if(item.nasc) {
     const p = item.nasc.split('/');
-    if(p.length === 3) document.getElementById("edit_nascimento").value = `${p[2]}-${p[1]}-${p[0]}`;
+    if(p.length === 3) {
+      document.getElementById("edit_nascimento").value = `${p[2]}-${p[1]}-${p[0]}`;
+    }
   }
 }
   
@@ -409,7 +410,6 @@ function prepararEdicao(item) {
 async function executarEdicao() {
   const user = JSON.parse(sessionStorage.getItem("usuario"));
   
-  // Captura os dados da tela
   const id = idSendoEditado;
   const cpf = document.getElementById("edit_cpf").value;
   const nome = document.getElementById("edit_nome").value;
@@ -417,9 +417,6 @@ async function executarEdicao() {
   const mun = document.getElementById("edit_municipio").value;
   const tel = document.getElementById("edit_telefone").value;
   const boleto = document.getElementById("edit_codigoBoleto").value;
-  
-  // PEGA A VIA DO CAMPO ESCONDIDO (Que não foi apagada)
-  const via = document.getElementById("edit_via_hidden").value;
 
   // Formata data de volta para BR
   let dBR = nasc;
@@ -428,20 +425,30 @@ async function executarEdicao() {
     dBR = `${p[2]}/${p[1]}/${p[0]}`;
   }
 
-  const url = `${urlSistema}?action=editarCadastroAppsScript&id=${id}&cpf=${cpf}&nome=${encodeURIComponent(nome)}&nasc=${dBR}&municipio=${encodeURIComponent(mun)}&tel=${tel}&via=${encodeURIComponent(via)}&atendente=${encodeURIComponent(user.nome)}&parceiro=${encodeURIComponent(user.parceiro)}&boleto=${boleto}`;
+  // URL LIMPA: Atualiza tudo, exceto a VIA
+  const url = `${urlSistema}?action=editarCadastroAppsScript` +
+              `&id=${id}` +
+              `&cpf=${cpf}` + 
+              `&nome=${encodeURIComponent(nome)}` +
+              `&nasc=${dBR}` +
+              `&municipio=${encodeURIComponent(mun)}` +
+              `&tel=${tel}` +
+              `&atendente=${encodeURIComponent(user.nome)}` +
+              `&parceiro=${encodeURIComponent(user.parceiro)}` +
+              `&boleto=${boleto}`;
 
   try {
     const response = await fetch(url);
     const res = await response.json();
     if(res.sucesso) {
-      alert("✅ Registro atualizado!");
+      alert("✅ Dados atualizados com sucesso!");
       document.getElementById('corrigirBox').style.display = 'none';
-      carregarLista(); // Atualiza a tabela lá embaixo
+      carregarLista(); 
     } else {
-      alert("Erro: " + res.erro);
+      alert("Erro ao salvar: " + res.erro);
     }
   } catch(e) {
-    alert("Erro de conexão com o servidor.");
+    alert("Erro de conexão.");
   }
 }
 
