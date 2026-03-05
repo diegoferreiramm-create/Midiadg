@@ -288,11 +288,36 @@ function salvarNovoUsuario() {
     alert("Preencha todos os campos!");
     return;
   }
-  google.script.run.withSuccessHandler(function(res) {
-    alert(res);
-    document.getElementById('cadastroUsuarioBox').style.display = 'none';
-  }).cadastrarNoServidor(user, pass, nome, parc);
-}
+  const google = {
+  script: {
+    run: {
+      withSuccessHandler: function(callback) {
+        this.callback = callback;
+        return this;
+      },
+      // ADICIONE ESTA LINHA ABAIXO PARA MAPEAMENTO:
+      cadastrarNoServidor: function(u, p, n, pc) { this.call("cadastrarNoServidor", [u, p, n, pc]); },
+      
+      // Mantenha as outras que você já usa, como:
+      validarLogin: function(u, p) { this.call("validarLogin", [u, p]); },
+      // filtrarHistorico, etc...
+
+      call: function(functionName, args) {
+        const self = this;
+        const urlFinal = `${WEB_APP_URL}?token=MACRO@MACRO&action=${functionName}&args=${encodeURIComponent(JSON.stringify(args))}`;
+
+        fetch(urlFinal, {
+          method: 'GET',
+          mode: 'cors',
+          redirect: 'follow'
+        })
+        .then(res => res.json())
+        .then(data => { if (self.callback) self.callback(data); })
+        .catch(err => console.error("Erro na ponte:", err));
+      }
+    }
+  }
+};
 
 // --- MALOTE ---
 var dadosMaloteLocalizados = [];
