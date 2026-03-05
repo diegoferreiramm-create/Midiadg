@@ -117,8 +117,8 @@ function filtrarTabelaAvancado() {
   const fNome = document.getElementById("fNome").value.toUpperCase();
   const fStatus = document.getElementById("fStatus").value.trim();
   
-  // Pegamos o valor do lote exatamente como foi digitado
-  const fLote = document.getElementById("fLote") ? document.getElementById("fLote").value.trim() : "";
+  // Captura o lote sem deixar o JS confundir 0 com vazio
+  const fLoteRaw = document.getElementById("fLote") ? document.getElementById("fLote").value.trim() : "";
  
   const fParc = isAdmin ? document.getElementById("fParceiro").value.toUpperCase() : "";
   const fAtend = isAdmin ? document.getElementById("fAtend").value.toUpperCase() : "";
@@ -149,18 +149,18 @@ function filtrarTabelaAvancado() {
     // --- FILTRO LOTE (COLUNA Q -> td[16]) ---
     let txtLote = td[16] ? td[16].innerText.trim() : "";
     
-    // SÓ ENTRA AQUI SE O CAMPO NÃO ESTIVER VAZIO
-    if (fLote !== "") {
-        if (fLote === "0") {
-            // Se você digitou "0", só mostramos se a célula estiver REALMENTE vazia
-            // Se houver qualquer número ou letra, nós escondemos (mostrar = false)
+    // SÓ FILTRA SE O CAMPO TIVER ALGO DIGITADO (MESMO QUE SEJA 0)
+    if (fLoteRaw.length > 0) {
+        if (fLoteRaw === "0") {
+            // Se digitou 0, esconde todas as linhas que POSSUEM algum texto no lote
             if (txtLote !== "" && txtLote !== "-") {
                 mostrar = false;
             }
         } else {
-            // Busca normal (1, 2, 3...): Mantém sua lógica original
-            if (txtLote !== fLote) {
-                if (td[15] && td[15].innerText.trim() === fLote) {
+            // Busca normal para 1, 2, 3...
+            if (txtLote !== fLoteRaw) {
+                // Tenta na 15 por segurança, como no seu original
+                if (td[15] && td[15].innerText.trim() === fLoteRaw) {
                     mostrar = true; 
                 } else {
                     mostrar = false;
@@ -183,11 +183,10 @@ function filtrarTabelaAvancado() {
   const elNumLinhas = document.getElementById("numLinhas");
   if (elNumLinhas) elNumLinhas.innerText = contadorVisiveis;
 
-  // --- CORREÇÃO DO ERRO DE COLUNA NULL ---
+  // --- CORREÇÃO DO ERRO DE COLUNA NULL (Aquele que você mandou antes) ---
   const checks = document.querySelectorAll('#containerChecks input[type="checkbox"]');
   checks.forEach((input) => {
     const idx = input.getAttribute('data-idx');
-    // Só tenta ocultar se o idx for um número válido (não null)
     if (idx && idx !== "null" && idx !== "") {
         const visivel = input.checked;
         const colunas = tabela.querySelectorAll(`tr > *:nth-child(${idx})`);
