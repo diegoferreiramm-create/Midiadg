@@ -112,7 +112,8 @@ function filtrarTabelaAvancado() {
   const isAdmin = (user.parceiro.toString() === "97");
 
   // Captura dos valores digitados - CPF ADICIONADO E MUNICIPIO REMOVIDO
-  const fCpf = document.getElementById("fCpf") ? document.getElementById("fCpf").value.trim() : "";
+  // AJUSTE: O replace(/\D/g, "") limpa o que você digita para aceitar só números
+  const fCpf = document.getElementById("fCpf") ? document.getElementById("fCpf").value.replace(/\D/g, "") : "";
   const fNome = document.getElementById("fNome").value.toUpperCase();
   
   // STATUS mantido sem toUpperCase para bater com a sua nova lista de frases
@@ -135,7 +136,11 @@ function filtrarTabelaAvancado() {
     let mostrar = true;
 
     // --- NOVO FILTRO CPF (Coluna 2 -> td[1]) ---
-    if (fCpf && td[1] && td[1].innerText.indexOf(fCpf) === -1) mostrar = false;
+    // AJUSTE: Limpamos o CPF da tabela também para comparar número com número
+    if (fCpf && td[1]) {
+      let cpfTabelaLimpo = td[1].innerText.replace(/\D/g, "");
+      if (cpfTabelaLimpo.indexOf(fCpf) === -1) mostrar = false;
+    }
 
     // --- FILTRO NOME (Coluna 3 -> td[2]) ---
     if (fNome && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
