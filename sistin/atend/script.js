@@ -148,17 +148,18 @@ function filtrarTabelaAvancado() {
     if (fStatus && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
 
     // --- FILTRO LOTE (AJUSTADO PARA MOSTRAR "EM ABERTO" COM O NÚMERO 0) ---
-    let txtLote = td[16] ? td[16].innerText.trim() : "";
+    let txtLote16 = td[16] ? td[16].innerText.trim() : "";
+    let txtLote15 = td[15] ? td[15].innerText.trim() : "";
     
     if (fLote) {
         if (fLote === "0") {
-            // Se você digitar 0, ele só mostra se o lote na tabela estiver VAZIO
-            if (txtLote !== "") mostrar = false;
-        } else if (txtLote !== fLote) {
-            // Lógica original: tenta na coluna 16, se não der, tenta na 15
-            if (td[15] && td[15].innerText.trim() === fLote) {
-                mostrar = true; 
-            } else {
+            // Se digitar 0, só mostra as linhas onde AMBAS as colunas (15 e 16) estão vazias
+            if (txtLote16 !== "" || txtLote15 !== "") {
+                mostrar = false;
+            }
+        } else {
+            // Se digitar um número de lote, ele verifica se está na 16 OU na 15
+            if (txtLote16 !== fLote && txtLote15 !== fLote) {
                 mostrar = false;
             }
         }
