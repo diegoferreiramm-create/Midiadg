@@ -1,12 +1,3 @@
-// ESTA FUNÇÃO VIGIA O SITE INTEIRO
-document.addEventListener('input', function (e) {
-  // Se o que o usuário estiver digitando for um campo de texto (INPUT)
-  if (e.target.tagName === 'INPUT') {
-    // Força o valor real a virar maiúsculo na hora
-    e.target.value = e.target.value.toUpperCase();
-  }
-}, true); // O "true" garante que ele capture o evento antes de qualquer outra função
-
 
 // CONFIGURAÇÃO INICIAL - COLOQUE NO TOPO DO SCRIPT.JS
 const urlSistema = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
@@ -759,58 +750,64 @@ function executarBuscaGeral(tipo) {
 }
 
 // --- RESTANTE DAS FUNÇÕES (MANTIDAS E AJUSTADAS) ---
+// --- VIGIA GLOBAL DE INPUTS ---
 document.addEventListener('input', function (e) {
+  if (e.target.tagName === 'INPUT') {
+    // 1. LISTA DE EXCEÇÕES (Campos que PODEM ter letras minúsculas)
+    const excecoes = ['login', 'senha', 'usuarioTroca', 'senhaAtual', 'novaSenha', 'confSenha'];
+
+    // 2. APLICA MAIÚSCULO SE NÃO FOR EXCEÇÃO
+    if (!excecoes.includes(e.target.id)) {
+      e.target.value = e.target.value.toUpperCase();
+    }
+  }
+
+  // --- LÓGICA DE MÁSCARA DE CPF ---
   const camposCpfObrigatorio = ['cpf', 'cpfTerceiro'];
-  
-  // Aplica a máscara/formatação em ambos os campos automaticamente
   if (camposCpfObrigatorio.includes(e.target.id)) {
       e.target.value = CPF.formatar(e.target.value);
   }
 
-  // Lógica específica para o CPF do Aluno (Cadastro)
+  // --- VALIDAÇÃO CPF DO ALUNO (CADASTRO) ---
   if(e.target.id === 'cpf') {
     const v = CPF.validar(e.target.value);
     const msg = document.getElementById("msgCPF");
     if(msg) {
-      msg.innerText = v ? "CPF Válido" : "CPF Inválido";
+      msg.innerText = v ? "CPF VÁLIDO" : "CPF INVÁLIDO";
       msg.className = v ? "valid" : "invalid";
     }
-    document.getElementById("btnSalvar").disabled = !v;
+    const btnSalvar = document.getElementById("btnSalvar");
+    if(btnSalvar) btnSalvar.disabled = !v;
   }
 
-  // NOVA LÓGICA: Validação do CPF do Terceiro (Entrega)
+  // --- VALIDAÇÃO CPF DO TERCEIRO (ENTREGA) ---
   if(e.target.id === 'cpfTerceiro') {
     const v = CPF.validar(e.target.value);
     
-    // --- TRECHO QUE FAZ A MENSAGEM APARECER NA TELA ---
+    // Adicionando a mensagem visual que faltava para o terceiro
     const msgT = document.getElementById("msgCPFTerceiro");
     if(msgT) {
        if (e.target.value.length > 0) {
-         msgT.innerText = v ? "CPF Válido" : "CPF Inválido";
-         msgT.style.color = v ? "#22c55e" : "#ef4444"; // Verde se válido, Vermelho se inválido
+         msgT.innerText = v ? "CPF VÁLIDO" : "CPF INVÁLIDO";
+         msgT.style.color = v ? "#22c55e" : "#ef4444";
+         msgT.style.fontSize = "11px";
+         msgT.style.fontWeight = "bold";
        } else {
          msgT.innerText = "";
        }
     }
-    // -------------------------------------------------
-    
-    // Se o CPF for inválido e tiver os 14 caracteres (formato completo), avisamos
+
     if (e.target.value.length === 14) {
-      if (!v) {
-        e.target.style.border = "2px solid #ef4444"; // Borda vermelha se inválido
-      } else {
-        e.target.style.border = "2px solid #22c55e"; // Borda verde se válido
-      }
+      e.target.style.border = v ? "2px solid #22c55e" : "2px solid #ef4444";
     } else {
-      e.target.style.border = ""; // Reseta a borda enquanto digita
+      e.target.style.border = "";
     }
     
-    // Bloquear o botão de registrar entrega se o CPF for inválido
     const btnEntrega = document.getElementById("btnConfirmarEntrega");
     if(btnEntrega) btnEntrega.disabled = !v;
   }
 
-  // Limpeza de caracteres não numéricos para o código CTR
+  // --- LIMPEZA DE CÓDIGO CTR (SOMENTE NÚMEROS) ---
   if(e.target.id === 'codigoCtr') e.target.value = e.target.value.replace(/\D/g, "");
 });
 
