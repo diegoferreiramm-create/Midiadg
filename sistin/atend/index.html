@@ -91,7 +91,7 @@
 
     <div id="camposTerceiro" class="area-terceiro" style="opacity: 0.5;">
       <input id="nomeTerceiro" placeholder="Nome Completo do Recebedor" disabled>
-      <input id="cpfTerceiro" placeholder="CPF do Recebedor" maxlength="14" disabled>
+      <input id="cpfTerceiro" placeholder="CPF do Recebedor" maxlength="14" onblur="validarCampoCpf(this)" disabled>
       
       <select id="parentesco" disabled>
         <option value="">Vínculo / Parentesco</option>
