@@ -136,7 +136,6 @@ function filtrarTabelaAvancado() {
     let mostrar = true;
 
     // --- NOVO FILTRO CPF (Coluna 2 -> td[1]) ---
-    // AJUSTE: Agora ele limpa os pontos da TABELA para bater com o que você digitou sem pontos
     if (fCpf && td[1]) {
       const cpfLimpoTabela = td[1].innerText.replace(/\D/g, "");
       if (cpfLimpoTabela.indexOf(fCpf) === -1) mostrar = false;
@@ -146,30 +145,28 @@ function filtrarTabelaAvancado() {
     if (fNome && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
 
     // --- FILTRO STATUS (Coluna 12 -> td[11]) ---
-    // Comparação exata para aceitar as frases longas que você configurou
     if (fStatus && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
 
-    // --- FILTRO LOTE (MAPEAMENTO RÍGIDO MANTIDO) ---
+    // --- FILTRO LOTE (AJUSTADO PARA MOSTRAR "EM ABERTO" COM O NÚMERO 0) ---
     let txtLote = td[16] ? td[16].innerText.trim() : "";
-    if (fLote && txtLote !== fLote) {
-        // Se não bateu na 16, tenta na 15 por segurança (Sua lógica original)
-        if (td[15] && td[15].innerText.trim() === fLote) {
-            mostrar = true; 
-        } else {
-            mostrar = false;
+    
+    if (fLote) {
+        if (fLote === "0") {
+            // Se você digitar 0, ele só mostra se o lote na tabela estiver VAZIO
+            if (txtLote !== "") mostrar = false;
+        } else if (txtLote !== fLote) {
+            // Lógica original: tenta na coluna 16, se não der, tenta na 15
+            if (td[15] && td[15].innerText.trim() === fLote) {
+                mostrar = true; 
+            } else {
+                mostrar = false;
+            }
         }
     }
    
     if (isAdmin) {
-      // VIA (Coluna 7 -> td[6])
       if (fVia && td[6] && td[6].innerText.toUpperCase().indexOf(fVia) === -1) mostrar = false;
-      
-      // PARCEIRO (Coluna 8 -> td[7])
       if (fParc && td[7] && td[7].innerText.toUpperCase().indexOf(fParc) === -1) mostrar = false;
-      
-      // MUNICIPIO REMOVIDO DAQUI
-      
-      // ATENDENTE (Coluna 10 -> td[9])
       if (fAtend && td[9] && td[9].innerText.toUpperCase().indexOf(fAtend) === -1) mostrar = false;
     }
 
@@ -186,14 +183,12 @@ function filtrarTabelaAvancado() {
   checks.forEach((input) => {
     const idx = input.getAttribute('data-idx');
     const visivel = input.checked;
-    // O CSS conta de 1 em diante, por isso idx puro funciona aqui
     const colunas = tabela.querySelectorAll(`tr > *:nth-child(${idx})`);
     colunas.forEach(cel => {
       cel.style.display = visivel ? "" : "none";
     });
   });
 }
-
 
 // --- FUNÇÕES DE INTERFACE (MANTIDAS) ---
 function imprimirLista() {
