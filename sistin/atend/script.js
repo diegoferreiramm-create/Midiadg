@@ -748,12 +748,16 @@ function executarBuscaGeral(tipo) {
     .catch(err => alert("Erro ao pesquisar"));
 }
 
-// --- RESTANTE DAS FUNÇÕES (MANTIDAS) ---
+// --- RESTANTE DAS FUNÇÕES (MANTIDAS E AJUSTADAS) ---
 document.addEventListener('input', function (e) {
   const camposCpfObrigatorio = ['cpf', 'cpfTerceiro'];
+  
+  // Aplica a máscara/formatação em ambos os campos automaticamente
   if (camposCpfObrigatorio.includes(e.target.id)) {
       e.target.value = CPF.formatar(e.target.value);
   }
+
+  // Lógica específica para o CPF do Aluno (Cadastro)
   if(e.target.id === 'cpf') {
     const v = CPF.validar(e.target.value);
     const msg = document.getElementById("msgCPF");
@@ -763,6 +767,30 @@ document.addEventListener('input', function (e) {
     }
     document.getElementById("btnSalvar").disabled = !v;
   }
+
+  // NOVA LÓGICA: Validação do CPF do Terceiro (Entrega)
+  if(e.target.id === 'cpfTerceiro') {
+    const v = CPF.validar(e.target.value);
+    
+    // Se o CPF for inválido e tiver os 14 caracteres (formato completo), avisamos
+    // Ou você pode mudar a cor da borda para dar o feedback visual
+    if (e.target.value.length === 14) {
+      if (!v) {
+        e.target.style.border = "2px solid #ef4444"; // Borda vermelha se inválido
+        // Opcional: alert("CPF do Terceiro Inválido!");
+      } else {
+        e.target.style.border = "2px solid #22c55e"; // Borda verde se válido
+      }
+    } else {
+      e.target.style.border = ""; // Reseta a borda enquanto digita
+    }
+    
+    // Opcional: Bloquear o botão de registrar entrega se o CPF for inválido
+    const btnEntrega = document.getElementById("btnConfirmarEntrega"); // Ajuste para o ID do seu botão de entrega
+    if(btnEntrega) btnEntrega.disabled = !v;
+  }
+
+  // Limpeza de caracteres não numéricos para o código CTR
   if(e.target.id === 'codigoCtr') e.target.value = e.target.value.replace(/\D/g, "");
 });
 
