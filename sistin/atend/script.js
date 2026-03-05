@@ -364,36 +364,29 @@ function toggleTerceiro() {
 
 // FUNÇÃO 1: Preenche os dados e faz a tela aparecer sobre a lista
 function prepararEdicao(item) {
-  // 1. Bloqueia o ID para saber quem estamos editando
   idSendoEditado = item.id; 
   
-  // 2. Faz o pop-up amarelo aparecer
   const popUp = document.getElementById('corrigirBox');
-  
-  if (popUp) {
-    popUp.style.display = 'block';
-    popUp.style.position = 'fixed';
-    popUp.style.zIndex = '10000';
-  } else {
-    alert("Erro: Tela de correção (corrigirBox) não encontrada!");
-    return;
-  }
+  if(popUp) popUp.style.display = 'block';
 
-  // 3. Limpa mensagens
-  const msg = document.getElementById("msgCorrecao");
-  if(msg) msg.innerText = "";
-
-  // 4. Preenche os campos de texto (IGUAL AO SEU)
+  // Preenche os dados normais
   document.getElementById("edit_cpf").value = item.cpf || "";
   document.getElementById("edit_nome").value = item.nome || "";
-  
-  // 5. Lógica da Data (MANTIDA INTEGRALMENTE)
+  document.getElementById("edit_municipio").value = item.municipio || "";
+  document.getElementById("edit_telefone").value = item.tel || "";
+  document.getElementById("edit_codigoBoleto").value = item.boleto || "";
+
+  // TRATAMENTO DA VIA: Mostra o texto e guarda o valor escondido
+  const viaEncontrada = item.via || "1ª VIA";
+  document.getElementById("edit_label_via").innerText = viaEncontrada.toUpperCase();
+  document.getElementById("edit_via_hidden").value = viaEncontrada;
+
+  // Data (MANTIDA SUA LÓGICA)
   if(item.nasc) {
-    const partes = item.nasc.split('/');
-    if(partes.length === 3) {
-      document.getElementById("edit_nascimento").value = `${partes[2]}-${partes[1]}-${partes[0]}`;
-    }
+    const p = item.nasc.split('/');
+    if(p.length === 3) document.getElementById("edit_nascimento").value = `${p[2]}-${p[1]}-${p[0]}`;
   }
+}
   
   document.getElementById("edit_municipio").value = item.municipio || "";
   document.getElementById("edit_telefone").value = item.tel || "";
@@ -414,10 +407,9 @@ function prepararEdicao(item) {
 
 // FUNÇÃO 2: Envia os dados corrigidos para o Apps Script (Lógica da Senha)
 async function executarEdicao() {
-  const sessao = sessionStorage.getItem("usuario");
-  if(!sessao) return alert("Sessão expirada!");
-  const user = JSON.parse(sessao);
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
   
+  // Captura os dados da tela
   const id = idSendoEditado;
   const cpf = document.getElementById("edit_cpf").value;
   const nome = document.getElementById("edit_nome").value;
@@ -426,39 +418,30 @@ async function executarEdicao() {
   const tel = document.getElementById("edit_telefone").value;
   const boleto = document.getElementById("edit_codigoBoleto").value;
   
-  // Pega a via que salvamos no campo escondido
+  // PEGA A VIA DO CAMPO ESCONDIDO (Que não foi apagada)
   const via = document.getElementById("edit_via_hidden").value;
 
-  let dataBR = nasc;
+  // Formata data de volta para BR
+  let dBR = nasc;
   if(nasc.includes("-")) {
     const p = nasc.split("-");
-    dataBR = `${p[2]}/${p[1]}/${p[0]}`;
+    dBR = `${p[2]}/${p[1]}/${p[0]}`;
   }
 
-  const url = `${urlSistema}?action=editarCadastroAppsScript` +
-              `&id=${id}&cpf=${cpf}&nome=${encodeURIComponent(nome)}` +
-              `&nasc=${dataBR}&municipio=${encodeURIComponent(mun)}` +
-              `&tel=${tel}&via=${encodeURIComponent(via)}` +
-              `&atendente=${encodeURIComponent(user.nome)}` +
-              `&parceiro=${encodeURIComponent(user.parceiro)}&boleto=${boleto}`;
-
-  const msg = document.getElementById("msgCorrecao");
-  msg.innerText = "Salvando...";
+  const url = `${urlSistema}?action=editarCadastroAppsScript&id=${id}&cpf=${cpf}&nome=${encodeURIComponent(nome)}&nasc=${dBR}&municipio=${encodeURIComponent(mun)}&tel=${tel}&via=${encodeURIComponent(via)}&atendente=${encodeURIComponent(user.nome)}&parceiro=${encodeURIComponent(user.parceiro)}&boleto=${boleto}`;
 
   try {
     const response = await fetch(url);
     const res = await response.json();
     if(res.sucesso) {
-      alert("✅ Atualizado com sucesso!");
+      alert("✅ Registro atualizado!");
       document.getElementById('corrigirBox').style.display = 'none';
-      carregarLista(); // Recarrega a tabela com o dado novo
+      carregarLista(); // Atualiza a tabela lá embaixo
     } else {
       alert("Erro: " + res.erro);
-      msg.innerText = "";
     }
-  } catch (e) {
-    alert("Erro de conexão.");
-    msg.innerText = "";
+  } catch(e) {
+    alert("Erro de conexão com o servidor.");
   }
 }
 
