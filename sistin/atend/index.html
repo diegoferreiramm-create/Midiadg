@@ -190,8 +190,11 @@
         Registros: <span id="numLinhas">0</span>
       </div>
 
-      <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+      <div style="display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap;">
+        <button id="btnFecharLote" onclick="fecharLote()" style="width: 150px; background: #e11d48; margin:0; padding: 8px 0;">Fechar Lote</button>
+        
         <button onclick="imprimirLista()" style="width: 150px; background: #3b82f6; margin:0; padding: 8px 0;">Imprimir Lista</button>
+        
         <button class="cancel" onclick="abrirTela('menuBox')" style="width: 150px; margin:0; padding: 8px 0;">Voltar ao Menu</button>
       </div>
 
