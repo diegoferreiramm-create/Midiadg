@@ -135,32 +135,37 @@ function filtrarTabelaAvancado() {
 
     let mostrar = true;
 
-    // --- NOVO FILTRO CPF (Coluna 2 -> td[1]) ---
+    // --- FILTRO CPF ---
     if (fCpf && td[1]) {
       const cpfLimpoTabela = td[1].innerText.replace(/\D/g, "");
       if (cpfLimpoTabela.indexOf(fCpf) === -1) mostrar = false;
     }
 
-    // --- FILTRO NOME (Coluna 3 -> td[2]) ---
+    // --- FILTRO NOME ---
     if (fNome && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
 
-    // --- FILTRO STATUS (Coluna 12 -> td[11]) ---
+    // --- FILTRO STATUS ---
     if (fStatus && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
 
-    // --- FILTRO LOTE (AJUSTADO PARA MOSTRAR "EM ABERTO" COM O NÚMERO 0) ---
-    let txtLote16 = td[16] ? td[16].innerText.trim() : "";
-    let txtLote15 = td[15] ? td[15].innerText.trim() : "";
+    // --- FILTRO LOTE (COLUNA Q -> td[16]) ---
+    let txtLote = td[16] ? td[16].innerText.trim() : "";
     
     if (fLote) {
         if (fLote === "0") {
-            // Se digitar 0, só mostra as linhas onde AMBAS as colunas (15 e 16) estão vazias
-            if (txtLote16 !== "" || txtLote15 !== "") {
+            // REGRA DO ZERO: Se o lote na tabela NÃO for vazio, então esconde.
+            // (Isso faz sobrar apenas os vazios na tela)
+            if (txtLote !== "") {
                 mostrar = false;
             }
         } else {
-            // Se digitar um número de lote, ele verifica se está na 16 OU na 15
-            if (txtLote16 !== fLote && txtLote15 !== fLote) {
-                mostrar = false;
+            // REGRA DOS NÚMEROS (1, 2, 3...): Mantém sua lógica original que já funciona
+            if (txtLote !== fLote) {
+                // Tenta na 15 por segurança, como você tinha antes
+                if (td[15] && td[15].innerText.trim() === fLote) {
+                    mostrar = true; 
+                } else {
+                    mostrar = false;
+                }
             }
         }
     }
