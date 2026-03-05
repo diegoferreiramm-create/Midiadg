@@ -112,10 +112,12 @@ function filtrarTabelaAvancado() {
   const user = JSON.parse(sessao);
   const isAdmin = (user.parceiro.toString() === "97");
 
-  // Captura dos valores
+  // Captura dos valores digitados - MANTIDO INTEGRALMENTE
   const fCpf = document.getElementById("fCpf") ? document.getElementById("fCpf").value.trim() : "";
   const fNome = document.getElementById("fNome").value.toUpperCase();
   const fStatus = document.getElementById("fStatus").value.trim();
+  
+  // Pegamos o valor do lote (ABERTO ou Número)
   const fLote = document.getElementById("fLote") ? document.getElementById("fLote").value.trim().toUpperCase() : "";
  
   const fParc = isAdmin ? document.getElementById("fParceiro").value.toUpperCase() : "";
@@ -132,31 +134,41 @@ function filtrarTabelaAvancado() {
 
     let mostrar = true;
 
-    // Filtros de CPF, Nome e Status (Originais)
+    // --- FILTRO CPF (Sua lógica original) ---
     if (fCpf && td[1]) {
       const cpfLimpoTabela = td[1].innerText.replace(/\D/g, "");
       if (cpfLimpoTabela.indexOf(fCpf) === -1) mostrar = false;
     }
+
+    // --- FILTRO NOME (Sua lógica original) ---
     if (fNome && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
+
+    // --- FILTRO STATUS (Sua lógica original) ---
     if (fStatus && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
 
-    // --- NOVA LÓGICA DE LOTE (ESTRATÉGIA "ABERTO") ---
+    // --- FILTRO LOTE (COLUNA Q -> td[16]) ---
     let txtLote = td[16] ? td[16].innerText.trim() : "";
     
     if (fLote !== "") {
-        if (fLote === "ABERTO") {
-            // Se clicar no botão ou digitar ABERTO, esconde tudo que tem número
+        if (fLote === "ABERTO" || fLote === "0") {
+            // REGRA PARA ABERTOS: Se tiver número na coluna Q, esconde.
             if (/\d/.test(txtLote)) {
                 mostrar = false;
             }
         } else {
-            // Busca normal por número do lote
-            if (txtLote !== fLote && (td[15] && td[15].innerText.trim() !== fLote)) {
-                mostrar = false;
+            // REGRA PARA NÚMEROS: Busca o lote que você digitou
+            if (txtLote !== fLote) {
+                // Mantém sua busca secundária na coluna 15 que você já tinha
+                if (td[15] && td[15].innerText.trim() === fLote) {
+                    mostrar = true; 
+                } else {
+                    mostrar = false;
+                }
             }
         }
     }
    
+    // --- FILTROS ADMIN (Sua lógica original completa) ---
     if (isAdmin) {
       if (fVia && td[6] && td[6].innerText.toUpperCase().indexOf(fVia) === -1) mostrar = false;
       if (fParc && td[7] && td[7].innerText.toUpperCase().indexOf(fParc) === -1) mostrar = false;
@@ -167,22 +179,23 @@ function filtrarTabelaAvancado() {
     if (mostrar) contadorVisiveis++;
   }
 
+  // Atualiza o contador de linhas (MANTIDO)
   const elNumLinhas = document.getElementById("numLinhas");
   if (elNumLinhas) elNumLinhas.innerText = contadorVisiveis;
 
-  // Lógica de ocultar colunas (Com proteção contra erro null)
+  // --- LOGICA DOS CHECKBOXES (MANTIDO E PROTEGIDO CONTRA ERRO NULL) ---
   const checks = document.querySelectorAll('#containerChecks input[type="checkbox"]');
   checks.forEach((input) => {
     const idx = input.getAttribute('data-idx');
     if (idx && idx !== "null") {
-        try {
-            const colunas = tabela.querySelectorAll(`tr > *:nth-child(${idx})`);
-            colunas.forEach(cel => { cel.style.display = input.checked ? "" : "none"; });
-        } catch(e) {}
+        const visivel = input.checked;
+        const colunas = tabela.querySelectorAll(`tr > *:nth-child(${idx})`);
+        colunas.forEach(cel => {
+          cel.style.display = visivel ? "" : "none";
+        });
     }
   });
 }
-
 
 // --- FUNÇÕES DE INTERFACE (MANTIDAS) ---
 function imprimirLista() {
