@@ -1,3 +1,13 @@
+// ESTA FUNÇÃO VIGIA O SITE INTEIRO
+document.addEventListener('input', function (e) {
+  // Se o que o usuário estiver digitando for um campo de texto (INPUT)
+  if (e.target.tagName === 'INPUT') {
+    // Força o valor real a virar maiúsculo na hora
+    e.target.value = e.target.value.toUpperCase();
+  }
+}, true); // O "true" garante que ele capture o evento antes de qualquer outra função
+
+
 // CONFIGURAÇÃO INICIAL - COLOQUE NO TOPO DO SCRIPT.JS
 const urlSistema = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
 
