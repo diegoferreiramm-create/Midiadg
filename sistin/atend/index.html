@@ -90,16 +90,19 @@
     </div>
 
     <div id="camposTerceiro" class="area-terceiro" style="opacity: 0.5;">
-      <input id="nomeTerceiro" placeholder="Nome Completo do Recebedor" disabled>
-      <input id="cpfTerceiro" placeholder="CPF do Recebedor" maxlength="14" onblur="validarCampoCpf(this)" disabled>
-      
-      <select id="parentesco" disabled>
-        <option value="">Vínculo / Parentesco</option>
-        <option value="Pai/Mãe">Pai/Mãe</option>
-        <option value="Irmãos/filhos">Irmãos/filhos</option>
-        <option value="Tios/primos/terceiros">Tios/primos/terceiros</option>
-      </select>
-    </div>
+  <input id="nomeTerceiro" placeholder="Nome Completo do Recebedor" disabled>
+  
+  <input id="cpfTerceiro" placeholder="CPF do Recebedor" maxlength="14" disabled>
+  
+  <div id="msgCPFTerceiro" style="font-size: 12px; margin-top: 2px; font-weight: bold;"></div>
+  
+  <select id="parentesco" disabled>
+    <option value="">Vínculo / Parentesco</option>
+    <option value="Pai/Mãe">Pai/Mãe</option>
+    <option value="Irmãos/filhos">Irmãos/filhos</option>
+    <option value="Tios/primos/terceiros">Tios/primos/terceiros</option>
+  </select>
+</div>
 
     <button onclick="salvarEntrega()">Confirmar e Imprimir</button>
     <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
