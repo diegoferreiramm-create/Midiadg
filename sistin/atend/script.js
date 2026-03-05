@@ -367,28 +367,27 @@ function prepararEdicao(item) {
   // 1. Bloqueia o ID para saber quem estamos editando
   idSendoEditado = item.id; 
   
-  // 2. IMPORTANTE: Não chamamos abrirTela() aqui! 
-  // Apenas forçamos o pop-up amarelo a aparecer
+  // 2. Faz o pop-up amarelo aparecer
   const popUp = document.getElementById('corrigirBox');
   
   if (popUp) {
-    popUp.style.display = 'block'; // Faz aparecer
+    popUp.style.display = 'block';
     popUp.style.position = 'fixed';
-    popUp.style.zIndex = '10000'; // Garante que fica na frente de tudo
+    popUp.style.zIndex = '10000';
   } else {
-    alert("Erro: Tela de correção (corrigirBox) não encontrada no HTML!");
+    alert("Erro: Tela de correção (corrigirBox) não encontrada!");
     return;
   }
 
-  // 3. Limpa qualquer mensagem de erro anterior
+  // 3. Limpa mensagens
   const msg = document.getElementById("msgCorrecao");
   if(msg) msg.innerText = "";
 
-  // 4. Preenche os campos do Pop-up (edit_...)
+  // 4. Preenche os campos de texto (IGUAL AO SEU)
   document.getElementById("edit_cpf").value = item.cpf || "";
   document.getElementById("edit_nome").value = item.nome || "";
   
-  // Converte a data do formato brasileiro (dd/mm/aaaa) para o calendário (yyyy-mm-dd)
+  // 5. Lógica da Data (MANTIDA INTEGRALMENTE)
   if(item.nasc) {
     const partes = item.nasc.split('/');
     if(partes.length === 3) {
@@ -400,48 +399,66 @@ function prepararEdicao(item) {
   document.getElementById("edit_telefone").value = item.tel || "";
   document.getElementById("edit_codigoBoleto").value = item.boleto || "";
 
-  // Marca a Via correta (1ª ou 2ª)
-  if(item.via === "1ª") document.getElementById("edit_via1").checked = true;
-  if(item.via === "2ª") document.getElementById("edit_via2").checked = true;
+  // --- AQUI MUDA PARA FICAR FIXO ---
+  // Em vez de marcar "checked" no radio, escrevemos o texto no label e guardamos no hidden
+  const viaValor = item.via || "1ª Via";
+  
+  // Escreve o texto bem grande no topo (para o usuário ver)
+  const labelVia = document.getElementById("edit_label_via");
+  if(labelVia) labelVia.innerText = viaValor.toUpperCase();
+  
+  // Guarda o valor no campo escondido (para o salvar levar essa info)
+  const hiddenVia = document.getElementById("edit_via_hidden");
+  if(hiddenVia) hiddenVia.value = viaValor;
 }
 
 // FUNÇÃO 2: Envia os dados corrigidos para o Apps Script (Lógica da Senha)
 async function executarEdicao() {
-  const user = JSON.parse(sessionStorage.getItem("usuario"));
-  const id = idSendoEditado;
+  const sessao = sessionStorage.getItem("usuario");
+  if(!sessao) return alert("Sessão expirada!");
+  const user = JSON.parse(sessao);
   
+  const id = idSendoEditado;
   const cpf = document.getElementById("edit_cpf").value;
   const nome = document.getElementById("edit_nome").value;
   const nasc = document.getElementById("edit_nascimento").value;
   const mun = document.getElementById("edit_municipio").value;
   const tel = document.getElementById("edit_telefone").value;
   const boleto = document.getElementById("edit_codigoBoleto").value;
-  const viaEl = document.querySelector('input[name="edit_via"]:checked');
-  const via = viaEl ? viaEl.value : "";
+  
+  // Pega a via que salvamos no campo escondido
+  const via = document.getElementById("edit_via_hidden").value;
 
-  // Converte data para o formato da planilha (dd/mm/aaaa)
-  let dataPlanilha = nasc;
+  let dataBR = nasc;
   if(nasc.includes("-")) {
     const p = nasc.split("-");
-    dataPlanilha = `${p[2]}/${p[1]}/${p[0]}`;
+    dataBR = `${p[2]}/${p[1]}/${p[0]}`;
   }
 
-  // URL direta para a função de EDITAR do seu .gs
-  const url = `${urlSistema}?action=editarCadastroAppsScript&id=${id}&cpf=${cpf}&nome=${encodeURIComponent(nome)}&nasc=${dataPlanilha}&municipio=${encodeURIComponent(mun)}&tel=${tel}&via=${via}&atendente=${encodeURIComponent(user.nome)}&parceiro=${encodeURIComponent(user.parceiro)}&boleto=${boleto}`;
+  const url = `${urlSistema}?action=editarCadastroAppsScript` +
+              `&id=${id}&cpf=${cpf}&nome=${encodeURIComponent(nome)}` +
+              `&nasc=${dataBR}&municipio=${encodeURIComponent(mun)}` +
+              `&tel=${tel}&via=${encodeURIComponent(via)}` +
+              `&atendente=${encodeURIComponent(user.nome)}` +
+              `&parceiro=${encodeURIComponent(user.parceiro)}&boleto=${boleto}`;
+
+  const msg = document.getElementById("msgCorrecao");
+  msg.innerText = "Salvando...";
 
   try {
     const response = await fetch(url);
     const res = await response.json();
-    
     if(res.sucesso) {
-      alert("✅ Registro corrigido com sucesso!");
-      document.getElementById('corrigirBox').style.display = 'none'; // Fecha o Pop-up
-      if(typeof listarCadastros === "function") listarCadastros(); // Atualiza a lista
+      alert("✅ Atualizado com sucesso!");
+      document.getElementById('corrigirBox').style.display = 'none';
+      carregarLista(); // Recarrega a tabela com o dado novo
     } else {
       alert("Erro: " + res.erro);
+      msg.innerText = "";
     }
   } catch (e) {
     alert("Erro de conexão.");
+    msg.innerText = "";
   }
 }
 
