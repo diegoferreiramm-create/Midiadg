@@ -363,23 +363,24 @@ function toggleTerceiro() {
 }
 
 // FUNÇÃO 1: Preenche os dados e faz a tela aparecer sobre a lista
+// --- FUNÇÕES DE EDIÇÃO (CORRIGIDAS E BLINDADAS) ---
+
 function prepararEdicao(item) {
   idSendoEditado = item.id; 
   
   const popUp = document.getElementById('corrigirBox');
   if(popUp) {
-    // Mudamos para 'flex' para que o box fique bem no centro da tela
     popUp.style.display = 'flex'; 
   }
 
-  // Preenche os campos
+  // Preenche os campos de texto
   if(document.getElementById("edit_cpf")) document.getElementById("edit_cpf").value = item.cpf || "";
   if(document.getElementById("edit_nome")) document.getElementById("edit_nome").value = item.nome || "";
   if(document.getElementById("edit_municipio")) document.getElementById("edit_municipio").value = item.municipio || "";
   if(document.getElementById("edit_telefone")) document.getElementById("edit_telefone").value = item.tel || "";
   if(document.getElementById("edit_codigoBoleto")) document.getElementById("edit_codigoBoleto").value = item.boleto || "";
 
-  // Via Imutável (Apenas exibe e guarda no hidden)
+  // Tratamento da VIA: Mostra o texto e guarda o valor escondido
   const viaValor = item.via || "1ª VIA";
   const labelVia = document.getElementById("edit_label_via");
   if(labelVia) labelVia.innerText = viaValor.toUpperCase();
@@ -387,32 +388,74 @@ function prepararEdicao(item) {
   const hiddenVia = document.getElementById("edit_via_hidden");
   if(hiddenVia) hiddenVia.value = viaValor;
 
-  // Formata Data para o input
+  // Formata a data para o input (AAAA-MM-DD)
   if(item.nasc && document.getElementById("edit_nascimento")) {
     const p = item.nasc.split('/');
     if(p.length === 3) {
       document.getElementById("edit_nascimento").value = `${p[2]}-${p[1]}-${p[0]}`;
     }
   }
-} // <--- FECHAMENTO CORRETO DA prepararEdicao
-  
-  document.getElementById("edit_municipio").value = item.municipio || "";
-  document.getElementById("edit_telefone").value = item.tel || "";
-  document.getElementById("edit_codigoBoleto").value = item.boleto || "";
-
-  // --- AQUI MUDA PARA FICAR FIXO ---
-  // Em vez de marcar "checked" no radio, escrevemos o texto no label e guardamos no hidden
-  const viaValor = item.via || "1ª Via";
-  
-  // Escreve o texto bem grande no topo (para o usuário ver)
-  const labelVia = document.getElementById("edit_label_via");
-  if(labelVia) labelVia.innerText = viaValor.toUpperCase();
-  
-  // Guarda o valor no campo escondido (para o salvar levar essa info)
-  const hiddenVia = document.getElementById("edit_via_hidden");
-  if(hiddenVia) hiddenVia.value = viaValor;
 }
 
+async function executarEdicao() {
+  const userStr = sessionStorage.getItem("usuario");
+  if(!userStr) return alert("Sessão expirada. Faça login novamente.");
+  const user = JSON.parse(userStr);
+  
+  const id = idSendoEditado;
+  const cpf = document.getElementById("edit_cpf").value;
+  const nome = document.getElementById("edit_nome").value;
+  const nasc = document.getElementById("edit_nascimento").value;
+  const mun = document.getElementById("edit_municipio").value;
+  const tel = document.getElementById("edit_telefone").value;
+  const boleto = document.getElementById("edit_codigoBoleto").value;
+  const via = document.getElementById("edit_via_hidden").value;
+
+  if(!via) {
+    alert("Erro: Via não detectada.");
+    return;
+  }
+
+  // Converte data de AAAA-MM-DD para DD/MM/AAAA
+  let dataFormatada = nasc;
+  if(nasc && nasc.includes("-")) {
+    const p = nasc.split("-");
+    dataFormatada = `${p[2]}/${p[1]}/${p[0]}`;
+  }
+
+  const btn = document.querySelector("#corrigirBox button[onclick='executarEdicao()']");
+  if(btn) { btn.disabled = true; btn.innerText = "SALVANDO..."; }
+
+  const urlFinal = `${urlSistema}?action=editarCadastroAppsScript` +
+    `&id=${encodeURIComponent(id)}` +
+    `&cpf=${encodeURIComponent(cpf)}` +
+    `&nome=${encodeURIComponent(nome)}` +
+    `&nasc=${encodeURIComponent(dataFormatada)}` +
+    `&municipio=${encodeURIComponent(mun)}` +
+    `&tel=${encodeURIComponent(tel)}` +
+    `&via=${encodeURIComponent(via)}` + 
+    `&atendente=${encodeURIComponent(user.nome)}` +
+    `&parceiro=${encodeURIComponent(user.parceiro)}` +
+    `&boleto=${encodeURIComponent(boleto)}`;
+
+  try {
+    const response = await fetch(urlFinal);
+    const res = await response.json();
+
+    if (res.sucesso) {
+      alert("✅ Atualizado com sucesso!");
+      document.getElementById('corrigirBox').style.display = 'none';
+      if(typeof carregarLista === "function") carregarLista();
+    } else {
+      alert("Erro ao salvar: " + res.erro);
+    }
+  } catch (error) {
+    console.error("Erro:", error);
+    alert("Erro de conexão.");
+  } finally {
+    if(btn) { btn.disabled = false; btn.innerText = "SALVAR ALTERAÇÕES"; }
+  }
+}
 // FUNÇÃO 2: Envia os dados corrigidos para o Apps Script
 async function executarEdicao() {
   const userStr = sessionStorage.getItem("usuario");
