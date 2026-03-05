@@ -282,6 +282,7 @@ button:hover{ background:#16a34a; }
   button { display: none !important; } /* Esconde os botões na impressão */
 }
 
-input {
+/* Força maiúsculo em tudo, EXCETO nos campos de login e troca de senha */
+input:not(#login):not(#senha):not(#usuarioTroca):not(#senhaAtual):not(#novaSenha):not(#confSenha) {
   text-transform: uppercase;
 }
