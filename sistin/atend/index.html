@@ -172,7 +172,13 @@
           <option value="1ª">1ª Via</option>
           <option value="2ª">2ª Via</option>
         </select>
-        <input type="text" id="fLote" placeholder="0 = ABERTO" onkeyup="filtrarTabelaAvancado()" style="width: 70px; height: 38px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+        
+        <div style="display: flex; gap: 4px; align-items: center;">
+          <input type="text" id="fLote" placeholder="LOTE" onkeyup="filtrarTabelaAvancado()" style="width: 70px; height: 38px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+          <button type="button" onclick="document.getElementById('fLote').value='ABERTO'; filtrarTabelaAvancado();" style="height: 38px; padding: 0 10px; border-radius: 4px; border: none; background: #3b82f6; color: white; cursor: pointer; font-size: 11px; font-weight: bold; white-space: nowrap;">
+            VER ABERTOS
+          </button>
+        </div>
       </div>
     </div>
       
