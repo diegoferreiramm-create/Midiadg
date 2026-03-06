@@ -1,10 +1,15 @@
-// CONFIGURAÇÃO INICIAL - COLOQUE NO TOPO DO SCRIPT.JS
+// CONFIGURAÇÃO INICIAL - TOPO DO SCRIPT.JS
 const urlSistema = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
 
+// --- VARIÁVEIS DE CONTROLE DO SISTEMA ---
 let modoEdicao = false;
 let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
-let clicouNoBotaoSair = false; // Essencial para o Log Inteligente funcionar
+let clicouNoBotaoSair = false; 
+
+// --- VARIÁVEIS GLOBAIS PARA O LOG (IGUAL AO SISTEMA LOTES) ---
+let usuarioLogadoParaLog = ""; 
+let parceiroLogadoParaLog = "";
 
 //atribuições de abrir paginas//
 function abrirTela(id){
