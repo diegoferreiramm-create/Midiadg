@@ -219,25 +219,27 @@ function salvarRecebimento() {
   btn.innerText = "SALVANDO...";
 
   google.script.run.withSuccessHandler(function(protocolo) {
+    // Preenche o cabeçalho do protocolo na tela
     document.getElementById('impParceiroLote').innerText = "PARCEIRO: " + codParceiro + " | LOTE: " + loteNum;
     document.getElementById('impProtocolo').innerText = "PROTOCOLO: " + protocolo;
     document.getElementById('impDataHora').innerText = "DATA: " + new Date().toLocaleString('pt-BR');
     document.getElementById('impNomeParceiro').innerText = "NOME DO PARCEIRO: " + nomeParceiro;
     document.getElementById('impNomeAtendente').innerText = nomeGlobal;
 
+    // MONTA A LISTA PARA IMPRESSÃO (Usando os nomes dos campos do objeto)
     var htmlImp = "";
     dadosLocalizados.forEach(function(r) {
       htmlImp += `<tr>
-        <td style="border:1px solid black; padding:2px;">${r[0]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[1]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[2]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[3]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[4]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[5]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[6]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[8]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[9]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[10]}</td>
+        <td style="border:1px solid black; padding:2px;">${r.id || "---"}</td>
+        <td style="border:1px solid black; padding:2px;">${r.cpf || "---"}</td>
+        <td style="border:1px solid black; padding:2px;">${r.nome || "---"}</td>
+        <td style="border:1px solid black; padding:2px;">${r.nasc || "---"}</td>
+        <td style="border:1px solid black; padding:2px;">${r.municipio || "---"}</td>
+        <td style="border:1px solid black; padding:2px;">${r.via || "---"}</td>
+        <td style="border:1px solid black; padding:2px;">${r.parceiro || "---"}</td>
+        <td style="border:1px solid black; padding:2px;">${r.data || "---"}</td>
+        <td style="border:1px solid black; padding:2px;">${r.atendente || "---"}</td>
+        <td style="border:1px solid black; padding:2px;">${r.lote || "---"}</td>
       </tr>`;
     });
     document.getElementById('corpoImpressao').innerHTML = htmlImp;
