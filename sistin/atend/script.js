@@ -1,13 +1,12 @@
 // CONFIGURAÇÃO INICIAL - TOPO DO SCRIPT.JS
 const urlSistema = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
 
-// --- VARIÁVEIS DE CONTROLE DO SISTEMA ---
 let modoEdicao = false;
 let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
 let clicouNoBotaoSair = false; 
 
-// --- VARIÁVEIS GLOBAIS PARA O LOG (IGUAL AO SISTEMA LOTES) ---
+// ESTAS DUAS SÃO AS QUE FALTAVAM:
 let usuarioLogadoParaLog = ""; 
 let parceiroLogadoParaLog = "";
 
@@ -47,7 +46,6 @@ function abrirTela(id){
   }
 }
 
-// ATRIBUIÇÃO LOGIN - ADAPTADA PARA GITHUB //
 function entrar() {
   const login = document.getElementById("login").value.trim();
   const senha = document.getElementById("senha").value.trim();
@@ -59,14 +57,16 @@ function entrar() {
     .then(response => response.json())
     .then(res => {
       if (res.sucesso) {
-        
-        // --- ADICIONE ESTAS DUAS LINHAS AQUI ---
-        // Elas salvam o nome na RAM para o Log de saída ler depois
+        // SALVA NA RAM PARA O LOG DE SAÍDA USAR DEPOIS
         usuarioLogadoParaLog = res.nome; 
         parceiroLogadoParaLog = res.parceiro;
-        // --------------------------------------
 
         sessionStorage.setItem("usuario", JSON.stringify(res));
+        
+        // LOG DE ENTRADA (OPCIONAL, MAS BOM TER)
+        const logEntrada = [res.nome, res.parceiro, "LOGIN REALIZADO", "Sistema MTECH"];
+        fetch(`${urlSistema}?action=registrarAcaoNoLog&args=${encodeURIComponent(JSON.stringify(logEntrada))}&token=MACRO@MACRO`, {mode:'no-cors'});
+
         mostrarMenu();
       } else {
         if (msg) msg.innerText = "Login inválido";
@@ -74,7 +74,7 @@ function entrar() {
     })
     .catch(err => {
       console.error("Erro ao conectar:", err);
-      if (msg) msg.innerText = "Erro de conexão com o servidor";
+      if (msg) msg.innerText = "Erro de conexão";
     });
 }
 
@@ -1157,37 +1157,33 @@ async function executarConserto() {
   }
 }
 
-// --- LOG INTELIGENTE MTECH (Sincronizado com LOTES) ---
-window.addEventListener('unload', function() {
-  // Verificamos as variáveis globais (mais seguro que sessionStorage no fechamento)
+// --- LOG DE SAÍDA MTECH (VERSÃO FINAL BLINDADA) ---
+
+// Usamos 'pagehide' porque o 'unload' é bloqueado em navegadores modernos (2026)
+window.addEventListener('pagehide', function() {
+  // Só dispara se houver um usuário logado na RAM
   if (usuarioLogadoParaLog && usuarioLogadoParaLog !== "") {
     
     let mensagemAcao = "";
-    let localAcao = "";
+    let localAcao = "Sistema MTECH";
 
-    // Detecta se foi botão Sair ou F5
+    // Verifica se foi Sair/F5 ou se fechou a aba no "X"
     if (clicouNoBotaoSair || (performance.navigation && performance.navigation.type === 1)) {
       mensagemAcao = "SAÍDA/ATUALIZOU";
-      localAcao = "Sistema MTECH";
     } else {
       mensagemAcao = "FECHOU ABA/NAVEGADOR";
-      localAcao = "Navegador";
     }
 
-    // Monta o array exatamente como o LOTES espera [Nome, Parceiro, Ação, Local]
+    // Monta os dados exatamente como o LOTES [Nome, Parceiro, Ação, Local]
     const dadosLog = [usuarioLogadoParaLog, parceiroLogadoParaLog, mensagemAcao, localAcao];
     
-    // Usa a sua urlSistema (que é o WEB_APP_URL do MTECH)
+    // Monta a URL com os parâmetros que suas 600 linhas de .gs esperam
     const urlLog = urlSistema + 
                    "?action=registrarAcaoNoLog" + 
                    "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
                    "&token=MACRO@MACRO";
 
-    // O keepalive: true é o segredo para o Google receber antes da aba morrer
-    fetch(urlLog, { 
-      method: 'GET', 
-      mode: 'no-cors', 
-      keepalive: true 
-    });
+    // O PULO DO GATO: navigator.sendBeacon não é cancelado pelo navegador
+    navigator.sendBeacon(urlLog);
   }
 });
