@@ -6,9 +6,6 @@ let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
 let clicouNoBotaoSair = false; 
 
-// ESTAS DUAS SÃO AS QUE FALTAVAM:
-let usuarioLogadoParaLog = ""; 
-let parceiroLogadoParaLog = "";
 
 //atribuições de abrir paginas//
 function abrirTela(id){
@@ -1157,33 +1154,35 @@ async function executarConserto() {
   }
 }
 
-// --- LOG DE SAÍDA MTECH (VERSÃO FINAL BLINDADA) ---
-
-// Usamos 'pagehide' porque o 'unload' é bloqueado em navegadores modernos (2026)
-window.addEventListener('pagehide', function() {
-  // Só dispara se houver um usuário logado na RAM
-  if (usuarioLogadoParaLog && usuarioLogadoParaLog !== "") {
+// --- LOG INTELIGENTE: DIFERENCIA FECHAMENTO DE SAÍDA/ATUALIZAÇÃO ---
+window.addEventListener('unload', function() {
+  if (typeof nomeGlobal !== 'undefined' && nomeGlobal && nomeGlobal !== "") {
     
     let mensagemAcao = "";
-    let localAcao = "Sistema MTECH";
+    let localAcao = "";
 
-    // Verifica se foi Sair/F5 ou se fechou a aba no "X"
-    if (clicouNoBotaoSair || (performance.navigation && performance.navigation.type === 1)) {
+    // Se o usuário clicou no botão ou se a página está recarregando (F5)
+    // O 'performance.navigation.type === 1' detecta se foi um RECARREGAMENTO (F5)
+    if ((typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) || performance.navigation.type === 1) {
       mensagemAcao = "SAÍDA/ATUALIZOU";
+      localAcao = "Sistema Lotes";
     } else {
+      // Se não foi botão nem F5, foi fechar a aba, desligar PC ou trocar de site
       mensagemAcao = "FECHOU ABA/NAVEGADOR";
+      localAcao = "Navegador";
     }
 
-    // Monta os dados exatamente como o LOTES [Nome, Parceiro, Ação, Local]
-    const dadosLog = [usuarioLogadoParaLog, parceiroLogadoParaLog, mensagemAcao, localAcao];
+    const dadosLog = [nomeGlobal, parceiroGlobal, mensagemAcao, localAcao];
     
-    // Monta a URL com os parâmetros que suas 600 linhas de .gs esperam
-    const urlLog = urlSistema + 
+    const urlLog = WEB_APP_URL + 
                    "?action=registrarAcaoNoLog" + 
                    "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
                    "&token=MACRO@MACRO";
 
-    // O PULO DO GATO: navigator.sendBeacon não é cancelado pelo navegador
-    navigator.sendBeacon(urlLog);
+    fetch(urlLog, { 
+      method: 'GET', 
+      mode: 'no-cors', 
+      keepalive: true 
+    });
   }
 });
