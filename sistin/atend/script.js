@@ -19,8 +19,9 @@ function abrirTela(id) {
 
   // 2. Se o ID for 'abrirAdmin', chamamos a função que abre o seu link do GitHub
   if(id === 'abrirAdmin') {
-    abrirAdminExterno(); // Chama a função que leva para midiadg.com.br
-    document.getElementById('menuBox').style.display = "flex"; // Mantém o menu aberto por baixo
+    abrirAdmin(); // Chama a função que leva para midiadg.com.br
+    const menu = document.getElementById('menuBox');
+    if(menu) menu.style.display = "flex"; 
     return;
   }
 
@@ -32,9 +33,12 @@ function abrirTela(id) {
   }
 
   // 4. Lógicas automáticas ao abrir certas telas
+  // Esta parte abaixo contém exatamente o que estava repetido, agora dentro da função correta
   if(id === 'entregarBox') {
-    document.getElementById("codigoCtr").value = "";
-    document.getElementById("infoAlunoEntrega").style.display = "none";
+    const campoCtr = document.getElementById("codigoCtr");
+    const infoEntrega = document.getElementById("infoAlunoEntrega");
+    if(campoCtr) campoCtr.value = "";
+    if(infoEntrega) infoEntrega.style.display = "none";
     alunoEncontradoGlobal = null;
   }
   
@@ -49,7 +53,6 @@ function abrirTela(id) {
     if(btnSalvar) btnSalvar.innerText = "Salvar e Gerar Protocolo";
   }
 }
-
   // Reseta campos específicos ao navegar
   if(id === 'entregarBox') {
     document.getElementById("codigoCtr").value = "";
@@ -1094,41 +1097,26 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
   telaPrint.document.close();
 }
 
-// --- FUNÇÃO PARA IR DO ATENDIMENTO PARA O LOTES (BLINDADA) ---
+// ABAIXO A FUNÇÃO QUE ABRE O LINK EXTERNO (Sem quebrar o login)
 function abrirAdmin() {
+  var urlLotes = "https://midiadg.com.br/sistin/lotes/index.html";
+  var token = "MACRO@MACRO";
+  var u = ""; var s = "";
   try {
-    var urlLotes = "https://midiadg.com.br/sistin/lotes/index.html";
-    var token = "MACRO@MACRO";
-    var u = ""; 
-    var s = "";
-
-    // Tenta capturar dos campos de login
     var uField = document.getElementById('userLogin');
     var sField = document.getElementById('passLogin');
+    if (uField) u = uField.value;
+    if (sField) s = sField.value;
     
-    if (uField && sField) {
-      u = uField.value;
-      s = sField.value;
+    // Se campos vazios, busca na sessão
+    if(!u || !s){
+       const sessao = JSON.parse(sessionStorage.getItem("usuario") || "{}");
+       u = sessao.user || sessao.usuario || "";
+       s = sessao.pass || sessao.senha || "";
     }
-
-    // Se não tiver nos campos, tenta buscar na sessão salva
-    if (!u || !s) {
-      var sessao = sessionStorage.getItem("usuario");
-      if (sessao) {
-        var obj = JSON.parse(sessao);
-        u = obj.user || obj.usuario || "";
-        s = obj.pass || obj.senha || "";
-      }
-    }
-
-    var linkFinal = urlLotes + "?u=" + encodeURIComponent(u) + "&s=" + encodeURIComponent(s) + "&token=" + encodeURIComponent(token);
-    window.open(linkFinal, '_blank');
-    
-  } catch (err) {
-    console.error("Erro ao tentar abrir Lotes:", err);
-    // Mesmo com erro, tenta abrir a URL base para não travar o usuário
-    window.open("https://midiadg.com.br/sistin/lotes/index.html", '_blank');
-  }
+  } catch (e) { console.log("Erro na captura."); }
+  var linkFinal = urlLotes + "?u=" + encodeURIComponent(u) + "&s=" + encodeURIComponent(s) + "&token=" + encodeURIComponent(token);
+  window.open(linkFinal, '_blank');
 }
 
 function mascaraData(campo) {
