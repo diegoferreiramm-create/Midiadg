@@ -355,19 +355,51 @@ function carregarDadosLog() {
     });
 }
 
-function logout(){ 
+// --- FUNÇÃO DE LOGOUT (PROJETO MTECH) ---
+function logout() {
+  // 1. Recupera os dados antes de limpar o storage para registrar o log
+  const userLog = sessionStorage.getItem("nomeUsuario") || "Desconhecido";
+  const parcLog = sessionStorage.getItem("parceiroUsuario") || "---";
+
+  // 2. Registra o log no servidor (Usando sua ponte google.script.run)
+  if (userLog !== "Desconhecido") {
+    google.script.run.call("registrarAcaoNoLog", [userLog, parcLog, "LOGOUT / SAÍDA", "Sistema MTECH"]);
+  }
+
+  // 3. Limpa a sessão e esconde o HUD
   sessionStorage.clear(); 
-  document.getElementById("hudUsuario").style.display="none"; 
+  document.getElementById("hudUsuario").style.display = "none"; 
   abrirTela('loginBox'); 
 }
 
+// --- FUNÇÃO DE TERCEIRO (MANTIDA ORIGINAL) ---
 function toggleTerceiro() {
   const isChecked = document.getElementById("checkTerceiro").checked;
   const container = document.getElementById("camposTerceiro");
   const inputs = container.querySelectorAll("input, select");
+  
+  // Ajuste visual para indicar se o campo está ativo ou não
   container.style.opacity = isChecked ? "1" : "0.5";
   inputs.forEach(el => el.disabled = !isChecked);
 }
+
+// --- ADICIONAL: LOG SE FECHAR A ABA NO MTECH ---
+window.addEventListener('beforeunload', function () {
+  const userLog = sessionStorage.getItem("nomeUsuario");
+  const parcLog = sessionStorage.getItem("parceiroUsuario");
+  
+  if (userLog) {
+    google.script.run.call("registrarAcaoNoLog", [userLog, parcLog, "FECHOU ABA (MTECH)", "Navegador"]);
+  }
+});
+
+// --- LOG AUTOMÁTICO AO FECHAR A PÁGINA OU ABA (LOTES) ---
+window.addEventListener('beforeunload', function (e) {
+  if (nomeGlobal && nomeGlobal !== "") {
+    // Dispara o log antes da aba fechar totalmente
+    google.script.run.call("registrarAcaoNoLog", [nomeGlobal, parceiroGlobal, "FECHOU ABA/NAVEGADOR", "Sistema Lotes"]);
+  }
+});
 
 
 // --- FUNÇÃO PARA ABRIR O BOX DE EDIÇÃO ---
