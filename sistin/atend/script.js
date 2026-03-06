@@ -1,58 +1,31 @@
 
-// CONFIGURAÇÃO INICIAL
+// CONFIGURAÇÃO INICIAL - COLOQUE NO TOPO DO SCRIPT.JS
 const urlSistema = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
 
 let modoEdicao = false;
 let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
 
-// ATRIBUIÇÕES DE ABRIR PAGINAS
-function abrirTela(id) {
-  // Lista de todas as telas (divs) internas do seu index.html
-  const telas = ["loginBox", "menuBox", "cadastrarBox", "pesquisarBox", "entregarBox", "listasBox", "logBox", "recebimentoLoteBox"];
+//atribuições de abrir paginas//
+function abrirTela(id){
+  // Adicionado 'recebimentoLoteBox' na lista abaixo
+  const telas = ["loginBox","menuBox","cadastrarBox","pesquisarBox","entregarBox","listasBox", "logBox", "recebimentoLoteBox"];   
   
-  // 1. Esconde todas as telas internas
   telas.forEach(t => { 
     const el = document.getElementById(t);
     if(el) el.style.display = "none"; 
   });
 
-  // 2. Se o ID for 'abrirAdmin', chamamos a função que abre o seu link do GitHub
-  if(id === 'abrirAdmin') {
-    abrirAdmin(); // Chama a função que leva para midiadg.com.br
-    const menu = document.getElementById('menuBox');
-    if(menu) menu.style.display = "flex"; 
-    return;
-  }
-
-  // 3. Mostra a tela de destino interna
   const telaDestino = document.getElementById(id);
-  if(telaDestino) {
-    // Mantém o padrão Flex para o seu layout não quebrar
-    telaDestino.style.display = "flex";
+  if(telaDestino){
+    // Mantém flex para telas de estrutura complexa
+    if(['menuBox', 'listasBox', 'recebimentoLoteBox'].includes(id)){
+      telaDestino.style.display = "flex";
+    } else {
+      telaDestino.style.display = "flex"; // Ou "block", mas seu CSS usa flex para centralizar
+    }
   }
 
-  // 4. Lógicas automáticas ao abrir certas telas
-  // Esta parte abaixo contém exatamente o que estava repetido, agora dentro da função correta
-  if(id === 'entregarBox') {
-    const campoCtr = document.getElementById("codigoCtr");
-    const infoEntrega = document.getElementById("infoAlunoEntrega");
-    if(campoCtr) campoCtr.value = "";
-    if(infoEntrega) infoEntrega.style.display = "none";
-    alunoEncontradoGlobal = null;
-  }
-  
-  if(id === 'listasBox') carregarLista();
-  if(id === 'logBox') carregarDadosLog();
-  
-  // Reseta o modo de edição se sair da tela de cadastro
-  if(id !== 'cadastrarBox') {
-    modoEdicao = false;
-    idSendoEditado = null;
-    const btnSalvar = document.getElementById("btnSalvar");
-    if(btnSalvar) btnSalvar.innerText = "Salvar e Gerar Protocolo";
-  }
-}
   // Reseta campos específicos ao navegar
   if(id === 'entregarBox') {
     document.getElementById("codigoCtr").value = "";
@@ -968,7 +941,6 @@ function fecharLotePorParceiro() {
     .catch(err => alert("Erro na conexão ao fechar lote."));
 }
 
-
 // --- BUSCA ÚNICA (Corrigida para GitHub) ---
 document.addEventListener('blur', function(e){
   if(e.target.id === "codigoCtr"){
@@ -1097,9 +1069,8 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
   telaPrint.document.close();
 }
 
-// ABAIXO A FUNÇÃO QUE ABRE O LINK EXTERNO (Sem quebrar o login)
 function abrirAdmin() {
-  var urlLotes = "https://midiadg.com.br/sistin/lotes/index.html";
+  var urlLotes = "https://script.google.com/macros/s/AKfycbxXBQmEu_d-jUL08Vi9Cvd-h0PPnl4XLPSocuMJmBBndADfui3qj6EpG91NXOmeuXSO/exec";
   var token = "MACRO@MACRO";
   var u = ""; var s = "";
   try {
@@ -1107,13 +1078,6 @@ function abrirAdmin() {
     var sField = document.getElementById('passLogin');
     if (uField) u = uField.value;
     if (sField) s = sField.value;
-    
-    // Se campos vazios, busca na sessão
-    if(!u || !s){
-       const sessao = JSON.parse(sessionStorage.getItem("usuario") || "{}");
-       u = sessao.user || sessao.usuario || "";
-       s = sessao.pass || sessao.senha || "";
-    }
   } catch (e) { console.log("Erro na captura."); }
   var linkFinal = urlLotes + "?u=" + encodeURIComponent(u) + "&s=" + encodeURIComponent(s) + "&token=" + encodeURIComponent(token);
   window.open(linkFinal, '_blank');
