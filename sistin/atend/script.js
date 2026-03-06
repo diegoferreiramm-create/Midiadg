@@ -1155,34 +1155,24 @@ async function executarConserto() {
 }
 
 // --- LOG INTELIGENTE: DIFERENCIA FECHAMENTO DE SAÍDA/ATUALIZAÇÃO ---
-window.addEventListener('unload', function() {
-  if (typeof nomeGlobal !== 'undefined' && nomeGlobal && nomeGlobal !== "") {
+window.addEventListener('pagehide', function() {
+  // Use aqui o nome EXATO das variáveis que você já usa no MTECH
+  // (Exemplo: se você usa 'usuarioAtivo', coloque 'usuarioAtivo' aqui)
+  if (typeof usuarioLogado !== 'undefined' && usuarioLogado) {
     
-    let mensagemAcao = "";
-    let localAcao = "";
+    let mensagemAcao = (performance.navigation && performance.navigation.type === 1) 
+                       ? "SAÍDA/ATUALIZOU" 
+                       : "FECHOU ABA/NAVEGADOR";
 
-    // Se o usuário clicou no botão ou se a página está recarregando (F5)
-    // O 'performance.navigation.type === 1' detecta se foi um RECARREGAMENTO (F5)
-    if ((typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) || performance.navigation.type === 1) {
-      mensagemAcao = "SAÍDA/ATUALIZOU";
-      localAcao = "Sistema Lotes";
-    } else {
-      // Se não foi botão nem F5, foi fechar a aba, desligar PC ou trocar de site
-      mensagemAcao = "FECHOU ABA/NAVEGADOR";
-      localAcao = "Navegador";
-    }
-
-    const dadosLog = [nomeGlobal, parceiroGlobal, mensagemAcao, localAcao];
+    // Monta os dados com as variáveis que já existem no seu código
+    const dadosLog = [usuarioLogado, parceiroLogado, mensagemAcao, "Sistema MTECH"];
     
-    const urlLog = WEB_APP_URL + 
+    const urlLog = urlSistema + 
                    "?action=registrarAcaoNoLog" + 
                    "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
                    "&token=MACRO@MACRO";
 
-    fetch(urlLog, { 
-      method: 'GET', 
-      mode: 'no-cors', 
-      keepalive: true 
-    });
+    // O sendBeacon garante a entrega no Google Script sem falhar no fechamento
+    navigator.sendBeacon(urlLog);
   }
 });
