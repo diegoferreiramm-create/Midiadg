@@ -27,7 +27,8 @@ const google = {
 
       call: function(functionName, args) {
         const self = this;
-        const urlFinal = WEB_APP_URL + "?token=MACRO@MACRO&action=" + functionName + "&args=" + encodeURIComponent(JSON.stringify(args));
+        // AJUSTE NA MONTAGEM DA URL PARA GARANTIR A COMUNICAÇÃO
+        const urlFinal = WEB_APP_URL + "?action=" + functionName + "&args=" + encodeURIComponent(JSON.stringify(args)) + "&token=MACRO@MACRO";
 
         fetch(urlFinal, {
           method: 'GET',
@@ -265,7 +266,6 @@ function salvarNovoUsuario() {
     alert("Preencha todos os campos!");
     return;
   }
-  // REMOVI O CONST GOOGLE QUE ESTAVA AQUI DENTRO E QUEBRAVA TUDO
   google.script.run.withSuccessHandler(function(res) {
     alert(res);
     document.getElementById('cadastroUsuarioBox').style.display = 'none';
