@@ -90,43 +90,59 @@ function entrar() {
   }).validarLogin(user, pass);
 }
 
-// --- FUNÇÃO DE SAÍDA CORRIGIDA (ESPERA O LOG) ---
+// --- FUNÇÃO DE SAÍDA FINAL (MÉTODO GARANTIDO) ---
 function resetarParaLogin() {
-  if (nomeGlobal) {
-    // Exibe uma mensagem rápida para o usuário não achar que travou
-    document.getElementById('infoUsuario').innerText = "Saindo com segurança...";
+  if (nomeGlobal) {
+    // Muda o texto do HUD para o usuário saber que o sistema está processando
+    const hud = document.getElementById('infoUsuario');
+    if(hud) hud.innerText = "Saindo...";
 
-    // Chamamos o log e usamos o SuccessHandler para só limpar a tela DEPOIS do OK do servidor
-    google.script.run.withSuccessHandler(function() {
-      finalizarSessaoVisual();
-    }).call("registrarAcaoNoLog", [nomeGlobal, parceiroGlobal, "LOGOUT / SAÍDA", "Sistema Lotes"]);
-    
-  } else {
-    // Se não tinha ninguém logado, limpa direto
-    finalizarSessaoVisual();
-  }
+    // 1. Tenta gravar o log primeiro
+    google.script.run
+      .withSuccessHandler(function() {
+         finalizarSessaoVisual(); // Sai se o log gravou com sucesso
+      })
+      .withFailureHandler(function() {
+         finalizarSessaoVisual(); // Sai mesmo se o log falhar (para não travar o usuário)
+      })
+      .call("registrarAcaoNoLog", [nomeGlobal, parceiroGlobal, "LOGOUT / SAÍDA", "Sistema Lotes"]);
+
+    // 2. Segurança: Se em 3 segundos o Google não responder, força a saída
+    setTimeout(function() {
+      if (nomeGlobal !== "") { 
+        finalizarSessaoVisual(); 
+      }
+    }, 3000);
+
+  } else {
+    finalizarSessaoVisual();
+  }
 }
 
-// Função auxiliar para limpar a tela (separada para organização)
+// Função que realmente limpa a tela e volta para o login
 function finalizarSessaoVisual() {
-  document.getElementById('menuBox').style.display = 'none';
-  document.getElementById('recebimentoBox').style.display = 'none';
-  document.getElementById('hudUsuario').style.display = 'none';
-  
-  document.getElementById('userLogin').value = "";
-  document.getElementById('passLogin').value = "";
-  document.getElementById('msg').innerText = "";
-  document.getElementById('msg').className = "";
-  
-  // Limpa os dados de sessão
-  nomeGlobal = "";
-  parceiroGlobal = "";
-  
-  clearInterval(intervaloRelogio);
-  document.getElementById('loginBox').style.display = 'flex';
-  
-  console.log("Logout concluído e log registrado.");
+  // Se já limpou, não faz nada (evita repetir pelo setTimeout)
+  if (nomeGlobal === "") return;
+
+  document.getElementById('menuBox').style.display = 'none';
+  document.getElementById('recebimentoBox').style.display = 'none';
+  document.getElementById('hudUsuario').style.display = 'none';
+  
+  document.getElementById('userLogin').value = "";
+  document.getElementById('passLogin').value = "";
+  document.getElementById('msg').innerText = "";
+  document.getElementById('msg').className = "";
+  
+  // Limpa os dados de sessão
+  nomeGlobal = "";
+  parceiroGlobal = "";
+  
+  if (typeof intervaloRelogio !== 'undefined') clearInterval(intervaloRelogio);
+  
+  document.getElementById('loginBox').style.display = 'flex';
+  console.log("Sistema resetado para login.");
 }
+
 // --- RELÓGIO ---
 function atualizarRelogio() {
   var agora = new Date();
