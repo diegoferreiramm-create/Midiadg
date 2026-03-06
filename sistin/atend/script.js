@@ -4,7 +4,6 @@ const urlSistema = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7
 let modoEdicao = false;
 let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
-let clicouNoBotaoSair = false; // Controle para o Log Inteligente
 
 //atribuições de abrir paginas//
 function abrirTela(id){
@@ -1147,36 +1146,35 @@ async function executarConserto() {
   }
 }
 
-// --- LOG INTELIGENTE MTECH ---
+// --- LOG INTELIGENTE MTECH: IDENTICO AO SISTEMA LOTES ---
 window.addEventListener('unload', function() {
   const userStr = sessionStorage.getItem("usuario");
   
+  // No MTECH, verificamos se existe a sessão ativa (equivale ao nomeGlobal do Lotes)
   if (userStr) {
     const user = JSON.parse(userStr);
     let mensagemAcao = "";
     let localAcao = "";
 
-    // Detecta se foi F5 ou recarregamento
-    const isReload = (performance.navigation && performance.navigation.type === 1) || 
-                     (performance.getEntriesByType("navigation")[0] && performance.getEntriesByType("navigation")[0].type === "reload");
-
-    if (clicouNoBotaoSair || isReload) {
+    // Se o usuário clicou no botão ou se a página está recarregando (F5)
+    if ((typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) || performance.navigation.type === 1) {
       mensagemAcao = "SAÍDA/ATUALIZOU";
       localAcao = "Sistema MTECH";
     } else {
-      // Se não clicou e não foi F5, ele fechou no X
+      // Se não foi botão nem F5, foi fechar a aba, desligar PC ou trocar de site
       mensagemAcao = "FECHOU ABA/NAVEGADOR";
       localAcao = "Navegador";
     }
 
-    // URL formatada para o padrão do seu MTECH
-    const urlLog = `${urlSistema}?action=registrarLogSaida` + 
-                   `&user=${encodeURIComponent(user.nome)}` + 
-                   `&parceiro=${encodeURIComponent(user.parceiro)}` + 
-                   `&acao=${encodeURIComponent(mensagemAcao)}` + 
-                   `&idRef=${encodeURIComponent(localAcao)}`;
+    // Criamos os dados para o args (Nome, Parceiro, Ação, Local)
+    const dadosLog = [user.nome, user.parceiro, mensagemAcao, localAcao];
+    
+    // A URL usa o urlSistema do MTECH mas com a estrutura de args do Lotes
+    const urlLog = urlSistema + 
+                   "?action=registrarAcaoNoLog" + 
+                   "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
+                   "&token=MACRO@MACRO";
 
-    // Manda pro Google e garante a entrega com o keepalive
     fetch(urlLog, { 
       method: 'GET', 
       mode: 'no-cors', 
