@@ -4,6 +4,7 @@ const urlSistema = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7
 let modoEdicao = false;
 let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
+let clicouNoBotaoSair = false; // Essencial para o Log Inteligente funcionar
 
 //atribuições de abrir paginas//
 function abrirTela(id){
