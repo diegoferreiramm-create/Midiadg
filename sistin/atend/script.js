@@ -6,6 +6,9 @@ let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
 let clicouNoBotaoSair = false; 
 
+// --- AS DUAS VARIÁVEIS QUE O LOG PRECISA ---
+let usuarioLogadoParaLog = ""; 
+let parceiroLogadoParaLog = "";
 
 //atribuições de abrir paginas//
 function abrirTela(id){
@@ -54,15 +57,15 @@ function entrar() {
     .then(response => response.json())
     .then(res => {
       if (res.sucesso) {
-        // SALVA NA RAM PARA O LOG DE SAÍDA USAR DEPOIS
-        usuarioLogadoParaLog = res.nome; 
+        // Alimenta as globais para o log de saída usar depois
+        usuarioLogadoParaLog = res.nome;  
         parceiroLogadoParaLog = res.parceiro;
 
         sessionStorage.setItem("usuario", JSON.stringify(res));
         
-        // LOG DE ENTRADA (OPCIONAL, MAS BOM TER)
-        const logEntrada = [res.nome, res.parceiro, "LOGIN REALIZADO", "Sistema MTECH"];
-        fetch(`${urlSistema}?action=registrarAcaoNoLog&args=${encodeURIComponent(JSON.stringify(logEntrada))}&token=MACRO@MACRO`, {mode:'no-cors'});
+        // COMENTEI ABAIXO PORQUE O .GS JÁ FAZ ESSE LOG. SE DEIXAR, FICA DUPLICADO.
+        // const logEntrada = [res.nome, res.parceiro, "LOGIN REALIZADO", "Sistema MTECH"];
+        // fetch(`${urlSistema}?action=registrarAcaoNoLog&args=${encodeURIComponent(JSON.stringify(logEntrada))}&token=MACRO@MACRO`, {mode:'no-cors'});
 
         mostrarMenu();
       } else {
@@ -1154,25 +1157,29 @@ async function executarConserto() {
   }
 }
 
-// --- LOG INTELIGENTE: DIFERENCIA FECHAMENTO DE SAÍDA/ATUALIZAÇÃO ---
+// --- LOG INTELIGENTE MTECH: DIFERENCIA FECHAMENTO DE SAÍDA/ATUALIZAÇÃO ---
 window.addEventListener('pagehide', function() {
-  // Use aqui o nome EXATO das variáveis que você já usa no MTECH
-  // (Exemplo: se você usa 'usuarioAtivo', coloque 'usuarioAtivo' aqui)
-  if (typeof usuarioLogado !== 'undefined' && usuarioLogado) {
+  // Agora usamos os nomes corretos que foram preenchidos no entrar()
+  if (usuarioLogadoParaLog && usuarioLogadoParaLog !== "") {
     
-    let mensagemAcao = (performance.navigation && performance.navigation.type === 1) 
-                       ? "SAÍDA/ATUALIZOU" 
-                       : "FECHOU ABA/NAVEGADOR";
+    let mensagemAcao = "";
+    
+    // Detecta F5/Atualização
+    if (performance.navigation && performance.navigation.type === 1) {
+      mensagemAcao = "SAÍDA/ATUALIZOU";
+    } else {
+      mensagemAcao = "FECHOU ABA/NAVEGADOR";
+    }
 
-    // Monta os dados com as variáveis que já existem no seu código
-    const dadosLog = [usuarioLogado, parceiroLogado, mensagemAcao, "Sistema MTECH"];
+    // Monta os dados conforme seu .gs espera
+    const dadosLog = [usuarioLogadoParaLog, parceiroLogadoParaLog, mensagemAcao, "Sistema MTECH"];
     
     const urlLog = urlSistema + 
                    "?action=registrarAcaoNoLog" + 
                    "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
                    "&token=MACRO@MACRO";
 
-    // O sendBeacon garante a entrega no Google Script sem falhar no fechamento
+    // O sendBeacon é o segredo para o log chegar no Google mesmo fechando a aba
     navigator.sendBeacon(urlLog);
   }
 });
