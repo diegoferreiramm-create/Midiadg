@@ -452,22 +452,32 @@ function salvarEntradaCarteiras() {
   }).gravarEntradaNoServidor(dadosEntradaLocalizados, remessa, nomeGlobal);
 }
 
-// --- LOG ÚNICO: SAÍDA (BOTÃO), ATUALIZAÇÃO (F5) OU FECHAMENTO (X) ---
+// --- LOG INTELIGENTE: DIFERENCIA BOTÃO SAIR DE FECHAMENTO DE ABA ---
 window.addEventListener('unload', function() {
-  // Verifica se o usuário estava logado antes de disparar o log
   if (typeof nomeGlobal !== 'undefined' && nomeGlobal && nomeGlobal !== "") {
     
-    // Texto padronizado para qualquer forma de saída do sistema
-    const dadosLog = [nomeGlobal, parceiroGlobal, "SESSÃO ENCERRADA (SAÍDA/FECHAMENTO)", "Sistema"];
+    // --- O QUE MUDOU COMEÇA AQUI ---
+    let mensagemAcao = "";
+    let localAcao = "";
+
+    // Se a variável 'clicouNoBotaoSair' for true, foi o botão. 
+    // Se for false, foi F5 ou fechamento de aba.
+    if (typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) {
+      mensagemAcao = "SAÍDA/FECHAMENTO";
+      localAcao = "Sistema Lotes";
+    } else {
+      mensagemAcao = "FECHOU ABA/NAVEGADOR";
+      localAcao = "Navegador";
+    }
+
+    const dadosLog = [nomeGlobal, parceiroGlobal, mensagemAcao, localAcao];
+    // --- O QUE MUDOU TERMINA AQUI ---
     
-    // Montagem da URL conforme seu doGet espera
     const urlLog = WEB_APP_URL + 
                    "?action=registrarAcaoNoLog" + 
                    "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
                    "&token=MACRO@MACRO";
 
-    // O 'keepalive: true' é o que garante que o Google receba a info 
-    // mesmo que a aba feche em milissegundos
     fetch(urlLog, { 
       method: 'GET', 
       mode: 'no-cors', 
