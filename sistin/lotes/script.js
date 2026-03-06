@@ -143,6 +143,7 @@ function limparBusca() {
 }
 
 // --- BUSCA DE DADOS ---
+// --- BUSCA DE DADOS (VERSÃO CORRIGIDA CONTRA UNDEFINED) ---
 function buscarLotes() {
   var cod = document.getElementById('filtroCodParceiro').value;
   var lote = document.getElementById('filtroLote').value;
@@ -152,28 +153,38 @@ function buscarLotes() {
     return;
   }
 
-  document.getElementById('corpoTabela').innerHTML = "<tr><td colspan='6' style='padding:20px; text-align:center;'>Buscando...</td></tr>";
+  const corpo = document.getElementById('corpoTabela');
+  corpo.innerHTML = "<tr><td colspan='6' style='padding:20px; text-align:center;'>Buscando registros...</td></tr>";
 
   google.script.run.withSuccessHandler(function(data) {
-    dadosLocalizados = data;
+    dadosLocalizados = data; // Armazena para o salvamento posterior
     var html = "";
-    if (data.length === 0) {
+
+    if (!data || data.length === 0) {
       html = "<tr><td colspan='6' style='padding:20px; text-align:center; color:#f87171;'>Nenhum registro encontrado.</td></tr>";
       document.getElementById('btnSalvarLote').style.display = "none";
     } else {
       data.forEach(function(r) {
+        // MAPEAMENTO SEGURO: Tenta ler o nome da chave, se não existir, tenta o índice numérico
+        const id = r.id || r.ID || r[0] || "";
+        const cpf = r.cpf || r.CPF || r[1] || "";
+        const nome = r.nome || r.NOME || r[2] || "";
+        const municipio = r.municipio || r.MUNICIPIO || r[4] || "";
+        const status = r.status || r.STATUS || r[11] || "PENDENTE";
+        const via = r.via || r.VIA || r[7] || "";
+
         html += `<tr style="border-bottom: 1px solid #1e293b;">
-          <td style="padding: 10px;">${r[0]}</td>
-          <td>${r[1]}</td>
-          <td>${r[2]}</td>
-          <td>${r[4]}</td>
-          <td>${r[11]}</td>
-          <td>${r[7]}</td>
+          <td style="padding: 10px;">${id}</td>
+          <td>${cpf}</td>
+          <td>${nome}</td>
+          <td>${municipio}</td>
+          <td><b style="color:#22c55e;">${status}</b></td>
+          <td>${via}</td>
         </tr>`;
       });
       document.getElementById('btnSalvarLote').style.display = "block";
     }
-    document.getElementById('corpoTabela').innerHTML = html;
+    corpo.innerHTML = html;
     document.getElementById('contadorLinhas').innerText = "Total: " + data.length + " registros";
   }).filtrarHistorico(cod, lote);
 }
