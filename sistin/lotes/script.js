@@ -145,9 +145,9 @@ function limparBusca() {
 // --- BUSCA DE DADOS (ALINHADO COM COLUNA H=7 E Q=16) ---
 function buscarLotes() {
   var cod = document.getElementById('filtroCodParceiro').value;
-  var lote = document.getElementById('filtroLote').value;
+  var loteBusca = document.getElementById('filtroLote').value;
 
-  if (!cod || !lote) {
+  if (!cod || !loteBusca) {
     alert("Preencha o Código do Parceiro e o Lote!");
     return;
   }
@@ -164,30 +164,41 @@ function buscarLotes() {
       document.getElementById('btnSalvarLote').style.display = "none";
     } else {
       data.forEach(function(r) {
-        // --- MAPEAMENTO BASEADO NA SUA PLANILHA ---
-        // Se r for um array (padrão do .gs), os índices são:
-        const id        = r.id   || r[0]  || ""; // Coluna A
-        const cpf       = r.cpf  || r[1]  || ""; // Coluna B
-        const nome      = r.nome || r[2]  || ""; // Coluna C
-        const municipio = r.mun  || r[4]  || ""; // Coluna E
-        const status    = r.status || r[11] || ""; // Coluna L
-        const loteNum   = r.lote || r[16] || ""; // Coluna Q (Lote)
-        const parceiro  = r.parc || r[7]  || ""; // Coluna H (Parceiro)
+        // --- FUNÇÃO DE BUSCA INTELIGENTE POR NOME DE COLUNA ---
+        function getVal(obj, nomes) {
+          if (Array.isArray(obj)) return ""; // Se for array puro, essa lógica muda
+          for (let key in obj) {
+            let k = key.toUpperCase().trim();
+            if (nomes.includes(k)) return obj[key];
+          }
+          return "";
+        }
+
+        // Se o seu retorno for um OBJETO {NOME: "...", LOTE: "..."}
+        let id    = r.id || r.ID || r[0] || "";
+        let cpf   = r.cpf || r.CPF || r[1] || "";
+        let nome  = r.nome || r.NOME || r[2] || "";
+        let mun   = r.municipio || r.MUNICIPIO || r[4] || "";
+        let status = r.status || r.STATUS || r[11] || "";
+        
+        // Tentativa agressiva de achar o LOTE e o PARCEIRO por nome
+        let loteReal = getVal(r, ["LOTE", "LOTE_NUM", "NUMLOTE"]) || r[16] || r[15] || "";
+        let parcReal = getVal(r, ["PARCEIRO", "COD_PARCEIRO", "PARC"]) || r[7] || "";
 
         html += `<tr style="border-bottom: 1px solid #1e293b;">
           <td style="padding: 10px;">${id}</td>
           <td>${cpf}</td>
           <td>${nome}</td>
-          <td>${municipio}</td>
+          <td>${mun}</td>
           <td><b style="color:#22c55e;">${status}</b></td>
-          <td>${loteNum}</td> 
+          <td>${loteReal}</td> 
         </tr>`;
       });
       document.getElementById('btnSalvarLote').style.display = "block";
     }
     corpo.innerHTML = html;
     document.getElementById('contadorLinhas').innerText = "Total: " + data.length + " registros";
-  }).filtrarHistorico(cod, lote);
+  }).filtrarHistorico(cod, loteBusca);
 }
 
 // --- SALVAMENTO EM "RECEBIDOS" ---
