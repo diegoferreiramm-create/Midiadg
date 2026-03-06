@@ -1147,7 +1147,7 @@ async function executarConserto() {
   }
 }
 
-// --- LOG INTELIGENTE MTECH: DIFERENCIA FECHAMENTO DE SAÍDA/ATUALIZAÇÃO ---
+// --- LOG INTELIGENTE MTECH ---
 window.addEventListener('unload', function() {
   const userStr = sessionStorage.getItem("usuario");
   
@@ -1156,7 +1156,7 @@ window.addEventListener('unload', function() {
     let mensagemAcao = "";
     let localAcao = "";
 
-    // Detecta se foi botão, F5 ou recarregamento de performance
+    // Detecta se foi F5 ou recarregamento
     const isReload = (performance.navigation && performance.navigation.type === 1) || 
                      (performance.getEntriesByType("navigation")[0] && performance.getEntriesByType("navigation")[0].type === "reload");
 
@@ -1164,20 +1164,19 @@ window.addEventListener('unload', function() {
       mensagemAcao = "SAÍDA/ATUALIZOU";
       localAcao = "Sistema MTECH";
     } else {
-      // Se não foi botão nem F5, o cara fechou a aba ou o navegador
+      // Se não clicou e não foi F5, ele fechou no X
       mensagemAcao = "FECHOU ABA/NAVEGADOR";
       localAcao = "Navegador";
     }
 
-    // Monta a URL para o seu Apps Script (ajustado para a action do MTECH)
-    // Usamos o formato de parâmetros que o seu MTECH já utiliza
-    const urlLog = `${urlSistema}?action=registrarAcaoNoLog` + 
+    // URL formatada para o padrão do seu MTECH
+    const urlLog = `${urlSistema}?action=registrarLogSaida` + 
                    `&user=${encodeURIComponent(user.nome)}` + 
                    `&parceiro=${encodeURIComponent(user.parceiro)}` + 
                    `&acao=${encodeURIComponent(mensagemAcao)}` + 
                    `&idRef=${encodeURIComponent(localAcao)}`;
 
-    // keepalive: true garante que a requisição termine mesmo com a aba fechando
+    // Manda pro Google e garante a entrega com o keepalive
     fetch(urlLog, { 
       method: 'GET', 
       mode: 'no-cors', 
