@@ -92,6 +92,11 @@ function entrar() {
 
 // --- FUNÇÃO DE SAÍDA ---
 function resetarParaLogin() {
+  // Registra o log de saída antes de limpar as variáveis globais
+  if (nomeGlobal) {
+    google.script.run.call("registrarAcaoNoLog", [nomeGlobal, parceiroGlobal, "LOGOUT / SAÍDA", "Sistema Lotes"]);
+  }
+
   document.getElementById('menuBox').style.display = 'none';
   document.getElementById('recebimentoBox').style.display = 'none';
   document.getElementById('hudUsuario').style.display = 'none';
@@ -99,6 +104,10 @@ function resetarParaLogin() {
   document.getElementById('userLogin').value = "";
   document.getElementById('passLogin').value = "";
   document.getElementById('msg').innerText = "";
+  
+  // Limpa os dados de sessão
+  nomeGlobal = "";
+  parceiroGlobal = "";
   
   clearInterval(intervaloRelogio);
   document.getElementById('loginBox').style.display = 'flex';
@@ -440,3 +449,13 @@ function salvarEntradaCarteiras() {
     voltarParaMenu();
   }).gravarEntradaNoServidor(dadosEntradaLocalizados, remessa, nomeGlobal);
 }
+
+// --- LOG AUTOMÁTICO AO FECHAR A PÁGINA OU ABA ---
+window.addEventListener('beforeunload', function (e) {
+  if (nomeGlobal) {
+    // Usamos o navigator.sendBeacon ou uma chamada síncrona/rápida 
+    // para tentar gravar antes do navegador destruir a instância.
+    // Como estamos usando sua ponte 'google.script.run', disparar o log:
+    google.script.run.call("registrarAcaoNoLog", [nomeGlobal, parceiroGlobal, "FECHOU ABA/NAVEGADOR", "Sistema Lotes"]);
+  }
+});
