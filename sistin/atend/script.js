@@ -42,7 +42,7 @@ function abrirTela(id){
   }
 }
 
-//ATRIBUIÇÃO LOGIN - ADAPTADA PARA GITHUB//
+// ATRIBUIÇÃO LOGIN - ADAPTADA PARA GITHUB //
 function entrar() {
   const login = document.getElementById("login").value.trim();
   const senha = document.getElementById("senha").value.trim();
@@ -50,12 +50,17 @@ function entrar() {
 
   if (msg) msg.innerText = "Verificando...";
 
-  // Trocamos o google.script.run pelo fetch para falar com as 600 linhas do .gs
   fetch(`${urlSistema}?action=validarLogin&user=${login}&pass=${senha}`)
     .then(response => response.json())
     .then(res => {
-      // Toda a sua lógica original de sucesso/erro foi mantida
       if (res.sucesso) {
+        
+        // --- ADICIONE ESTAS DUAS LINHAS AQUI ---
+        // Elas salvam o nome na RAM para o Log de saída ler depois
+        usuarioLogadoParaLog = res.nome; 
+        parceiroLogadoParaLog = res.parceiro;
+        // --------------------------------------
+
         sessionStorage.setItem("usuario", JSON.stringify(res));
         mostrarMenu();
       } else {
@@ -1147,35 +1152,33 @@ async function executarConserto() {
   }
 }
 
-// --- LOG INTELIGENTE MTECH: IDENTICO AO SISTEMA LOTES ---
+// --- LOG INTELIGENTE MTECH (Sincronizado com LOTES) ---
 window.addEventListener('unload', function() {
-  const userStr = sessionStorage.getItem("usuario");
-  
-  // No MTECH, verificamos se existe a sessão ativa (equivale ao nomeGlobal do Lotes)
-  if (userStr) {
-    const user = JSON.parse(userStr);
+  // Verificamos as variáveis globais (mais seguro que sessionStorage no fechamento)
+  if (usuarioLogadoParaLog && usuarioLogadoParaLog !== "") {
+    
     let mensagemAcao = "";
     let localAcao = "";
 
-    // Se o usuário clicou no botão ou se a página está recarregando (F5)
-    if ((typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) || performance.navigation.type === 1) {
+    // Detecta se foi botão Sair ou F5
+    if (clicouNoBotaoSair || (performance.navigation && performance.navigation.type === 1)) {
       mensagemAcao = "SAÍDA/ATUALIZOU";
       localAcao = "Sistema MTECH";
     } else {
-      // Se não foi botão nem F5, foi fechar a aba, desligar PC ou trocar de site
       mensagemAcao = "FECHOU ABA/NAVEGADOR";
       localAcao = "Navegador";
     }
 
-    // Criamos os dados para o args (Nome, Parceiro, Ação, Local)
-    const dadosLog = [user.nome, user.parceiro, mensagemAcao, localAcao];
+    // Monta o array exatamente como o LOTES espera [Nome, Parceiro, Ação, Local]
+    const dadosLog = [usuarioLogadoParaLog, parceiroLogadoParaLog, mensagemAcao, localAcao];
     
-    // A URL usa o urlSistema do MTECH mas com a estrutura de args do Lotes
+    // Usa a sua urlSistema (que é o WEB_APP_URL do MTECH)
     const urlLog = urlSistema + 
                    "?action=registrarAcaoNoLog" + 
                    "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
                    "&token=MACRO@MACRO";
 
+    // O keepalive: true é o segredo para o Google receber antes da aba morrer
     fetch(urlLog, { 
       method: 'GET', 
       mode: 'no-cors', 
