@@ -1,6 +1,7 @@
 // --- CONFIGURAÇÃO DE COMUNICAÇÃO GITHUB -> GOOGLE ---
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0Ls9ct32TDn6N1x7n3w5gMByQRUYRr7izo-0RtbKFqie3KYYAAtWuJLi2MRKbDc1F/exec";
 
+// Esta "ponte" permite que seu código continue usando google.script.run
 const google = {
   script: {
     run: {
@@ -12,7 +13,7 @@ const google = {
         this.failCallback = failCallback;
         return this;
       },
-      // MAPEAMENTO DAS FUNÇÕES
+      // MAPEAMENTO DAS SUAS FUNÇÕES (Para o GitHub entender o que chamar no Google)
       validarLogin: function(user, pass) { this.call("validarLogin", [user, pass]); },
       cadastrarNoServidor: function(u, p, n, pc) { this.call("cadastrarNoServidor", [u, p, n, pc]); },
       filtrarHistorico: function(cod, lote) { this.call("filtrarHistorico", [cod, lote]); },
@@ -21,35 +22,37 @@ const google = {
       buscarParaNovoMalote: function(a, b) { this.call("buscarParaNovoMalote", [a, b]); },
       carregarDadosProducao: function() { this.call("carregarDadosProducao", []); },
       gravarEntradaNoServidor: function(a, b, c) { this.call("gravarEntradaNoServidor", [a, b, c]); },
-      
+
       call: function(functionName, args) {
         const self = this;
+        // Usamos GET com redirect: 'follow' porque o POST bloqueia no GitHub (CORS)
         const urlFinal = `${WEB_APP_URL}?token=MACRO@MACRO&action=${functionName}&args=${encodeURIComponent(JSON.stringify(args))}`;
-        
+
         fetch(urlFinal, {
           method: 'GET',
           mode: 'cors',
           redirect: 'follow'
         })
         .then(res => res.json())
-        .then(data => { 
-          if(self.callback) self.callback(data); 
+        .then(data => {
+          if (self.callback) self.callback(data);
         })
-        .catch(err => { 
+        .catch(err => {
           console.error("Erro na comunicação:", err);
-          if(self.failCallback) self.failCallback(err); 
+          if (self.failCallback) self.failCallback(err);
         });
       }
     }
   }
 };
 
+// --- VARIÁVEIS GLOBAIS ---
 var nomeGlobal = "";
 var parceiroGlobal = "";
 var intervaloRelogio;
 var dadosLocalizados = [];
 
-// --- FUNÇÃO DE LOGIN ---
+// --- FUNÇÃO DE LOGIN (EXATAMENTE A SUA) ---
 function entrar() {
   var user = document.getElementById('userLogin').value;
   var pass = document.getElementById('passLogin').value;
@@ -75,7 +78,10 @@ function entrar() {
       document.getElementById('infoUsuario').innerText = "USUÁRIO: " + nomeGlobal + " | PARCEIRO: " + parceiroGlobal;
       document.getElementById('hudUsuario').style.display = 'block';
       
-      intervaloRelogio = setInterval(atualizarRelogio, 1000);
+      // Verifica se a função existe antes de chamar para não dar erro
+      if (typeof atualizarRelogio === "function") {
+          intervaloRelogio = setInterval(atualizarRelogio, 1000);
+      }
     } else {
       msg.className = "erro";
       msg.innerText = res.erro || "Usuário ou senha incorretos!";
