@@ -201,7 +201,7 @@ function buscarLotes() {
   }).filtrarHistorico(cod, loteBusca);
 }
 
-// --- SALVAMENTO EM "RECEBIDOS" ---
+// --- SALVAMENTO EM "RECEBIDOS" (CORRIGIDO PARA IGUALAR REIMPRESSÃO) ---
 function salvarRecebimento() {
   var nomeParceiro = document.getElementById('filtroNomeParceiro').value;
   var codParceiro = document.getElementById('filtroCodParceiro').value;
@@ -226,20 +226,32 @@ function salvarRecebimento() {
     document.getElementById('impNomeParceiro').innerText = "NOME DO PARCEIRO: " + nomeParceiro;
     document.getElementById('impNomeAtendente').innerText = nomeGlobal;
 
-    // MONTA A LISTA PARA IMPRESSÃO (Usando os nomes dos campos do objeto)
+    // MONTA A LISTA PARA IMPRESSÃO - CORRIGIDO PARA USAR ÍNDICES IGUAL À REIMPRESSÃO
     var htmlImp = "";
     dadosLocalizados.forEach(function(r) {
+      // Garante a extração correta independente se 'r' é objeto ou array
+      let d_id    = r.id || r[0] || "---";
+      let d_cpf   = r.cpf || r[1] || "---";
+      let d_nome  = r.nome || r[2] || "---";
+      let d_nasc  = r.nasc || r[3] || "---";
+      let d_mun   = r.municipio || r[4] || "---";
+      let d_via   = r.via || r[6] || "---";
+      let d_parc  = r.parceiro || r[7] || "---";
+      let d_data  = r.data || r[8] || "---";
+      let d_atend = r.atendente || r[9] || "---";
+      let d_bol   = r.boleto || r[10] || "---";
+
       htmlImp += `<tr>
-        <td style="border:1px solid black; padding:2px;">${r.id || "---"}</td>
-        <td style="border:1px solid black; padding:2px;">${r.cpf || "---"}</td>
-        <td style="border:1px solid black; padding:2px;">${r.nome || "---"}</td>
-        <td style="border:1px solid black; padding:2px;">${r.nasc || "---"}</td>
-        <td style="border:1px solid black; padding:2px;">${r.municipio || "---"}</td>
-        <td style="border:1px solid black; padding:2px;">${r.via || "---"}</td>
-        <td style="border:1px solid black; padding:2px;">${r.parceiro || "---"}</td>
-        <td style="border:1px solid black; padding:2px;">${r.data || "---"}</td>
-        <td style="border:1px solid black; padding:2px;">${r.atendente || "---"}</td>
-        <td style="border:1px solid black; padding:2px;">${r.lote || "---"}</td>
+        <td style="border:1px solid black; padding:2px;">${d_id}</td>
+        <td style="border:1px solid black; padding:2px;">${d_cpf}</td>
+        <td style="border:1px solid black; padding:2px;">${d_nome}</td>
+        <td style="border:1px solid black; padding:2px;">${d_nasc}</td>
+        <td style="border:1px solid black; padding:2px;">${d_mun}</td>
+        <td style="border:1px solid black; padding:2px;">${d_via}</td>
+        <td style="border:1px solid black; padding:2px;">${d_parc}</td>
+        <td style="border:1px solid black; padding:2px;">${d_data}</td>
+        <td style="border:1px solid black; padding:2px;">${d_atend}</td>
+        <td style="border:1px solid black; padding:2px;">${d_bol}</td>
       </tr>`;
     });
     document.getElementById('corpoImpressao').innerHTML = htmlImp;
