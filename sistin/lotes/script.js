@@ -90,34 +90,6 @@ function entrar() {
   }).validarLogin(user, pass);
 }
 
-// --- FUNÇÃO DE SAÍDA FINAL (MÉTODO GARANTIDO) ---
-function resetarParaLogin() {
-  if (nomeGlobal) {
-    // Muda o texto do HUD para o usuário saber que o sistema está processando
-    const hud = document.getElementById('infoUsuario');
-    if(hud) hud.innerText = "Saindo...";
-
-    // 1. Tenta gravar o log primeiro
-    google.script.run
-      .withSuccessHandler(function() {
-         finalizarSessaoVisual(); // Sai se o log gravou com sucesso
-      })
-      .withFailureHandler(function() {
-         finalizarSessaoVisual(); // Sai mesmo se o log falhar (para não travar o usuário)
-      })
-      .call("registrarAcaoNoLog", [nomeGlobal, parceiroGlobal, "LOGOUT / SAÍDA", "Sistema Lotes"]);
-
-    // 2. Segurança: Se em 3 segundos o Google não responder, força a saída
-    setTimeout(function() {
-      if (nomeGlobal !== "") { 
-        finalizarSessaoVisual(); 
-      }
-    }, 3000);
-
-  } else {
-    finalizarSessaoVisual();
-  }
-}
 
 // Função que realmente limpa a tela e volta para o login
 function finalizarSessaoVisual() {
@@ -480,20 +452,22 @@ function salvarEntradaCarteiras() {
   }).gravarEntradaNoServidor(dadosEntradaLocalizados, remessa, nomeGlobal);
 }
 
-// --- LOG AUTOMÁTICO AO FECHAR A PÁGINA OU ABA (VERSÃO GARANTIDA) ---
+// --- LOG ÚNICO: SAÍDA (BOTÃO), ATUALIZAÇÃO (F5) OU FECHAMENTO (X) ---
 window.addEventListener('unload', function() {
-  if (nomeGlobal && nomeGlobal !== "") {
-    // Criamos os argumentos exatamente como o seu doGet espera (args como JSON string)
-    const dadosLog = [nomeGlobal, parceiroGlobal, "FECHOU ABA/NAVEGADOR", "Navegador"];
+  // Verifica se o usuário estava logado antes de disparar o log
+  if (typeof nomeGlobal !== 'undefined' && nomeGlobal && nomeGlobal !== "") {
     
-    // Montamos a URL completa para o GET
+    // Texto padronizado para qualquer forma de saída do sistema
+    const dadosLog = [nomeGlobal, parceiroGlobal, "SESSÃO ENCERRADA (SAÍDA/FECHAMENTO)", "Sistema"];
+    
+    // Montagem da URL conforme seu doGet espera
     const urlLog = WEB_APP_URL + 
                    "?action=registrarAcaoNoLog" + 
                    "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
                    "&token=MACRO@MACRO";
 
-    // O segredo está aqui: 'keepalive: true' mantém o envio vivo mesmo após fechar a aba
-    // Usamos 'no-cors' para ser mais rápido e ignorar a resposta (já que a página sumiu)
+    // O 'keepalive: true' é o que garante que o Google receba a info 
+    // mesmo que a aba feche em milissegundos
     fetch(urlLog, { 
       method: 'GET', 
       mode: 'no-cors', 
