@@ -1157,29 +1157,38 @@ async function executarConserto() {
   }
 }
 
-// --- LOG INTELIGENTE MTECH: DIFERENCIA FECHAMENTO DE SAÍDA/ATUALIZAÇÃO ---
+// --- LOG DE SAÍDA MTECH (VERSÃO FINAL PARA F5 E FECHAR) ---
 window.addEventListener('pagehide', function() {
-  // Agora usamos os nomes corretos que foram preenchidos no entrar()
-  if (usuarioLogadoParaLog && usuarioLogadoParaLog !== "") {
-    
-    let mensagemAcao = "";
-    
-    // Detecta F5/Atualização
-    if (performance.navigation && performance.navigation.type === 1) {
-      mensagemAcao = "SAÍDA/ATUALIZOU";
-    } else {
-      mensagemAcao = "FECHOU ABA/NAVEGADOR";
+    // 1. BUSCA DIRETO DO STORAGE (Pois variáveis globais somem no F5)
+    const sessao = sessionStorage.getItem("usuario");
+    if (!sessao) return; // Se não tem ninguém logado, não faz nada
+
+    const user = JSON.parse(sessao);
+    const nomeParaLog = user.nome;
+    const parceiroParaLog = user.parceiro;
+
+    if (nomeParaLog) {
+        let mensagemAcao = "";
+        
+        // 2. DETECÇÃO DE ATUALIZAÇÃO (F5) - Compatível com 2026
+        const entries = performance.getEntriesByType("navigation");
+        const isReload = entries.length > 0 && entries[0].type === "reload";
+
+        if (clicouNoBotaoSair || isReload) {
+            mensagemAcao = "SAÍDA/ATUALIZOU";
+        } else {
+            mensagemAcao = "FECHOU ABA/NAVEGADOR";
+        }
+
+        // 3. MONTAGEM DOS DADOS PARA O .GS
+        const dadosLog = [nomeParaLog, parceiroParaLog, mensagemAcao, "Sistema MTECH"];
+        
+        const urlLog = urlSistema + 
+                       "?action=registrarAcaoNoLog" + 
+                       "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
+                       "&token=MACRO@MACRO";
+
+        // 4. ENVIO REFORÇADO (sendBeacon não é cancelado pelo navegador)
+        navigator.sendBeacon(urlLog);
     }
-
-    // Monta os dados conforme seu .gs espera
-    const dadosLog = [usuarioLogadoParaLog, parceiroLogadoParaLog, mensagemAcao, "Sistema MTECH"];
-    
-    const urlLog = urlSistema + 
-                   "?action=registrarAcaoNoLog" + 
-                   "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
-                   "&token=MACRO@MACRO";
-
-    // O sendBeacon é o segredo para o log chegar no Google mesmo fechando a aba
-    navigator.sendBeacon(urlLog);
-  }
 });
