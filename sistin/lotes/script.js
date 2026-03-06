@@ -1,5 +1,4 @@
 // --- CONFIGURAÇÃO DE COMUNICAÇÃO GITHUB -> GOOGLE ---
-/ --- CONFIGURAÇÃO DE COMUNICAÇÃO GITHUB -> GOOGLE ---
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0Ls9ct32TDn6N1x7n3w5gMByQRUYRr7izo-0RtbKFqie3KYYAAtWuJLi2MRKbDc1F/exec";
 
 const google = {
@@ -25,7 +24,7 @@ const google = {
       
       call: function(functionName, args) {
         const self = this;
-        // Usamos apenas o GET que é mais estável para retornar dados de login/cadastro
+        // Simplificamos para usar apenas o GET com redirecionamento, que é o que funciona com CORS
         const urlFinal = `${WEB_APP_URL}?token=MACRO@MACRO&action=${functionName}&args=${encodeURIComponent(JSON.stringify(args))}`;
         
         fetch(urlFinal, {
