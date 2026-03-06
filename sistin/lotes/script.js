@@ -12,7 +12,7 @@ const google = {
         this.failCallback = failCallback;
         return this;
       },
-      // Funções mapeadas para o seu .gs
+      // MAPEAMENTO DAS FUNÇÕES
       validarLogin: function(user, pass) { this.call("validarLogin", [user, pass]); },
       cadastrarNoServidor: function(u, p, n, pc) { this.call("cadastrarNoServidor", [u, p, n, pc]); },
       filtrarHistorico: function(cod, lote) { this.call("filtrarHistorico", [cod, lote]); },
@@ -24,7 +24,6 @@ const google = {
       
       call: function(functionName, args) {
         const self = this;
-        // Simplificamos para usar apenas o GET com redirecionamento, que é o que funciona com CORS
         const urlFinal = `${WEB_APP_URL}?token=MACRO@MACRO&action=${functionName}&args=${encodeURIComponent(JSON.stringify(args))}`;
         
         fetch(urlFinal, {
@@ -32,10 +31,7 @@ const google = {
           mode: 'cors',
           redirect: 'follow'
         })
-        .then(res => {
-          if (!res.ok) throw new Error('Erro na rede');
-          return res.json();
-        })
+        .then(res => res.json())
         .then(data => { 
           if(self.callback) self.callback(data); 
         })
