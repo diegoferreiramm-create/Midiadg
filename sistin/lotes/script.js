@@ -90,29 +90,43 @@ function entrar() {
   }).validarLogin(user, pass);
 }
 
-// --- FUNÇÃO DE SAÍDA ---
+// --- FUNÇÃO DE SAÍDA CORRIGIDA (ESPERA O LOG) ---
 function resetarParaLogin() {
-  // Registra o log de saída antes de limpar as variáveis globais
-  if (nomeGlobal) {
-    google.script.run.call("registrarAcaoNoLog", [nomeGlobal, parceiroGlobal, "LOGOUT / SAÍDA", "Sistema Lotes"]);
-  }
+  if (nomeGlobal) {
+    // Exibe uma mensagem rápida para o usuário não achar que travou
+    document.getElementById('infoUsuario').innerText = "Saindo com segurança...";
 
-  document.getElementById('menuBox').style.display = 'none';
-  document.getElementById('recebimentoBox').style.display = 'none';
-  document.getElementById('hudUsuario').style.display = 'none';
-  
-  document.getElementById('userLogin').value = "";
-  document.getElementById('passLogin').value = "";
-  document.getElementById('msg').innerText = "";
-  
-  // Limpa os dados de sessão
-  nomeGlobal = "";
-  parceiroGlobal = "";
-  
-  clearInterval(intervaloRelogio);
-  document.getElementById('loginBox').style.display = 'flex';
+    // Chamamos o log e usamos o SuccessHandler para só limpar a tela DEPOIS do OK do servidor
+    google.script.run.withSuccessHandler(function() {
+      finalizarSessaoVisual();
+    }).call("registrarAcaoNoLog", [nomeGlobal, parceiroGlobal, "LOGOUT / SAÍDA", "Sistema Lotes"]);
+    
+  } else {
+    // Se não tinha ninguém logado, limpa direto
+    finalizarSessaoVisual();
+  }
 }
 
+// Função auxiliar para limpar a tela (separada para organização)
+function finalizarSessaoVisual() {
+  document.getElementById('menuBox').style.display = 'none';
+  document.getElementById('recebimentoBox').style.display = 'none';
+  document.getElementById('hudUsuario').style.display = 'none';
+  
+  document.getElementById('userLogin').value = "";
+  document.getElementById('passLogin').value = "";
+  document.getElementById('msg').innerText = "";
+  document.getElementById('msg').className = "";
+  
+  // Limpa os dados de sessão
+  nomeGlobal = "";
+  parceiroGlobal = "";
+  
+  clearInterval(intervaloRelogio);
+  document.getElementById('loginBox').style.display = 'flex';
+  
+  console.log("Logout concluído e log registrado.");
+}
 // --- RELÓGIO ---
 function atualizarRelogio() {
   var agora = new Date();
@@ -450,12 +464,24 @@ function salvarEntradaCarteiras() {
   }).gravarEntradaNoServidor(dadosEntradaLocalizados, remessa, nomeGlobal);
 }
 
-// --- LOG AUTOMÁTICO AO FECHAR A PÁGINA OU ABA ---
-window.addEventListener('beforeunload', function (e) {
-  if (nomeGlobal) {
-    // Usamos o navigator.sendBeacon ou uma chamada síncrona/rápida 
-    // para tentar gravar antes do navegador destruir a instância.
-    // Como estamos usando sua ponte 'google.script.run', disparar o log:
-    google.script.run.call("registrarAcaoNoLog", [nomeGlobal, parceiroGlobal, "FECHOU ABA/NAVEGADOR", "Sistema Lotes"]);
+// --- LOG AUTOMÁTICO AO FECHAR A PÁGINA OU ABA (VERSÃO GARANTIDA) ---
+window.addEventListener('unload', function() {
+  if (nomeGlobal && nomeGlobal !== "") {
+    // Criamos os argumentos exatamente como o seu doGet espera (args como JSON string)
+    const dadosLog = [nomeGlobal, parceiroGlobal, "FECHOU ABA/NAVEGADOR", "Navegador"];
+    
+    // Montamos a URL completa para o GET
+    const urlLog = WEB_APP_URL + 
+                   "?action=registrarAcaoNoLog" + 
+                   "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
+                   "&token=MACRO@MACRO";
+
+    // O segredo está aqui: 'keepalive: true' mantém o envio vivo mesmo após fechar a aba
+    // Usamos 'no-cors' para ser mais rápido e ignorar a resposta (já que a página sumiu)
+    fetch(urlLog, { 
+      method: 'GET', 
+      mode: 'no-cors', 
+      keepalive: true 
+    });
   }
 });
