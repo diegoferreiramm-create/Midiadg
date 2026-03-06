@@ -142,7 +142,7 @@ function limparBusca() {
   document.getElementById('filtroNomeParceiro').value = "";
 }
 
-// --- BUSCA DE DADOS (ALINHADO COM COLUNA H=7 E Q=16) ---
+// --- BUSCA DE DADOS (VERSÃO COMPLETA E SEGURA) ---
 function buscarLotes() {
   var cod = document.getElementById('filtroCodParceiro').value;
   var loteBusca = document.getElementById('filtroLote').value;
@@ -164,34 +164,34 @@ function buscarLotes() {
       document.getElementById('btnSalvarLote').style.display = "none";
     } else {
       data.forEach(function(r) {
-        // --- FUNÇÃO DE BUSCA INTELIGENTE POR NOME DE COLUNA ---
+        
+        // --- FUNÇÃO DE BUSCA INTELIGENTE (Mantida para evitar Undefined) ---
         function getVal(obj, nomes) {
-          if (Array.isArray(obj)) return ""; // Se for array puro, essa lógica muda
+          if (!obj || Array.isArray(obj)) return null; 
           for (let key in obj) {
             let k = key.toUpperCase().trim();
             if (nomes.includes(k)) return obj[key];
           }
-          return "";
+          return null;
         }
 
-        // Se o seu retorno for um OBJETO {NOME: "...", LOTE: "..."}
-        let id    = r.id || r.ID || r[0] || "";
-        let cpf   = r.cpf || r.CPF || r[1] || "";
-        let nome  = r.nome || r.NOME || r[2] || "";
-        let mun   = r.municipio || r.MUNICIPIO || r[4] || "";
-        let status = r.status || r.STATUS || r[11] || "";
+        // --- MAPEAMENTO SEGURO RESPEITANDO SUA ORDEM (A, B, C, E, L, H) ---
+        let id    = getVal(r, ["ID"]) || r[0] || "";  // Coluna A
+        let cpf   = getVal(r, ["CPF"]) || r[1] || ""; // Coluna B
+        let nome  = getVal(r, ["NOME"]) || r[2] || ""; // Coluna C
+        let mun   = getVal(r, ["MUNICIPIO", "MUN"]) || r[4] || ""; // Coluna E
         
-        // Tentativa agressiva de achar o LOTE e o PARCEIRO por nome
-        let loteReal = getVal(r, ["LOTE", "LOTE_NUM", "NUMLOTE"]) || r[16] || r[15] || "";
-        let parcReal = getVal(r, ["PARCEIRO", "COD_PARCEIRO", "PARC"]) || r[7] || "";
+        // Aqui usamos a Coluna L (11) para o Lote e Coluna H (7) para o Parceiro
+        let loteReal = getVal(r, ["LOTE", "NUMLOTE"]) || r[11] || ""; // Coluna L
+        let parcReal = getVal(r, ["PARCEIRO", "PARC"]) || r[7] || "";  // Coluna H
 
         html += `<tr style="border-bottom: 1px solid #1e293b;">
           <td style="padding: 10px;">${id}</td>
           <td>${cpf}</td>
           <td>${nome}</td>
           <td>${mun}</td>
-          <td><b style="color:#22c55e;">${status}</b></td>
-          <td>${loteReal}</td> 
+          <td style="font-weight: bold; color: #fbbf24;">${loteReal}</td> 
+          <td>${parcReal}</td>
         </tr>`;
       });
       document.getElementById('btnSalvarLote').style.display = "block";
