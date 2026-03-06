@@ -142,8 +142,7 @@ function limparBusca() {
   document.getElementById('filtroNomeParceiro').value = "";
 }
 
-// --- BUSCA DE DADOS ---
-// --- BUSCA DE DADOS (VERSÃO CORRIGIDA CONTRA UNDEFINED) ---
+// --- BUSCA DE DADOS (ALINHADO COM COLUNA H=7 E Q=16) ---
 function buscarLotes() {
   var cod = document.getElementById('filtroCodParceiro').value;
   var lote = document.getElementById('filtroLote').value;
@@ -154,10 +153,10 @@ function buscarLotes() {
   }
 
   const corpo = document.getElementById('corpoTabela');
-  corpo.innerHTML = "<tr><td colspan='6' style='padding:20px; text-align:center;'>Buscando registros...</td></tr>";
+  corpo.innerHTML = "<tr><td colspan='6' style='padding:20px; text-align:center;'>Buscando...</td></tr>";
 
   google.script.run.withSuccessHandler(function(data) {
-    dadosLocalizados = data; // Armazena para o salvamento posterior
+    dadosLocalizados = data; 
     var html = "";
 
     if (!data || data.length === 0) {
@@ -165,13 +164,15 @@ function buscarLotes() {
       document.getElementById('btnSalvarLote').style.display = "none";
     } else {
       data.forEach(function(r) {
-        // MAPEAMENTO SEGURO: Tenta ler o nome da chave, se não existir, tenta o índice numérico
-        const id = r.id || r.ID || r[0] || "";
-        const cpf = r.cpf || r.CPF || r[1] || "";
-        const nome = r.nome || r.NOME || r[2] || "";
-        const municipio = r.municipio || r.MUNICIPIO || r[4] || "";
-        const status = r.status || r.STATUS || r[11] || "PENDENTE";
-        const via = r.via || r.VIA || r[7] || "";
+        // --- MAPEAMENTO BASEADO NA SUA PLANILHA ---
+        // Se r for um array (padrão do .gs), os índices são:
+        const id        = r.id   || r[0]  || ""; // Coluna A
+        const cpf       = r.cpf  || r[1]  || ""; // Coluna B
+        const nome      = r.nome || r[2]  || ""; // Coluna C
+        const municipio = r.mun  || r[4]  || ""; // Coluna E
+        const status    = r.status || r[11] || ""; // Coluna L
+        const loteNum   = r.lote || r[16] || ""; // Coluna Q (Lote)
+        const parceiro  = r.parc || r[7]  || ""; // Coluna H (Parceiro)
 
         html += `<tr style="border-bottom: 1px solid #1e293b;">
           <td style="padding: 10px;">${id}</td>
@@ -179,7 +180,7 @@ function buscarLotes() {
           <td>${nome}</td>
           <td>${municipio}</td>
           <td><b style="color:#22c55e;">${status}</b></td>
-          <td>${via}</td>
+          <td>${loteNum}</td> 
         </tr>`;
       });
       document.getElementById('btnSalvarLote').style.display = "block";
