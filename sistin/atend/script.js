@@ -1,10 +1,10 @@
-
 // CONFIGURAÇÃO INICIAL - COLOQUE NO TOPO DO SCRIPT.JS
 const urlSistema = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
 
 let modoEdicao = false;
 let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
+let clicouNoBotaoSair = false; // Controle para o Log Inteligente
 
 //atribuições de abrir paginas//
 function abrirTela(id){
@@ -354,53 +354,6 @@ function carregarDadosLog() {
       tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:red;'>Erro ao conectar com o servidor.</td></tr>";
     });
 }
-
-// --- FUNÇÃO DE LOGOUT (PROJETO MTECH) ---
-function logout() {
-  // 1. Recupera os dados antes de limpar o storage para registrar o log
-  const userLog = sessionStorage.getItem("nomeUsuario") || "Desconhecido";
-  const parcLog = sessionStorage.getItem("parceiroUsuario") || "---";
-
-  // 2. Registra o log no servidor (Usando sua ponte google.script.run)
-  if (userLog !== "Desconhecido") {
-    google.script.run.call("registrarAcaoNoLog", [userLog, parcLog, "LOGOUT / SAÍDA", "Sistema MTECH"]);
-  }
-
-  // 3. Limpa a sessão e esconde o HUD
-  sessionStorage.clear(); 
-  document.getElementById("hudUsuario").style.display = "none"; 
-  abrirTela('loginBox'); 
-}
-
-// --- FUNÇÃO DE TERCEIRO (MANTIDA ORIGINAL) ---
-function toggleTerceiro() {
-  const isChecked = document.getElementById("checkTerceiro").checked;
-  const container = document.getElementById("camposTerceiro");
-  const inputs = container.querySelectorAll("input, select");
-  
-  // Ajuste visual para indicar se o campo está ativo ou não
-  container.style.opacity = isChecked ? "1" : "0.5";
-  inputs.forEach(el => el.disabled = !isChecked);
-}
-
-// --- ADICIONAL: LOG SE FECHAR A ABA NO MTECH ---
-window.addEventListener('beforeunload', function () {
-  const userLog = sessionStorage.getItem("nomeUsuario");
-  const parcLog = sessionStorage.getItem("parceiroUsuario");
-  
-  if (userLog) {
-    google.script.run.call("registrarAcaoNoLog", [userLog, parcLog, "FECHOU ABA (MTECH)", "Navegador"]);
-  }
-});
-
-// --- LOG AUTOMÁTICO AO FECHAR A PÁGINA OU ABA (LOTES) ---
-window.addEventListener('beforeunload', function (e) {
-  if (nomeGlobal && nomeGlobal !== "") {
-    // Dispara o log antes da aba fechar totalmente
-    google.script.run.call("registrarAcaoNoLog", [nomeGlobal, parceiroGlobal, "FECHOU ABA/NAVEGADOR", "Sistema Lotes"]);
-  }
-});
-
 
 // --- FUNÇÃO PARA ABRIR O BOX DE EDIÇÃO ---
 function prepararEdicao(item) {
@@ -1194,3 +1147,41 @@ async function executarConserto() {
   }
 }
 
+// --- LOG INTELIGENTE MTECH: DIFERENCIA FECHAMENTO DE SAÍDA/ATUALIZAÇÃO ---
+window.addEventListener('unload', function() {
+  const userStr = sessionStorage.getItem("usuario");
+  
+  if (userStr) {
+    const user = JSON.parse(userStr);
+    let mensagemAcao = "";
+    let localAcao = "";
+
+    // Detecta se foi botão, F5 ou recarregamento de performance
+    const isReload = (performance.navigation && performance.navigation.type === 1) || 
+                     (performance.getEntriesByType("navigation")[0] && performance.getEntriesByType("navigation")[0].type === "reload");
+
+    if (clicouNoBotaoSair || isReload) {
+      mensagemAcao = "SAÍDA/ATUALIZOU";
+      localAcao = "Sistema MTECH";
+    } else {
+      // Se não foi botão nem F5, o cara fechou a aba ou o navegador
+      mensagemAcao = "FECHOU ABA/NAVEGADOR";
+      localAcao = "Navegador";
+    }
+
+    // Monta a URL para o seu Apps Script (ajustado para a action do MTECH)
+    // Usamos o formato de parâmetros que o seu MTECH já utiliza
+    const urlLog = `${urlSistema}?action=registrarAcaoNoLog` + 
+                   `&user=${encodeURIComponent(user.nome)}` + 
+                   `&parceiro=${encodeURIComponent(user.parceiro)}` + 
+                   `&acao=${encodeURIComponent(mensagemAcao)}` + 
+                   `&idRef=${encodeURIComponent(localAcao)}`;
+
+    // keepalive: true garante que a requisição termine mesmo com a aba fechando
+    fetch(urlLog, { 
+      method: 'GET', 
+      mode: 'no-cors', 
+      keepalive: true 
+    });
+  }
+});
