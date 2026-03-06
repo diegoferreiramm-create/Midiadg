@@ -1070,17 +1070,27 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
   telaPrint.document.close();
 }
 
-function abrirAdmin() {
-  var urlLotes = "https://script.google.com/macros/s/AKfycbxXBQmEu_d-jUL08Vi9Cvd-h0PPnl4XLPSocuMJmBBndADfui3qj6EpG91NXOmeuXSO/exec";
+ffunction abrirAdmin() {
+  // O SEU LINK DO GITHUB / DOMÍNIO
+  var urlGithub = "https://midiadg.com.br/sistin/lotes/index.html";
+  
   var token = "MACRO@MACRO";
-  var u = ""; var s = "";
+  var u = ""; 
+  var s = "";
+  
   try {
     var uField = document.getElementById('userLogin');
     var sField = document.getElementById('passLogin');
     if (uField) u = uField.value;
     if (sField) s = sField.value;
-  } catch (e) { console.log("Erro na captura."); }
-  var linkFinal = urlLotes + "?u=" + encodeURIComponent(u) + "&s=" + encodeURIComponent(s) + "&token=" + encodeURIComponent(token);
+  } catch (e) { 
+    console.log("Erro na captura das credenciais."); 
+  }
+
+  // Monta a URL apontando para o seu site no GitHub
+  var linkFinal = urlGithub + "?u=" + encodeURIComponent(u) + "&s=" + encodeURIComponent(s) + "&token=" + encodeURIComponent(token);
+  
+  // Abre a sua página do GitHub em uma nova aba
   window.open(linkFinal, '_blank');
 }
 
