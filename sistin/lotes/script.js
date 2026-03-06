@@ -1,7 +1,7 @@
 // --- CONFIGURAÇÃO DE COMUNICAÇÃO GITHUB -> GOOGLE ---
+/ --- CONFIGURAÇÃO DE COMUNICAÇÃO GITHUB -> GOOGLE ---
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0Ls9ct32TDn6N1x7n3w5gMByQRUYRr7izo-0RtbKFqie3KYYAAtWuJLi2MRKbDc1F/exec";
 
-// Esta "ponte" permite que seu código continue usando google.script.run
 const google = {
   script: {
     run: {
@@ -13,8 +13,9 @@ const google = {
         this.failCallback = failCallback;
         return this;
       },
-      // Funções dinâmicas
+      // Funções mapeadas para o seu .gs
       validarLogin: function(user, pass) { this.call("validarLogin", [user, pass]); },
+      cadastrarNoServidor: function(u, p, n, pc) { this.call("cadastrarNoServidor", [u, p, n, pc]); },
       filtrarHistorico: function(cod, lote) { this.call("filtrarHistorico", [cod, lote]); },
       processarRecebimento: function(a, b, c) { this.call("processarRecebimento", [a, b, c]); },
       gravarMaloteFinal: function(a, b, c) { this.call("gravarMaloteFinal", [a, b, c]); },
@@ -24,29 +25,29 @@ const google = {
       
       call: function(functionName, args) {
         const self = this;
-        const payload = JSON.stringify({ functionName: functionName, args: args });
+        // Usamos apenas o GET que é mais estável para retornar dados de login/cadastro
+        const urlFinal = `${WEB_APP_URL}?token=MACRO@MACRO&action=${functionName}&args=${encodeURIComponent(JSON.stringify(args))}`;
         
-        fetch(WEB_APP_URL, {
-          method: "POST",
-          mode: "no-cors", // Necessário para evitar erro de CORS
-          body: payload
-        }).then(() => {
-          // Como o no-cors não permite ler a resposta no POST, 
-          // usamos um segundo passo com GET para pegar o resultado se necessário
-          // ou ajustamos o doGet/doPost no Apps Script.
-          console.log("Chamada enviada para " + functionName);
+        fetch(urlFinal, {
+          method: 'GET',
+          mode: 'cors',
+          redirect: 'follow'
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('Erro na rede');
+          return res.json();
+        })
+        .then(data => { 
+          if(self.callback) self.callback(data); 
+        })
+        .catch(err => { 
+          console.error("Erro na comunicação:", err);
+          if(self.failCallback) self.failCallback(err); 
         });
-        
-        // Para sistemas externos, o ideal é usar GET para receber dados:
-        fetch(`${WEB_APP_URL}?token=MACRO@MACRO&action=${functionName}&args=${encodeURIComponent(JSON.stringify(args))}`)
-          .then(res => res.json())
-          .then(data => { if(self.callback) self.callback(data); })
-          .catch(err => { if(self.failCallback) self.failCallback(err); });
       }
     }
   }
 };
-
 
 var nomeGlobal = "";
 var parceiroGlobal = "";
