@@ -811,9 +811,7 @@ function abrirSenha(){ document.getElementById("modalSenha").style.display="flex
 function fecharSenha(){ document.getElementById("modalSenha").style.display="none"; }
 
 function carregarLista() {
-  const sessao = sessionStorage.getItem("usuario");
-  if (!sessao) return;
-  const user = JSON.parse(sessao);
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
   const isAdmin = (user.parceiro.toString() === "97");
   
   const fAdmin = document.getElementById("filtrosAdmin");
@@ -852,9 +850,7 @@ function carregarLista() {
   const cabecalho = document.getElementById("cabecalhoTabela");
   const colNames = ["ID", "CPF", "NOME", "NASC", "MUNICIPIO", "TEL", "VIA", "PARCEIRO", "DATA", "ATENDENTE", "BOLETO", "STATUS", "MOTIVO", "DATA STATUS", "NUM CARTEIRA", "LOTE", "AÇÕES"];
   
-  if (cabecalho) {
-    cabecalho.innerHTML = colNames.map((name, idx) => `<th class="col-${idx}">${name}</th>`).join("");
-  }
+  cabecalho.innerHTML = colNames.map((name, idx) => `<th class="col-${idx}">${name}</th>`).join("");
 
   if(!document.getElementById("containerChecks")){
     const divChecks = document.createElement("div");
@@ -864,46 +860,28 @@ function carregarLista() {
     colNames.forEach((name, idx) => {
       divChecks.innerHTML += `<label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(${idx})"> ${name}</label>`;
     });
-    const listasBox = document.getElementById("listasBox");
-    if(listasBox) listasBox.prepend(divChecks);
+    
+    
+    
+    document.getElementById("listasBox").prepend(divChecks);
   }
 
-  const tbody = document.getElementById("corpoTabelaListas");
-  if(tbody) tbody.innerHTML = "<tr><td colspan='17' style='text-align:center; padding:10px;'>Carregando dados...</td></tr>";
+  document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='17'>Carregando dados...</td></tr>";
   
   // ADAPTAÇÃO FETCH PARA OBTENÇÃO DE LISTA
   fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
     .then(res => res.json())
     .then(dados => {
-      if(!tbody) return;
+      const tbody = document.getElementById("corpoTabelaListas");
       tbody.innerHTML = "";
       
       dados.forEach(item => {
-        // --- MAPEAMENTO DE SEGURANÇA CONTRA UNDEFINED ---
-        // Tenta pegar o nome da chave em minúsculo, se não existir tenta em maiúsculo (comum no Apps Script)
-        const id = item.id || item.ID || "";
-        const cpf = item.cpf || item.CPF || "";
-        const nome = item.nome || item.NOME || "";
-        const nasc = item.nasc || item.NASC || item.nascimento || "";
-        const municipio = item.municipio || item.MUNICIPIO || "";
-        const via = item.via || item.VIA || "";
-        const parceiro = item.parceiro || item.PARCEIRO || "";
-        const data = item.data || item.DATA || "";
-        const atendente = item.atendente || item.ATENDENTE || "";
-        const boleto = item.boleto || item.BOLETO || "";
-        const status = item.status || item.STATUS || "";
-        const motivo = item.motivo || item.MOTIVO || "";
-        const carteira = item.carteira || item.CARTEIRA || item.num_carteira || "";
-        const lote = item.lote || item.LOTE || "";
-
-        // Lógica para Data Status (Procura variações da chave)
         let valDataStatus = "";
         for (let key in item) {
           let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
-          if (normalizedKey === "DATASTATUS" || normalizedKey === "DTATU") { valDataStatus = item[key]; break; }
+          if (normalizedKey === "DATASTATUS") { valDataStatus = item[key]; break; }
         }
         
-        // Lógica para Telefone
         let valTel = "";
         for (let key in item) {
           let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
@@ -911,22 +889,22 @@ function carregarLista() {
         }
 
         tbody.innerHTML += `<tr>
-          <td class="col-0">${id}</td>
-          <td class="col-1">${cpf}</td>
-          <td class="col-2">${nome}</td>
-          <td class="col-3">${nasc}</td>
-          <td class="col-4">${municipio}</td>
+          <td class="col-0">${item.id || ''}</td>
+          <td class="col-1">${item.cpf || ''}</td>
+          <td class="col-2">${item.nome || ''}</td>
+          <td class="col-3">${item.nasc || ''}</td>
+          <td class="col-4">${item.municipio || ''}</td>
           <td class="col-5">${valTel}</td>
-          <td class="col-6">${via}</td>
-          <td class="col-7">${parceiro}</td>
-          <td class="col-8">${data}</td>
-          <td class="col-9">${atendente}</td>
-          <td class="col-10">${boleto}</td>
-          <td class="col-11"><b>${status}</b></td>
-          <td class="col-12">${motivo}</td>
+          <td class="col-6">${item.via || ''}</td>
+          <td class="col-7">${item.parceiro || ''}</td>
+          <td class="col-8">${item.data || ''}</td>
+          <td class="col-9">${item.atendente || ''}</td>
+          <td class="col-10">${item.boleto || ''}</td>
+          <td class="col-11"><b>${item.status || ''}</b></td>
+          <td class="col-12">${item.motivo || ''}</td>
           <td class="col-13">${valDataStatus}</td>
-          <td class="col-14">${carteira}</td>
-          <td class="col-15">${lote}</td>
+          <td class="col-14">${item.carteira || ''}</td>
+          <td class="col-15">${item.lote || ''}</td>
           <td class="col-16">
             <button onclick='prepararEdicao(${JSON.stringify(item)})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
           </td>
@@ -937,10 +915,33 @@ function carregarLista() {
       checks.forEach((chk, i) => { if(!chk.checked) aplicarOcultacao(i, false); });
     })
     .catch(err => {
-      console.error(err);
-      if(tbody) tbody.innerHTML = "<tr><td colspan='17' style='color:red; text-align:center;'>Erro ao carregar lista do servidor.</td></tr>";
+      document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='17' style='color:red;'>Erro ao carregar lista do servidor.</td></tr>";
     });
 }
+
+function alternarColuna(idx) { aplicarOcultacao(idx, event.target.checked); }
+function aplicarOcultacao(idx, exibir) {
+  document.querySelectorAll(`.col-${idx}`).forEach(c => c.style.display = exibir ? "" : "none");
+}
+
+function fecharLotePorParceiro() {
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  if(!confirm("Deseja fechar o lote atual para o parceiro " + user.parceiro + "?")) return;
+  
+  fetch(`${urlSistema}?action=fecharLoteAppsScript&parceiro=${user.parceiro}`)
+    .then(res => res.json())
+    .then(res => {
+      if(res.sucesso) {
+        alert("Lote fechado com sucesso! Lote: " + res.loteGerado);
+        carregarLista();
+      } else {
+        alert("Erro ao fechar lote: " + res.erro);
+      }
+    })
+    .catch(err => alert("Erro na conexão ao fechar lote."));
+}
+
+
 // --- BUSCA ÚNICA (Corrigida para GitHub) ---
 document.addEventListener('blur', function(e){
   if(e.target.id === "codigoCtr"){
