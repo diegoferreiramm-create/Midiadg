@@ -811,9 +811,12 @@ function abrirSenha(){ document.getElementById("modalSenha").style.display="flex
 function fecharSenha(){ document.getElementById("modalSenha").style.display="none"; }
 
 function carregarLista() {
-  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  const sessao = sessionStorage.getItem("usuario");
+  if (!sessao) return;
+  const user = JSON.parse(sessao);
   const isAdmin = (user.parceiro.toString() === "97");
   
+  // --- CONFIGURAÇÃO DE FILTROS ---
   const fAdmin = document.getElementById("filtrosAdmin");
   if(fAdmin) {
     fAdmin.style.display = "flex";
@@ -830,7 +833,7 @@ function carregarLista() {
        const inputLote = document.createElement("input");
        inputLote.id = "fLote";
        inputLote.placeholder = "LOTE";
-       inputLote.onkeyup = filtrarTabelaAvancado;
+       inputLote.onkeyup = () => filtrarTabelaAvancado(); // Ajustado para chamar a função
        inputLote.style.width = "70px";
        fAdmin.appendChild(inputLote);
     }
@@ -847,75 +850,77 @@ function carregarLista() {
     });
   }
   
+  // --- CABEÇALHO ---
   const cabecalho = document.getElementById("cabecalhoTabela");
-  const colNames = ["ID", "CPF", "NOME", "NASC", "MUNICIPIO", "TEL", "VIA", "PARCEIRO", "DATA", "ATENDENTE", "BOLETO", "STATUS", "MOTIVO", "DATA STATUS", "NUM CARTEIRA", "LOTE", "AÇÕES"];
+  const colNames = ["ID", "CPF", "NOME", "NASC", "MUNICIPIO", "TEL", "VIA", "PARCEIRO", "DATA", "ATENDENTE", "BOLETO", "STATUS", "MOTIVO", "DT ATU", "CARTEIRA", "LOTE", "AÇÕES"];
   
-  cabecalho.innerHTML = colNames.map((name, idx) => `<th class="col-${idx}">${name}</th>`).join("");
+  if (cabecalho) {
+    cabecalho.innerHTML = colNames.map((name, idx) => `<th class="col-${idx}">${name}</th>`).join("");
+  }
 
+  // --- CHECKBOXES DE COLUNAS ---
   if(!document.getElementById("containerChecks")){
     const divChecks = document.createElement("div");
     divChecks.id = "containerChecks";
     divChecks.style = "display:flex; flex-wrap:wrap; gap:10px; padding:10px; background:#1e293b; border-radius:8px; margin-bottom:10px; font-size:11px; color:#22c55e; border:1px solid #334155;";
     divChecks.innerHTML = "<div style='width:100%; color:white; font-weight:bold; margin-bottom:5px;'>Exibir/Ocultar Colunas:</div>";
+    
     colNames.forEach((name, idx) => {
-      divChecks.innerHTML += `<label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(${idx})"> ${name}</label>`;
+      // Ajuste para bater com o seu colunasParaMarcar se necessário
+      const marcado = ["ID", "CPF", "NOME", "STATUS", "AÇÕES"].includes(name) ? "checked" : "";
+      divChecks.innerHTML += `<label style="cursor:pointer;"><input type="checkbox" ${marcado} onclick="alternarColuna(${idx})"> ${name}</label>`;
     });
     
-    
-    
-    document.getElementById("listasBox").prepend(divChecks);
+    const box = document.getElementById("listasBox");
+    if(box) box.prepend(divChecks);
   }
 
-  document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='17'>Carregando dados...</td></tr>";
+  const tbody = document.getElementById("corpoTabelaListas");
+  if(tbody) tbody.innerHTML = "<tr><td colspan='17' style='text-align:center; padding:20px;'>Carregando dados da CADASTRO...</td></tr>";
   
-  // ADAPTAÇÃO FETCH PARA OBTENÇÃO DE LISTA
+  // --- BUSCA DOS DADOS (FETCH) ---
   fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
     .then(res => res.json())
     .then(dados => {
-      const tbody = document.getElementById("corpoTabelaListas");
+      if(!tbody) return;
       tbody.innerHTML = "";
       
-      dados.forEach(item => {
-        let valDataStatus = "";
-        for (let key in item) {
-          let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
-          if (normalizedKey === "DATASTATUS") { valDataStatus = item[key]; break; }
-        }
-        
-        let valTel = "";
-        for (let key in item) {
-          let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
-          if (normalizedKey === "TEL" || normalizedKey === "TELEFONE") { valTel = item[key]; break; }
-        }
+      if(!dados || dados.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='17' style='text-align:center; padding:20px;'>Nenhum registro encontrado.</td></tr>";
+        return;
+      }
 
+      dados.forEach(item => {
+        // Mapeamento seguro baseado no objeto enviado pelo .gs (Lógica do projeto antigo)
         tbody.innerHTML += `<tr>
           <td class="col-0">${item.id || ''}</td>
           <td class="col-1">${item.cpf || ''}</td>
           <td class="col-2">${item.nome || ''}</td>
           <td class="col-3">${item.nasc || ''}</td>
           <td class="col-4">${item.municipio || ''}</td>
-          <td class="col-5">${valTel}</td>
+          <td class="col-5">${item.tel || ''}</td>
           <td class="col-6">${item.via || ''}</td>
           <td class="col-7">${item.parceiro || ''}</td>
           <td class="col-8">${item.data || ''}</td>
           <td class="col-9">${item.atendente || ''}</td>
           <td class="col-10">${item.boleto || ''}</td>
-          <td class="col-11"><b>${item.status || ''}</b></td>
+          <td class="col-11"><b>${item.status || 'PENDENTE'}</b></td>
           <td class="col-12">${item.motivo || ''}</td>
-          <td class="col-13">${valDataStatus}</td>
+          <td class="col-13">${item.dt_atu || ''}</td>
           <td class="col-14">${item.carteira || ''}</td>
           <td class="col-15">${item.lote || ''}</td>
           <td class="col-16">
-            <button onclick='prepararEdicao(${JSON.stringify(item)})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
+            <button onclick='prepararEdicao(${JSON.stringify(item)})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">EDITAR</button>
           </td>
         </tr>`;
       });
       
-      const checks = document.getElementById("containerChecks").querySelectorAll("input");
-      checks.forEach((chk, i) => { if(!chk.checked) aplicarOcultacao(i, false); });
+      // Chama o filtro para aplicar a visibilidade inicial das colunas e filtros de Admin
+      setTimeout(() => filtrarTabelaAvancado(), 300);
     })
     .catch(err => {
-      document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='17' style='color:red;'>Erro ao carregar lista do servidor.</td></tr>";
+      console.error(err);
+      if(tbody) tbody.innerHTML = "<tr><td colspan='17' style='color:red; text-align:center; padding:20px;'>Erro ao carregar lista do servidor. Verifique a URL do sistema.</td></tr>";
     });
 }
 
