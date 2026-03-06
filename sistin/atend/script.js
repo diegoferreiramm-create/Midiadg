@@ -1094,38 +1094,41 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
   telaPrint.document.close();
 }
 
+// --- FUNÇÃO PARA IR DO ATENDIMENTO PARA O LOTES (BLINDADA) ---
 function abrirAdmin() {
-  // Alterado: Agora aponta para o seu site no GitHub/Domínio Próprio
-  var urlLotes = "https://midiadg.com.br/sistin/lotes/index.html";
-  
-  var token = "MACRO@MACRO";
-  var u = ""; 
-  var s = "";
-  
   try {
-    // Captura os dados dos campos de login da tela atual
+    var urlLotes = "https://midiadg.com.br/sistin/lotes/index.html";
+    var token = "MACRO@MACRO";
+    var u = ""; 
+    var s = "";
+
+    // Tenta capturar dos campos de login
     var uField = document.getElementById('userLogin');
     var sField = document.getElementById('passLogin');
     
-    if (uField) u = uField.value;
-    if (sField) s = sField.value;
-
-    // Caso o usuário já esteja logado e os campos acima estejam vazios,
-    // tentamos buscar da sessão para ele não ter que digitar de novo
-    if (!u) {
-      const sessao = JSON.parse(sessionStorage.getItem("usuario") || "{}");
-      u = sessao.user || "";
-      s = sessao.pass || "";
+    if (uField && sField) {
+      u = uField.value;
+      s = sField.value;
     }
-  } catch (e) { 
-    console.log("Erro na captura das credenciais."); 
-  }
 
-  // Monta o link com os parâmetros para que a página de destino saiba quem está entrando
-  var linkFinal = urlLotes + "?u=" + encodeURIComponent(u) + "&s=" + encodeURIComponent(s) + "&token=" + encodeURIComponent(token);
-  
-  // Abre o seu site em uma nova aba
-  window.open(linkFinal, '_blank');
+    // Se não tiver nos campos, tenta buscar na sessão salva
+    if (!u || !s) {
+      var sessao = sessionStorage.getItem("usuario");
+      if (sessao) {
+        var obj = JSON.parse(sessao);
+        u = obj.user || obj.usuario || "";
+        s = obj.pass || obj.senha || "";
+      }
+    }
+
+    var linkFinal = urlLotes + "?u=" + encodeURIComponent(u) + "&s=" + encodeURIComponent(s) + "&token=" + encodeURIComponent(token);
+    window.open(linkFinal, '_blank');
+    
+  } catch (err) {
+    console.error("Erro ao tentar abrir Lotes:", err);
+    // Mesmo com erro, tenta abrir a URL base para não travar o usuário
+    window.open("https://midiadg.com.br/sistin/lotes/index.html", '_blank');
+  }
 }
 
 function mascaraData(campo) {
