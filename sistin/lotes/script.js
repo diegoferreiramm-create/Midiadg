@@ -452,26 +452,25 @@ function salvarEntradaCarteiras() {
   }).gravarEntradaNoServidor(dadosEntradaLocalizados, remessa, nomeGlobal);
 }
 
-// --- LOG INTELIGENTE: DIFERENCIA BOTÃO SAIR DE FECHAMENTO DE ABA ---
+// --- LOG INTELIGENTE: DIFERENCIA FECHAMENTO DE SAÍDA/ATUALIZAÇÃO ---
 window.addEventListener('unload', function() {
   if (typeof nomeGlobal !== 'undefined' && nomeGlobal && nomeGlobal !== "") {
     
-    // --- O QUE MUDOU COMEÇA AQUI ---
     let mensagemAcao = "";
     let localAcao = "";
 
-    // Se a variável 'clicouNoBotaoSair' for true, foi o botão. 
-    // Se for false, foi F5 ou fechamento de aba.
-    if (typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) {
-      mensagemAcao = "SAÍDA/FECHAMENTO";
+    // Se o usuário clicou no botão ou se a página está recarregando (F5)
+    // O 'performance.navigation.type === 1' detecta se foi um RECARREGAMENTO (F5)
+    if ((typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) || performance.navigation.type === 1) {
+      mensagemAcao = "SAÍDA/ATUALIZOU";
       localAcao = "Sistema Lotes";
     } else {
+      // Se não foi botão nem F5, foi fechar a aba, desligar PC ou trocar de site
       mensagemAcao = "FECHOU ABA/NAVEGADOR";
       localAcao = "Navegador";
     }
 
     const dadosLog = [nomeGlobal, parceiroGlobal, mensagemAcao, localAcao];
-    // --- O QUE MUDOU TERMINA AQUI ---
     
     const urlLog = WEB_APP_URL + 
                    "?action=registrarAcaoNoLog" + 
