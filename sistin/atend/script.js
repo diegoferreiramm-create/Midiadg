@@ -1069,19 +1069,6 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
   telaPrint.document.close();
 }
 
-function abrirAdmin() {
-  var urlLotes = "https://script.google.com/macros/s/AKfycbxXBQmEu_d-jUL08Vi9Cvd-h0PPnl4XLPSocuMJmBBndADfui3qj6EpG91NXOmeuXSO/exec";
-  var token = "MACRO@MACRO";
-  var u = ""; var s = "";
-  try {
-    var uField = document.getElementById('userLogin');
-    var sField = document.getElementById('passLogin');
-    if (uField) u = uField.value;
-    if (sField) s = sField.value;
-  } catch (e) { console.log("Erro na captura."); }
-  var linkFinal = urlLotes + "?u=" + encodeURIComponent(u) + "&s=" + encodeURIComponent(s) + "&token=" + encodeURIComponent(token);
-  window.open(linkFinal, '_blank');
-}
 
 function mascaraData(campo) {
   var v = campo.value.replace(/\D/g, "");
