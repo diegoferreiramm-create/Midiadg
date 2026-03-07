@@ -303,28 +303,25 @@
   <div class="grid-filtros" style="grid-template-columns: 1fr 1fr 1fr;">
     <div>
       <label style="font-size: 11px; color: #94a3b8;">FILTRAR PARCEIRO (CONFERÊNCIA)</label>
-      <input type="text" id="entParceiroConf" placeholder="Ex: 88" style="margin: 0;">
+      <input type="text" id="entParceiroConf" placeholder="Ex: 88">
     </div>
     <div>
       <label style="font-size: 11px; color: #94a3b8;">FILTRAR MUNICÍPIO (CONFERÊNCIA)</label>
-      <input type="text" id="entMunicipioConf" placeholder="Ex: FORTALEZA" style="margin: 0;">
+      <input type="text" id="entMunicipioConf" placeholder="Ex: FORTALEZA">
     </div>
     <div>
       <label style="font-size: 11px; color: #94a3b8;">Nº REMESSA / LOTE</label>
-      <input type="text" id="entRemessa" placeholder="Ex: 05" style="margin: 0;">
+      <input type="text" id="entRemessa" placeholder="Ex: 05">
     </div>
   </div>
 
   <div style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #38bdf8;">
-  <label style="font-weight: bold; color: #38bdf8;">BIPAR CÓDIGO (CTR):</label>
-  <input type="tel" id="inputBipagem" 
-         placeholder="Sincronizando..." 
-         style="font-size: 24px; border-color: #38bdf8; text-align: center; width: 100%;" 
-         oninput="this.value = this.value.replace(/[^0-9]/g, ''); autoBip(this.value)" 
-         maxlength="8" 
-         disabled 
-         autocomplete="off">
-</div>
+    <label style="font-weight: bold; color: #38bdf8;">BIPAR CÓDIGO (CTR):</label>
+    <input type="tel" id="inputBipagem" placeholder="Sincronizando..." 
+           style="font-size: 24px; border-color: #38bdf8; text-align: center; width: 100%;" 
+           oninput="this.value = this.value.replace(/[^0-9]/g, ''); autoBip(this.value)" 
+           maxlength="8" disabled autocomplete="off">
+  </div>
 
   <div class="container-tabela">
     <table id="tabelaEntrada">
@@ -344,26 +341,65 @@
   </div>
 
   <div style="margin-top: 15px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
-    
     <div style="display: flex; gap: 40px; background: #1e293b; padding: 10px 30px; border-radius: 20px; border: 1px solid #334155;">
       <div id="contadorGeralEntrada" style="color: #38bdf8; font-weight: bold; font-size: 16px;">Total Geral: 0</div>
       <div id="contadorLoteEntrada" style="color: #fbbf24; font-weight: bold; font-size: 16px;">Lote (30): 0/30</div>
     </div>
 
     <div style="display: flex; gap: 15px; justify-content: center; width: 100%;">
-      
-      <button id="btnSalvarEntrada" onclick="salvarEntradaCarteiras()" 
-              style="width: 250px; padding: 12px; background: #22c55e; margin: 0; font-weight: bold; border-radius: 6px;">
-        ✅ SALVAR ENTRADA
-      </button>
-
-      <button id="btnReimprimirEntrada" onclick="abrirReimpressaoBipagem()" 
-              style="width: 250px; padding: 12px; background: #3b82f6; margin: 0; font-weight: bold; border-radius: 6px;">
-        🔍 REIMPRIMIR PROTOCOLO
-      </button>
-
+      <button id="btnSalvarEntrada" onclick="salvarEntradaCarteiras()" style="width: 250px; background: #22c55e; font-weight: bold;">✅ SALVAR ENTRADA</button>
+      <button id="btnReimprimirEntrada" onclick="abrirReimpressaoBipagem()" style="width: 250px; background: #3b82f6; font-weight: bold;">🔍 REIMPRIMIR PROTOCOLO</button>
     </div>
   </div>
+</div>
+
+<div id="camadaResumoBipagem" class="camada-sobreposta">
+  <div class="conteudo-sobreposto">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #38bdf8; padding-bottom: 10px;">
+      <h3 style="color: #38bdf8; margin: 0;">📋 HISTÓRICO DE BIPAGENS (RESUMO)</h3>
+      <button onclick="document.getElementById('camadaResumoBipagem').style.display='none'" style="background: #ef4444; width: auto; padding: 5px 15px;">FECHAR</button>
+    </div>
+    <div style="max-height: 400px; overflow-y: auto; margin-top: 15px;">
+      <table style="width: 100%; color: white; font-size: 14px;">
+        <thead>
+          <tr style="background: #0f172a; text-align: left;">
+            <th style="padding: 10px;">REMESSA</th>
+            <th>DATA</th>
+            <th>QUANTIDADE</th>
+            <th>PROTOCOLO</th>
+          </tr>
+        </thead>
+        <tbody id="corpoResumoBipagem"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="camadaDetalheBipagem" class="camada-sobreposta" style="z-index: 2001;">
+  <div class="conteudo-sobreposto" style="max-width: 950px; border-color: #fbbf24;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #fbbf24; padding-bottom: 10px;">
+      <h3 id="tituloDetalhe" style="color: #fbbf24; margin: 0;">DETALHES DO PROTOCOLO</h3>
+      <div style="display: flex; gap: 10px;">
+        <button onclick="dispararImpressaoBipagem()" style="background: #22c55e; width: auto; padding: 5px 20px;">🖨️ IMPRIMIR</button>
+        <button onclick="document.getElementById('camadaDetalheBipagem').style.display='none'" style="background: #ef4444; width: auto; padding: 5px 15px;">VOLTAR</button>
+      </div>
+    </div>
+    <div style="max-height: 450px; overflow-y: auto; margin-top: 15px;">
+      <table style="width: 100%; font-size: 12px; color: white;">
+        <thead>
+          <tr style="background: #0f172a; text-align: left;">
+            <th style="padding: 5px;">ID</th>
+            <th>CPF</th>
+            <th>NOME</th>
+            <th>MUNICÍPIO</th>
+            <th>PARCEIRO</th>
+          </tr>
+        </thead>
+        <tbody id="corpoDetalheBipagem"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
   <script src="script.js"></script>
 </body>
