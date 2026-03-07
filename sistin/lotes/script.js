@@ -571,41 +571,112 @@ function buscarParaNovoMalote(cod, lote) {
 }
 
 
-// --- ENTRADA ---
+// --- ENTRADA BIPAGEM ---
 var cacheGrafica = []; 
 var dadosEntradaLocalizados = [];
 
+// FUNÇÃO QUE ABRE A TELA
 function entradaCarteiras() {
   document.getElementById('menuBox').style.display = 'none';
   document.getElementById('entradaBox').style.display = 'flex';
-  google.script.run.withSuccessHandler(function(dados) {
-    cacheGrafica = dados || [];
-  }).carregarDadosProducao();
+  
+  var campo = document.getElementById('inputBipagem');
+  campo.value = "";
+  campo.disabled = true;
+  campo.placeholder = "⚡ CARREGANDO BASE...";
+
+  google.script.run
+    .withSuccessHandler(function(dados) {
+      cacheGrafica = dados || [];
+      campo.disabled = false;
+      campo.placeholder = "PODE BIPAR AGORA";
+      campo.focus();
+    })
+    .carregarDadosProducao();
 }
 
+// GATILHO DE 9 DÍGITOS - ESSA É A FUNÇÃO QUE SEU INPUT CHAMA
 window.autoBip = function(valor) {
-  if (valor.length === 8) processarBipagemRapida(valor);
+  // AJUSTADO PARA 8 NÚMEROS
+  if (valor.length === 8) {
+    processarBipagemRapida(valor);
+  }
 }
 
 function processarBipagemRapida(ctr) {
-  if (dadosEntradaLocalizados.some(r => r[0] == ctr)) return;
-  var item = cacheGrafica.find(r => r[0].toString().trim() == ctr.toString().trim());
-  if (!item) {
-    dadosEntradaLocalizados.unshift([ctr, "---", "CTR NÃO LOCALIZADO", "---", "---", "---", "1"]);
+  var campo = document.getElementById('inputBipagem');
+  var ctrBipado = ctr.toString().trim();
+  campo.value = ""; 
+
+  if (dadosEntradaLocalizados.some(r => r[0] == ctrBipado)) return;
+
+  // BUSCA "CAÇADORA": 
+  // Ela limpa zeros, limpa espaços e tenta achar o número de qualquer jeito
+  var itemEncontrado = cacheGrafica.find(function(r) {
+    var cPlan = r[0].toString().trim();
+    
+    // Testa 3 formas: 
+    // 1. Igualdade exata ("00171114" === "00171114")
+    // 2. Valor numérico (171114 === 171114)
+    // 3. Se um está contido no outro
+    return (cPlan === ctrBipado) || 
+           (Number(cPlan) === Number(ctrBipado)) ||
+           (cPlan.includes(ctrBipado) || ctrBipado.includes(cPlan));
+  });
+
+  if (!itemEncontrado) {
+    // Se não achar mesmo assim, entra o erro para não travar
+    var erroItem = [ctrBipado, "---", "CTR NÃO LOCALIZADO", "---", "---", "---", "1"];
+    dadosEntradaLocalizados.unshift(erroItem);
   } else {
-    dadosEntradaLocalizados.unshift([...item]);
+    // SE ACHOU, vamos garantir que o CTR exibido seja o que você bipou
+    var itemCopia = [...itemEncontrado];
+    itemCopia[0] = ctrBipado; 
+    dadosEntradaLocalizados.unshift(itemCopia);
   }
+
   renderizarTabelaEntrada();
-  document.getElementById('inputBipagem').value = "";
+  campo.focus();
 }
 
 function renderizarTabelaEntrada() {
+  var elCorpo = document.getElementById('corpoEntrada');
+  if (!elCorpo) return;
+
+  // Filtros de conferência (Regra do Lote)
+  var parceiroDefinido = document.getElementById('entParceiroConf').value.trim();
+  var municipioDefinido = document.getElementById('entMunicipioConf').value.trim().toUpperCase();
+  
   var html = "";
+
   dadosEntradaLocalizados.forEach(function(r, index) {
-    html += `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td><button onclick="removerLinhaEntrada(${index})">EXCLUIR</button></td></tr>`;
+    // r[5] agora é o Parceiro que vem da Coluna P
+    
+    // Condições de ERRO para ativar o Alerta Vermelho
+    var erroCtr = (r[2] === "CTR NÃO LOCALIZADO" || r[2] === "---");
+    var erroParceiro = (parceiroDefinido !== "" && r[5].toString().trim() !== parceiroDefinido);
+    var erroMunicipio = (municipioDefinido !== "" && r[4].toString().toUpperCase().trim() !== municipioDefinido);
+
+    // Se houver erro, a linha "sangra" vermelho
+    var corFundo = (erroCtr || erroParceiro || erroMunicipio) ? '#7f1d1d' : 'transparent';
+    var corTexto = (erroCtr || erroParceiro || erroMunicipio) ? '#ffffff' : '#e2e8f0';
+
+    html += `<tr style="background-color: ${corFundo}; color: ${corTexto}; border-bottom: 1px solid #334155;">
+      <td style="padding: 10px; font-weight: bold;">${r[0]}</td>
+      <td>${r[1]}</td>
+      <td>${r[2]}</td>
+      <td style="white-space: nowrap;">${r[3]}</td> <td>${r[4]}</td>
+      <td style="text-align:center; font-weight: bold; font-size: 1.1em;">${r[5]}</td> <td>
+        <button onclick="removerLinhaEntrada(${index})" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-weight:bold;">EXCLUIR</button>
+      </td>
+    </tr>`;
   });
-  document.getElementById('corpoEntrada').innerHTML = html;
-  document.getElementById('contadorGeralEntrada').innerText = "Total: " + dadosEntradaLocalizados.length;
+
+  elCorpo.innerHTML = html;
+  
+  var total = dadosEntradaLocalizados.length;
+  document.getElementById('contadorGeralEntrada').innerText = "Total Geral: " + total;
+  document.getElementById('contadorLoteEntrada').innerText = "Lote (30): " + (total % 30) + "/30";
 }
 
 function removerLinhaEntrada(index) {
@@ -614,10 +685,17 @@ function removerLinhaEntrada(index) {
 }
 
 function salvarEntradaCarteiras() {
+  if (dadosEntradaLocalizados.length === 0) return;
+  var btn = document.getElementById('btnSalvarEntrada');
   var remessa = document.getElementById('entRemessa').value || "S/N";
+  btn.disabled = true;
+
   google.script.run.withSuccessHandler(function(protocolo) {
-    alert("Salvo: " + protocolo);
+    alert("Salvo! Protocolo: " + protocolo);
+    dadosEntradaLocalizados = [];
+    renderizarTabelaEntrada();
     voltarParaMenu();
+    btn.disabled = false;
   }).gravarEntradaNoServidor(dadosEntradaLocalizados, remessa, nomeGlobal);
 }
 
