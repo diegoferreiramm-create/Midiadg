@@ -229,18 +229,26 @@ function salvarRecebimento() {
   btn.disabled = true;
   btn.innerText = "SALVANDO...";
 
-  google.script.run.withSuccessHandler(function(protocolo) {
-    // Preenche o cabeçalho do protocolo na tela
+  google.script.run.withSuccessHandler(function(res) {
+    // VERIFICAÇÃO SE DEU ERRO NO SERVIDOR
+    if (res.sucesso === false) {
+       alert("Erro ao salvar: " + res.erro);
+       btn.disabled = false;
+       btn.innerText = "SALVAR RECEBIMENTO";
+       return;
+    }
+
+    // Se chegou aqui, 'res' é o protocolo (string)
+    var protocolo = res; 
+
     document.getElementById('impParceiroLote').innerText = "PARCEIRO: " + codParceiro + " | LOTE: " + loteNum;
     document.getElementById('impProtocolo').innerText = "PROTOCOLO: " + protocolo;
     document.getElementById('impDataHora').innerText = "DATA: " + new Date().toLocaleString('pt-BR');
     document.getElementById('impNomeParceiro').innerText = "NOME DO PARCEIRO: " + nomeParceiro;
     document.getElementById('impNomeAtendente').innerText = nomeGlobal;
 
-    // MONTA A LISTA PARA IMPRESSÃO - CORRIGIDO PARA USAR ÍNDICES IGUAL À REIMPRESSÃO
     var htmlImp = "";
     dadosLocalizados.forEach(function(r) {
-      // Garante a extração correta independente se 'r' é objeto ou array
       let d_id    = r.id || r[0] || "---";
       let d_cpf   = r.cpf || r[1] || "---";
       let d_nome  = r.nome || r[2] || "---";
@@ -452,35 +460,28 @@ function salvarEntradaCarteiras() {
   }).gravarEntradaNoServidor(dadosEntradaLocalizados, remessa, nomeGlobal);
 }
 
-// --- LOG INTELIGENTE: DIFERENCIA FECHAMENTO DE SAÍDA/ATUALIZAÇÃO ---
 window.addEventListener('unload', function() {
   if (typeof nomeGlobal !== 'undefined' && nomeGlobal && nomeGlobal !== "") {
     
     let mensagemAcao = "";
     let localAcao = "";
 
-    // Se o usuário clicou no botão ou se a página está recarregando (F5)
-    // O 'performance.navigation.type === 1' detecta se foi um RECARREGAMENTO (F5)
-    if ((typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) || performance.navigation.type === 1) {
+    if ((typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) || (window.performance && performance.navigation.type === 1)) {
       mensagemAcao = "SAÍDA/ATUALIZOU";
       localAcao = "Sistema Lotes";
     } else {
-      // Se não foi botão nem F5, foi fechar a aba, desligar PC ou trocar de site
       mensagemAcao = "FECHOU ABA/NAVEGADOR";
       localAcao = "Navegador";
     }
 
-    const dadosLog = [nomeGlobal, parceiroGlobal, mensagemAcao, localAcao];
+    // Criamos o array de argumentos exatamente como o seu doGet espera receber para o registrarAcaoNoLog
+    const argsLog = [nomeGlobal, parceiroGlobal, mensagemAcao, localAcao];
     
     const urlLog = WEB_APP_URL + 
                    "?action=registrarAcaoNoLog" + 
-                   "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
-                   "&token=MACRO@MACRO";
+                   "&args=" + encodeURIComponent(JSON.stringify(argsLog)) + 
+                   "&token=" + TOKEN_SECRETO; // Usando a constante que você já tem
 
-    fetch(urlLog, { 
-      method: 'GET', 
-      mode: 'no-cors', 
-      keepalive: true 
-    });
+    navigator.sendBeacon(urlLog); // sendBeacon é mais seguro que fetch no unload para não travar o navegador
   }
 });
