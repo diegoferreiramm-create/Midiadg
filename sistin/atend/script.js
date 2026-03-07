@@ -1166,40 +1166,24 @@ async function executarConserto() {
   }
 }
 
-// --- LOG DE SAÍDA MTECH (CORREÇÃO FINAL) ---
-window.addEventListener('pagehide', function() {
-  // 1. Buscamos os dados direto do sessionStorage (único lugar que sobrevive ao F5 por milissegundos)
-  const sessaoMemoria = sessionStorage.getItem("usuario");
-  if (!sessaoMemoria) return; // Se não tem ninguém logado, sai fora
+// --- LOG DE SAÍDA MTECH (VERSÃO ANTI-BLOQUEIO) ---
+window.onbeforeunload = function() {
+  const dados = sessionStorage.getItem("usuario");
+  if (!dados) return;
 
-  try {
-    const userLog = JSON.parse(sessaoMemoria);
-    const nomeUsuario = userLog.nome;
-    const parceiroUsuario = userLog.parceiro;
+  const u = JSON.parse(dados);
+  let acao = (clicouNoBotaoSair || performance.navigation.type === 1) ? "SAÍDA/ATUALIZOU" : "FECHOU ABA/NAVEGADOR";
 
-    if (nomeUsuario) {
-      // 2. Identifica se é F5 ou fechamento
-      let acaoTexto = "FECHOU ABA/NAVEGADOR";
-      if (clicouNoBotaoSair || (performance.navigation && performance.navigation.type === 1)) {
-        acaoTexto = "SAÍDA/ATUALIZOU";
-      }
+  // Monta a URL do seu Google Script
+  const urlLog = urlSistema + "?action=registrarAcaoNoLog&args=" + encodeURIComponent(JSON.stringify([u.nome, u.parceiro, acao, "Sistema MTECH"]));
 
-      // 3. Monta os argumentos EXATAMENTE como o seu .gs espera (sem token!)
-      const argsLog = [nomeUsuario, parceiroUsuario, acaoTexto, "Sistema MTECH"];
-      
-      const urlFinalLog = urlSistema + 
-                          "?action=registrarAcaoNoLog" + 
-                          "&args=" + encodeURIComponent(JSON.stringify(argsLog));
-
-      // 4. O segredo: Envia via sendBeacon (O navegador prioriza isso no fechamento)
-      navigator.sendBeacon(urlFinalLog);
-      
-      // 5. Só limpa a sessão DEPOIS que o beacon foi disparado
-      if (clicouNoBotaoSair) {
-        sessionStorage.clear();
-      }
-    }
-  } catch (e) {
-    console.error("Erro no log de saída:", e);
+  // EM VEZ DE SENDBEACON QUE O GITHUB IGNORA, VAMOS USAR O TRUQUE DA IMAGEM
+  // Isso "engana" o navegador fazendo ele achar que está carregando uma foto, mas na verdade envia o log
+  var img = new Image();
+  img.src = urlLog;
+  
+  // Se o botão SAIR for clicado, limpamos a sessão aqui no finalzinho
+  if (clicouNoBotaoSair) {
+    sessionStorage.clear();
   }
-});
+};
