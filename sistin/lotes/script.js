@@ -737,37 +737,35 @@ var dadosParaImpressaoBip = []; // Cache para a camada 2
 function abrirReimpressaoBipagem() {
   document.getElementById('camadaResumoBipagem').style.display = 'flex';
   var corpo = document.getElementById('corpoResumoBipagem');
-  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Buscando Dados...</td></tr>";
+  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Lendo aba BIPAGEM...</td></tr>";
 
   google.script.run
     .withSuccessHandler(function(dados) {
-      // Se vier mensagem de erro em texto
-      if (typeof dados === "string") {
-        corpo.innerHTML = "<tr><td colspan='4' style='color:red; text-align:center;'>" + dados + "</td></tr>";
+      // Se não vier uma lista (Array), limpa e avisa
+      if (!Array.isArray(dados)) {
+        corpo.innerHTML = "<tr><td colspan='4' style='color:red; text-align:center; padding:20px;'>⚠️ Problema nos dados: " + dados + "</td></tr>";
         return;
       }
 
-      if (!dados || dados.length === 0) {
-        corpo.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Nenhum registro encontrado em BIPAGEM.</td></tr>";
+      if (dados.length === 0) {
+        corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>Nenhum registro com Protocolo na coluna J.</td></tr>";
         return;
       }
 
       var html = "";
       for (var i = 0; i < dados.length; i++) {
         var r = dados[i];
-        html += '<tr onclick="verDetalhesBipagem(\'' + r.protocolo + '\', ' + r.quantidade + ')" ' +
-                'style="cursor:pointer; border-bottom:1px solid #334155;" ' +
-                'onmouseover="this.style.background=\'#334155\'" onmouseout="this.style.background=\'\'">' +
-                '<td style="padding:15px; font-weight:bold; color:#38bdf8;">' + r.remessa + '</td>' +
-                '<td>' + r.data + '</td>' +
-                '<td style="text-align:center; font-weight:bold; color:#fbbf24;">' + r.quantidade + ' ITENS</td>' +
-                '<td style="font-family:monospace; font-size:12px;">' + r.protocolo + '</td>' +
-                '</tr>';
+        html += `
+          <tr onclick="verDetalhesBipagem('${r.protocolo}', ${r.quantidade})" 
+              style="cursor:pointer; border-bottom:1px solid #334155;" 
+              onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background=''">
+            <td style="padding:15px; font-weight:bold; color:#38bdf8;">${r.remessa}</td>
+            <td>${r.data}</td>
+            <td style="text-align:center; font-weight:bold; color:#fbbf24; font-size:16px;">${r.quantidade} ITENS</td>
+            <td style="font-family:monospace; font-size:12px; color:#94a3b8;">${r.protocolo}</td>
+          </tr>`;
       }
       corpo.innerHTML = html;
-    })
-    .withFailureHandler(function(err) {
-      corpo.innerHTML = "<tr><td colspan='4' style='color:red;'>Erro fatal: " + err + "</td></tr>";
     })
     .buscarResumoBipagem("");
 }
