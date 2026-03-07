@@ -26,6 +26,8 @@ const google = {
       buscarDadosRecebidos: function(p, c, l) { this.call("buscarDadosRecebidos", [p, c, l]); },
       buscarDadosMaloteGeral: function(p, c, l) { this.call("buscarDadosMaloteGeral", [p, c, l]); },
       registrarAcaoNoLog: function(u, p, a, i) { this.call("registrarAcaoNoLog", [u, p, a, i]); }, // <--- NOVO
+      buscarResumoBipagem: function(a) { this.call("buscarResumoBipagem", [a]); },
+      buscarItensBipagemPorProtocolo: function(a) { this.call("buscarItensBipagemPorProtocolo", [a]); },
 
       call: function(functionName, args) {
         const self = this;
@@ -725,3 +727,66 @@ window.addEventListener('beforeunload', function () {
     navigator.sendBeacon(urlFinal);
   }
 });
+
+
+function abrirReimpressaoBipagem() {
+  document.getElementById('reimpRemessaBip').value = "";
+  document.getElementById('reimpressaoBipagemBox').style.display = 'block';
+}
+
+function consultarBipagemAgrupada() {
+  var remessa = document.getElementById('reimpRemessaBip').value.trim();
+  var corpo = document.getElementById('corpoConsultaBipagem');
+  corpo.innerHTML = "<tr><td colspan='4'>Buscando...</td></tr>";
+  document.getElementById('areaConsultaBipagem').style.display = 'block';
+
+  google.script.run.withSuccessHandler(function(dados) {
+    if (!dados || dados.length === 0) {
+      corpo.innerHTML = "<tr><td colspan='4'>Nenhuma bipagem encontrada.</td></tr>";
+      return;
+    }
+    
+    var html = "";
+    dados.forEach(function(r) {
+      html += `<tr style="cursor:pointer; border-bottom:1px solid #334155;" onclick="prepararImpressaoBipagem('${r.protocolo}')">
+        <td style="padding:8px;">${r.remessa}</td>
+        <td>${r.data}</td>
+        <td style="color:#fbbf24; font-weight:bold;">${r.quantidade} itens</td>
+        <td>${r.protocolo}</td>
+      </tr>`;
+    });
+    corpo.innerHTML = html;
+  }).buscarResumoBipagem(remessa);
+}
+
+function prepararImpressaoBipagem(protocolo) {
+  if(!confirm("Deseja imprimir o protocolo " + protocolo + "?")) return;
+
+  google.script.run.withSuccessHandler(function(dados) {
+    if (!dados || dados.length === 0) return;
+    
+    // Cabeçalho da Impressão (reaproveitando seus IDs de impressão)
+    var r = dados[0];
+    document.getElementById('impParceiroLote').innerText = "REMESSA: " + r[11];
+    document.getElementById('impProtocolo').innerText = "PROTOCOLO: " + r[12];
+    document.getElementById('impDataHora').innerText = "DATA BIPAGEM: " + r[10];
+    document.getElementById('impNomeAtendente').innerText = r[13].toUpperCase();
+
+    var html = "";
+    dados.forEach(function(item) {
+      html += `<tr>
+        <td style="border:1px solid black; padding:2px;">${item[0]}</td>
+        <td style="border:1px solid black; padding:2px;">${item[1]}</td>
+        <td style="border:1px solid black; padding:2px;">${item[2]}</td>
+        <td style="border:1px solid black; padding:2px;">${item[3]}</td>
+        <td style="border:1px solid black; padding:2px;">${item[4]}</td>
+        <td style="border:1px solid black; padding:2px;">${item[5]}</td>
+        <td colspan="4" style="border:1px solid black; padding:2px; text-align:center;">ENTRADA CONFIRMADA</td>
+      </tr>`;
+    });
+    
+    document.getElementById('corpoImpressao').innerHTML = html;
+    document.getElementById('reimpressaoBipagemBox').style.display = 'none';
+    setTimeout(function() { window.print(); }, 500);
+  }).buscarItensBipagemPorProtocolo(protocolo);
+}
