@@ -463,35 +463,29 @@ function salvarEntradaCarteiras() {
   }).gravarEntradaNoServidor(dadosEntradaLocalizados, remessa, nomeGlobal);
 }
 
-// --- LOG DE SAÍDA INTELIGENTE ---
-window.addEventListener('beforeunload', function (e) {
-  if (nomeGlobal && nomeGlobal !== "") {
-    
+// --- LOG DE FECHAMENTO E ATUALIZAÇÃO ---
+window.addEventListener('beforeunload', function () {
+  if (typeof nomeGlobal !== 'undefined' && nomeGlobal && nomeGlobal !== "") {
     let mensagemAcao = "";
-    let localAcao = "Sistema Lotes";
-
-    // 1. Se clicou no botão "SAIR"
+    
+    // Identifica o tipo de saída
     if (typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) {
-      mensagemAcao = "CLICOU EM SAIR (LOGOUT)";
-    } 
-    // 2. Se a página foi atualizada (F5 ou reload manual)
-    else if (window.performance && performance.navigation.type === 1) {
+      mensagemAcao = "SAIU PELO BOTÃO (LOGOUT)";
+    } else if (window.performance && performance.navigation.type === 1) {
       mensagemAcao = "PÁGINA ATUALIZADA (F5)";
-    } 
-    // 3. Se fechou a aba ou o navegador
-    else {
+    } else {
       mensagemAcao = "ABA OU NAVEGADOR FECHADO";
     }
 
-    const argsLog = [nomeGlobal, parceiroGlobal, mensagemAcao, localAcao];
+    const argsLog = [nomeGlobal, parceiroGlobal, mensagemAcao, "Sistema Lotes"];
     
-    // Montagem da URL para o seu doGet
+    // Monta a URL exatamente para o seu doGet
     const urlFinal = WEB_APP_URL + 
                      "?action=registrarAcaoNoLog" + 
                      "&args=" + encodeURIComponent(JSON.stringify(argsLog)) + 
                      "&token=" + TOKEN_SECRETO;
 
-    // O sendBeacon garante que o log chegue na planilha mesmo que a página feche instantaneamente
+    // Dispara o log sem esperar resposta (evita o erro que você viu)
     navigator.sendBeacon(urlFinal);
   }
 });
