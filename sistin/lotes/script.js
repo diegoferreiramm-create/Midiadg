@@ -49,6 +49,7 @@ const google = {
 };
 
 // --- VARIÁVEIS GLOBAIS ---
+var clicouNoBotaoSair = false;
 var nomeGlobal = "";
 var parceiroGlobal = "";
 var intervaloRelogio;
@@ -460,37 +461,35 @@ function salvarEntradaCarteiras() {
   }).gravarEntradaNoServidor(dadosEntradaLocalizados, remessa, nomeGlobal);
 }
 
-// --- LOG DE FECHAMENTO/ATUALIZAÇÃO ---
-// Usamos 'beforeunload' para capturar o momento exato antes da página ser destruída
-window.addEventListener('beforeunload', function() {
-  // Verificação de segurança: só loga se o usuário estiver de fato logado no sistema
-  if (typeof nomeGlobal !== 'undefined' && nomeGlobal && nomeGlobal !== "") {
+// --- LOG DE SAÍDA INTELIGENTE ---
+window.addEventListener('beforeunload', function (e) {
+  if (nomeGlobal && nomeGlobal !== "") {
     
     let mensagemAcao = "";
     let localAcao = "Sistema Lotes";
 
-    // Detecta se o usuário deu F5 ou se fechou a aba/navegador
-    if (window.performance && performance.navigation.type === 1) {
+    // 1. Se clicou no botão "SAIR"
+    if (typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) {
+      mensagemAcao = "CLICOU EM SAIR (LOGOUT)";
+    } 
+    // 2. Se a página foi atualizada (F5 ou reload manual)
+    else if (window.performance && performance.navigation.type === 1) {
       mensagemAcao = "PÁGINA ATUALIZADA (F5)";
-    } else {
+    } 
+    // 3. Se fechou a aba ou o navegador
+    else {
       mensagemAcao = "ABA OU NAVEGADOR FECHADO";
     }
 
-    // Monta o array de argumentos exatamente como o seu 'registrarAcaoNoLog' espera (4 argumentos)
     const argsLog = [nomeGlobal, parceiroGlobal, mensagemAcao, localAcao];
     
-    // Construção da URL de forma limpa
-    const urlSaida = WEB_APP_URL + 
+    // Montagem da URL para o seu doGet
+    const urlFinal = WEB_APP_URL + 
                      "?action=registrarAcaoNoLog" + 
                      "&args=" + encodeURIComponent(JSON.stringify(argsLog)) + 
                      "&token=" + TOKEN_SECRETO;
 
-    /**
-     * O SEGREDO AQUI: navigator.sendBeacon
-     * Diferente do fetch comum, o sendBeacon envia os dados de forma assíncrona e 
-     * NÃO espera resposta. Isso garante que ele não bloqueie a fila do Google 
-     * e não cause o erro "Failed to Fetch" nas outras funções de salvamento.
-     */
-    navigator.sendBeacon(urlSaida);
+    // O sendBeacon garante que o log chegue na planilha mesmo que a página feche instantaneamente
+    navigator.sendBeacon(urlFinal);
   }
 });
