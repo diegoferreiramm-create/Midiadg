@@ -10,6 +10,15 @@ let clicouNoBotaoSair = false;
 let usuarioLogadoParaLog = ""; 
 let parceiroLogadoParaLog = "";
 
+// No topo do script, para garantir que ao deslogar a tela volte ao zero
+window.onload = function() {
+  if (clicouNoBotaoSair) {
+    sessionStorage.clear();
+    abrirTela('loginBox');
+  }
+  gerarChecksColunas(); // sua função que já existia no onload
+};
+
 //atribuições de abrir paginas//
 function abrirTela(id){
   // Adicionado 'recebimentoLoteBox' na lista abaixo
