@@ -1166,32 +1166,34 @@ async function executarConserto() {
   }
 }
 
-// --- LOG DE SAÍDA MTECH (VERSÃO FINAL E ÚNICA) ---
+// --- VIGIA PARA FECHAMENTO DE ABA E F5 ---
 window.addEventListener('pagehide', function() {
-  // 1. Pega os dados que o login salvou
+  // Se o usuário clicou no botão "Sair", a função deslogarMtech já cuidou do log.
+  // Se não clicou, significa que ele deu F5 ou fechou a aba.
+  if (clicouNoBotaoSair) return; 
+
   const sessao = sessionStorage.getItem("usuario");
   if (!sessao) return;
 
   const u = JSON.parse(sessao);
   
-  // 2. Define a ação (F5 ou Botão Sair)
-  let acao = (clicouNoBotaoSair || (performance.navigation && performance.navigation.type === 1)) 
-             ? "SAÍDA/ATUALIZOU" 
-             : "FECHOU ABA/NAVEGADOR";
+  // Detecta se é apenas um F5 ou se fechou a aba de vez
+  let acaoAutomatica = (performance.navigation && performance.navigation.type === 1) 
+                       ? "SAÍDA/ATUALIZOU" 
+                       : "FECHOU ABA/NAVEGADOR";
 
-  // 3. Monta a URL pura (Sem o token do Lotes)
-  const urlLog = urlSistema + 
-                 "?action=registrarAcaoNoLog" + 
-                 "&args=" + encodeURIComponent(JSON.stringify([u.nome, u.parceiro, acao, "Sistema MTECH"]));
+  const urlLogAutomatico = urlSistema + "?action=registrarAcaoNoLog&args=" + 
+                           encodeURIComponent(JSON.stringify([u.nome, u.parceiro, acaoAutomatica, "Sistema MTECH"]));
 
-  // 4. TRUQUE FINAL: Envia como se fosse uma imagem para o navegador não bloquear
-  new Image().src = urlLog;
-  
-  // 5. Limpa a sessão se o usuário realmente clicou em Sair
-  if (clicouNoBotaoSair) sessionStorage.clear();
+  // O sendBeacon é perfeito aqui porque ele envia o dado "na surdina" 
+  // mesmo que a aba já esteja fechando.
+  navigator.sendBeacon(urlLogAutomatico);
 });
 
 function deslogarMtech() {
+  // ESSA LINHA É A CHAVE: Avisa o outro código para não registrar "FECHOU ABA"
+  clicouNoBotaoSair = true; 
+
   const sessao = sessionStorage.getItem("usuario");
   if (!sessao) {
     window.location.reload();
@@ -1201,16 +1203,12 @@ function deslogarMtech() {
   const u = JSON.parse(sessao);
   const dadosLog = [u.nome, u.parceiro, "SAÍDA/LOGOUT", "Sistema MTECH"];
   
-  // URL direta sem o token do Lotes
   const urlLog = urlSistema + "?action=registrarAcaoNoLog&args=" + encodeURIComponent(JSON.stringify(dadosLog));
 
-  // O "Pulo do Gato": Usamos uma imagem. O navegador dispara a requisição 
-  // e não espera ela voltar para recarregar a página.
   const img = new Image();
   img.onload = () => { sessionStorage.clear(); window.location.reload(); };
   img.onerror = () => { sessionStorage.clear(); window.location.reload(); };
   img.src = urlLog;
 
-  // Garantia: se a imagem demorar mais de 1 segundo, recarrega de qualquer jeito
   setTimeout(() => { sessionStorage.clear(); window.location.reload(); }, 1000);
 }
