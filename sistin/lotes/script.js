@@ -736,40 +736,41 @@ var dadosParaImpressaoBip = []; // Cache para a camada 2
 // 1. Abre a primeira camada (Resumo)
 function abrirReimpressaoBipagem() {
   document.getElementById('camadaResumoBipagem').style.display = 'flex';
-  const tbody = document.getElementById("corpoResumoBipagem");
-  tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>🔍 Carregando Histórico...</td></tr>";
+  var tbody = document.getElementById("corpoResumoBipagem");
+  tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>🔍 Buscando dados na planilha...</td></tr>";
 
   google.script.run
     .withSuccessHandler(function(dados) {
-      // TRATAMENTO DE SEGURANÇA: Se não for array, transforma em array vazia
-      const listaValida = Array.isArray(dados) ? dados : [];
-      
-      tbody.innerHTML = "";
-
-      if (listaValida.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>Nenhuma bipagem encontrada ou erro na planilha.</td></tr>";
+      // Se o servidor mandou uma mensagem de erro em texto
+      if (typeof dados === "string") {
+        tbody.innerHTML = "<tr><td colspan='4' style='color:red; text-align:center; padding:20px;'>" + dados + "</td></tr>";
         return;
       }
 
-      let html = "";
-      listaValida.forEach(function(item) {
-        html += `
-          <tr onclick="verDetalhesBipagem('${item.protocolo}', ${item.quantidade})" 
-              style="cursor:pointer; border-bottom:1px solid #334155;" 
-              onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background=''">
-            <td style="padding:12px; font-weight:bold; color:#38bdf8;">${item.remessa}</td>
-            <td>${item.data}</td>
-            <td style="text-align:center; font-weight:bold; color:#fbbf24;">
-               📦 ${item.quantidade} ITENS
-            </td>
-            <td style="font-family:monospace; font-size:12px; color:#94a3b8;">${item.protocolo}</td>
-          </tr>`;
-      });
+      var lista = (dados && Array.isArray(dados)) ? dados : [];
+      tbody.innerHTML = "";
+
+      if (lista.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>Nenhuma bipagem encontrada na Coluna J.</td></tr>";
+        return;
+      }
+
+      var html = "";
+      for (var i = 0; i < lista.length; i++) {
+        var item = lista[i];
+        html += '<tr onclick="verDetalhesBipagem(\'' + item.protocolo + '\', ' + item.quantidade + ')" ' +
+                'style="cursor:pointer; border-bottom:1px solid #334155;" ' +
+                'onmouseover="this.style.background=\'#1e293b\'" onmouseout="this.style.background=\'\'">' +
+                '<td style="padding:15px; font-weight:bold; color:#38bdf8;">' + item.remessa + '</td>' +
+                '<td>' + item.data + '</td>' +
+                '<td style="text-align:center; font-weight:bold; color:#fbbf24;">📦 ' + item.quantidade + ' ITENS</td>' +
+                '<td style="font-family:monospace; font-size:12px; color:#94a3b8;">' + item.protocolo + '</td>' +
+                '</tr>';
+      }
       tbody.innerHTML = html;
     })
     .withFailureHandler(function(err) {
-      console.error("Erro na chamada:", err);
-      tbody.innerHTML = "<tr><td colspan='4' style='color:red; text-align:center;'>⚠️ Falha de conexão com o servidor.</td></tr>";
+      tbody.innerHTML = "<tr><td colspan='4' style='color:red; text-align:center;'>Erro de comunicação.</td></tr>";
     })
     .buscarResumoBipagem();
 }
