@@ -729,64 +729,103 @@ window.addEventListener('beforeunload', function () {
 });
 
 
-function abrirReimpressaoBipagem() {
-  document.getElementById('reimpRemessaBip').value = "";
-  document.getElementById('reimpressaoBipagemBox').style.display = 'block';
-}
+// --- SISTEMA DE CONSULTA E REIMPRESSÃO (CAMADAS SOBREPOSTAS) ---
 
-function consultarBipagemAgrupada() {
-  var remessa = document.getElementById('reimpRemessaBip').value.trim();
-  var corpo = document.getElementById('corpoConsultaBipagem');
-  corpo.innerHTML = "<tr><td colspan='4'>Buscando...</td></tr>";
-  document.getElementById('areaConsultaBipagem').style.display = 'block';
+var dadosParaImpressaoBip = []; // Cache para a camada 2
+
+// 1. Abre a primeira camada (Resumo)
+function abrirReimpressaoBipagem() {
+  // Garante que a camada de detalhe esteja fechada ao abrir o resumo
+  document.getElementById('camadaDetalheBipagem').style.display = 'none';
+  document.getElementById('camadaResumoBipagem').style.display = 'flex';
+  
+  var corpo = document.getElementById('corpoResumoBipagem');
+  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Buscando histórico agrupado...</td></tr>";
 
   google.script.run.withSuccessHandler(function(dados) {
     if (!dados || dados.length === 0) {
-      corpo.innerHTML = "<tr><td colspan='4'>Nenhuma bipagem encontrada.</td></tr>";
+      corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>Nenhuma bipagem encontrada.</td></tr>";
       return;
     }
     
     var html = "";
     dados.forEach(function(r) {
-      html += `<tr style="cursor:pointer; border-bottom:1px solid #334155;" onclick="prepararImpressaoBipagem('${r.protocolo}')">
-        <td style="padding:8px;">${r.remessa}</td>
+      // r.remessa, r.data, r.quantidade, r.protocolo
+      html += `<tr onclick="verDetalhesBipagem('${r.protocolo}')" 
+                   style="cursor:pointer; border-bottom:1px solid #334155;" 
+                   onmouseover="this.style.background='#334155'" 
+                   onmouseout="this.style.background=''">
+        <td style="padding:15px; font-weight:bold; color:#38bdf8;">${r.remessa}</td>
         <td>${r.data}</td>
         <td style="color:#fbbf24; font-weight:bold;">${r.quantidade} itens</td>
-        <td>${r.protocolo}</td>
+        <td style="font-family:monospace; font-size:12px;">${r.protocolo}</td>
       </tr>`;
     });
     corpo.innerHTML = html;
-  }).buscarResumoBipagem(remessa);
+  }).buscarResumoBipagem(""); // Busca geral sem filtro de texto
 }
 
-function prepararImpressaoBipagem(protocolo) {
-  if(!confirm("Deseja imprimir o protocolo " + protocolo + "?")) return;
+// 2. Abre a segunda camada (Detalhes) ao clicar na linha
+function verDetalhesBipagem(protocolo) {
+  document.getElementById('camadaDetalheBipagem').style.display = 'flex';
+  document.getElementById('tituloDetalhe').innerText = "ITENS DO PROTOCOLO: " + protocolo;
+  
+  var corpo = document.getElementById('corpoDetalheBipagem');
+  corpo.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>📑 Carregando lista de itens...</td></tr>";
 
   google.script.run.withSuccessHandler(function(dados) {
-    if (!dados || dados.length === 0) return;
+    if (!dados || dados.length === 0) {
+      corpo.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Erro ao carregar itens.</td></tr>";
+      return;
+    }
     
-    // Cabeçalho da Impressão (reaproveitando seus IDs de impressão)
-    var r = dados[0];
-    document.getElementById('impParceiroLote').innerText = "REMESSA: " + r[11];
-    document.getElementById('impProtocolo').innerText = "PROTOCOLO: " + r[12];
-    document.getElementById('impDataHora').innerText = "DATA BIPAGEM: " + r[10];
-    document.getElementById('impNomeAtendente').innerText = r[13].toUpperCase();
-
+    dadosParaImpressaoBip = dados; // Guarda para o botão imprimir
     var html = "";
     dados.forEach(function(item) {
-      html += `<tr>
-        <td style="border:1px solid black; padding:2px;">${item[0]}</td>
-        <td style="border:1px solid black; padding:2px;">${item[1]}</td>
-        <td style="border:1px solid black; padding:2px;">${item[2]}</td>
-        <td style="border:1px solid black; padding:2px;">${item[3]}</td>
-        <td style="border:1px solid black; padding:2px;">${item[4]}</td>
-        <td style="border:1px solid black; padding:2px;">${item[5]}</td>
-        <td colspan="4" style="border:1px solid black; padding:2px; text-align:center;">ENTRADA CONFIRMADA</td>
+      // item[0]=CTR, item[1]=CPF, item[2]=NOME, item[4]=MUNICÍPIO, item[5]=PARCEIRO
+      html += `<tr style="border-bottom: 1px solid #1e293b;">
+        <td style="padding:8px; font-weight:bold;">${item[0]}</td>
+        <td>${item[1]}</td>
+        <td>${item[2]}</td>
+        <td>${item[4]}</td>
+        <td style="text-align:center;">${item[5]}</td>
       </tr>`;
     });
-    
-    document.getElementById('corpoImpressao').innerHTML = html;
-    document.getElementById('reimpressaoBipagemBox').style.display = 'none';
-    setTimeout(function() { window.print(); }, 500);
+    corpo.innerHTML = html;
   }).buscarItensBipagemPorProtocolo(protocolo);
+}
+
+// 3. Dispara a impressão (dentro da Camada 2)
+function dispararImpressaoBipagem() {
+  if (dadosParaImpressaoBip.length === 0) {
+    alert("Nenhum dado carregado para impressão.");
+    return;
+  }
+  
+  var r = dadosParaImpressaoBip[0];
+  // Preenche o cabeçalho do seu template de impressão
+  document.getElementById('impParceiroLote').innerText = "REMESSA: " + (r[11] || "S/N");
+  document.getElementById('impProtocolo').innerText = "PROTOCOLO: " + (r[12] || "S/P");
+  document.getElementById('impDataHora').innerText = "DATA BIPAGEM: " + (r[10] || "");
+  document.getElementById('impNomeAtendente').innerText = (r[13] || "").toUpperCase();
+
+  var html = "";
+  dadosParaImpressaoBip.forEach(function(item) {
+    html += `<tr>
+      <td style="border:1px solid black; padding:2px;">${item[0]}</td>
+      <td style="border:1px solid black; padding:2px;">${item[1]}</td>
+      <td style="border:1px solid black; padding:2px;">${item[2]}</td>
+      <td style="border:1px solid black; padding:2px;">${item[3]}</td>
+      <td style="border:1px solid black; padding:2px;">${item[4]}</td>
+      <td style="border:1px solid black; padding:2px; text-align:center;">${item[5]}</td>
+      <td colspan="4" style="border:1px solid black; padding:2px; text-align:center;">ENTRADA CONFIRMADA</td>
+    </tr>`;
+  });
+  
+  document.getElementById('corpoImpressao').innerHTML = html;
+  
+  // Pequeno delay para garantir que o HTML da impressão renderizou antes de abrir o PDF
+  setTimeout(function() { 
+    window.print(); 
+  }, 300);
 }
