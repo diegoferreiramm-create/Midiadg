@@ -377,10 +377,48 @@ function removerLinhaMalote(index) {
 
 function salvarMalote() {
   var destino = document.getElementById('maloteDestino').value;
-  if (!destino) { alert("Destino?"); return; }
+  if (!destino) { alert("Informe o destino do malote!"); return; }
+
+  if (!confirm("Confirmar o envio do malote?")) return;
+
+  var btn = document.getElementById('btnSalvarMalote');
+  btn.disabled = true;
+  btn.innerText = "SALVANDO...";
+
   google.script.run.withSuccessHandler(function(protocolo) {
-    alert("Gerado: " + protocolo);
-    voltarParaMenu();
+    // 1. Preenche o cabeçalho da impressão (usando os IDs que você já tem no HTML)
+    document.getElementById('impProtocolo').innerText = "PROTOCOLO: " + protocolo;
+    document.getElementById('impDataHora').innerText = "DATA: " + new Date().toLocaleString('pt-BR');
+    document.getElementById('impNomeParceiro').innerText = "DESTINO: " + destino;
+    document.getElementById('impNomeAtendente').innerText = nomeGlobal;
+
+    // 2. Monta as linhas da tabela de impressão
+    var htmlImp = "";
+    dadosMaloteLocalizados.forEach(function(r) {
+      htmlImp += `<tr>
+        <td style="border:1px solid black; padding:2px;">${r[0]}</td>
+        <td style="border:1px solid black; padding:2px;">${r[1]}</td>
+        <td style="border:1px solid black; padding:2px;">${r[2]}</td>
+        <td style="border:1px solid black; padding:2px;">${r[3]}</td>
+        <td style="border:1px solid black; padding:2px;">${r[4]}</td>
+        <td style="border:1px solid black; padding:2px;">${r[6]}</td>
+        <td style="border:1px solid black; padding:2px;">${r[7]}</td>
+        <td style="border:1px solid black; padding:2px;">${r[8]}</td>
+        <td style="border:1px solid black; padding:2px;">${r[9]}</td>
+        <td style="border:1px solid black; padding:2px;">${r[10]}</td>
+      </tr>`;
+    });
+    document.getElementById('corpoImpressao').innerHTML = htmlImp;
+
+    // 3. Dispara a impressão
+    setTimeout(function() {
+      window.print();
+      alert("Malote Enviado! Protocolo: " + protocolo);
+      voltarParaMenu();
+      btn.disabled = false;
+      btn.innerText = "GRAVAR MALOTE";
+    }, 500);
+
   }).gravarMaloteFinal(dadosMaloteLocalizados, destino, nomeGlobal);
 }
 
@@ -389,14 +427,32 @@ function abrirReimpressaoMalote() {
 }
 
 function consultarLote() {
-  var cod = document.getElementById('reimpCodMalote').value;
-  var lote = document.getElementById('reimpLoteMalote').value;
+  var cod = document.getElementById('reimpCodMalote').value.trim();
+  var lote = document.getElementById('reimpLoteMalote').value.trim();
+  
+  if (!cod || !lote) {
+    alert("Informe Código e Lote para buscar!");
+    return;
+  }
+
+  var corpo = document.getElementById('corpoConsultaReimp');
+  corpo.innerHTML = "<tr><td colspan='4'>Buscando...</td></tr>";
+
   google.script.run.withSuccessHandler(function(dados) {
-    var corpo = document.getElementById('corpoConsultaReimp');
     corpo.innerHTML = "";
+    if (!dados || dados.length === 0) {
+      corpo.innerHTML = "<tr><td colspan='4'>Nenhum malote encontrado.</td></tr>";
+      return;
+    }
     dados.forEach(function(r) {
       var tr = document.createElement('tr');
-      tr.onclick = function() { document.getElementById('reimpProtocoloMalote').value = r[15]; };
+      tr.style.cursor = "pointer";
+      tr.onclick = function() { 
+        document.getElementById('reimpProtocoloMalote').value = r[15];
+        // Destaca a linha selecionada
+        Array.from(corpo.rows).forEach(row => row.style.backgroundColor = "");
+        tr.style.backgroundColor = "#1e293b";
+      };
       tr.innerHTML = `<td>${r[1]}</td><td>${r[2]}</td><td>${r[13]}</td><td>${r[15]}</td>`;
       corpo.appendChild(tr);
     });
