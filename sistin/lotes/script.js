@@ -737,37 +737,29 @@ var dadosParaImpressaoBip = []; // Cache para a camada 2
 function abrirReimpressaoBipagem() {
   document.getElementById('camadaResumoBipagem').style.display = 'flex';
   var corpo = document.getElementById('corpoResumoBipagem');
-  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Lendo aba BIPAGEM...</td></tr>";
+  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center;'>🔍 Lendo...</td></tr>";
 
-  google.script.run
-    .withSuccessHandler(function(dados) {
-      // Se não vier uma lista (Array), limpa e avisa
-      if (!Array.isArray(dados)) {
-        corpo.innerHTML = "<tr><td colspan='4' style='color:red; text-align:center; padding:20px;'>⚠️ Problema nos dados: " + dados + "</td></tr>";
-        return;
-      }
+  google.script.run.withSuccessHandler(function(dados) {
+    // ISSO AQUI VAI TE DIZER A VERDADE NO F12:
+    console.table(dados); 
 
-      if (dados.length === 0) {
-        corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>Nenhum registro com Protocolo na coluna J.</td></tr>";
-        return;
-      }
+    if (!Array.isArray(dados) || dados.length === 0) {
+      corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>Nenhum dado na Coluna J de 'BIPAGEM'</td></tr>";
+      return;
+    }
 
-      var html = "";
-      for (var i = 0; i < dados.length; i++) {
-        var r = dados[i];
-        html += `
-          <tr onclick="verDetalhesBipagem('${r.protocolo}', ${r.quantidade})" 
-              style="cursor:pointer; border-bottom:1px solid #334155;" 
-              onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background=''">
-            <td style="padding:15px; font-weight:bold; color:#38bdf8;">${r.remessa}</td>
-            <td>${r.data}</td>
-            <td style="text-align:center; font-weight:bold; color:#fbbf24; font-size:16px;">${r.quantidade} ITENS</td>
-            <td style="font-family:monospace; font-size:12px; color:#94a3b8;">${r.protocolo}</td>
-          </tr>`;
-      }
-      corpo.innerHTML = html;
-    })
-    .buscarResumoBipagem("");
+    var html = "";
+    for (var i = 0; i < dados.length; i++) {
+      var r = dados[i];
+      html += `<tr onclick="verDetalhesBipagem('${r.protocolo}', ${r.quantidade})" style="cursor:pointer; border-bottom:1px solid #334155;">
+        <td style="padding:15px; font-weight:bold; color:#38bdf8;">${r.remessa}</td>
+        <td>${r.data}</td>
+        <td style="text-align:center; font-weight:bold; color:#fbbf24;">${r.quantidade} ITENS</td>
+        <td style="font-family:monospace; font-size:12px; color:#94a3b8;">${r.protocolo}</td>
+      </tr>`;
+    }
+    corpo.innerHTML = html;
+  }).buscarResumoBipagem("");
 }
 
 // Atualizei a função de detalhes para exibir a quantidade no título também
