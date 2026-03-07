@@ -1166,37 +1166,27 @@ async function executarConserto() {
   }
 }
 
-// --- LOG DE SAÍDA MTECH (VERSÃO BLINDADA 2026) ---
-document.addEventListener('visibilitychange', function() {
-  // Só dispara se a página estiver ficando invisível (fechando ou atualizando)
-  if (document.visibilityState === 'hidden') {
-    
-    const sessaoAtiva = sessionStorage.getItem("usuario");
-    if (!sessaoAtiva) return;
+// --- LOG DE SAÍDA MTECH (VERSÃO FINAL E ÚNICA) ---
+window.addEventListener('pagehide', function() {
+  // 1. Pega os dados que o login salvou
+  const sessao = sessionStorage.getItem("usuario");
+  if (!sessao) return;
 
-    const userLog = JSON.parse(sessaoAtiva);
-    
-    // Define a ação
-    let acaoLog = "FECHOU ABA/NAVEGADOR";
-    if (clicouNoBotaoSair || (performance.navigation && performance.navigation.type === 1)) {
-      acaoLog = "SAÍDA/ATUALIZOU";
-    }
+  const u = JSON.parse(sessao);
+  
+  // 2. Define a ação (F5 ou Botão Sair)
+  let acao = (clicouNoBotaoSair || (performance.navigation && performance.navigation.type === 1)) 
+             ? "SAÍDA/ATUALIZOU" 
+             : "FECHOU ABA/NAVEGADOR";
 
-    // Monta os dados (Sem o token do Lotes, conforme você pediu)
-    const dadosParaPlanilha = [userLog.nome, userLog.parceiro, acaoLog, "Sistema MTECH"];
-    
-    const urlFinal = urlSistema + 
-                     "?action=registrarAcaoNoLog" + 
-                     "&args=" + encodeURIComponent(JSON.stringify(dadosParaPlanilha));
+  // 3. Monta a URL pura (Sem o token do Lotes)
+  const urlLog = urlSistema + 
+                 "?action=registrarAcaoNoLog" + 
+                 "&args=" + encodeURIComponent(JSON.stringify([u.nome, u.parceiro, acao, "Sistema MTECH"]));
 
-    // TRUQUE DE FORÇA BRUTA: Sincronização via imagem (fura o bloqueio do GitHub)
-    var ping = new Image();
-    ping.src = urlFinal;
-    
-    // Se clicou em sair, limpamos após o envio
-    if (clicouNoBotaoSair) {
-       // Não limpamos o sessionStorage aqui para não matar o log de novos acessos
-       // O navegador cuidará disso no próximo carregamento se clicouNoBotaoSair for true
-    }
-  }
+  // 4. TRUQUE FINAL: Envia como se fosse uma imagem para o navegador não bloquear
+  new Image().src = urlLog;
+  
+  // 5. Limpa a sessão se o usuário realmente clicou em Sair
+  if (clicouNoBotaoSair) sessionStorage.clear();
 });
