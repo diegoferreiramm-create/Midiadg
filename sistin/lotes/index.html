@@ -26,6 +26,25 @@
     </div>
   </div>
 
+  <div id="reimpressaoBipagemBox" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>Reimpressão de Bipagem (Entrada)</h3>
+    <input type="text" id="reimpRemessaBip" placeholder="Filtrar por Remessa (Opcional)">
+    <button onclick="consultarBipagemAgrupada()">CONSULTAR</button>
+    <button onclick="this.parentElement.parentElement.style.display='none'">FECHAR</button>
+
+    <div id="areaConsultaBipagem" style="display:none; margin-top:15px; max-height:300px; overflow-y:auto;">
+      <table style="width:100%; color:white; font-size:12px;">
+        <thead>
+          <tr style="background:#1e293b">
+            <th>REMESSA</th><th>DATA</th><th>QTD</th><th>PROTOCOLO</th>
+          </tr>
+        </thead>
+        <tbody id="corpoConsultaBipagem"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
   <div id="menuBox">
     <h1>MENU PRINCIPAL</h1>
