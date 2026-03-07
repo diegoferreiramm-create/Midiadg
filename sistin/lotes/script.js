@@ -737,26 +737,23 @@ var dadosParaImpressaoBip = []; // Cache para a camada 2
 function abrirReimpressaoBipagem() {
   document.getElementById('camadaResumoBipagem').style.display = 'flex';
   const corpo = document.getElementById('corpoResumoBipagem');
-  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Carregando Histórico...</td></tr>";
+  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Carregando...</td></tr>";
 
   google.script.run
     .withSuccessHandler(function(dados) {
-      // Se o servidor retornar vazio ou der erro, 'dados' pode não ser uma lista
-      // Essa linha abaixo mata o erro de vez:
-      var lista = dados || []; 
-
-      if (!Array.isArray(lista)) {
-        corpo.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Erro no formato dos dados.</td></tr>";
+      // Se o servidor mandou uma STRING de erro em vez de uma lista:
+      if (typeof dados === "string") {
+        corpo.innerHTML = `<tr><td colspan='4' style='text-align:center; color:#ef4444; padding:20px; font-weight:bold;'>⚠️ ${dados}</td></tr>`;
         return;
       }
 
+      var lista = dados || [];
       if (lista.length === 0) {
         corpo.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Nenhum registro encontrado.</td></tr>";
         return;
       }
       
       let html = "";
-      // Usamos 'lista' que garantimos ser uma Array (mesmo que vazia)
       lista.forEach(function(r) {
         html += `
         <tr onclick="verDetalhesBipagem('${r.protocolo}', ${r.quantidade})" 
