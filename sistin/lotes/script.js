@@ -468,24 +468,24 @@ window.addEventListener('beforeunload', function () {
   if (typeof nomeGlobal !== 'undefined' && nomeGlobal && nomeGlobal !== "") {
     let mensagemAcao = "";
     
-    // Identifica o tipo de saída
+    // Diferencia se foi botão Sair, F5 ou fechar aba
     if (typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) {
-      mensagemAcao = "SAIU PELO BOTÃO (LOGOUT)";
+      mensagemAcao = "SAIU PELO BOTAO (LOGOUT)";
     } else if (window.performance && performance.navigation.type === 1) {
-      mensagemAcao = "PÁGINA ATUALIZADA (F5)";
+      mensagemAcao = "PAGINA ATUALIZADA (F5)";
     } else {
       mensagemAcao = "ABA OU NAVEGADOR FECHADO";
     }
 
     const argsLog = [nomeGlobal, parceiroGlobal, mensagemAcao, "Sistema Lotes"];
     
-    // Monta a URL exatamente para o seu doGet
+    // Montagem da URL exata para o seu doGet reconhecer
     const urlFinal = WEB_APP_URL + 
                      "?action=registrarAcaoNoLog" + 
                      "&args=" + encodeURIComponent(JSON.stringify(argsLog)) + 
                      "&token=" + TOKEN_SECRETO;
 
-    // Dispara o log sem esperar resposta (evita o erro que você viu)
+    // Envia o log de forma "invisível" para o navegador não travar
     navigator.sendBeacon(urlFinal);
   }
 });
