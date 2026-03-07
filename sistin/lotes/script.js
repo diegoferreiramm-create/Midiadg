@@ -737,19 +737,27 @@ var dadosParaImpressaoBip = []; // Cache para a camada 2
 function abrirReimpressaoBipagem() {
   document.getElementById('camadaResumoBipagem').style.display = 'flex';
   const corpo = document.getElementById('corpoResumoBipagem');
-  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Carregando...</td></tr>";
+  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Carregando Histórico...</td></tr>";
 
   google.script.run
     .withSuccessHandler(function(dados) {
-      // VALIDAÇÃO CRÍTICA: Se 'dados' não for uma lista, o forEach vai dar erro.
-      if (!dados || !Array.isArray(dados)) {
-        console.error("Recebido algo que não é array:", dados);
-        corpo.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Erro ao formatar lista ou nenhum dado encontrado.</td></tr>";
+      // Se o servidor retornar vazio ou der erro, 'dados' pode não ser uma lista
+      // Essa linha abaixo mata o erro de vez:
+      var lista = dados || []; 
+
+      if (!Array.isArray(lista)) {
+        corpo.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Erro no formato dos dados.</td></tr>";
+        return;
+      }
+
+      if (lista.length === 0) {
+        corpo.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Nenhum registro encontrado.</td></tr>";
         return;
       }
       
       let html = "";
-      dados.forEach(function(r) {
+      // Usamos 'lista' que garantimos ser uma Array (mesmo que vazia)
+      lista.forEach(function(r) {
         html += `
         <tr onclick="verDetalhesBipagem('${r.protocolo}', ${r.quantidade})" 
             style="cursor:pointer; border-bottom:1px solid #334155;" 
@@ -762,9 +770,6 @@ function abrirReimpressaoBipagem() {
         </tr>`;
       });
       corpo.innerHTML = html;
-    })
-    .withFailureHandler(function(err) {
-      corpo.innerHTML = "<tr><td colspan='4' style='color:red;'>Erro: " + err + "</td></tr>";
     })
     .buscarResumoBipagem(""); 
 }
