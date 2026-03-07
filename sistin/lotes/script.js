@@ -460,28 +460,37 @@ function salvarEntradaCarteiras() {
   }).gravarEntradaNoServidor(dadosEntradaLocalizados, remessa, nomeGlobal);
 }
 
-window.addEventListener('unload', function() {
+// --- LOG DE FECHAMENTO/ATUALIZAÇÃO ---
+// Usamos 'beforeunload' para capturar o momento exato antes da página ser destruída
+window.addEventListener('beforeunload', function() {
+  // Verificação de segurança: só loga se o usuário estiver de fato logado no sistema
   if (typeof nomeGlobal !== 'undefined' && nomeGlobal && nomeGlobal !== "") {
     
     let mensagemAcao = "";
-    let localAcao = "";
+    let localAcao = "Sistema Lotes";
 
-    if ((typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) || (window.performance && performance.navigation.type === 1)) {
-      mensagemAcao = "SAÍDA/ATUALIZOU";
-      localAcao = "Sistema Lotes";
+    // Detecta se o usuário deu F5 ou se fechou a aba/navegador
+    if (window.performance && performance.navigation.type === 1) {
+      mensagemAcao = "PÁGINA ATUALIZADA (F5)";
     } else {
-      mensagemAcao = "FECHOU ABA/NAVEGADOR";
-      localAcao = "Navegador";
+      mensagemAcao = "ABA OU NAVEGADOR FECHADO";
     }
 
-    // Criamos o array de argumentos exatamente como o seu doGet espera receber para o registrarAcaoNoLog
+    // Monta o array de argumentos exatamente como o seu 'registrarAcaoNoLog' espera (4 argumentos)
     const argsLog = [nomeGlobal, parceiroGlobal, mensagemAcao, localAcao];
     
-    const urlLog = WEB_APP_URL + 
-                   "?action=registrarAcaoNoLog" + 
-                   "&args=" + encodeURIComponent(JSON.stringify(argsLog)) + 
-                   "&token=" + TOKEN_SECRETO; // Usando a constante que você já tem
+    // Construção da URL de forma limpa
+    const urlSaida = WEB_APP_URL + 
+                     "?action=registrarAcaoNoLog" + 
+                     "&args=" + encodeURIComponent(JSON.stringify(argsLog)) + 
+                     "&token=" + TOKEN_SECRETO;
 
-    navigator.sendBeacon(urlLog); // sendBeacon é mais seguro que fetch no unload para não travar o navegador
+    /**
+     * O SEGREDO AQUI: navigator.sendBeacon
+     * Diferente do fetch comum, o sendBeacon envia os dados de forma assíncrona e 
+     * NÃO espera resposta. Isso garante que ele não bloqueie a fila do Google 
+     * e não cause o erro "Failed to Fetch" nas outras funções de salvamento.
+     */
+    navigator.sendBeacon(urlSaida);
   }
 });
