@@ -736,33 +736,37 @@ var dadosParaImpressaoBip = []; // Cache para a camada 2
 // 1. Abre a primeira camada (Resumo)
 function abrirReimpressaoBipagem() {
   document.getElementById('camadaResumoBipagem').style.display = 'flex';
-  var corpo = document.getElementById('corpoResumoBipagem');
-  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Carregando Histórico...</td></tr>";
+  const corpo = document.getElementById('corpoResumoBipagem');
+  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Carregando...</td></tr>";
 
-  google.script.run.withSuccessHandler(function(dados) {
-    if (!dados || dados.length === 0) {
-      corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>Nenhuma bipagem encontrada.</td></tr>";
-      return;
-    }
-    
-    var html = "";
-    dados.forEach(function(r) {
-      // Aqui r.quantidade já vem com o número total de linhas do agrupamento
-      html += `
-      <tr onclick="verDetalhesBipagem('${r.protocolo}')" 
-          style="cursor:pointer; border-bottom:1px solid #334155;" 
-          onmouseover="this.style.background='#334155'" 
-          onmouseout="this.style.background=''">
-        <td style="padding:15px; font-weight:bold; color:#38bdf8;">${r.remessa}</td>
-        <td>${r.data}</td>
-        <td style="color:#fbbf24; font-weight:bold; font-size:15px;">
-           📦 ${r.quantidade} ITENS
-        </td>
-        <td style="font-family:monospace; font-size:12px; color:#94a3b8;">${r.protocolo}</td>
-      </tr>`;
-    });
-    corpo.innerHTML = html;
-  }).buscarResumoBipagem("");
+  google.script.run
+    .withSuccessHandler(function(dados) {
+      // VALIDAÇÃO CRÍTICA: Se 'dados' não for uma lista, o forEach vai dar erro.
+      if (!dados || !Array.isArray(dados)) {
+        console.error("Recebido algo que não é array:", dados);
+        corpo.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Erro ao formatar lista ou nenhum dado encontrado.</td></tr>";
+        return;
+      }
+      
+      let html = "";
+      dados.forEach(function(r) {
+        html += `
+        <tr onclick="verDetalhesBipagem('${r.protocolo}', ${r.quantidade})" 
+            style="cursor:pointer; border-bottom:1px solid #334155;" 
+            onmouseover="this.style.background='#334155'" 
+            onmouseout="this.style.background=''">
+          <td style="padding:15px; font-weight:bold; color:#38bdf8;">${r.remessa}</td>
+          <td>${r.data}</td>
+          <td style="text-align:center; font-weight:bold; color:#fbbf24;">${r.quantidade} ITENS</td>
+          <td style="font-family:monospace; font-size:12px;">${r.protocolo}</td>
+        </tr>`;
+      });
+      corpo.innerHTML = html;
+    })
+    .withFailureHandler(function(err) {
+      corpo.innerHTML = "<tr><td colspan='4' style='color:red;'>Erro: " + err + "</td></tr>";
+    })
+    .buscarResumoBipagem(""); 
 }
 
 // Atualizei a função de detalhes para exibir a quantidade no título também
