@@ -132,7 +132,7 @@ function recebimentoLotes() {
 }
 
 function voltarParaMenu() {
-  var telas = ['recebimentoBox', 'maloteBox', 'entregaBox', 'entradaBox', 'reimpressaoBox', 'reimpressaoMaloteBox'];
+  var telas = ['recebimentoBox', 'Box', 'entregaBox', 'entradaBox', 'reimpressaoBox', 'reimpressaoMaloteBox'];
   telas.forEach(function(id) {
     var elemento = document.getElementById(id);
     if (elemento) elemento.style.display = 'none';
@@ -331,98 +331,161 @@ function salvarNovoUsuario() {
   }).cadastrarNoServidor(user, pass, nome, parc);
 }
 
-// --- MALOTE ---
-var dadosMaloteLocalizados = [];
+// --- VARIÁVEL GLOBAL DO MALOTE ---
+    var dadosMaloteLocalizados = [];
 
-function abrirMalote() {
-  document.getElementById('menuBox').style.display = 'none';
-  document.getElementById('maloteBox').style.display = 'flex';
-}
+    // --- ABRIR TELA ---
+    function abrirMalote() {
+      document.getElementById('menuBox').style.display = 'none';
+      document.getElementById('maloteBox').style.display = 'flex';
+    }
 
-function limparBuscaMalote() {
-  dadosMaloteLocalizados = [];
-  document.getElementById('corpoMalote').innerHTML = "";
-  document.getElementById('contadorMalote').innerText = "Total: 0 registros";
-  document.getElementById('btnSalvarMalote').style.display = "none";
-}
+    // --- LIMPAR BUSCA MALOTE (Cópia da sua limparBusca) ---
+    function limparBuscaMalote() {
+      dadosMaloteLocalizados = [];
+      document.getElementById('corpoMalote').innerHTML = "";
+      document.getElementById('contadorMalote').innerText = "Total: 0 registros";
+      document.getElementById('btnSalvarMalote').style.display = "none";
+      document.getElementById('maloteCod').value = "";
+      document.getElementById('maloteLote').value = "";
+      document.getElementById('maloteDestino').value = "";
+    }
 
-function buscarParaMalote() {
+    // --- BUSCA (Chama a mesma buscarDadosRecebidos que você já tem no GS) ---
+    function buscarParaMalote() {
   var cod = document.getElementById('maloteCod').value;
   var lote = document.getElementById('maloteLote').value;
+
+  if (!cod || !lote) {
+    alert("Preencha o Código do Parceiro e o Lote!");
+    return;
+  }
+
+  document.getElementById('corpoMalote').innerHTML = "<tr><td colspan='5' style='padding:20px; text-align:center;'>Buscando...</td></tr>";
+
+  // MUDANÇA AQUI: Chamamos buscarParaNovoMalote em vez de buscarDadosRecebidos
   google.script.run.withSuccessHandler(function(data) {
     dadosMaloteLocalizados = data;
     renderizarTabelaMalote();
-  }).buscarParaNovoMalote(cod, lote);
+  }).buscarParaNovoMalote(cod, lote); 
 }
 
-function renderizarTabelaMalote() {
-  var html = "";
-  if (dadosMaloteLocalizados.length === 0) {
-    html = "<tr><td colspan='13' style='text-align:center;'>Nada encontrado.</td></tr>";
-    document.getElementById('btnSalvarMalote').style.display = "none";
-  } else {
-    dadosMaloteLocalizados.forEach(function(r, index) {
-      html += `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td><td>${r[10]}</td><td>${r[11]}</td><td><button onclick="removerLinhaMalote(${index})">EXCLUIR</button></td></tr>`;
-    });
-    document.getElementById('btnSalvarMalote').style.display = "block";
-  }
-  document.getElementById('corpoMalote').innerHTML = html;
-  document.getElementById('contadorMalote').innerText = "Total: " + dadosMaloteLocalizados.length;
-}
+    // --- RENDERIZAR TABELA DO MALOTE (AMPLIADA A AO L) ---
+    function renderizarTabelaMalote() {
+      var html = "";
+      if (dadosMaloteLocalizados.length === 0) {
+        html = "<tr><td colspan='13' style='padding:20px; text-align:center; color:#f87171;'>Nenhum registro encontrado em RECEBIDOS.</td></tr>";
+        document.getElementById('btnSalvarMalote').style.display = "none";
+      } else {
+        dadosMaloteLocalizados.forEach(function(r, index) {
+          // r[0]=ID, r[1]=CPF, r[2]=NOME, r[3]=NASC, r[4]=MUNICIPIO, r[5]=TEL, r[6]=VIA, 
+          // r[7]=PARCEIRO, r[8]=DATA, r[9]=ATENDENTE, r[10]=BOLETO, r[11]=LOTE
+          html += `<tr style="border-bottom: 1px solid #1e293b;">
+            <td style="padding: 10px;">${r[0]}</td>
+            <td>${r[1]}</td>
+            <td>${r[2]}</td>
+            <td>${r[3]}</td>
+            <td>${r[4]}</td>
+            <td>${r[5]}</td>
+            <td>${r[6]}</td>
+            <td>${r[7]}</td>
+            <td>${r[8]}</td>
+            <td>${r[9]}</td>
+            <td>${r[10]}</td>
+            <td>${r[11]}</td>
+            <td style="text-align:center;">
+               <button onclick="removerLinhaMalote(${index})" style="background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">EXCLUIR</button>
+            </td>
+          </tr>`;
+        });
+        document.getElementById('btnSalvarMalote').style.display = "block";
+      }
+      document.getElementById('corpoMalote').innerHTML = html;
+      document.getElementById('contadorMalote').innerText = "Total: " + dadosMaloteLocalizados.length + " registros";
+    }
+    function removerLinhaMalote(index) {
+      dadosMaloteLocalizados.splice(index, 1);
+      renderizarTabelaMalote();
+    }
 
-function removerLinhaMalote(index) {
-  dadosMaloteLocalizados.splice(index, 1);
-  renderizarTabelaMalote();
-}
-
-function salvarMalote() {
+    function salvarMalote() {
   var destino = document.getElementById('maloteDestino').value;
-  if (!destino) { alert("Informe o destino do malote!"); return; }
+  var codParceiro = document.getElementById('maloteCod').value; // Pegando o código para o cabeçalho
+  var loteNum = document.getElementById('maloteLote').value;   // Pegando o lote para o cabeçalho
 
-  if (!confirm("Confirmar o envio do malote?")) return;
+  if (!destino) {
+    alert("Por favor, informe o DESTINO do malote!");
+    return;
+  }
+
+  if (dadosMaloteLocalizados.length === 0) {
+    alert("Não há dados na tabela para salvar.");
+    return;
+  }
+
+  // Usamos o confirm igual ao recebimento para ficar padronizado
+  if (!confirm("Confirmar o envio de " + dadosMaloteLocalizados.length + " itens para o malote?")) return;
 
   var btn = document.getElementById('btnSalvarMalote');
   btn.disabled = true;
   btn.innerText = "SALVANDO...";
 
+  // Note que aqui passamos 'nomeGlobal', exatamente como no seu Recebimento
   google.script.run.withSuccessHandler(function(protocolo) {
-    // 1. Preenche o cabeçalho da impressão (usando os IDs que você já tem no HTML)
+    
+    // --- PREPARAÇÃO DA IMPRESSÃO (IGUAL AO RECEBIMENTO) ---
+    document.getElementById('impParceiroLote').innerText = "DESTINO: " + destino.toUpperCase() + " | LOTE: " + loteNum;
     document.getElementById('impProtocolo').innerText = "PROTOCOLO: " + protocolo;
-    document.getElementById('impDataHora').innerText = "DATA: " + new Date().toLocaleString('pt-BR');
-    document.getElementById('impNomeParceiro').innerText = "DESTINO: " + destino;
+    document.getElementById('impDataHora').innerText = "DATA ENVIO: " + new Date().toLocaleString('pt-BR');
+    
+    if(document.getElementById('impNomeParceiro')) {
+       document.getElementById('impNomeParceiro').innerText = "DESTINO: " + destino.toUpperCase();
+    }
+
+    // AQUI ESTÁ A CORREÇÃO: Usando a mesma variável nomeGlobal que funciona no recebimento
     document.getElementById('impNomeAtendente').innerText = nomeGlobal;
 
-    // 2. Monta as linhas da tabela de impressão
     var htmlImp = "";
     dadosMaloteLocalizados.forEach(function(r) {
       htmlImp += `<tr>
-        <td style="border:1px solid black; padding:2px;">${r[0]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[1]}</td>
+        <td style="border:1px solid black; padding:2px; width:15px; text-align:center;">${r[0]}</td>
+        <td style="border:1px solid black; padding:2px; width:85px;">${r[1]}</td>
         <td style="border:1px solid black; padding:2px;">${r[2]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[3]}</td>
+        <td style="border:1px solid black; padding:2px; width:50px; text-align:center;">${r[3]}</td>
         <td style="border:1px solid black; padding:2px;">${r[4]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[6]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[7]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[8]}</td>
-        <td style="border:1px solid black; padding:2px;">${r[9]}</td>
+        <td style="border:1px solid black; padding:2px; width:65px;">${r[5]}</td>
+        <td style="border:1px solid black; padding:2px; width:15px; text-align:center;">${r[6]}</td>
+        <td style="border:1px solid black; padding:2px; width:40px;">${r[8]}</td>
+        <td style="border:1px solid black; padding:2px; width:30px;">${r[9]}</td> 
         <td style="border:1px solid black; padding:2px;">${r[10]}</td>
       </tr>`;
     });
     document.getElementById('corpoImpressao').innerHTML = htmlImp;
 
-    // 3. Dispara a impressão
+    // Aguarda o carregamento e dispara a impressão
     setTimeout(function() {
       window.print();
-      alert("Malote Enviado! Protocolo: " + protocolo);
-      voltarParaMenu();
+      alert("Sucesso! Malote Gerado: " + protocolo);
+      
+      limparBuscaMalote(); // Limpa os campos da busca
+      voltarParaMenu();    // Volta para o menu igual ao recebimento
+      
       btn.disabled = false;
-      btn.innerText = "GRAVAR MALOTE";
+      btn.innerText = "GERAR PROTOCOLO DE MALOTE";
     }, 500);
 
-  }).gravarMaloteFinal(dadosMaloteLocalizados, destino, nomeGlobal);
+  }).gravarMaloteFinal(dadosMaloteLocalizados, destino, nomeGlobal); 
+  // Envia nomeGlobal para o servidor também!
 }
 
+    
+
 function abrirReimpressaoMalote() {
+  // Limpa os campos antes de abrir
+  document.getElementById('reimpProtocoloMalote').value = "";
+  document.getElementById('reimpCodMalote').value = "";
+  document.getElementById('reimpLoteMalote').value = "";
+  
   document.getElementById('reimpressaoMaloteBox').style.display = 'block';
 }
 
@@ -430,44 +493,83 @@ function consultarLote() {
   var cod = document.getElementById('reimpCodMalote').value.trim();
   var lote = document.getElementById('reimpLoteMalote').value.trim();
   
-  if (!cod || !lote) {
-    alert("Informe Código e Lote para buscar!");
-    return;
-  }
-
-  var corpo = document.getElementById('corpoConsultaReimp');
-  corpo.innerHTML = "<tr><td colspan='4'>Buscando...</td></tr>";
-
   google.script.run.withSuccessHandler(function(dados) {
+    if (!dados || dados.length === 0) { alert("Nada encontrado!"); return; }
+    
+    document.getElementById('areaConsultaReimp').style.display = 'block';
+    var corpo = document.getElementById('corpoConsultaReimp');
     corpo.innerHTML = "";
-    if (!dados || dados.length === 0) {
-      corpo.innerHTML = "<tr><td colspan='4'>Nenhum malote encontrado.</td></tr>";
-      return;
-    }
+
     dados.forEach(function(r) {
       var tr = document.createElement('tr');
+      tr.style.borderBottom = "1px solid #1e293b";
       tr.style.cursor = "pointer";
-      tr.onclick = function() { 
-        document.getElementById('reimpProtocoloMalote').value = r[15];
-        // Destaca a linha selecionada
-        Array.from(corpo.rows).forEach(row => row.style.backgroundColor = "");
-        tr.style.backgroundColor = "#1e293b";
-      };
-      tr.innerHTML = `<td>${r[1]}</td><td>${r[2]}</td><td>${r[13]}</td><td>${r[15]}</td>`;
+      tr.onclick = function() { document.getElementById('reimpProtocoloMalote').value = r[15]; };
+      tr.innerHTML = `<td style="padding:5px">${r[1]}</td><td style="padding:5px">${r[2]}</td><td style="padding:5px;color:#f59e0b">${r[13]}</td><td style="padding:5px">${r[15]}</td>`;
       corpo.appendChild(tr);
     });
   }).buscarDadosMaloteGeral("", cod, lote);
 }
 
 function imprimirProtocolo() {
-  var protocolo = document.getElementById('reimpProtocoloMalote').value;
+  var protocolo = document.getElementById('reimpProtocoloMalote').value.trim().toUpperCase();
+  if (!protocolo) { alert("Selecione um protocolo!"); return; }
+
   google.script.run.withSuccessHandler(function(dados) {
     if (!dados || dados.length === 0) return;
-    document.getElementById('impProtocolo').innerText = "PROTOCOLO: " + dados[0][15];
+    var r = dados[0];
+    document.getElementById('impParceiroLote').innerText = "DESTINO: " + r[13].toUpperCase() + " | LOTE: " + r[11];
+    document.getElementById('impProtocolo').innerText = "PROTOCOLO: " + r[15];
+    document.getElementById('impDataHora').innerText = "DATA ENVIO: " + r[12];
+    document.getElementById('impNomeAtendente').innerText = r[14].toUpperCase();
+
+    var html = "";
+    dados.forEach(function(item) {
+      html += `<tr>
+        <td style="border:1px solid black; padding:2px; text-align:center;">${item[0]}</td>
+        <td style="border:1px solid black; padding:2px;">${item[1]}</td>
+        <td style="border:1px solid black; padding:2px;">${item[2]}</td>
+        <td style="border:1px solid black; padding:2px; text-align:center;">${item[3]}</td>
+        <td style="border:1px solid black; padding:2px;">${item[4]}</td>
+        <td style="border:1px solid black; padding:2px;">${item[5]}</td>
+        <td style="border:1px solid black; padding:2px; text-align:center;">${item[6]}</td>
+        <td style="border:1px solid black; padding:2px;">${item[8]}</td>
+        <td style="border:1px solid black; padding:2px;">${item[9]}</td>
+        <td style="border:1px solid black; padding:2px;">${item[10]}</td>
+      </tr>`;
+    });
+    document.getElementById('corpoImpressao').innerHTML = html;
     document.getElementById('reimpressaoMaloteBox').style.display = 'none';
     setTimeout(function() { window.print(); }, 500);
   }).buscarDadosMaloteGeral(protocolo, "", "");
 }
+
+
+function buscarParaNovoMalote(cod, lote) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetHist = ss.getSheetByName("HISTORICO");
+  var sheetMal = ss.getSheetByName("MALOTE");
+  
+  var dadosHist = sheetHist.getDataRange().getDisplayValues();
+  var IDsNoMalote = [];
+  
+  // Pega os IDs que já estão no Malote para excluir da busca
+  if (sheetMal) {
+    var dadosMal = sheetMal.getDataRange().getValues();
+    IDsNoMalote = dadosMal.map(function(r) { return r[0].toString(); });
+  }
+
+  var resultados = [];
+  for (var i = 1; i < dadosHist.length; i++) {
+    var r = dadosHist[i];
+    // r[7] é Parceiro, r[11] é Lote, r[0] é ID
+    if (r[7] == cod && r[11] == lote && IDsNoMalote.indexOf(r[0].toString()) === -1) {
+      resultados.push(r);
+    }
+  }
+  return resultados;
+}
+
 
 // --- ENTRADA ---
 var cacheGrafica = []; 
