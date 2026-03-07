@@ -736,43 +736,18 @@ var dadosParaImpressaoBip = []; // Cache para a camada 2
 // 1. Abre a primeira camada (Resumo)
 function abrirReimpressaoBipagem() {
   document.getElementById('camadaResumoBipagem').style.display = 'flex';
-  var tbody = document.getElementById("corpoResumoBipagem");
-  tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>🔍 Buscando dados na planilha...</td></tr>";
-
-  google.script.run
-    .withSuccessHandler(function(dados) {
-      // Se o servidor mandou uma mensagem de erro em texto
-      if (typeof dados === "string") {
-        tbody.innerHTML = "<tr><td colspan='4' style='color:red; text-align:center; padding:20px;'>" + dados + "</td></tr>";
-        return;
-      }
-
-      var lista = (dados && Array.isArray(dados)) ? dados : [];
-      tbody.innerHTML = "";
-
-      if (lista.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>Nenhuma bipagem encontrada na Coluna J.</td></tr>";
-        return;
-      }
-
-      var html = "";
-      for (var i = 0; i < lista.length; i++) {
-        var item = lista[i];
-        html += '<tr onclick="verDetalhesBipagem(\'' + item.protocolo + '\', ' + item.quantidade + ')" ' +
-                'style="cursor:pointer; border-bottom:1px solid #334155;" ' +
-                'onmouseover="this.style.background=\'#1e293b\'" onmouseout="this.style.background=\'\'">' +
-                '<td style="padding:15px; font-weight:bold; color:#38bdf8;">' + item.remessa + '</td>' +
-                '<td>' + item.data + '</td>' +
-                '<td style="text-align:center; font-weight:bold; color:#fbbf24;">📦 ' + item.quantidade + ' ITENS</td>' +
-                '<td style="font-family:monospace; font-size:12px; color:#94a3b8;">' + item.protocolo + '</td>' +
-                '</tr>';
-      }
-      tbody.innerHTML = html;
-    })
-    .withFailureHandler(function(err) {
-      tbody.innerHTML = "<tr><td colspan='4' style='color:red; text-align:center;'>Erro de comunicação.</td></tr>";
-    })
-    .buscarResumoBipagem();
+  google.script.run.withSuccessHandler(function(dados) {
+    var html = "";
+    if(!dados || dados.length == 0) { 
+      document.getElementById("corpoResumoBipagem").innerHTML = "Vazio"; 
+      return; 
+    }
+    // Usando FOR simples para nunca mais dar erro de forEach
+    for(var i=0; i<dados.length; i++){
+      html += "<tr><td>"+dados[i].remessa+"</td><td>"+dados[i].protocolo+"</td></tr>";
+    }
+    document.getElementById("corpoResumoBipagem").innerHTML = html;
+  }).buscarResumoBipagemV2(); // Nome novo para forçar atualização
 }
 
 // Atualizei a função de detalhes para exibir a quantidade no título também
