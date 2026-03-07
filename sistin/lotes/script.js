@@ -735,31 +735,39 @@ var dadosParaImpressaoBip = []; // Cache para a camada 2
 
 // 1. Abre a primeira camada (Resumo)
 function abrirReimpressaoBipagem() {
+  // Exibe a camada
   document.getElementById('camadaResumoBipagem').style.display = 'flex';
-  var corpo = document.getElementById('corpoResumoBipagem');
-  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center;'>🔍 Lendo...</td></tr>";
+  
+  const tbody = document.getElementById("corpoResumoBipagem");
+  tbody.innerHTML = "<tr><td colspan='4'>Carregando histórico agrupado...</td></tr>";
 
-  google.script.run.withSuccessHandler(function(dados) {
-    // ISSO AQUI VAI TE DIZER A VERDADE NO F12:
-    console.table(dados); 
+  // Chamada idêntica à lógica do seu fetch/Google Script
+  google.script.run
+    .withSuccessHandler(function(dados) {
+      tbody.innerHTML = "";
+      
+      if (dados.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Nenhum dado encontrado na aba BIPAGEM.</td></tr>";
+        return;
+      }
 
-    if (!Array.isArray(dados) || dados.length === 0) {
-      corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>Nenhum dado na Coluna J de 'BIPAGEM'</td></tr>";
-      return;
-    }
-
-    var html = "";
-    for (var i = 0; i < dados.length; i++) {
-      var r = dados[i];
-      html += `<tr onclick="verDetalhesBipagem('${r.protocolo}', ${r.quantidade})" style="cursor:pointer; border-bottom:1px solid #334155;">
-        <td style="padding:15px; font-weight:bold; color:#38bdf8;">${r.remessa}</td>
-        <td>${r.data}</td>
-        <td style="text-align:center; font-weight:bold; color:#fbbf24;">${r.quantidade} ITENS</td>
-        <td style="font-family:monospace; font-size:12px; color:#94a3b8;">${r.protocolo}</td>
-      </tr>`;
-    }
-    corpo.innerHTML = html;
-  }).buscarResumoBipagem("");
+      // Lógica de construção de linha que você mandou no exemplo
+      dados.forEach(item => {
+        tbody.innerHTML += `
+          <tr onclick="verDetalhesBipagem('${item.protocolo}', ${item.quantidade})" 
+              style="cursor:pointer; border-bottom:1px solid #334155;" 
+              onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background=''">
+            <td style="padding:12px; font-weight:bold; color:#38bdf8;">${item.remessa}</td>
+            <td>${item.data}</td>
+            <td style="text-align:center; font-weight:bold; color:#fbbf24;">📦 ${item.quantidade} ITENS</td>
+            <td style="font-family:monospace; font-size:12px; color:#94a3b8;">${item.protocolo}</td>
+          </tr>`;
+      });
+    })
+    .withFailureHandler(err => {
+      tbody.innerHTML = "<tr><td colspan='4' style='color:red;'>Erro ao conectar com o servidor.</td></tr>";
+    })
+    .buscarResumoBipagem();
 }
 
 // Atualizei a função de detalhes para exibir a quantidade no título também
