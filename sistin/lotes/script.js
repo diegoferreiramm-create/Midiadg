@@ -132,7 +132,7 @@ function recebimentoLotes() {
 }
 
 function voltarParaMenu() {
-  var telas = ['recebimentoBox', 'Box', 'entregaBox', 'entradaBox', 'reimpressaoBox', 'reimpressaoMaloteBox'];
+  var telas = ['recebimentoBox', 'maloteBox', 'entregaBox', 'entradaBox', 'reimpressaoBox', 'reimpressaoMaloteBox'];
   telas.forEach(function(id) {
     var elemento = document.getElementById(id);
     if (elemento) elemento.style.display = 'none';
