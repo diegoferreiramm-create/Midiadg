@@ -1166,31 +1166,40 @@ async function executarConserto() {
   }
 }
 
-// --- LOG DE SAÍDA MTECH (LIMPO E SEM TOKEN) ---
+// --- LOG DE SAÍDA MTECH (CORREÇÃO FINAL) ---
 window.addEventListener('pagehide', function() {
-  // 1. Pega o usuário que ainda está na sessão (pois o botão não apaga mais antes)
-  const sessao = sessionStorage.getItem("usuario");
-  if (!sessao) return;
+  // 1. Buscamos os dados direto do sessionStorage (único lugar que sobrevive ao F5 por milissegundos)
+  const sessaoMemoria = sessionStorage.getItem("usuario");
+  if (!sessaoMemoria) return; // Se não tem ninguém logado, sai fora
 
-  const user = JSON.parse(sessao);
-  
-  // 2. Define a ação (F5 ou Botão Sair)
-  let acao = "FECHOU ABA/NAVEGADOR";
-  if (clicouNoBotaoSair || (performance.navigation && performance.navigation.type === 1)) {
-    acao = "SAÍDA/ATUALIZOU";
+  try {
+    const userLog = JSON.parse(sessaoMemoria);
+    const nomeUsuario = userLog.nome;
+    const parceiroUsuario = userLog.parceiro;
+
+    if (nomeUsuario) {
+      // 2. Identifica se é F5 ou fechamento
+      let acaoTexto = "FECHOU ABA/NAVEGADOR";
+      if (clicouNoBotaoSair || (performance.navigation && performance.navigation.type === 1)) {
+        acaoTexto = "SAÍDA/ATUALIZOU";
+      }
+
+      // 3. Monta os argumentos EXATAMENTE como o seu .gs espera (sem token!)
+      const argsLog = [nomeUsuario, parceiroUsuario, acaoTexto, "Sistema MTECH"];
+      
+      const urlFinalLog = urlSistema + 
+                          "?action=registrarAcaoNoLog" + 
+                          "&args=" + encodeURIComponent(JSON.stringify(argsLog));
+
+      // 4. O segredo: Envia via sendBeacon (O navegador prioriza isso no fechamento)
+      navigator.sendBeacon(urlFinalLog);
+      
+      // 5. Só limpa a sessão DEPOIS que o beacon foi disparado
+      if (clicouNoBotaoSair) {
+        sessionStorage.clear();
+      }
+    }
+  } catch (e) {
+    console.error("Erro no log de saída:", e);
   }
-
-  // 3. Monta os dados para o seu .gs do MTECH
-  const dadosLog = [user.nome, user.parceiro, acao, "Sistema MTECH"];
-  
-  // 4. URL LIMPA: Sem o token que só o Lotes exige
-  const urlLog = urlSistema + 
-                 "?action=registrarAcaoNoLog" + 
-                 "&args=" + encodeURIComponent(JSON.stringify(dadosLog));
-
-  // 5. Envia o log "no susto" antes da aba sumir
-  navigator.sendBeacon(urlLog);
-  
-  // 6. Limpa a sessão após o envio
-  sessionStorage.clear();
 });
