@@ -1166,24 +1166,37 @@ async function executarConserto() {
   }
 }
 
-// --- LOG DE SAÍDA MTECH (VERSÃO ANTI-BLOQUEIO) ---
-window.onbeforeunload = function() {
-  const dados = sessionStorage.getItem("usuario");
-  if (!dados) return;
+// --- LOG DE SAÍDA MTECH (VERSÃO BLINDADA 2026) ---
+document.addEventListener('visibilitychange', function() {
+  // Só dispara se a página estiver ficando invisível (fechando ou atualizando)
+  if (document.visibilityState === 'hidden') {
+    
+    const sessaoAtiva = sessionStorage.getItem("usuario");
+    if (!sessaoAtiva) return;
 
-  const u = JSON.parse(dados);
-  let acao = (clicouNoBotaoSair || performance.navigation.type === 1) ? "SAÍDA/ATUALIZOU" : "FECHOU ABA/NAVEGADOR";
+    const userLog = JSON.parse(sessaoAtiva);
+    
+    // Define a ação
+    let acaoLog = "FECHOU ABA/NAVEGADOR";
+    if (clicouNoBotaoSair || (performance.navigation && performance.navigation.type === 1)) {
+      acaoLog = "SAÍDA/ATUALIZOU";
+    }
 
-  // Monta a URL do seu Google Script
-  const urlLog = urlSistema + "?action=registrarAcaoNoLog&args=" + encodeURIComponent(JSON.stringify([u.nome, u.parceiro, acao, "Sistema MTECH"]));
+    // Monta os dados (Sem o token do Lotes, conforme você pediu)
+    const dadosParaPlanilha = [userLog.nome, userLog.parceiro, acaoLog, "Sistema MTECH"];
+    
+    const urlFinal = urlSistema + 
+                     "?action=registrarAcaoNoLog" + 
+                     "&args=" + encodeURIComponent(JSON.stringify(dadosParaPlanilha));
 
-  // EM VEZ DE SENDBEACON QUE O GITHUB IGNORA, VAMOS USAR O TRUQUE DA IMAGEM
-  // Isso "engana" o navegador fazendo ele achar que está carregando uma foto, mas na verdade envia o log
-  var img = new Image();
-  img.src = urlLog;
-  
-  // Se o botão SAIR for clicado, limpamos a sessão aqui no finalzinho
-  if (clicouNoBotaoSair) {
-    sessionStorage.clear();
+    // TRUQUE DE FORÇA BRUTA: Sincronização via imagem (fura o bloqueio do GitHub)
+    var ping = new Image();
+    ping.src = urlFinal;
+    
+    // Se clicou em sair, limpamos após o envio
+    if (clicouNoBotaoSair) {
+       // Não limpamos o sessionStorage aqui para não matar o log de novos acessos
+       // O navegador cuidará disso no próximo carregamento se clicouNoBotaoSair for true
+    }
   }
-};
+});
