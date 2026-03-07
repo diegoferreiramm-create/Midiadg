@@ -1190,3 +1190,27 @@ window.addEventListener('pagehide', function() {
   // 5. Limpa a sessão se o usuário realmente clicou em Sair
   if (clicouNoBotaoSair) sessionStorage.clear();
 });
+
+function deslogarMtech() {
+  const sessao = sessionStorage.getItem("usuario");
+  if (!sessao) {
+    window.location.reload();
+    return;
+  }
+
+  const u = JSON.parse(sessao);
+  const dadosLog = [u.nome, u.parceiro, "SAÍDA/LOGOUT", "Sistema MTECH"];
+  
+  // URL direta sem o token do Lotes
+  const urlLog = urlSistema + "?action=registrarAcaoNoLog&args=" + encodeURIComponent(JSON.stringify(dadosLog));
+
+  // O "Pulo do Gato": Usamos uma imagem. O navegador dispara a requisição 
+  // e não espera ela voltar para recarregar a página.
+  const img = new Image();
+  img.onload = () => { sessionStorage.clear(); window.location.reload(); };
+  img.onerror = () => { sessionStorage.clear(); window.location.reload(); };
+  img.src = urlLog;
+
+  // Garantia: se a imagem demorar mais de 1 segundo, recarrega de qualquer jeito
+  setTimeout(() => { sessionStorage.clear(); window.location.reload(); }, 1000);
+}
