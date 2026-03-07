@@ -1,5 +1,6 @@
 // --- CONFIGURAÇÃO DE COMUNICAÇÃO GITHUB -> GOOGLE ---
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0Ls9ct32TDn6N1x7n3w5gMByQRUYRr7izo-0RtbKFqie3KYYAAtWuJLi2MRKbDc1F/exec";
+const TOKEN_SECRETO = "MACRO@MACRO"; // Faltava esta linha para a URL funcionar
 
 // Esta "ponte" permite que seu código continue usando google.script.run
 const google = {
@@ -13,7 +14,7 @@ const google = {
         this.failCallback = failCallback;
         return this;
       },
-      // MAPEAMENTO DE TODAS AS SUAS FUNÇÕES
+      // MAPEAMENTO DE TODAS AS SUAS FUNÇÕES (Adicionada a linha de log aqui)
       validarLogin: function(user, pass) { this.call("validarLogin", [user, pass]); },
       cadastrarNoServidor: function(u, p, n, pc) { this.call("cadastrarNoServidor", [u, p, n, pc]); },
       filtrarHistorico: function(cod, lote) { this.call("filtrarHistorico", [cod, lote]); },
@@ -24,11 +25,12 @@ const google = {
       gravarEntradaNoServidor: function(a, b, c) { this.call("gravarEntradaNoServidor", [a, b, c]); },
       buscarDadosRecebidos: function(p, c, l) { this.call("buscarDadosRecebidos", [p, c, l]); },
       buscarDadosMaloteGeral: function(p, c, l) { this.call("buscarDadosMaloteGeral", [p, c, l]); },
+      registrarAcaoNoLog: function(u, p, a, i) { this.call("registrarAcaoNoLog", [u, p, a, i]); }, // <--- NOVO
 
       call: function(functionName, args) {
         const self = this;
-        // AJUSTE NA MONTAGEM DA URL PARA GARANTIR A COMUNICAÇÃO
-        const urlFinal = WEB_APP_URL + "?action=" + functionName + "&args=" + encodeURIComponent(JSON.stringify(args)) + "&token=MACRO@MACRO";
+        // Agora o TOKEN_SECRETO está definido e não vai dar erro na linha 1
+        const urlFinal = WEB_APP_URL + "?action=" + functionName + "&args=" + encodeURIComponent(JSON.stringify(args)) + "&token=" + TOKEN_SECRETO;
 
         fetch(urlFinal, {
           method: 'GET',
