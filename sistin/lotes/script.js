@@ -736,39 +736,40 @@ var dadosParaImpressaoBip = []; // Cache para a camada 2
 // 1. Abre a primeira camada (Resumo)
 function abrirReimpressaoBipagem() {
   document.getElementById('camadaResumoBipagem').style.display = 'flex';
-  const corpo = document.getElementById('corpoResumoBipagem');
-  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Carregando...</td></tr>";
+  var corpo = document.getElementById('corpoResumoBipagem');
+  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Buscando Dados...</td></tr>";
 
   google.script.run
     .withSuccessHandler(function(dados) {
-      // Se o servidor mandou uma STRING de erro em vez de uma lista:
+      // Se vier mensagem de erro em texto
       if (typeof dados === "string") {
-        corpo.innerHTML = `<tr><td colspan='4' style='text-align:center; color:#ef4444; padding:20px; font-weight:bold;'>⚠️ ${dados}</td></tr>`;
+        corpo.innerHTML = "<tr><td colspan='4' style='color:red; text-align:center;'>" + dados + "</td></tr>";
         return;
       }
 
-      var lista = dados || [];
-      if (lista.length === 0) {
-        corpo.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Nenhum registro encontrado.</td></tr>";
+      if (!dados || dados.length === 0) {
+        corpo.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Nenhum registro encontrado em BIPAGEM.</td></tr>";
         return;
       }
-      
-      let html = "";
-      lista.forEach(function(r) {
-        html += `
-        <tr onclick="verDetalhesBipagem('${r.protocolo}', ${r.quantidade})" 
-            style="cursor:pointer; border-bottom:1px solid #334155;" 
-            onmouseover="this.style.background='#334155'" 
-            onmouseout="this.style.background=''">
-          <td style="padding:15px; font-weight:bold; color:#38bdf8;">${r.remessa}</td>
-          <td>${r.data}</td>
-          <td style="text-align:center; font-weight:bold; color:#fbbf24;">${r.quantidade} ITENS</td>
-          <td style="font-family:monospace; font-size:12px;">${r.protocolo}</td>
-        </tr>`;
-      });
+
+      var html = "";
+      for (var i = 0; i < dados.length; i++) {
+        var r = dados[i];
+        html += '<tr onclick="verDetalhesBipagem(\'' + r.protocolo + '\', ' + r.quantidade + ')" ' +
+                'style="cursor:pointer; border-bottom:1px solid #334155;" ' +
+                'onmouseover="this.style.background=\'#334155\'" onmouseout="this.style.background=\'\'">' +
+                '<td style="padding:15px; font-weight:bold; color:#38bdf8;">' + r.remessa + '</td>' +
+                '<td>' + r.data + '</td>' +
+                '<td style="text-align:center; font-weight:bold; color:#fbbf24;">' + r.quantidade + ' ITENS</td>' +
+                '<td style="font-family:monospace; font-size:12px;">' + r.protocolo + '</td>' +
+                '</tr>';
+      }
       corpo.innerHTML = html;
     })
-    .buscarResumoBipagem(""); 
+    .withFailureHandler(function(err) {
+      corpo.innerHTML = "<tr><td colspan='4' style='color:red;'>Erro fatal: " + err + "</td></tr>";
+    })
+    .buscarResumoBipagem("");
 }
 
 // Atualizei a função de detalhes para exibir a quantidade no título também
