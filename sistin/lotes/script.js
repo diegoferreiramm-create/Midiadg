@@ -735,12 +735,9 @@ var dadosParaImpressaoBip = []; // Cache para a camada 2
 
 // 1. Abre a primeira camada (Resumo)
 function abrirReimpressaoBipagem() {
-  // Garante que a camada de detalhe esteja fechada ao abrir o resumo
-  document.getElementById('camadaDetalheBipagem').style.display = 'none';
   document.getElementById('camadaResumoBipagem').style.display = 'flex';
-  
   var corpo = document.getElementById('corpoResumoBipagem');
-  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Buscando histórico agrupado...</td></tr>";
+  corpo.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>🔍 Carregando Histórico...</td></tr>";
 
   google.script.run.withSuccessHandler(function(dados) {
     if (!dados || dados.length === 0) {
@@ -750,45 +747,43 @@ function abrirReimpressaoBipagem() {
     
     var html = "";
     dados.forEach(function(r) {
-      // r.remessa, r.data, r.quantidade, r.protocolo
-      html += `<tr onclick="verDetalhesBipagem('${r.protocolo}')" 
-                   style="cursor:pointer; border-bottom:1px solid #334155;" 
-                   onmouseover="this.style.background='#334155'" 
-                   onmouseout="this.style.background=''">
+      // Aqui r.quantidade já vem com o número total de linhas do agrupamento
+      html += `
+      <tr onclick="verDetalhesBipagem('${r.protocolo}')" 
+          style="cursor:pointer; border-bottom:1px solid #334155;" 
+          onmouseover="this.style.background='#334155'" 
+          onmouseout="this.style.background=''">
         <td style="padding:15px; font-weight:bold; color:#38bdf8;">${r.remessa}</td>
         <td>${r.data}</td>
-        <td style="color:#fbbf24; font-weight:bold;">${r.quantidade} itens</td>
-        <td style="font-family:monospace; font-size:12px;">${r.protocolo}</td>
+        <td style="color:#fbbf24; font-weight:bold; font-size:15px;">
+           📦 ${r.quantidade} ITENS
+        </td>
+        <td style="font-family:monospace; font-size:12px; color:#94a3b8;">${r.protocolo}</td>
       </tr>`;
     });
     corpo.innerHTML = html;
-  }).buscarResumoBipagem(""); // Busca geral sem filtro de texto
+  }).buscarResumoBipagem("");
 }
 
-// 2. Abre a segunda camada (Detalhes) ao clicar na linha
-function verDetalhesBipagem(protocolo) {
+// Atualizei a função de detalhes para exibir a quantidade no título também
+function verDetalhesBipagem(protocolo, qtd) {
   document.getElementById('camadaDetalheBipagem').style.display = 'flex';
-  document.getElementById('tituloDetalhe').innerText = "ITENS DO PROTOCOLO: " + protocolo;
+  document.getElementById('tituloDetalhe').innerText = "PROTOCOLO: " + protocolo;
+  document.getElementById('subtituloQuantidade').innerText = "Total de itens neste lote: " + qtd;
   
-  var corpo = document.getElementById('corpoDetalheBipagem');
-  corpo.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>📑 Carregando lista de itens...</td></tr>";
+  const corpo = document.getElementById('corpoDetalheBipagem');
+  corpo.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Abrindo lista detalhada...</td></tr>";
 
   google.script.run.withSuccessHandler(function(dados) {
-    if (!dados || dados.length === 0) {
-      corpo.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Erro ao carregar itens.</td></tr>";
-      return;
-    }
-    
-    dadosParaImpressaoBip = dados; // Guarda para o botão imprimir
-    var html = "";
-    dados.forEach(function(item) {
-      // item[0]=CTR, item[1]=CPF, item[2]=NOME, item[4]=MUNICÍPIO, item[5]=PARCEIRO
-      html += `<tr style="border-bottom: 1px solid #1e293b;">
-        <td style="padding:8px; font-weight:bold;">${item[0]}</td>
+    dadosParaImpressaoBip = dados;
+    let html = "";
+    dados.forEach(item => {
+      html += `<tr style="border-bottom: 1px solid #0f172a;">
+        <td style="padding:8px;">${item[0]}</td>
         <td>${item[1]}</td>
         <td>${item[2]}</td>
         <td>${item[4]}</td>
-        <td style="text-align:center;">${item[5]}</td>
+        <td>${item[5]}</td>
       </tr>`;
     });
     corpo.innerHTML = html;
