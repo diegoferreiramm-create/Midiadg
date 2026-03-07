@@ -1166,38 +1166,31 @@ async function executarConserto() {
   }
 }
 
-// --- LOG DE SAÍDA MTECH (VERSÃO FINAL PARA F5 E FECHAR) ---
+// --- LOG DE SAÍDA MTECH (LIMPO E SEM TOKEN) ---
 window.addEventListener('pagehide', function() {
-    // 1. BUSCA DIRETO DO STORAGE (Pois variáveis globais somem no F5)
-    const sessao = sessionStorage.getItem("usuario");
-    if (!sessao) return; // Se não tem ninguém logado, não faz nada
+  // 1. Pega o usuário que ainda está na sessão (pois o botão não apaga mais antes)
+  const sessao = sessionStorage.getItem("usuario");
+  if (!sessao) return;
 
-    const user = JSON.parse(sessao);
-    const nomeParaLog = user.nome;
-    const parceiroParaLog = user.parceiro;
+  const user = JSON.parse(sessao);
+  
+  // 2. Define a ação (F5 ou Botão Sair)
+  let acao = "FECHOU ABA/NAVEGADOR";
+  if (clicouNoBotaoSair || (performance.navigation && performance.navigation.type === 1)) {
+    acao = "SAÍDA/ATUALIZOU";
+  }
 
-    if (nomeParaLog) {
-        let mensagemAcao = "";
-        
-        // 2. DETECÇÃO DE ATUALIZAÇÃO (F5) - Compatível com 2026
-        const entries = performance.getEntriesByType("navigation");
-        const isReload = entries.length > 0 && entries[0].type === "reload";
+  // 3. Monta os dados para o seu .gs do MTECH
+  const dadosLog = [user.nome, user.parceiro, acao, "Sistema MTECH"];
+  
+  // 4. URL LIMPA: Sem o token que só o Lotes exige
+  const urlLog = urlSistema + 
+                 "?action=registrarAcaoNoLog" + 
+                 "&args=" + encodeURIComponent(JSON.stringify(dadosLog));
 
-        if (clicouNoBotaoSair || isReload) {
-            mensagemAcao = "SAÍDA/ATUALIZOU";
-        } else {
-            mensagemAcao = "FECHOU ABA/NAVEGADOR";
-        }
-
-        // 3. MONTAGEM DOS DADOS PARA O .GS
-        const dadosLog = [nomeParaLog, parceiroParaLog, mensagemAcao, "Sistema MTECH"];
-        
-        const urlLog = urlSistema + 
-                       "?action=registrarAcaoNoLog" + 
-                       "&args=" + encodeURIComponent(JSON.stringify(dadosLog)) + 
-                       "&token=MACRO@MACRO";
-
-        // 4. ENVIO REFORÇADO (sendBeacon não é cancelado pelo navegador)
-        navigator.sendBeacon(urlLog);
-    }
+  // 5. Envia o log "no susto" antes da aba sumir
+  navigator.sendBeacon(urlLog);
+  
+  // 6. Limpa a sessão após o envio
+  sessionStorage.clear();
 });
