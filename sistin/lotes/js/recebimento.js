@@ -1,17 +1,19 @@
 const ModuloRecebimento = {
-    // Variável interna: só este módulo mexe nestes dados buscados
+    // Armazena os dados buscados para uso no salvamento e impressão
     dadosLocalizados: [],
 
-    // Abre a tela de recebimento
+    // --- NAVEGAÇÃO E TELA ---
     abrirTela: function() {
+        // Esconde o menu e outras caixas, mostra o recebimento
         document.getElementById('menuBox').style.display = 'none';
         document.getElementById('recebimentoBox').style.display = 'flex';
+        this.limpar();
     },
 
-    // Executa a busca no servidor (.gs)
+    // --- BUSCA DE DADOS (HISTÓRICO) ---
     buscarLotes: function() {
-        var cod = document.getElementById('filtroCodParceiro').value;
-        var loteBusca = document.getElementById('filtroLote').value;
+        var cod = document.getElementById('filtroCodParceiro').value.trim();
+        var loteBusca = document.getElementById('filtroLote').value.trim();
 
         if (!cod || !loteBusca) {
             alert("Preencha o Código do Parceiro e o Lote!");
@@ -19,42 +21,33 @@ const ModuloRecebimento = {
         }
 
         const corpo = document.getElementById('corpoTabela');
-        corpo.innerHTML = "<tr><td colspan='6' style='padding:20px; text-align:center;'>Buscando...</td></tr>";
+        corpo.innerHTML = "<tr><td colspan='6' style='padding:20px; text-align:center;'>Buscando no Servidor...</td></tr>";
 
         google.script.run.withSuccessHandler((data) => {
-            this.dadosLocalizados = data; // Armazena os dados dentro do módulo
+            this.dadosLocalizados = data || [];
             this.renderizarTabela();
         }).filtrarHistorico(cod, loteBusca);
     },
 
-    // Desenha a tabela na tela
     renderizarTabela: function() {
         const corpo = document.getElementById('corpoTabela');
         const btnSalvar = document.getElementById('btnSalvarLote');
         const contador = document.getElementById('contadorLinhas');
         
-        var html = "";
+        let html = "";
 
-        if (!this.dadosLocalizados || this.dadosLocalizados.length === 0) {
+        if (this.dadosLocalizados.length === 0) {
             html = "<tr><td colspan='6' style='padding:20px; text-align:center; color:#f87171;'>Nenhum registro encontrado.</td></tr>";
             btnSalvar.style.display = "none";
         } else {
             this.dadosLocalizados.forEach((r) => {
-                // Função auxiliar interna para evitar campos nulos
-                const getVal = (obj, nomes, index) => {
-                    if (!obj || Array.isArray(obj)) return obj[index] || "";
-                    for (let key in obj) {
-                        if (nomes.includes(key.toUpperCase().trim())) return obj[key];
-                    }
-                    return "";
-                };
-
-                let id = getVal(r, ["ID"], 0);
-                let cpf = getVal(r, ["CPF"], 1);
-                let nome = getVal(r, ["NOME"], 2);
-                let mun = getVal(r, ["MUNICIPIO", "MUN"], 4);
-                let loteReal = getVal(r, ["LOTE", "NUMLOTE"], 11);
-                let parcReal = getVal(r, ["PARCEIRO", "PARC"], 7);
+                // Mapeamento seguro das colunas conforme seu padrão antigo
+                let id = r[0] || "";      // Coluna A
+                let cpf = r[1] || "";     // Coluna B
+                let nome = r[2] || "";    // Coluna C
+                let mun = r[4] || "";     // Coluna E
+                let loteReal = r[11] || ""; // Coluna L
+                let parcReal = r[7] || "";  // Coluna H
 
                 html += `<tr style="border-bottom: 1px solid #1e293b;">
                     <td style="padding: 10px;">${id}</td>
@@ -72,7 +65,7 @@ const ModuloRecebimento = {
         contador.innerText = "Total: " + this.dadosLocalizados.length + " registros";
     },
 
-    // Processa o salvamento e gera a impressão
+    // --- SALVAMENTO COM ENVIO FRACIONADO (SOLUÇÃO DO ERRO) ---
     salvar: function() {
         var nomeParceiro = document.getElementById('filtroNomeParceiro').value;
         var codParceiro = document.getElementById('filtroCodParceiro').value;
@@ -83,44 +76,44 @@ const ModuloRecebimento = {
             return;
         }
 
-        if (!confirm("Confirmar o recebimento?")) return;
+        if (!confirm("Confirmar o recebimento de " + this.dadosLocalizados.length + " itens?")) return;
 
         var btn = document.getElementById('btnSalvarLote');
         btn.disabled = true;
-        btn.innerText = "SALVANDO...";
+        btn.innerText = "SALVANDO EM LOTES...";
 
-        // --- LÓGICA DE ENVIO EM LOTES (PEDAÇOS) ---
         const total = this.dadosLocalizados.length;
-        const tamanhoLote = 5; // Enviar 5 por vez mantém a URL curta e segura
+        const tamanhoLote = 5; // Envia de 5 em 5 para não estourar a URL (GET)
         let atual = 0;
         let protocoloFinal = "";
 
-        const enviarProximoPedaço = () => {
+        const enviarPedaço = () => {
             const fim = Math.min(atual + tamanhoLote, total);
             const pedaço = this.dadosLocalizados.slice(atual, fim);
 
             google.script.run.withSuccessHandler((res) => {
-                if (res.sucesso === false) {
+                if (res && res.sucesso === false) {
                     alert("Erro parcial: " + res.erro);
                     btn.disabled = false;
                     btn.innerText = "SALVAR RECEBIMENTO";
                     return;
                 }
 
-                protocoloFinal = res; // Guarda o protocolo (ex: REC97-10)
+                protocoloFinal = res; // O servidor retorna o protocolo (ex: REC-123)
                 atual = fim;
 
                 if (atual < total) {
                     btn.innerText = `SALVANDO (${atual}/${total})...`;
-                    enviarProximoPedaço();
+                    enviarPedaço();
                 } else {
-                    // FINALIZOU TUDO
-                    this.executarImpressao(protocoloFinal, codParceiro, loteNum, nomeParceiro);
+                    // FINALIZOU O ÚLTIMO LOTE
+                    this.executarImpressao(protocoloFinal, codParceiro, loteNum, nomeParceiro, AppSessao.nome);
                     
                     setTimeout(() => {
                         window.print();
-                        alert("Sucesso! Protocolo: " + protocoloFinal);
-                        ModuloUtils.voltarParaMenu();
+                        alert("Recebimento concluído! Protocolo: " + protocoloFinal);
+                        this.limpar();
+                        ModuloUtils.voltarParaMenu(); // Certifique-se que ModuloUtils existe
                         btn.disabled = false;
                         btn.innerText = "SALVAR RECEBIMENTO";
                     }, 500);
@@ -128,30 +121,65 @@ const ModuloRecebimento = {
             }).processarRecebimento(pedaço, nomeParceiro, AppSessao.nome);
         };
 
-        enviarProximoPedaço();
+        enviarPedaço();
     },
 
-    // Prepara o HTML oculto de impressão
-    executarImpressao: function(protocolo, codParc, lote, nomeParc) {
+    // --- REIMPRESSÃO (TUDO QUE ESTAVA NA PARTE 1 E 2) ---
+    abrirReimpressao: function() {
+        document.getElementById('reimpressaoBox').style.display = 'block';
+    },
+
+    buscarReimpressao: function() {
+        var prot = document.getElementById('reimpProtocolo').value.trim();
+        var cod = document.getElementById('reimpCod').value.trim();
+        var lote = document.getElementById('reimpLote').value.trim();
+
+        if (!prot && (!cod || !lote)) {
+            alert("Informe o Protocolo ou a combinação de Código e Lote!");
+            return;
+        }
+
+        google.script.run.withSuccessHandler((dados) => {
+            if (!dados || dados.length === 0) { 
+                alert("Nenhum dado encontrado para reimpressão."); 
+                return; 
+            }
+            
+            // r[11]=Lote, r[15]=Protocolo, r[13]=NomeParceiro, r[14]=Atendente
+            let r0 = dados[0];
+            this.executarImpressao(r0[15], r0[7], r0[11], r0[13], r0[14]);
+            
+            document.getElementById('reimpressaoBox').style.display = 'none';
+            setTimeout(() => { window.print(); }, 500);
+        }).buscarDadosRecebidos(prot, cod, lote);
+    },
+
+    // --- GERAÇÃO DO HTML DE IMPRESSÃO ---
+    executarImpressao: function(protocolo, codParc, lote, nomeParc, atendente) {
         document.getElementById('impParceiroLote').innerText = "PARCEIRO: " + codParc + " | LOTE: " + lote;
         document.getElementById('impProtocolo').innerText = "PROTOCOLO: " + protocolo;
         document.getElementById('impDataHora').innerText = "DATA: " + new Date().toLocaleString('pt-BR');
         document.getElementById('impNomeParceiro').innerText = "NOME DO PARCEIRO: " + nomeParc;
-        document.getElementById('impNomeAtendente').innerText = AppSessao.nome;
+        document.getElementById('impNomeAtendente').innerText = atendente;
 
-        var htmlImp = "";
-        this.dadosLocalizados.forEach(function(r) {
+        let htmlImp = "";
+        // Nota: Se for reimpressão, os índices podem mudar. Tratamos aqui:
+        const listaParaImprimir = (this.dadosLocalizados.length > 0) ? this.dadosLocalizados : arguments[0]; 
+        // Se dadosLocalizados estiver vazio, ele usa os dados que vieram na reimpressão.
+
+        // Usamos uma lógica flexível para os dados da tabela
+        this.dadosLocalizados.forEach((r) => {
             htmlImp += `<tr>
-                <td style="border:1px solid black; padding:2px;">${r[0] || "---"}</td>
-                <td style="border:1px solid black; padding:2px;">${r[1] || "---"}</td>
-                <td style="border:1px solid black; padding:2px;">${r[2] || "---"}</td>
-                <td style="border:1px solid black; padding:2px;">${r[3] || "---"}</td>
-                <td style="border:1px solid black; padding:2px;">${r[4] || "---"}</td>
-                <td style="border:1px solid black; padding:2px;">${r[6] || "---"}</td>
-                <td style="border:1px solid black; padding:2px;">${r[7] || "---"}</td>
-                <td style="border:1px solid black; padding:2px;">${r[8] || "---"}</td>
-                <td style="border:1px solid black; padding:2px;">${r[9] || "---"}</td>
-                <td style="border:1px solid black; padding:2px;">${r[10] || "---"}</td>
+                <td style="border:1px solid black; padding:2px;">${r[0] || ""}</td>
+                <td style="border:1px solid black; padding:2px;">${r[1] || ""}</td>
+                <td style="border:1px solid black; padding:2px;">${r[2] || ""}</td>
+                <td style="border:1px solid black; padding:2px;">${r[3] || ""}</td>
+                <td style="border:1px solid black; padding:2px;">${r[4] || ""}</td>
+                <td style="border:1px solid black; padding:2px;">${r[6] || ""}</td>
+                <td style="border:1px solid black; padding:2px;">${r[7] || ""}</td>
+                <td style="border:1px solid black; padding:2px;">${r[8] || ""}</td>
+                <td style="border:1px solid black; padding:2px;">${r[9] || ""}</td>
+                <td style="border:1px solid black; padding:2px;">${r[10] || ""}</td>
             </tr>`;
         });
         document.getElementById('corpoImpressao').innerHTML = htmlImp;
