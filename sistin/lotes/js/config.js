@@ -20,30 +20,22 @@ const google = {
                 this.failCallback = fail; 
                 return this; 
             },
+            // No seu js/config.js
             call: function(functionName, args) {
                 const self = this;
-                
-                // Agora enviamos os dados no corpo (body) para não lotar a URL
                 const payload = {
                     action: functionName,
                     args: args,
                     token: TOKEN_SECRETO
                 };
-
+            
                 fetch(WEB_APP_URL, {
-                    method: 'POST', // Mudamos para POST para suportar muitos dados
-                    mode: 'no-cors', // Importante para evitar erros de política de origem no Apps Script
-                    cache: 'no-cache',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    method: 'POST',
                     body: JSON.stringify(payload)
                 })
-                .then(() => {
-                    // Como usamos 'no-cors', o fetch não retorna o JSON diretamente por segurança.
-                    // Para sistemas de log e gravação rápida, isso costuma bastar.
-                    // Se você precisa do PROTOCOLO de volta, precisaremos de um ajuste no .gs
-                    if (self.callback) self.callback("Processado"); 
+                .then(res => res.json()) // O login precisa ler o JSON de retorno!
+                .then(data => {
+                    if (self.callback) self.callback(data);
                 })
                 .catch(err => {
                     console.error("Erro na comunicação:", err);
