@@ -33,7 +33,7 @@ const google = {
                     method: 'POST',
                     body: JSON.stringify(payload)
                 })
-                .then(res => res.json()) // O login precisa ler o JSON de retorno!
+                .then(res => res.json())
                 .then(data => {
                     if (self.callback) self.callback(data);
                 })
