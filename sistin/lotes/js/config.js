@@ -2,6 +2,7 @@
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0Ls9ct32TDn6N1x7n3w5gMByQRUYRr7izo-0RtbKFqie3KYYAAtWuJLi2MRKbDc1F/exec";
 const TOKEN_SECRETO = "MACRO@MACRO";
 
+// Objeto para centralizar os dados da sessão (nome, parceiro, etc)
 const AppSessao = {
     nome: "",
     parceiro: "",
@@ -9,6 +10,7 @@ const AppSessao = {
     intervaloRelogio: null
 };
 
+// A "Ponte" google.script.run reconstruída para ser modular
 const google = {
     script: {
         run: {
@@ -20,18 +22,15 @@ const google = {
                 this.failCallback = fail; 
                 return this; 
             },
-            // No seu js/config.js
+            // Função centralizadora de chamadas
             call: function(functionName, args) {
                 const self = this;
-                const payload = {
-                    action: functionName,
-                    args: args,
-                    token: TOKEN_SECRETO
-                };
-            
-                fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
+                const urlFinal = WEB_APP_URL + "?action=" + functionName + "&args=" + encodeURIComponent(JSON.stringify(args)) + "&token=" + TOKEN_SECRETO;
+
+                fetch(urlFinal, {
+                    method: 'GET',
+                    mode: 'cors',
+                    redirect: 'follow'
                 })
                 .then(res => res.json())
                 .then(data => {
@@ -43,6 +42,8 @@ const google = {
                 });
             },
             
+            // --- MAPEAMENTO DAS FUNÇÕES DO SERVIDOR (.gs) ---
+            // Adicione aqui cada função que você tem no Apps Script
             validarLogin: function(u, p) { this.call("validarLogin", [u, p]); },
             filtrarHistorico: function(c, l) { this.call("filtrarHistorico", [c, l]); },
             processarRecebimento: function(a, b, c) { this.call("processarRecebimento", [a, b, c]); },
