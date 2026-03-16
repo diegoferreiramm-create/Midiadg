@@ -125,9 +125,17 @@ const ModuloRecebimento = {
     },
 
     // --- REIMPRESSÃO (TUDO QUE ESTAVA NA PARTE 1 E 2) ---
-    abrirReimpressao: function() {
-        document.getElementById('reimpressaoBox').style.display = 'block';
-    },
+    // No ModuloRecebimento (recebimento.js)
+
+abrirReimpressao: function() {
+    const caixa = document.getElementById('reimpressaoBox'); // VERIFIQUE SE ESTE ID EXISTE NO INDEX.HTML
+    if (caixa) {
+        caixa.style.display = 'block';
+    } else {
+        console.error("ERRO: O elemento 'reimpressaoBox' não foi encontrado no HTML. Verifique o ID da DIV de reimpressão.");
+        alert("Erro técnico: Tela de reimpressão não localizada. Verifique o console (F12).");
+    }
+},
 
     buscarReimpressao: function() {
         var prot = document.getElementById('reimpProtocolo').value.trim();
