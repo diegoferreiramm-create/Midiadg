@@ -1,245 +1,241 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema Administrativo - Projeto B</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Administrativo - Projeto B</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div id="hudUsuario" style="display:none;">
-    <div id="dataHoraHud">00/00/0000 00:00:00</div>
-    <div id="infoUsuario"></div>
-    <div class="btns-hud">
-      <button onclick="AppSessao.clicouSair=true; window.location.reload();">SAIR</button>
+    <div id="hudUsuario">
+        <div id="dataHoraHud">00/00/0000 00:00:00</div>
+        <div id="infoUsuario"></div>
+        <div class="btns-hud">
+            <button onclick="clicouNoBotaoSair=true; window.location.reload();">SAIR</button>
+        </div>
     </div>
-  </div>
 
-  <div id="loginBox">
-    <div class="box">
-      <h2>ÁREA ADMINISTRATIVA</h2>
-      <input type="text" id="userLogin" placeholder="Usuário">
-      <input type="password" id="passLogin" placeholder="Senha">
-      <button onclick="ModuloLogin.entrar()">ENTRAR</button>
-      <div id="msg"></div>
+    <div id="loginBox">
+        <div class="box">
+            <h2>ÁREA ADMINISTRATIVA</h2>
+            <input type="text" id="userLogin" placeholder="Usuário">
+            <input type="password" id="passLogin" placeholder="Senha">
+            <button onclick="AppSessao.entrar()">ENTRAR</button>
+            <div id="msg"></div>
+        </div>
     </div>
-  </div>
 
-  <div id="reimpressaoBipagemBox" class="modal" style="display:none;">
-    <div class="modal-content">
-      <h3>Reimpressão de Bipagem (Entrada)</h3>
-      <input type="text" id="reimpRemessaBip" placeholder="Filtrar por Remessa (Opcional)">
-      <button onclick="ModuloBipagem.consultarBipagemAgrupada()">CONSULTAR</button>
-      <button onclick="this.parentElement.parentElement.style.display='none'">FECHAR</button>
+    <div id="menuBox" style="display: none;">
+        <h1>MENU PRINCIPAL</h1>
+        <button class="btn-menu" onclick="ModuloRecebimento.abrirTela()">
+            <span class="icon-menu">📦</span> RECEBIMENTO DE LOTES
+        </button>
+        <button class="btn-menu" onclick="ModuloEntrega.abrirTela()">
+            <span class="icon-menu">🤝</span> ENTREGA DE CARTEIRA A PARCEIROS
+        </button>
+        <button class="btn-menu" onclick="ModuloBipagem.abrirTela()">
+            <span class="icon-menu">📥</span> ENTRADA DE CARTEIRAS (BIPAGEM)
+        </button>
+        <button class="btn-menu" onclick="ModuloMalote.abrirTela()">
+            <span class="icon-menu">🚚</span> ENVIO DE MALOTE
+        </button>
+        <button onclick="ModuloUsuarios.abrirCadastro()" style="background: #8b5cf6; margin-bottom: 10px; width: 100%; border-radius: 8px; padding: 15px; border: none; color: white; cursor: pointer; font-weight: bold;">👤 CADASTRO DE USUÁRIOS</button>
+    </div>
 
-      <div id="areaConsultaBipagem" style="display:none; margin-top:15px; max-height:300px; overflow-y:auto;">
-        <table style="width:100%; color:white; font-size:12px;">
-          <thead>
-            <tr style="background:#1e293b">
-              <th>REMESSA</th><th>DATA</th><th>QTD</th><th>PROTOCOLO</th>
-            </tr>
-          </thead>
-          <tbody id="corpoConsultaBipagem"></tbody>
+    <div id="recebimentoBox" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: #22c55e;">📦 RECEBIMENTO DE LOTES</h2>
+            <button onclick="ModuloUtils.voltarParaMenu()" style="width: auto; margin: 0; background: #64748b; padding: 8px 15px;">VOLTAR AO MENU</button>
+        </div>
+
+        <div class="grid-filtros">
+            <div>
+                <label style="font-size: 11px; color: #94a3b8;">CÓD. PARCEIRO (COL H)</label>
+                <input type="text" id="filtroCodParceiro" placeholder="Ex: 88">
+            </div>
+            <div>
+                <label style="font-size: 11px; color: #94a3b8;">NÚMERO DO LOTE (COL L)</label>
+                <input type="text" id="filtroLote" placeholder="Ex: 01">
+            </div>
+            <div>
+                <label style="font-size: 11px; color: #94a3b8;">NOME DO PARCEIRO (GRAVAÇÃO)</label>
+                <input type="text" id="filtroNomeParceiro" placeholder="Nome para o histórico">
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-end;">
+                <button onclick="ModuloRecebimento.buscarLotes()" style="background: #3b82f6; flex: 1;">BUSCAR</button>
+                <button onclick="ModuloRecebimento.abrirReimpressao()" style="background: #64748b; flex: 1;">🖨️ REIMPRESSÃO</button>
+            </div>
+        </div>
+
+        <div class="container-tabela">
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>CPF</th><th>NOME</th><th>MUNICIPIO</th><th>LOTE</th><th>PARCEIRO</th></tr>
+                </thead>
+                <tbody id="corpoTabela"></tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <div id="contadorLinhas" style="color: #94a3b8; font-size: 14px;">Total: 0 registros</div>
+            <button id="btnSalvarLote" onclick="ModuloRecebimento.salvar()" style="width: auto; padding: 10px 40px; background: #22c55e; display: none;">SALVAR RECEBIMENTO</button>
+        </div>
+    </div>
+
+    <div id="maloteBox" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: #f59e0b;">🚚 ENVIO DE MALOTE</h2>
+            <button onclick="ModuloUtils.voltarParaMenu()" style="width: auto; margin: 0; background: #64748b; padding: 8px 15px;">VOLTAR AO MENU</button>
+        </div>
+
+        <div class="grid-filtros">
+            <div>
+                <label style="font-size: 11px; color: #94a3b8;">CÓD. PARCEIRO</label>
+                <input type="text" id="maloteCod" placeholder="Ex: 88">
+            </div>
+            <div>
+                <label style="font-size: 11px; color: #94a3b8;">NÚMERO DO LOTE</label>
+                <input type="text" id="maloteLote" placeholder="Ex: 01">
+            </div>
+            <div>
+                <label style="font-size: 11px; color: #94a3b8;">DESTINO</label>
+                <input type="text" id="maloteDestino" placeholder="Destino do malote">
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-end;">
+                <button onclick="ModuloMalote.buscarParaMalote()" style="background: #3b82f6; flex: 1;">BUSCAR</button>
+                <button onclick="ModuloMalote.abrirReimpressao()" style="background: #64748b; flex: 1;">🖨️ REIMPRESSÃO</button>
+            </div>
+        </div>
+
+        <div class="container-tabela">
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>CPF</th><th>NOME</th><th>VIA</th><th>AÇÃO</th></tr>
+                </thead>
+                <tbody id="corpoMalote"></tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <div id="contadorMalote" style="color: #94a3b8; font-size: 14px;">Total: 0 registros</div>
+            <button id="btnSalvarMalote" onclick="ModuloMalote.salvar()" style="width: auto; padding: 10px 40px; background: #22c55e; display: none;">GERAR PROTOCOLO</button>
+        </div>
+    </div>
+
+    <div id="entradaBox" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: #38bdf8;">📥 ENTRADA DE CARTEIRAS</h2>
+            <button onclick="ModuloUtils.voltarParaMenu()" style="width: auto; margin: 0; background: #64748b; padding: 8px 15px;">VOLTAR AO MENU</button>
+        </div>
+
+        <div class="grid-filtros" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div><label>FILTRAR PARCEIRO</label><input type="text" id="entParceiroConf"></div>
+            <div><label>FILTRAR MUNICÍPIO</label><input type="text" id="entMunicipioConf"></div>
+            <div><label>Nº REMESSA / LOTE</label><input type="text" id="entRemessa"></div>
+        </div>
+
+        <div style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #38bdf8; margin-top: 20px;">
+            <label style="font-weight: bold; color: #38bdf8;">BIPAR CÓDIGO (CTR):</label>
+            <input type="tel" id="inputBipagem" placeholder="Sincronizando..." 
+                   style="font-size: 24px; border-color: #38bdf8; text-align: center; width: 100%;" 
+                   oninput="this.value = this.value.replace(/[^0-9]/g, ''); ModuloBipagem.autoBip(this.value)" 
+                   maxlength="8" disabled autocomplete="off">
+        </div>
+
+        <div class="container-tabela">
+            <table>
+                <thead>
+                    <tr><th>CTR (ID)</th><th>CPF</th><th>NOME</th><th>NASCIMENTO</th><th>MUNICÍPIO</th><th>PARCEIRO</th><th>AÇÃO</th></tr>
+                </thead>
+                <tbody id="corpoEntrada"></tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 15px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+            <div style="display: flex; gap: 40px; background: #1e293b; padding: 10px 30px; border-radius: 20px;">
+                <div id="contadorGeralEntrada" style="color: #38bdf8; font-weight: bold;">Total Geral: 0</div>
+                <div id="contadorLoteEntrada" style="color: #fbbf24; font-weight: bold;">Lote (30): 0/30</div>
+            </div>
+            <div style="display: flex; gap: 15px;">
+                <button id="btnSalvarEntrada" onclick="ModuloBipagem.salvar()" style="width: 250px; background: #22c55e;">✅ SALVAR ENTRADA</button>
+                <button onclick="ModuloBipagem.abrirResumo()" style="width: 250px; background: #3b82f6;">🔍 REIMPRIMIR PROTOCOLO</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="reimpressaoBox" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; background: #1e293b; padding: 25px; border-radius: 12px; border: 2px solid #3b82f6; z-index: 2000;">
+        <h3 style="color: #3b82f6; margin-top: 0;">🖨️ REIMPRESSÃO</h3>
+        <input type="text" id="reimpProtocolo" placeholder="Ex: REC67-01"><br>
+        <div style="text-align: center; margin: 10px 0; color: #64748b;">— OU —</div>
+        <input type="text" id="reimpCod" placeholder="Cód. Parceiro">
+        <input type="text" id="reimpLote" placeholder="Lote">
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="ModuloRecebimento.buscarReimpressao()" style="background: #3b82f6; flex:1;">BUSCAR</button>
+            <button onclick="document.getElementById('reimpressaoBox').style.display='none'" style="background: #ef4444; flex:1;">FECHAR</button>
+        </div>
+    </div>
+
+    <div id="reimpressaoMaloteBox" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; background: #1e293b; padding: 25px; border-radius: 12px; border: 2px solid #f59e0b; z-index: 2000;">
+        <h3 style="color: #f59e0b; margin-top: 0;">🖨️ REIMPRESSÃO MALOTE</h3>
+        <input type="text" id="reimpProtocoloMalote" placeholder="Ex: ENV670001">
+        <div style="text-align: center; margin: 10px 0; color: #64748b;">— OU —</div>
+        <input type="text" id="reimpCodMalote" placeholder="Cód. Parceiro">
+        <input type="text" id="reimpLoteMalote" placeholder="Lote">
+        <div style="display: flex; gap: 5px; margin-top: 20px;">
+            <button onclick="ModuloMalote.consultarLote()" style="background: #3b82f6; flex:1;">BUSCAR</button>
+            <button onclick="ModuloMalote.imprimirProtocolo()" style="background: #f59e0b; flex:1;">IMPRIMIR</button>
+            <button onclick="document.getElementById('reimpressaoMaloteBox').style.display='none'" style="background: #ef4444; flex:1;">FECHAR</button>
+        </div>
+    </div>
+
+    <div id="cadastroUsuarioBox" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; background: #1e293b; padding: 25px; border-radius: 12px; border: 2px solid #8b5cf6; z-index: 2100;">
+        <h3 style="color: #8b5cf6;">👤 NOVO USUÁRIO</h3>
+        <input type="text" id="new_user" placeholder="Login">
+        <input type="password" id="new_pass" placeholder="Senha">
+        <input type="text" id="new_nome" placeholder="Nome Completo">
+        <input type="number" id="new_parceiro" placeholder="Cód. Parceiro">
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="ModuloUsuarios.salvar()" style="background: #8b5cf6; flex:1;">SALVAR</button>
+            <button onclick="document.getElementById('cadastroUsuarioBox').style.display='none'" style="background: #ef4444; flex:1;">FECHAR</button>
+        </div>
+    </div>
+
+    <div id="camadaResumoBipagem" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center;">
+        <div style="background:#1e293b; width:90%; max-width:800px; padding:20px; border-radius:10px; border:1px solid #38bdf8;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #38bdf8; padding-bottom:10px;">
+                <h3 style="color:#38bdf8; margin:0;">📋 HISTÓRICO DE BIPAGENS</h3>
+                <button onclick="document.getElementById('camadaResumoBipagem').style.display='none'" style="background:#ef4444; width:auto; padding:5px 15px;">FECHAR</button>
+            </div>
+            <div style="max-height:400px; overflow-y:auto; margin-top:15px;">
+                <table style="width:100%; color:white; border-collapse:collapse;">
+                    <thead><tr style="background:#0f172a;"><th style="padding:10px;">REMESSA</th><th>DATA</th><th>QTD</th><th>PROTOCOLO</th></tr></thead>
+                    <tbody id="corpoResumoBipagem"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="areaImpressao" style="display:none; color: black; background: white; padding: 20px; font-family: 'Courier New', Courier, monospace;">
+        <div style="border: 2px solid black; padding: 10px; margin-bottom: 20px;">
+            <h2 id="tituloImpressao" style="text-align: center; margin: 0;">RECEBIMENTO DE LOTES</h2>
+            <div style="display: flex; justify-content: space-between; border-top: 1px solid black; margin-top: 10px; padding-top: 5px; font-size: 12px;">
+                <span id="impParceiroLote"></span>
+                <span id="impProtocolo"></span>
+                <span id="impDataHora"></span>
+            </div>
+            <div style="font-size: 12px; margin-top: 5px;" id="impNomeParceiro"></div>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+            <thead><tr style="border-bottom: 2px solid black;"><th>ID</th><th>CPF</th><th>NOME</th><th>NASC.</th><th>MUNICIPIO</th><th>TEL</th><th>VIA</th><th>DATA</th><th>ATENDENTE</th><th>BOLETO</th></tr></thead>
+            <tbody id="corpoImpressao"></tbody>
         </table>
-      </div>
-    </div>
-  </div>
-
-  <div id="menuBox" style="display:none;">
-    <h1>MENU PRINCIPAL</h1>
-    <button class="btn-menu" onclick="ModuloRecebimento.abrirTela()">
-      <span class="icon-menu">📦</span> RECEBIMENTO DE LOTES
-    </button>
-    <button class="btn-menu" onclick="ModuloEntrega.abrirTela()"> <span class="icon-menu">🤝</span> ENTREGA DE CARTEIRA A PARCEIROS
-    </button>
-    <button class="btn-menu" onclick="ModuloBipagem.abrirTela()">
-      <span class="icon-menu">📥</span> ENTRADA DE CARTEIRAS
-    </button>
-    <button class="btn-menu" onclick="ModuloMalote.abrirTela()">
-      <span class="icon-menu">🚚</span> ENVIO DE MALOTE
-    </button>
-    <button onclick="ModuloUsuarios.abrirCadastro()" style="background: #8b5cf6; margin-bottom: 10px;">👤 CADASTRO DE USUÁRIOS</button>
-  </div>
-
-  <div id="recebimentoBox" style="display:none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2 style="margin: 0; color: #22c55e;">📦 RECEBIMENTO DE LOTES</h2>
-      <button onclick="ModuloUtils.voltarParaMenu()" style="width: auto; margin: 0; background: #64748b; padding: 8px 15px;">VOLTAR AO MENU</button>
+        <div style="margin-top: 50px; display: flex; justify-content: space-around;">
+            <div style="text-align: center; width: 200px; border-top: 1px solid black;">Assinatura Entregador</div>
+            <div style="text-align: center; width: 200px; border-top: 1px solid black;"><span id="impNomeAtendente"></span><br>Atendente</div>
+        </div>
     </div>
 
-    <div class="grid-filtros">
-      <div>
-        <label style="font-size: 11px; color: #94a3b8;">CÓD. PARCEIRO (COL H)</label>
-        <input type="text" id="filtroCodParceiro" placeholder="Ex: 88" style="margin: 0;">
-      </div>
-      <div>
-        <label style="font-size: 11px; color: #94a3b8;">NÚMERO DO LOTE (COL L)</label>
-        <input type="text" id="filtroLote" placeholder="Ex: 01" style="margin: 0;">
-      </div>
-      <div>
-        <label style="font-size: 11px; color: #94a3b8;">NOME DO PARCEIRO (GRAVAÇÃO)</label>
-        <input type="text" id="filtroNomeParceiro" placeholder="Digite o nome para o histórico" style="margin: 0;">
-      </div>
-      <div style="display: flex; gap: 10px; align-items: flex-end;">
-        <button onclick="ModuloRecebimento.buscarLotes()" style="margin: 0; padding: 10px 20px; width: auto; background: #3b82f6; flex: 1;">BUSCAR</button>
-        <button onclick="ModuloRecebimento.abrirReimpressao()" style="margin: 0; padding: 10px 20px; width: auto; background: #64748b; flex: 1; white-space: nowrap;">🖨️ REIMPRESSÃO</button>
-      </div>
-    </div>
-
-    <div class="container-tabela">
-      <table id="tabelaResultados">
-        <thead>
-          <tr>
-            <th>ID</th><th>CPF</th><th>NOME</th><th>MUNICIPIO</th><th>LOTE</th><th>PARCEIRO</th>
-          </tr>
-        </thead>
-        <tbody id="corpoTabela"></tbody>
-      </table>
-    </div>
-
-    <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-      <div id="contadorLinhas" style="color: #94a3b8; font-size: 14px;">Total: 0 registros</div>
-      <button id="btnSalvarLote" onclick="ModuloRecebimento.salvar()" style="width: auto; padding: 10px 40px; background: #22c55e; display: none; margin: 0;">SALVAR RECEBIMENTO</button>
-    </div>
-  </div>
-
-  <div id="areaImpressao" style="display:none; color: black; background: white; padding: 20px; font-family: 'Courier New', Courier, monospace;">
-    <div style="border: 2px solid black; padding: 10px; margin-bottom: 20px;">
-      <h2 style="text-align: center; margin: 0;">RECEBIMENTO DE LOTES PARCEIRO</h2>
-      <div style="display: flex; justify-content: space-between; border-top: 1px solid black; margin-top: 10px; padding-top: 5px; font-size: 12px;">
-        <span id="impParceiroLote"></span>
-        <span id="impProtocolo"></span>
-        <span id="impDataHora"></span>
-      </div>
-      <div style="font-size: 12px; margin-top: 5px;" id="impNomeParceiro"></div>
-    </div>
-
-    <table style="width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; word-wrap: break-word;">
-      <thead>
-        <tr style="border-bottom: 2px solid black;">
-          <th style="text-align: left; width: 15px;">ID</th>
-          <th style="text-align: left;">CPF</th>
-          <th style="text-align: left;">NOME</th>
-          <th style="text-align: left;">NASC.</th>
-          <th style="text-align: left;">MUNICÍPIO</th>
-          <th style="text-align: left;">TEL</th>
-          <th style="text-align: left; width: 15px;">VIA</th>
-          <th style="text-align: left;">DATA</th>
-          <th style="text-align: left;">ATENDENTE</th>
-          <th style="text-align: left;">BOLETO</th>
-        </tr>
-      </thead>
-      <tbody id="corpoImpressao"></tbody>
-    </table>
-
-    <div style="margin-top: 50px; display: flex; justify-content: space-around;">
-      <div style="text-align: center; width: 250px;">
-        <div style="border-top: 1px solid black; margin-top: 20px;">Assinatura (Quem Entrega)</div>
-      </div>
-      <div style="text-align: center; width: 250px;">
-        <div id="impNomeAtendente" style="font-weight: bold;"></div>
-        <div style="border-top: 1px solid black;">Atendente Logado</div>
-      </div>
-    </div>
-  </div>
-
-  <div id="maloteBox" style="display: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2 style="margin: 0; color: #f59e0b;">🚚 ENVIO DE MALOTE</h2>
-      <button onclick="ModuloUtils.voltarParaMenu()" style="width: auto; margin: 0; background: #64748b; padding: 8px 15px;">VOLTAR AO MENU</button>
-    </div>
-
-    <div class="grid-filtros">
-      <div>
-        <label style="font-size: 11px; color: #94a3b8;">CÓD. PARCEIRO (COL H)</label>
-        <input type="text" id="maloteCod" placeholder="Ex: 88" style="margin: 0;">
-      </div>
-      <div>
-        <label style="font-size: 11px; color: #94a3b8;">NÚMERO DO LOTE (COL L)</label>
-        <input type="text" id="maloteLote" placeholder="Ex: 01" style="margin: 0;">
-      </div>
-      <div>
-        <label style="font-size: 11px; color: #94a3b8;">DESTINO (GRAVAÇÃO)</label>
-        <input type="text" id="maloteDestino" placeholder="Digite o destino para o malote" style="margin: 0;">
-      </div>
-      <div style="display: flex; gap: 10px; align-items: flex-end;">
-        <button onclick="ModuloMalote.buscarParaMalote()" style="margin: 0; padding: 10px 20px; width: auto; background: #3b82f6; flex: 1;">BUSCAR</button>
-        <button onclick="ModuloMalote.abrirReimpressao()" style="margin: 0; padding: 10px 20px; width: auto; background: #64748b; flex: 1; white-space: nowrap;">🖨️ REIMPRESSÃO</button>
-      </div>
-    </div>
-
-    <div class="container-tabela">
-      <table id="tabelaMalote">
-        <thead>
-          <tr><th>ID</th><th>CPF</th><th>NOME</th><th>VIA</th><th>AÇÃO</th></tr>
-        </thead>
-        <tbody id="corpoMalote"></tbody>
-      </table>
-    </div>
-
-    <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-      <div id="contagemMalote" style="color: #94a3b8; font-size: 14px;">Total: 0 registros</div>
-      <button id="btnSalvarMalote" onclick="ModuloMalote.salvarEImprimir()" style="width: auto; padding: 10px 40px; background: #22c55e; display: none; margin: 0;">GERAR PROTOCOLO DE MALOTE</button>
-    </div>
-  </div>
-
-  <div id="entradaBox" style="display: none; flex-direction: column; gap: 20px; padding: 20px; width: 100%; max-width: 1200px; margin: 0 auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2 style="margin: 0; color: #38bdf8;">📥 ENTRADA DE CARTEIRAS</h2>
-      <button onclick="ModuloUtils.voltarParaMenu()" style="width: auto; margin: 0; background: #64748b; padding: 8px 15px;">VOLTAR AO MENU</button>
-    </div>
-
-    <div class="grid-filtros" style="grid-template-columns: 1fr 1fr 1fr;">
-      <div>
-        <label style="font-size: 11px; color: #94a3b8;">FILTRAR PARCEIRO (CONFERÊNCIA)</label>
-        <input type="text" id="entParceiroConf" placeholder="Ex: 88">
-      </div>
-      <div>
-        <label style="font-size: 11px; color: #94a3b8;">FILTRAR MUNICÍPIO (CONFERÊNCIA)</label>
-        <input type="text" id="entMunicipioConf" placeholder="Ex: FORTALEZA">
-      </div>
-      <div>
-        <label style="font-size: 11px; color: #94a3b8;">Nº REMESSA / LOTE</label>
-        <input type="text" id="entRemessa" placeholder="Ex: 05">
-      </div>
-    </div>
-
-    <div style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #38bdf8;">
-      <label style="font-weight: bold; color: #38bdf8;">BIPAR CÓDIGO (CTR):</label>
-      <input type="tel" id="inputBipagem" placeholder="Sincronizando..." 
-             style="font-size: 24px; border-color: #38bdf8; text-align: center; width: 100%;" 
-             oninput="this.value = this.value.replace(/[^0-9]/g, ''); autoBip(this.value)" 
-             maxlength="8" disabled autocomplete="off">
-    </div>
-
-    <div class="container-tabela">
-      <table id="tabelaEntrada">
-        <thead>
-          <tr><th>CTR (ID)</th><th>CPF</th><th>NOME</th><th>NASCIMENTO</th><th>MUNICÍPIO</th><th>PARCEIRO</th><th>AÇÃO</th></tr>
-        </thead>
-        <tbody id="corpoTabelaEntrada"></tbody>
-      </table>
-    </div>
-
-    <div style="margin-top: 15px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
-      <div style="display: flex; gap: 40px; background: #1e293b; padding: 10px 30px; border-radius: 20px; border: 1px solid #334155;">
-        <div id="contagemEntrada" style="color: #38bdf8; font-weight: bold; font-size: 16px;">Total Bipados: 0</div>
-      </div>
-
-      <div style="display: flex; gap: 15px; justify-content: center; width: 100%;">
-        <button id="btnSalvarEntrada" onclick="ModuloBipagem.salvar()" style="width: 250px; background: #22c55e; font-weight: bold;">✅ SALVAR ENTRADA</button>
-        <button id="btnReimprimirEntrada" onclick="ModuloBipagem.abrirReimpressao()" style="width: 250px; background: #3b82f6; font-weight: bold;">🔍 REIMPRIMIR PROTOCOLO</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="js/config.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/login.js"></script>
-  <script src="js/recebimento.js"></script>
-  <script src="js/bipagem.js"></script>
-  <script src="js/malote.js"></script>
-
+    <script src="script.js"></script>
 </body>
 </html>
