@@ -89,25 +89,48 @@ const ModuloRecebimento = {
         btn.disabled = true;
         btn.innerText = "SALVANDO...";
 
-        google.script.run.withSuccessHandler((res) => {
-            if (res.sucesso === false) {
-                alert("Erro ao salvar: " + res.erro);
-                btn.disabled = false;
-                btn.innerText = "SALVAR RECEBIMENTO";
-                return;
-            }
+        // --- SOLUÇÃO: ENVIAR DADOS EM LOTES PEQUENOS PARA NÃO QUEBRAR O GET ---
+        const totalRegistros = this.dadosLocalizados.length;
+        const tamanhoDoPulo = 15; // Envia de 15 em 15 para a URL ficar pequena
+        let processados = 0;
+        let protocoloFinal = "";
 
-            // 'res' aqui é o protocolo gerado
-            this.executarImpressao(res, codParceiro, loteNum, nomeParceiro);
-            
-            setTimeout(() => {
-                window.print();
-                alert("Sucesso! Protocolo: " + res);
-                ModuloUtils.voltarParaMenu(); // Chama a navegação global
-                btn.disabled = false;
-                btn.innerText = "SALVAR RECEBIMENTO";
-            }, 500);
-        }).processarRecebimento(this.dadosLocalizados, nomeParceiro, AppSessao.nome);
+        const enviarPedaço = (inicio) => {
+            const fim = Math.min(inicio + tamanhoDoPulo, totalRegistros);
+            const pedaço = this.dadosLocalizados.slice(inicio, fim);
+
+            google.script.run.withSuccessHandler((res) => {
+                if (res.sucesso === false) {
+                    alert("Erro ao salvar parte dos dados: " + res.erro);
+                    btn.disabled = false;
+                    btn.innerText = "SALVAR RECEBIMENTO";
+                    return;
+                }
+
+                protocoloFinal = res; // Guarda o protocolo gerado
+                processados = fim;
+
+                if (processados < totalRegistros) {
+                    // Ainda tem mais pra enviar
+                    btn.innerText = `SALVANDO (${processados}/${totalRegistros})...`;
+                    enviarPedaço(processados);
+                } else {
+                    // Terminou tudo! Agora imprime
+                    this.executarImpressao(protocoloFinal, codParceiro, loteNum, nomeParceiro);
+                    
+                    setTimeout(() => {
+                        window.print();
+                        alert("Sucesso! Todos os registros foram salvos. Protocolo: " + protocoloFinal);
+                        ModuloUtils.voltarParaMenu();
+                        btn.disabled = false;
+                        btn.innerText = "SALVAR RECEBIMENTO";
+                    }, 500);
+                }
+            }).processarRecebimento(pedaço, nomeParceiro, AppSessao.nome);
+        };
+
+        // Inicia o primeiro envio
+        enviarPedaço(0);
     },
 
     // Prepara o HTML oculto de impressão
