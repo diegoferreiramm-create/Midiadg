@@ -89,38 +89,37 @@ const ModuloRecebimento = {
         btn.disabled = true;
         btn.innerText = "SALVANDO...";
 
-        // --- SOLUÇÃO: ENVIAR DADOS EM LOTES PEQUENOS PARA NÃO QUEBRAR O GET ---
-        const totalRegistros = this.dadosLocalizados.length;
-        const tamanhoDoPulo = 15; // Envia de 15 em 15 para a URL ficar pequena
-        let processados = 0;
+        // --- LÓGICA DE ENVIO EM LOTES (PEDAÇOS) ---
+        const total = this.dadosLocalizados.length;
+        const tamanhoLote = 5; // Enviar 5 por vez mantém a URL curta e segura
+        let atual = 0;
         let protocoloFinal = "";
 
-        const enviarPedaço = (inicio) => {
-            const fim = Math.min(inicio + tamanhoDoPulo, totalRegistros);
-            const pedaço = this.dadosLocalizados.slice(inicio, fim);
+        const enviarProximoPedaço = () => {
+            const fim = Math.min(atual + tamanhoLote, total);
+            const pedaço = this.dadosLocalizados.slice(atual, fim);
 
             google.script.run.withSuccessHandler((res) => {
                 if (res.sucesso === false) {
-                    alert("Erro ao salvar parte dos dados: " + res.erro);
+                    alert("Erro parcial: " + res.erro);
                     btn.disabled = false;
                     btn.innerText = "SALVAR RECEBIMENTO";
                     return;
                 }
 
-                protocoloFinal = res; // Guarda o protocolo gerado
-                processados = fim;
+                protocoloFinal = res; // Guarda o protocolo (ex: REC97-10)
+                atual = fim;
 
-                if (processados < totalRegistros) {
-                    // Ainda tem mais pra enviar
-                    btn.innerText = `SALVANDO (${processados}/${totalRegistros})...`;
-                    enviarPedaço(processados);
+                if (atual < total) {
+                    btn.innerText = `SALVANDO (${atual}/${total})...`;
+                    enviarProximoPedaço();
                 } else {
-                    // Terminou tudo! Agora imprime
+                    // FINALIZOU TUDO
                     this.executarImpressao(protocoloFinal, codParceiro, loteNum, nomeParceiro);
                     
                     setTimeout(() => {
                         window.print();
-                        alert("Sucesso! Todos os registros foram salvos. Protocolo: " + protocoloFinal);
+                        alert("Sucesso! Protocolo: " + protocoloFinal);
                         ModuloUtils.voltarParaMenu();
                         btn.disabled = false;
                         btn.innerText = "SALVAR RECEBIMENTO";
@@ -129,8 +128,7 @@ const ModuloRecebimento = {
             }).processarRecebimento(pedaço, nomeParceiro, AppSessao.nome);
         };
 
-        // Inicia o primeiro envio
-        enviarPedaço(0);
+        enviarProximoPedaço();
     },
 
     // Prepara o HTML oculto de impressão
