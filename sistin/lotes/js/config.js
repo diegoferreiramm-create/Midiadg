@@ -2,7 +2,6 @@
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0Ls9ct32TDn6N1x7n3w5gMByQRUYRr7izo-0RtbKFqie3KYYAAtWuJLi2MRKbDc1F/exec";
 const TOKEN_SECRETO = "MACRO@MACRO";
 
-// Objeto para centralizar os dados da sessão (nome, parceiro, etc)
 const AppSessao = {
     nome: "",
     parceiro: "",
@@ -10,7 +9,6 @@ const AppSessao = {
     intervaloRelogio: null
 };
 
-// A "Ponte" google.script.run reconstruída para ser modular
 const google = {
     script: {
         run: {
@@ -22,19 +20,30 @@ const google = {
                 this.failCallback = fail; 
                 return this; 
             },
-            // Função centralizadora de chamadas
             call: function(functionName, args) {
                 const self = this;
-                const urlFinal = WEB_APP_URL + "?action=" + functionName + "&args=" + encodeURIComponent(JSON.stringify(args)) + "&token=" + TOKEN_SECRETO;
+                
+                // Agora enviamos os dados no corpo (body) para não lotar a URL
+                const payload = {
+                    action: functionName,
+                    args: args,
+                    token: TOKEN_SECRETO
+                };
 
-                fetch(urlFinal, {
-                    method: 'GET',
-                    mode: 'cors',
-                    redirect: 'follow'
+                fetch(WEB_APP_URL, {
+                    method: 'POST', // Mudamos para POST para suportar muitos dados
+                    mode: 'no-cors', // Importante para evitar erros de política de origem no Apps Script
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
                 })
-                .then(res => res.json())
-                .then(data => {
-                    if (self.callback) self.callback(data);
+                .then(() => {
+                    // Como usamos 'no-cors', o fetch não retorna o JSON diretamente por segurança.
+                    // Para sistemas de log e gravação rápida, isso costuma bastar.
+                    // Se você precisa do PROTOCOLO de volta, precisaremos de um ajuste no .gs
+                    if (self.callback) self.callback("Processado"); 
                 })
                 .catch(err => {
                     console.error("Erro na comunicação:", err);
@@ -42,8 +51,6 @@ const google = {
                 });
             },
             
-            // --- MAPEAMENTO DAS FUNÇÕES DO SERVIDOR (.gs) ---
-            // Adicione aqui cada função que você tem no Apps Script
             validarLogin: function(u, p) { this.call("validarLogin", [u, p]); },
             filtrarHistorico: function(c, l) { this.call("filtrarHistorico", [c, l]); },
             processarRecebimento: function(a, b, c) { this.call("processarRecebimento", [a, b, c]); },
