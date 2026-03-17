@@ -1058,6 +1058,24 @@ function salvarEntrega() {
     });
 }
 
+// FUNÇÃO PARA MOSTRAR/ESCONDER CAMPOS DE TERCEIRO
+function toggleTerceiro() {
+    const checkTerceiro = document.getElementById("checkTerceiro");
+    const camposTerceiro = document.getElementById("camposTerceiro");
+    
+    if (checkTerceiro && camposTerceiro) {
+        if (checkTerceiro.checked) {
+            camposTerceiro.style.display = "block";
+            // Limpa os campos quando abre
+            document.getElementById("nomeTerceiro").value = "";
+            document.getElementById("cpfTerceiro").value = "";
+            document.getElementById("parentesco").value = "";
+        } else {
+            camposTerceiro.style.display = "none";
+        }
+    }
+}
+
 // FUNÇÕES DE IMPRESSÃO, ADMIN E MASCARA (MANTIDAS 100% COMO VOCÊ ENVIOU)
 function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, atendente, via) {
   const telaPrint = window.open('', '_blank');
