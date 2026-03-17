@@ -299,29 +299,24 @@ document.addEventListener('blur', function(e) {
           if (res.nascimento) {
             try {
               let dataStr = res.nascimento.toString();
+              console.log("Data recebida:", dataStr); // Para debug
               
-              // VERIFICA SE VEIO NO FORMATO ISO (yyyy-mm-dd)
+              // Se vier no formato ISO (yyyy-mm-dd) - EX: 1979-10-17
               if (dataStr.includes('-')) {
                 const partes = dataStr.split('-');
-                // CONVERTE PARA dd/mm/yyyy PARA EXIBIÇÃO
+                // partes[0] = 1979, partes[1] = 10, partes[2] = 17
+                // CONVERTE PARA dd/mm/aaaa
                 const dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
                 document.getElementById("nascimento").value = dataFormatada;
+                console.log("Data convertida:", dataFormatada); // Para debug
               } 
-              // SE JÁ VEIO NO FORMATO BRASILEIRO (dd/mm/aaaa)
+              // Se já vier no formato brasileiro (dd/mm/aaaa)
               else if (dataStr.includes('/')) {
                 document.getElementById("nascimento").value = dataStr;
               }
-              // SE FOR OUTRO FORMATO (OBJETO DATE)
-              else {
-                let d = new Date(res.nascimento);
-                if (!isNaN(d.getTime())) {
-                  let dia = String(d.getDate()).padStart(2, '0');
-                  let mes = String(d.getMonth() + 1).padStart(2, '0');
-                  let ano = d.getFullYear();
-                  document.getElementById("nascimento").value = `${dia}/${mes}/${ano}`;
-                }
-              }
-            } catch(err) { console.error(err); }
+            } catch(err) { 
+              console.error("Erro ao formatar data:", err); 
+            }
           }
         } else {
           document.getElementById("msgCPF").innerText = "CPF não encontrado (Novo cadastro).";
