@@ -1197,13 +1197,157 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
   const telaPrint = window.open('', '_blank');
   const dataHora = new Date().toLocaleString('pt-BR');
   
-  // Verificação de segurança para pop-up
   if (!telaPrint) {
     alert("Pop-up bloqueado! Por favor, permita pop-ups para imprimir o comprovante.");
     return;
   }
 
-  telaPrint.document.write(`<html><head><title>Entrega CTR ${ctr}</title><style>@page { size: A5 landscape; margin: 0; } body { font-family: Arial, sans-serif; margin: 0; padding: 7mm; box-sizing: border-box; width: 210mm; height: 148mm; display: flex; justify-content: center; align-items: center; } .ticket { width: 100%; height: 100%; border: 2px solid #000; padding: 6mm; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; } .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 2mm; } .header h2 { margin: 0; font-size: 20px; text-transform: uppercase; } .section-title { font-size: 13px; font-weight: bold; background: #f2f2f2; padding: 1.5mm 3mm; border: 1px solid #000; margin-top: 2mm; } .info-group { display: flex; width: 100%; font-size: 14px; margin: 1.5mm 0; } .info-item { flex: 1; line-height: 1.4; } .declaracao { font-size: 13px; line-height: 1.5; text-align: justify; border: 1px dashed #000; padding: 4mm; margin: 3mm 0; } .assinatura-area { text-align: center; margin-top: 2mm; } .assinatura-linha { border-top: 1.5px solid #000; width: 60%; margin: 0 auto; } .assinatura-texto { font-size: 11px; margin-top: 1mm; font-weight: bold; text-transform: uppercase; } .meta-info { display: flex; justify-content: space-between; font-size: 10px; border-top: 1px solid #eee; padding-top: 1mm; } b { text-transform: uppercase; }</style></head><body><div class="ticket"><div class="header"><h2>COMPROVANTE DE ENTREGA</h2></div><div><div class="section-title">DADOS DO ALUNO</div><div class="info-group"><div class="info-item"><b>CTR:</b> ${ctr}</div><div class="info-item"><b>VIA:</b> ${via}ª VIA</div><div class="info-item"><b>ALUNO:</b> ${aluno}</div></div><div class="info-group" style="margin-top: -1mm;"><div class="info-item"><b>CPF ALUNO:</b> ${cpfA}</div></div></div><div class="declaracao">Declaro que recebi, nesta data, a Carteira de Estudante Macrorregião 2026, emitida conforme os dados informados e conferidos no ato da entrega. Estou ciente de que o documento é pessoal e intransferível, comprometendo-me a zelar por sua conservação, ciente de que, em caso de perda, extravio ou dano, será necessária nova solicitação conforme as normas vigentes.</div><div><div class="section-title">DADOS DO RECEBEDOR</div><div class="info-group"><div class="info-item"><b>NOME:</b> ${recebedor}</div><div class="info-item"><b>CPF:</b> ${cpfR}</div></div><div class="info-group" style="margin-top: -1mm;"><div class="info-item"><b>VÍNCULO:</b> ${vinculo}</div></div></div><div class="assinatura-area"><div class="assinatura-linha"></div><div class="assinatura-texto">Assinatura do Recebedor</div></div><div class="meta-info"><span><b>ATENDENTE:</b> ${atendente}</span><span><b>DATA/HORA:</b> ${dataHora}</span></div></div><script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };<\/script></body></html>`);
+  telaPrint.document.write(`
+    <html>
+    <head>
+      <title>Entrega CTR ${ctr}</title>
+      <style>
+        @page {
+          size: A5 portrait;
+          margin: 0;
+        }
+        body {
+          margin: 0;
+          padding: 0;
+          width: 148mm;
+          height: 210mm;
+          font-family: Arial, sans-serif;
+        }
+        .ticket {
+          width: 146mm;
+          height: 208mm;
+          margin: 1mm auto;
+          border: 2px solid #000;
+          padding: 5mm;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        .header {
+          text-align: center;
+          border-bottom: 2px solid #000;
+          padding-bottom: 2mm;
+        }
+        .header h2 {
+          margin: 0;
+          font-size: 20px;
+          text-transform: uppercase;
+        }
+        .section-title {
+          font-size: 13px;
+          font-weight: bold;
+          background: #f2f2f2;
+          padding: 1.5mm 3mm;
+          border: 1px solid #000;
+          margin-top: 3mm;
+        }
+        .info-group {
+          display: flex;
+          width: 100%;
+          font-size: 14px;
+          margin: 2mm 0;
+        }
+        .info-item {
+          flex: 1;
+          line-height: 1.4;
+        }
+        .declaracao {
+          font-size: 13px;
+          line-height: 1.5;
+          text-align: justify;
+          border: 1px dashed #000;
+          padding: 4mm;
+          margin: 3mm 0;
+        }
+        .assinatura-area {
+          text-align: center;
+          margin-top: 3mm;
+        }
+        .assinatura-linha {
+          border-top: 1.5px solid #000;
+          width: 60%;
+          margin: 0 auto;
+        }
+        .assinatura-texto {
+          font-size: 11px;
+          margin-top: 1mm;
+          font-weight: bold;
+          text-transform: uppercase;
+        }
+        .meta-info {
+          display: flex;
+          justify-content: space-between;
+          font-size: 10px;
+          border-top: 1px solid #eee;
+          padding-top: 2mm;
+          margin-top: 2mm;
+        }
+        b {
+          text-transform: uppercase;
+        }
+        * {
+          box-sizing: border-box;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="ticket">
+        <div class="header">
+          <h2>COMPROVANTE DE ENTREGA</h2>
+        </div>
+        
+        <div>
+          <div class="section-title">DADOS DO ALUNO</div>
+          <div class="info-group">
+            <div class="info-item"><b>CTR:</b> ${ctr}</div>
+            <div class="info-item"><b>VIA:</b> ${via}ª VIA</div>
+          </div>
+          <div class="info-group">
+            <div class="info-item"><b>ALUNO:</b> ${aluno}</div>
+            <div class="info-item"><b>CPF:</b> ${cpfA}</div>
+          </div>
+        </div>
+
+        <div class="declaracao">
+          Declaro que recebi, nesta data, a Carteira de Estudante Macrorregião 2026, emitida conforme os dados informados e conferidos no ato da entrega. Estou ciente de que o documento é pessoal e intransferível, comprometendo-me a zelar por sua conservação, ciente de que, em caso de perda, extravio ou dano, será necessária nova solicitação conforme as normas vigentes.
+        </div>
+
+        <div>
+          <div class="section-title">DADOS DO RECEBEDOR</div>
+          <div class="info-group">
+            <div class="info-item"><b>NOME:</b> ${recebedor}</div>
+            <div class="info-item"><b>CPF:</b> ${cpfR}</div>
+          </div>
+          <div class="info-group">
+            <div class="info-item"><b>VÍNCULO:</b> ${vinculo}</div>
+          </div>
+        </div>
+
+        <div class="assinatura-area">
+          <div class="assinatura-linha"></div>
+          <div class="assinatura-texto">Assinatura do Recebedor</div>
+        </div>
+
+        <div class="meta-info">
+          <span><b>ATENDENTE:</b> ${atendente}</span>
+          <span><b>DATA/HORA:</b> ${dataHora}</span>
+        </div>
+      </div>
+      <script>
+        window.onload = function() { 
+          window.print();
+          window.onafterprint = function() { window.close(); };
+        };
+      <\/script>
+    </body>
+    </html>
+  `);
   telaPrint.document.close();
 }
 
