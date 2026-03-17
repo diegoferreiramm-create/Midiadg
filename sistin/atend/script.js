@@ -661,13 +661,11 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
     <head>
       <title>Protocolo CTR - ${id}</title>
       <style>
-        /* FORÇA A FOLHA A4 EM RETRATO */
         @page {
           size: A4 portrait;
           margin: 0;
         }
         
-        /* FORÇA O NAVEGADOR A RESPEITAR */
         * {
           margin: 0;
           padding: 0;
@@ -675,8 +673,8 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         }
         
         body {
-          width: 210mm; /* Largura exata do A4 retrato */
-          height: 297mm; /* Altura exata do A4 retrato */
+          width: 210mm;
+          height: 297mm;
           font-family: Arial, sans-serif;
           background: white;
           display: flex;
@@ -684,25 +682,26 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           align-items: center;
         }
         
-        /* CONTEÚDO NA METADE SUPERIOR */
         .ticket {
-          width: 200mm; /* Largura com pequena margem nas laterais */
-          margin-top: 5mm; /* Margem superior */
+          width: 200mm;
+          margin-top: 5mm;
           border: 2px solid #000;
-          padding: 3mm;
+          padding: 4mm; /* Aumentei o padding */
           background: white;
           font-size: 11px;
+          /* AUMENTEI A ALTURA */
+          min-height: 130mm; /* Altura mínima para caber assinatura */
         }
         
         .header {
           text-align: center;
           border-bottom: 2px solid #000;
-          margin-bottom: 3mm;
-          padding-bottom: 1mm;
+          margin-bottom: 4mm;
+          padding-bottom: 2mm;
         }
         
         .header h2 {
-          font-size: 16px;
+          font-size: 18px;
           margin: 1mm 0;
         }
         
@@ -714,40 +713,56 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         .row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 2mm;
+          margin-bottom: 3mm;
+          font-size: 12px;
         }
         
         .lgpd {
           font-size: 8px;
           font-style: italic;
-          margin: 3mm 0;
+          margin: 4mm 0;
           border-top: 1px solid #ccc;
           border-bottom: 1px solid #ccc;
-          padding: 1mm 0;
+          padding: 2mm 0;
           text-align: justify;
         }
         
         .rules {
-          font-size: 9px;
+          font-size: 10px;
           background: #f2f2f2;
-          padding: 2mm;
+          padding: 3mm;
           border: 1px solid #000;
-          margin: 3mm 0;
-          line-height: 1.3;
+          margin: 4mm 0;
+          line-height: 1.4;
         }
         
         .footer {
           display: flex;
           justify-content: space-between;
-          margin-top: 3mm;
-          font-size: 10px;
+          margin-top: 8mm; /* MAIS ESPAÇO ANTES DA ASSINATURA */
+          font-size: 11px;
+          align-items: flex-end;
         }
         
         .assinatura {
           border-top: 1px solid #000;
-          width: 80mm;
+          width: 90mm; /* MAIS LARGO */
           text-align: center;
-          padding-top: 1mm;
+          padding-top: 2mm; /* MAIS ESPAÇO */
+          margin-top: 5mm; /* ESPAÇO EXTRA */
+        }
+        
+        /* ESPAÇO PARA CARIMBO */
+        .carimbo {
+          border: 1px dashed #999;
+          width: 30mm;
+          height: 15mm;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 8px;
+          color: #666;
+          margin-left: 5mm;
         }
         
         b {
@@ -789,9 +804,18 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
         </div>
 
-        <div class="footer">
-          <div class="assinatura">Assinatura do Requerente</div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10mm;">
+          <div style="flex: 1;">
+            <div class="assinatura">Assinatura do Requerente</div>
+          </div>
+          <div class="carimbo">
+            CARIMBO
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 8mm; font-size: 10px;">
           <div>Via do Aluno / ${parceiro} / ID: ${id}</div>
+          <div style="color: #666;">(Espaço reservado para carimbo)</div>
         </div>
       </div>
       <script>
@@ -805,7 +829,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
   `);
   telaPrint.document.close();
 }
-
 // --- TROCAR SENHA (ADAPTADA) ---
 function salvarSenha() {
   const login = document.getElementById("usuarioTroca").value.trim();
