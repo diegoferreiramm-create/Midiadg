@@ -65,7 +65,7 @@ function entrar() {
 
   if (msg) msg.innerText = "Verificando...";
 
-  fetch(`${urlSistema}?action=validarLogin&user=${login}&pass=${senha}`)
+  fetch(`${WEB_APP_URL}?action=validarLogin&user=${login}&pass=${senha}`)
     .then(response => response.json())
     .then(res => {
       if (res.sucesso) {
