@@ -835,28 +835,40 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
 
 // --- TROCAR SENHA (ADAPTADA) ---
 function salvarSenha() {
-  const login = document.getElementById("usuarioTroca").value.trim();
-  const atual = document.getElementById("senhaAtual").value.trim();
-  const nova = document.getElementById("novaSenha").value.trim();
-  const conf = document.getElementById("confSenha").value.trim();
+  const login = document.getElementById("usuarioTroca")?.value?.trim() || "";
+  const atual = document.getElementById("senhaAtual")?.value?.trim() || "";
+  const nova = document.getElementById("novaSenha")?.value?.trim() || "";
+  const conf = document.getElementById("confSenha")?.value?.trim() || "";
+  
+  if (!login || !atual || !nova || !conf) {
+    alert("Preencha todos os campos!");
+    return;
+  }
   
   if(nova !== conf) { 
     alert("A nova senha não coincide!"); 
     return; 
   }
 
-  fetch(`${WEB_APP_URL}?action=trocarSenha&user=${login}&passAtual=${atual}&passNova=${nova}`)
-    .then(res => res.json())
+  // Usando fetch com tratamento de erro melhorado
+  fetch(`${WEB_APP_URL}?action=trocarSenha&user=${encodeURIComponent(login)}&passAtual=${encodeURIComponent(atual)}&passNova=${encodeURIComponent(nova)}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      return res.json();
+    })
     .then(res => {
       if(res.sucesso) { 
-        alert("Senha alterada!"); 
+        alert("Senha alterada com sucesso!"); 
         fecharSenha(); 
       }
       else { 
         alert("Erro ao alterar senha: " + (res.erro || "Verifique os dados")); 
       }
     })
-    .catch(err => alert("Erro de conexão"));
+    .catch(err => {
+      console.error("Erro detalhado:", err);
+      alert("Erro de conexão com o servidor. Verifique o console para mais detalhes.");
+    });
 }
 
 
