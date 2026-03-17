@@ -550,6 +550,29 @@ async function salvarCadastro() {
     return; 
   }
 
+  // --- NOVA VERIFICAÇÃO DE BOLETO DUPLICADO (SÓ PARA CADASTRO NOVO) ---
+  if (!idSendoEditado) { // Só verifica se NÃO é edição
+    const btn = document.querySelector("button[onclick='salvarCadastro()']");
+    if(btn) { btn.disabled = true; btn.innerText = "Verificando..."; }
+    
+    try {
+      // Faz uma requisição para verificar se o boleto já existe
+      const response = await fetch(`${urlSistema}?action=verificarBoleto&boleto=${encodeURIComponent(boleto)}`);
+      const res = await response.json();
+      
+      if (res.existe) {
+        alert("❌ Este número de boleto já foi cadastrado! Use outro número.");
+        if(btn) { btn.disabled = false; btn.innerText = "CADASTRAR"; }
+        return; // INTERROMPE O CADASTRO
+      }
+    } catch (error) {
+      console.error("Erro ao verificar boleto:", error);
+      // Se der erro na verificação, CONTINUA o cadastro mesmo assim
+      // (não queremos travar o sistema se a verificação falhar)
+    }
+  }
+  // --- FIM DA VERIFICAÇÃO ---
+
   // --- LÓGICA IGUAL À TROCA DE SENHA (MULTICRITÉRIO) ---
   // Se idSendoEditado existe, enviamos a ação de EDITAR.
   // O servidor vai usar o ID + CPF + VIA para garantir que está editando a VIA certa.
@@ -638,52 +661,49 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
     <head>
       <title>Protocolo CTR - ${id}</title>
       <style>
-        /* SEM @page - Deixa a impressora definir o tamanho */
+        @page {
+          size: A5 portrait;
+          margin: 0;
+        }
         body {
           margin: 0;
-          padding: 5mm;
+          padding: 0;
+          width: 148mm;
+          height: 210mm;
           font-family: Arial, sans-serif;
-          background: white;
-          display: flex;
-          justify-content: center;
-          align-items: flex-start; /* Alinha no topo */
-          min-height: 100vh;
+          position: relative;
         }
         .ticket {
-          width: 100%;
-          max-width: 130mm; /* Largura máxima para caber no A5 */
+          width: 148mm;
+          height: 210mm;
           border: 2px solid #000;
           padding: 5mm;
           box-sizing: border-box;
           display: flex;
           flex-direction: column;
-          background: white;
+          position: absolute;
+          top: 0;
+          left: 0;
         }
         .header {
           text-align: center;
           border-bottom: 2px solid #000;
-          margin-bottom: 4mm;
-        }
-        .header h2 {
-          margin: 1mm 0;
-          font-size: 18px;
+          margin-bottom: 5mm;
         }
         .id-destaque {
           font-size: 16px;
           font-weight: bold;
-          display: block;
-          margin: 2mm 0;
         }
         .row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 3mm;
+          margin-bottom: 4mm;
           font-size: 12px;
         }
         .lgpd {
           font-size: 8px;
           font-style: italic;
-          margin: 4mm 0;
+          margin: 5mm 0;
           border-top: 1px solid #ccc;
           border-bottom: 1px solid #ccc;
           padding: 2mm 0;
@@ -701,7 +721,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           display: flex;
           justify-content: space-between;
           align-items: flex-end;
-          margin-top: 2mm;
+          margin-top: auto;
           font-size: 10px;
         }
         .assinatura {
@@ -709,7 +729,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           width: 60mm;
           text-align: center;
           padding-top: 1mm;
-          font-size: 10px;
         }
         b {
           text-transform: uppercase;
@@ -719,7 +738,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
     <body>
       <div class="ticket">
         <div class="header">
-          <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
+          <h2 style="margin:2mm 0; font-size:16px;">PROTOCOLO DE SOLICITAÇÃO</h2>
           <span class="id-destaque">Nº BOLETO: ${boleto}</span>
         </div>
         
