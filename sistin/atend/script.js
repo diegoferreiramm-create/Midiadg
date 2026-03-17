@@ -1,4 +1,4 @@
-// --- CONFIGURAÇÃO DE COMUNICAÇÃO GITHUB -> GOOGLE ---
+// --- CONFIGURAÇÃO DE COMUNICAÇÃO ---
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0Ls9ct32TDn6N1x7n3w5gMByQRUYRr7izo-0RtbKFqie3KYYAAtWuJLi2MRKbDc1F/exec";
 const TOKEN_SECRETO = "MACRO@MACRO";
 
