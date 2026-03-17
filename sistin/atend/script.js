@@ -686,7 +686,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           width: 190mm;
           margin-top: 5mm;
           border: 2px solid #000;
-          padding: 5mm 5mm 3mm 5mm;
+          padding: 5mm;
           background: white;
           font-size: 11px;
           height: 140mm;
@@ -709,13 +709,20 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         .id-destaque {
           font-size: 14px;
           font-weight: bold;
+          margin-bottom: 3mm;
         }
         
-        .row {
+        .info-grid {
           display: flex;
+          flex-wrap: wrap;
           justify-content: space-between;
           margin-bottom: 3mm;
           font-size: 12px;
+        }
+        
+        .info-item {
+          width: 48%;
+          margin-bottom: 2mm;
         }
         
         .lgpd {
@@ -744,35 +751,29 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           flex-direction: column;
         }
         
-        /* CONTAINER DA ASSINATURA */
-        .assinatura-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin-bottom: 15mm; /* Espaço generoso no meio */
-        }
-        
-        /* LINHA CURTA DA ASSINATURA */
+        /* LINHA DA ASSINATURA */
         .assinatura-linha {
           border-top: 2px solid #000;
-          width: 80mm; /* Linha mais curta */
-          margin: 2mm 0 3mm 0;
+          width: 100%;
+          margin: 5mm 0 1mm 0;
         }
         
-        /* TEXTO DA ASSINATURA ABAIXO DA LINHA */
-        .assinatura-texto {
-          font-size: 11px;
-          font-weight: bold;
-          text-align: center;
-        }
-        
-        /* RODAPÉ COM INFORMAÇÃO NO CANTO DIREITO */
-        .rodape {
+        /* CONTAINER DA ASSINATURA E VIA */
+        .assinatura-container {
           display: flex;
-          justify-content: flex-end;
+          justify-content: space-between;
+          align-items: center;
           font-size: 11px;
           font-weight: bold;
-          margin-top: 2mm;
+          margin-top: 1mm;
+        }
+        
+        .via-info {
+          white-space: nowrap;
+        }
+        
+        .assinatura-texto {
+          white-space: nowrap;
         }
         
         b {
@@ -787,19 +788,13 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <div class="id-destaque">Nº BOLETO: ${boleto}</div>
         </div>
         
-        <div class="row">
-          <span><b>NOME:</b> ${nome ? nome.toUpperCase() : ''}</span>
-          <span><b>DATA:</b> ${data ? data.split(' ')[0] : ''}</span>
-        </div>
-        
-        <div class="row">
-          <span><b>CPF:</b> ${cpf}</span>
-          <span><b>VIA:</b> ${via}</span>
-        </div>
-        
-        <div class="row">
-          <span><b>MUNICÍPIO:</b> ${municipio ? municipio.toUpperCase() : ''}</span>
-          <span><b>ATENDENTE:</b> ${atendente}</span>
+        <div class="info-grid">
+          <div class="info-item"><b>NOME:</b> ${nome ? nome.toUpperCase() : ''}</div>
+          <div class="info-item"><b>DATA:</b> ${data ? data.split(' ')[0] : ''}</div>
+          <div class="info-item"><b>CPF:</b> ${cpf}</div>
+          <div class="info-item"><b>VIA:</b> ${via}</div>
+          <div class="info-item"><b>MUNICÍPIO:</b> ${municipio ? municipio.toUpperCase() : ''}</div>
+          <div class="info-item"><b>ATENDENTE:</b> ${atendente}</div>
         </div>
         
         <div class="lgpd">
@@ -814,17 +809,12 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
         </div>
 
-        <!-- SEÇÃO FINAL COM ASSINATURA E RODAPÉ -->
+        <!-- SEÇÃO FINAL - EXATAMENTE COMO NA SUA IMAGEM -->
         <div class="final-section">
+          <div class="assinatura-linha"></div>
           <div class="assinatura-container">
-            <div class="assinatura-linha"></div>
-            <div class="assinatura-texto">Assinatura do Requerente</div>
-          </div>
-          
-          <!-- ESPAÇO VAZIO NO MEIO (já garantido pelo margin-bottom:15mm) -->
-          
-          <div class="rodape">
-            Via do Aluno / ${parceiro} / ID: ${id}
+            <span class="via-info">Via do Aluno / ${parceiro} / ID: ${id}</span>
+            <span class="assinatura-texto">Assinatura do Requerente</span>
           </div>
         </div>
       </div>
@@ -1296,87 +1286,114 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
     <head>
       <title>Entrega CTR ${ctr}</title>
       <style>
-        /* SEM @page - Deixa a impressora definir o tamanho */
-        body {
+        @page {
+          size: A4 portrait;
           margin: 0;
-          padding: 5mm;
+        }
+        
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        body {
+          width: 210mm;
+          height: 297mm;
           font-family: Arial, sans-serif;
           background: white;
           display: flex;
-          justify-content: center;
-          align-items: flex-start; /* Alinha no topo */
-          min-height: 100vh;
+          flex-direction: column;
+          align-items: center;
         }
+        
         .ticket {
-          width: 100%;
-          max-width: 130mm; /* Largura máxima para caber no A5 */
+          width: 190mm;
+          margin-top: 5mm;
           border: 2px solid #000;
           padding: 5mm;
-          box-sizing: border-box;
+          background: white;
+          font-size: 11px;
+          height: 140mm;
           display: flex;
           flex-direction: column;
-          background: white;
         }
+        
         .header {
           text-align: center;
           border-bottom: 2px solid #000;
+          margin-bottom: 4mm;
           padding-bottom: 2mm;
-          margin-bottom: 3mm;
         }
+        
         .header h2 {
-          margin: 0;
           font-size: 18px;
-          text-transform: uppercase;
+          margin: 1mm 0;
         }
+        
         .section-title {
           font-size: 12px;
           font-weight: bold;
           background: #f2f2f2;
-          padding: 1.5mm 3mm;
+          padding: 2mm;
           border: 1px solid #000;
           margin: 3mm 0 2mm 0;
         }
-        .info-group {
+        
+        .info-grid {
           display: flex;
-          width: 100%;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          margin-bottom: 2mm;
           font-size: 12px;
-          margin: 2mm 0;
         }
+        
         .info-item {
-          flex: 1;
-          line-height: 1.4;
+          width: 48%;
+          margin-bottom: 2mm;
         }
+        
         .declaracao {
-          font-size: 11px;
+          font-size: 10px;
           line-height: 1.4;
           text-align: justify;
           border: 1px dashed #000;
           padding: 3mm;
           margin: 3mm 0;
         }
-        .assinatura-area {
-          text-align: center;
-          margin: 3mm 0 2mm 0;
+        
+        /* ÁREA FINAL - ASSINATURA E RODAPÉ */
+        .final-section {
+          margin-top: auto;
+          display: flex;
+          flex-direction: column;
         }
+        
+        /* LINHA DA ASSINATURA */
         .assinatura-linha {
-          border-top: 1.5px solid #000;
-          width: 70%;
-          margin: 0 auto;
+          border-top: 2px solid #000;
+          width: 100%;
+          margin: 5mm 0 1mm 0;
         }
-        .assinatura-texto {
-          font-size: 10px;
-          margin-top: 1mm;
-          font-weight: bold;
-          text-transform: uppercase;
-        }
-        .meta-info {
+        
+        /* CONTAINER DA ASSINATURA E CTR */
+        .assinatura-container {
           display: flex;
           justify-content: space-between;
-          font-size: 9px;
-          border-top: 1px solid #ccc;
-          padding-top: 2mm;
-          margin-top: 2mm;
+          align-items: center;
+          font-size: 11px;
+          font-weight: bold;
+          margin-top: 1mm;
         }
+        
+        .ctr-info {
+          white-space: nowrap;
+        }
+        
+        .assinatura-texto {
+          white-space: nowrap;
+        }
+        
         b {
           text-transform: uppercase;
         }
@@ -1388,41 +1405,35 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
           <h2>COMPROVANTE DE ENTREGA</h2>
         </div>
         
-        <div>
-          <div class="section-title">DADOS DO ALUNO</div>
-          <div class="info-group">
-            <div class="info-item"><b>CTR:</b> ${ctr}</div>
-            <div class="info-item"><b>VIA:</b> ${via}ª VIA</div>
-          </div>
-          <div class="info-group">
-            <div class="info-item"><b>ALUNO:</b> ${aluno}</div>
-            <div class="info-item"><b>CPF:</b> ${cpfA}</div>
-          </div>
+        <div class="section-title">DADOS DO ALUNO</div>
+        <div class="info-grid">
+          <div class="info-item"><b>CTR:</b> ${ctr}</div>
+          <div class="info-item"><b>VIA:</b> ${via}ª VIA</div>
+          <div class="info-item"><b>ALUNO:</b> ${aluno}</div>
+          <div class="info-item"><b>CPF:</b> ${cpfA}</div>
         </div>
 
         <div class="declaracao">
           Declaro que recebi, nesta data, a Carteira de Estudante Macrorregião 2026, emitida conforme os dados informados e conferidos no ato da entrega. Estou ciente de que o documento é pessoal e intransferível, comprometendo-me a zelar por sua conservação, ciente de que, em caso de perda, extravio ou dano, será necessária nova solicitação conforme as normas vigentes.
         </div>
 
-        <div>
-          <div class="section-title">DADOS DO RECEBEDOR</div>
-          <div class="info-group">
-            <div class="info-item"><b>NOME:</b> ${recebedor}</div>
-            <div class="info-item"><b>CPF:</b> ${cpfR}</div>
-          </div>
-          <div class="info-group">
-            <div class="info-item"><b>VÍNCULO:</b> ${vinculo}</div>
-          </div>
+        <div class="section-title">DADOS DO RECEBEDOR</div>
+        <div class="info-grid">
+          <div class="info-item"><b>NOME:</b> ${recebedor}</div>
+          <div class="info-item"><b>CPF:</b> ${cpfR}</div>
+          <div class="info-item"><b>VÍNCULO:</b> ${vinculo}</div>
         </div>
 
-        <div class="assinatura-area">
+        <!-- SEÇÃO FINAL - IGUAL AO PROTOCOLO DE CADASTRO -->
+        <div class="final-section">
           <div class="assinatura-linha"></div>
-          <div class="assinatura-texto">Assinatura do Recebedor</div>
-        </div>
-
-        <div class="meta-info">
-          <span><b>ATENDENTE:</b> ${atendente}</span>
-          <span><b>DATA/HORA:</b> ${dataHora}</span>
+          <div class="assinatura-container">
+            <span class="ctr-info">CTR: ${ctr} / ${via}ª VIA</span>
+            <span class="assinatura-texto">Assinatura do Recebedor</span>
+          </div>
+          <div style="text-align: right; font-size: 9px; margin-top: 1mm; color: #555;">
+            ${atendente} - ${dataHora}
+          </div>
         </div>
       </div>
       <script>
