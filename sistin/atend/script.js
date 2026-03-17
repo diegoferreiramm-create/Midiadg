@@ -683,14 +683,13 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         }
         
         .ticket {
-          width: 200mm;
-          margin-top: 5mm;
+          width: 190mm;
+          margin-top: 30mm; /* AUMENTEI MUITO A MARGEM SUPERIOR */
           border: 2px solid #000;
-          padding: 4mm; /* Aumentei o padding */
+          padding: 5mm;
           background: white;
           font-size: 11px;
-          /* AUMENTEI A ALTURA */
-          min-height: 130mm; /* Altura mínima para caber assinatura */
+          min-height: 120mm;
         }
         
         .header {
@@ -738,31 +737,31 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         
         .footer {
           display: flex;
-          justify-content: space-between;
-          margin-top: 8mm; /* MAIS ESPAÇO ANTES DA ASSINATURA */
+          flex-direction: column;
+          align-items: center;
+          margin-top: 8mm;
           font-size: 11px;
-          align-items: flex-end;
         }
         
         .assinatura {
           border-top: 1px solid #000;
-          width: 90mm; /* MAIS LARGO */
+          width: 100mm;
           text-align: center;
-          padding-top: 2mm; /* MAIS ESPAÇO */
-          margin-top: 5mm; /* ESPAÇO EXTRA */
+          padding-top: 2mm;
+          margin: 3mm 0;
         }
         
         /* ESPAÇO PARA CARIMBO */
-        .carimbo {
+        .carimbo-area {
           border: 1px dashed #999;
-          width: 30mm;
-          height: 15mm;
+          width: 40mm;
+          height: 20mm;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 8px;
+          font-size: 9px;
           color: #666;
-          margin-left: 5mm;
+          margin: 5mm auto;
         }
         
         b {
@@ -804,18 +803,16 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10mm;">
-          <div style="flex: 1;">
-            <div class="assinatura">Assinatura do Requerente</div>
+        <div class="footer">
+          <div class="assinatura">Assinatura do Requerente</div>
+          
+          <div class="carimbo-area">
+            ÁREA PARA CARIMBO
           </div>
-          <div class="carimbo">
-            CARIMBO
+          
+          <div style="margin-top: 5mm; font-size: 10px;">
+            Via do Aluno / ${parceiro} / ID: ${id}
           </div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; margin-top: 8mm; font-size: 10px;">
-          <div>Via do Aluno / ${parceiro} / ID: ${id}</div>
-          <div style="color: #666;">(Espaço reservado para carimbo)</div>
         </div>
       </div>
       <script>
@@ -829,6 +826,9 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
   `);
   telaPrint.document.close();
 }
+
+
+
 // --- TROCAR SENHA (ADAPTADA) ---
 function salvarSenha() {
   const login = document.getElementById("usuarioTroca").value.trim();
