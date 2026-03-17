@@ -1314,7 +1314,7 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
           padding: 5mm;
           background: white;
           font-size: 11px;
-          height: 140mm;
+          height: 140mm; /* Metade da folha A4 */
           display: flex;
           flex-direction: column;
         }
@@ -1394,6 +1394,13 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
           white-space: nowrap;
         }
         
+        .data-atendente {
+          text-align: right;
+          font-size: 9px;
+          margin-top: 1mm;
+          color: #555;
+        }
+        
         b {
           text-transform: uppercase;
         }
@@ -1431,7 +1438,7 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
             <span class="ctr-info">CTR: ${ctr} / ${via}ª VIA</span>
             <span class="assinatura-texto">Assinatura do Recebedor</span>
           </div>
-          <div style="text-align: right; font-size: 9px; margin-top: 1mm; color: #555;">
+          <div class="data-atendente">
             ${atendente} - ${dataHora}
           </div>
         </div>
