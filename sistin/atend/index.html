@@ -90,21 +90,36 @@
       <label><input type="checkbox" id="checkTerceiro" onchange="toggleTerceiro()"> Entregar para Terceiro?</label>
     </div>
 
-    <div id="camposTerceiro" class="area-terceiro" style="opacity: 0.5;">
-  <input id="nomeTerceiro" placeholder="Nome Completo do Recebedor" disabled>
-  
-  <input id="cpfTerceiro" placeholder="CPF do Recebedor" maxlength="14" disabled>
-  <div id="msgCPFTerceiro" class="msg-cpf"></div>
-  
-  <div id="msgCPFTerceiro" style="font-size: 12px; margin-top: 2px; font-weight: bold;"></div>
-  
-  <select id="parentesco" disabled>
-    <option value="">Vínculo / Parentesco</option>
-    <option value="Pai/Mãe">Pai/Mãe</option>
-    <option value="Irmãos/filhos">Irmãos/filhos</option>
-    <option value="Tios/primos/terceiros">Tios/primos/terceiros</option>
-  </select>
-</div>
+    <div id="camposTerceiro" style="display: none; margin-top: 15px; padding: 15px; background: #0f172a; border-radius: 8px; border-left: 4px solid #fbbf24;">
+      <div style="margin-bottom: 12px;">
+        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">NOME COMPLETO DO RECEBEDOR</label>
+        <input id="nomeTerceiro" placeholder="Digite o nome completo" 
+               style="width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: white; box-sizing: border-box;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">CPF DO RECEBEDOR</label>
+        <input id="cpfTerceiro" placeholder="000.000.000-00" maxlength="14"
+               style="width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: white; box-sizing: border-box;">
+        <div id="msgCPFTerceiro" style="font-size: 11px; margin-top: 3px; min-height: 16px;"></div>
+      </div>
+      <div style="margin-bottom: 5px;">
+        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">VÍNCULO / PARENTESCO</label>
+        <select id="parentesco" 
+                style="width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: white; cursor: pointer;">
+          <option value="">SELECIONE O VÍNCULO</option>
+          <option value="PAI">PAI</option>
+          <option value="MÃE">MÃE</option>
+          <option value="FILHO(A)">FILHO(A)</option>
+          <option value="IRMÃO(Ã)">IRMÃO(Ã)</option>
+          <option value="AVÔ(Ó)">AVÔ(Ó)</option>
+          <option value="TIO(A)">TIO(A)</option>
+          <option value="PRIMO(A)">PRIMO(A)</option>
+          <option value="CÔNJUGE">CÔNJUGE</option>
+          <option value="AMIGO(A)">AMIGO(A)</option>
+          <option value="OUTROS">OUTROS</option>
+        </select>
+      </div>
+    </div>
 
     <button onclick="salvarEntrega()">Confirmar e Imprimir</button>
     <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
