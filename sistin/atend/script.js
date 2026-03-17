@@ -850,24 +850,23 @@ function salvarSenha() {
     return; 
   }
 
-  // Usando fetch com tratamento de erro melhorado
-  fetch(`${WEB_APP_URL}?action=trocarSenha&user=${encodeURIComponent(login)}&passAtual=${encodeURIComponent(atual)}&passNova=${encodeURIComponent(nova)}`)
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      return res.json();
-    })
+  // ENVIANDO COMO ARGS (do jeito que seu doGet espera)
+  const args = [login, atual, nova];
+  
+  fetch(`${WEB_APP_URL}?action=trocarSenha&args=${encodeURIComponent(JSON.stringify(args))}`)
+    .then(res => res.json())
     .then(res => {
       if(res.sucesso) { 
         alert("Senha alterada com sucesso!"); 
         fecharSenha(); 
       }
       else { 
-        alert("Erro ao alterar senha: " + (res.erro || "Verifique os dados")); 
+        alert("Erro: " + (res.erro || "Verifique os dados")); 
       }
     })
     .catch(err => {
-      console.error("Erro detalhado:", err);
-      alert("Erro de conexão com o servidor. Verifique o console para mais detalhes.");
+      console.error("Erro:", err);
+      alert("Erro de conexão");
     });
 }
 
