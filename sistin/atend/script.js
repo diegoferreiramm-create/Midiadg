@@ -1,9 +1,6 @@
 // --- CONFIGURAÇÃO DE COMUNICAÇÃO ---
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0Ls9ct32TDn6N1x7n3w5gMByQRUYRr7izo-0RtbKFqie3KYYAAtWuJLi2MRKbDc1F/exec"; // MTECH
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0Ls9ct32TDn6N1x7n3w5gMByQRUYRr7izo-0RtbKFqie3KYYAAtWuJLi2MRKbDc1F/exec";
 const TOKEN_SECRETO = "MACRO@MACRO";
-
-// ESSA LINHA RESOLVE TUDO: urlSistema aponta pra MTECH
-const urlSistema = WEB_APP_URL;  // <--- ADICIONA ISSO!
 
 
 // ... todas as suas funções ...
@@ -838,41 +835,29 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
 
 // --- TROCAR SENHA (ADAPTADA) ---
 function salvarSenha() {
-  const login = document.getElementById("usuarioTroca")?.value?.trim() || "";
-  const atual = document.getElementById("senhaAtual")?.value?.trim() || "";
-  const nova = document.getElementById("novaSenha")?.value?.trim() || "";
-  const conf = document.getElementById("confSenha")?.value?.trim() || "";
-  
-  if (!login || !atual || !nova || !conf) {
-    alert("Preencha todos os campos!");
-    return;
-  }
+  const login = document.getElementById("usuarioTroca").value.trim();
+  const atual = document.getElementById("senhaAtual").value.trim();
+  const nova = document.getElementById("novaSenha").value.trim();
+  const conf = document.getElementById("confSenha").value.trim();
   
   if(nova !== conf) { 
     alert("A nova senha não coincide!"); 
     return; 
   }
 
-  // ENVIANDO COMO ARGS (do jeito que seu doGet espera)
-  const args = [login, atual, nova];
-  
-  fetch(`${WEB_APP_URL}?action=trocarSenha&args=${encodeURIComponent(JSON.stringify(args))}`)
+  fetch(`${WEB_APP_URL}?action=trocarSenha&user=${login}&passAtual=${atual}&passNova=${nova}`)
     .then(res => res.json())
     .then(res => {
       if(res.sucesso) { 
-        alert("Senha alterada com sucesso!"); 
+        alert("Senha alterada!"); 
         fecharSenha(); 
       }
       else { 
-        alert("Erro: " + (res.erro || "Verifique os dados")); 
+        alert("Erro ao alterar senha: " + (res.erro || "Verifique os dados")); 
       }
     })
-    .catch(err => {
-      console.error("Erro:", err);
-      alert("Erro de conexão");
-    });
+    .catch(err => alert("Erro de conexão"));
 }
-
 
 // --- BUSCA GERAL (ADAPTADA) ---
 function executarBuscaGeral(tipo) {
