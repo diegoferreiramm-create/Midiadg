@@ -626,10 +626,8 @@ async function salvarCadastro() {
 
 // --- IMPRIMIR PROTOCOLO (CORRIGIDA PARA EVITAR ERRO DE POP-UP) ---
 function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
-  // Abre a nova janela
   const telaPrint = window.open('', '_blank');
 
-  // --- VERIFICAÇÃO DE BLOQUEIO DE POP-UP ---
   if (!telaPrint || telaPrint.closed || typeof telaPrint.document === 'undefined') {
     alert("⚠️ O cadastro foi salvo, mas o seu navegador BLOQUEOU a janela de impressão.\n\nVerifique a barra de endereços e clique em 'Sempre permitir pop-ups' para este site.");
     return; 
@@ -640,22 +638,80 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
     <head>
       <title>Protocolo CTR - ${id}</title>
       <style>
-        @page { size: A5 landscape; margin: 0; }
-        body { font-family: Arial, sans-serif; padding: 5mm; color: #000; }
-        .ticket { border: 2px solid #000; padding: 10px; width: 195mm; height: 135mm; display: flex; flex-direction: column; box-sizing: border-box; }
-        .header { text-align: center; border-bottom: 2px solid #000; margin-bottom: 10px; }
-        .id-destaque { font-size: 24px; font-weight: bold; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
-        .lgpd { font-size: 9px; font-style: italic; margin-top: 10px; border-top: 1px solid #ccc; padding-top: 5px; text-align: justify; }
-        .rules { font-size: 10px; background: #f2f2f2; padding: 8px; border: 1px solid #000; margin-top: 8px; line-height: 1.3; }
-        .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; padding-bottom: 5px; }
-        b { text-transform: uppercase; }
+        @page { 
+          size: A5 portrait; 
+          margin: 0;
+        }
+        body { 
+          font-family: Arial, sans-serif; 
+          margin: 0; 
+          padding: 0;
+          width: 148mm;
+          height: 210mm;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background: white;
+        }
+        .ticket { 
+          width: 140mm; 
+          height: 200mm; 
+          border: 2px solid #000; 
+          padding: 5mm; 
+          box-sizing: border-box;
+          display: flex; 
+          flex-direction: column; 
+          justify-content: space-between;
+          background: white;
+          margin: 0 auto;
+        }
+        .header { 
+          text-align: center; 
+          border-bottom: 2px solid #000; 
+          margin-bottom: 5mm; 
+        }
+        .id-destaque { 
+          font-size: 22px; 
+          font-weight: bold; 
+        }
+        .row { 
+          display: flex; 
+          justify-content: space-between; 
+          margin-bottom: 4mm; 
+          font-size: 14px; 
+        }
+        .lgpd { 
+          font-size: 9px; 
+          font-style: italic; 
+          margin-top: 5mm; 
+          border-top: 1px solid #ccc; 
+          padding-top: 3mm; 
+          text-align: justify; 
+        }
+        .rules { 
+          font-size: 10px; 
+          background: #f2f2f2; 
+          padding: 4mm; 
+          border: 1px solid #000; 
+          margin-top: 4mm; 
+          line-height: 1.3; 
+        }
+        .footer { 
+          display: flex; 
+          justify-content: space-between; 
+          align-items: flex-end; 
+          margin-top: auto; 
+          padding-bottom: 3mm; 
+        }
+        b { 
+          text-transform: uppercase; 
+        }
       </style>
     </head>
     <body>
       <div class="ticket">
         <div class="header">
-          <h2 style="margin:5px 0;">PROTOCOLO DE SOLICITAÇÃO</h2>
+          <h2 style="margin:2mm 0;">PROTOCOLO DE SOLICITAÇÃO</h2>
           <span class="id-destaque">Nº BOLETO: ${boleto}</span>
         </div>
         <div class="content">
@@ -677,20 +733,23 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         </div>
 
         <div class="footer">
-          <div style="border-top:1px solid #000; width:250px; text-align:center; font-size:12px; margin-top: 20px;">Assinatura do Requerente</div>
+          <div style="border-top:1px solid #000; width:60mm; text-align:center; font-size:12px; margin-top: 5mm;">Assinatura do Requerente</div>
           <div style="font-size:12px;">Via do Aluno / ${parceiro} / ID: ${id}</div>
         </div>
       </div>
       <script>
-        // Pequeno atraso para garantir que o conteúdo carregue antes de imprimir
-        setTimeout(function() { window.print(); }, 500);
+        window.onload = function() { 
+          setTimeout(function() { 
+            window.print(); 
+            window.onafterprint = function() { window.close(); };
+          }, 500);
+        };
       <\/script>
     </body>
     </html>
   `);
   telaPrint.document.close();
 }
-
 
 // --- TROCAR SENHA (ADAPTADA) ---
 function salvarSenha() {
