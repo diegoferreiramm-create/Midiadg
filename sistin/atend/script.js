@@ -868,12 +868,75 @@ function carregarLista() {
       divChecks.innerHTML += `<label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(${idx})"> ${name}</label>`;
     });
     
-    
-    
     document.getElementById("listasBox").prepend(divChecks);
   }
 
   document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='17'>Carregando dados...</td></tr>";
+  
+  fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
+    .then(res => res.json())
+    .then(dados => {
+      const tbody = document.getElementById("corpoTabelaListas");
+      tbody.innerHTML = "";
+      
+      // --- ORDENAÇÃO: DO MAIS RECENTE PARA O MAIS ANTIGO ---
+      // Se ID for numérico e sequencial, ordena do maior para o menor
+      dados.sort((a, b) => {
+        // Tenta ordenar por ID (se existir e for número)
+        if (a.id && b.id) {
+          return (parseInt(b.id) || 0) - (parseInt(a.id) || 0);
+        }
+        // Se não tiver ID, tenta ordenar por DATA
+        else if (a.data && b.data) {
+          return new Date(b.data) - new Date(a.data);
+        }
+        return 0;
+      });
+      // --- FIM DA ORDENAÇÃO ---
+      
+      dados.forEach(item => {
+        let valDataStatus = "";
+        for (let key in item) {
+          let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
+          if (normalizedKey === "DATASTATUS") { valDataStatus = item[key]; break; }
+        }
+        
+        let valTel = "";
+        for (let key in item) {
+          let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
+          if (normalizedKey === "TEL" || normalizedKey === "TELEFONE") { valTel = item[key]; break; }
+        }
+
+        tbody.innerHTML += `<tr>
+          <td class="col-0">${item.id || ''}</td>
+          <td class="col-1">${item.cpf || ''}</td>
+          <td class="col-2">${item.nome || ''}</td>
+          <td class="col-3">${item.nasc || ''}</td>
+          <td class="col-4">${item.municipio || ''}</td>
+          <td class="col-5">${valTel}</td>
+          <td class="col-6">${item.via || ''}</td>
+          <td class="col-7">${item.parceiro || ''}</td>
+          <td class="col-8">${item.data || ''}</td>
+          <td class="col-9">${item.atendente || ''}</td>
+          <td class="col-10">${item.boleto || ''}</td>
+          <td class="col-11"><b>${item.status || ''}</b></td>
+          <td class="col-12">${item.motivo || ''}</td>
+          <td class="col-13">${valDataStatus}</td>
+          <td class="col-14">${item.carteira || ''}</td>
+          <td class="col-15">${item.lote || ''}</td>
+          <td class="col-16">
+            <button onclick='prepararEdicao(${JSON.stringify(item)})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
+          </td>
+        </tr>`;
+      });
+      
+      const checks = document.getElementById("containerChecks").querySelectorAll("input");
+      checks.forEach((chk, i) => { if(!chk.checked) aplicarOcultacao(i, false); });
+    })
+    .catch(err => {
+      document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='17' style='color:red;'>Erro ao carregar lista do servidor.</td></tr>";
+    });
+}
   
   // ADAPTAÇÃO FETCH PARA OBTENÇÃO DE LISTA
   fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
