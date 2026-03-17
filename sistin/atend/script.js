@@ -638,106 +638,121 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
     <head>
       <title>Protocolo CTR - ${id}</title>
       <style>
-        @page {
-          size: A4; /* Usando A4 como base */
-          margin: 0; /* Sem margens */
-        }
+        /* SEM @page - Deixa a impressora definir o tamanho */
         body {
           margin: 0;
-          padding: 0;
-          width: 210mm; /* Largura A4 */
-          height: 297mm; /* Altura A4 */
+          padding: 5mm;
           font-family: Arial, sans-serif;
           background: white;
-          position: relative;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start; /* Alinha no topo */
+          min-height: 100vh;
         }
         .ticket {
-          width: 148mm; /* Largura A5 */
-          height: 200mm; /* Altura A5 reduzida para caber */
+          width: 100%;
+          max-width: 130mm; /* Largura máxima para caber no A5 */
           border: 2px solid #000;
           padding: 5mm;
           box-sizing: border-box;
           display: flex;
           flex-direction: column;
-          position: absolute;
-          top: 0; /* COLADO NO TOPO */
-          left: 50%;
-          transform: translateX(-50%); /* Centraliza horizontalmente */
           background: white;
         }
         .header {
           text-align: center;
           border-bottom: 2px solid #000;
-          margin-bottom: 5mm;
+          margin-bottom: 4mm;
+        }
+        .header h2 {
+          margin: 1mm 0;
+          font-size: 18px;
         }
         .id-destaque {
-          font-size: 22px;
+          font-size: 16px;
           font-weight: bold;
+          display: block;
+          margin: 2mm 0;
         }
         .row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 4mm;
-          font-size: 14px;
+          margin-bottom: 3mm;
+          font-size: 12px;
         }
         .lgpd {
-          font-size: 9px;
+          font-size: 8px;
           font-style: italic;
-          margin-top: 5mm;
+          margin: 4mm 0;
           border-top: 1px solid #ccc;
-          padding-top: 3mm;
+          border-bottom: 1px solid #ccc;
+          padding: 2mm 0;
           text-align: justify;
         }
         .rules {
-          font-size: 10px;
+          font-size: 9px;
           background: #f2f2f2;
-          padding: 4mm;
+          padding: 3mm;
           border: 1px solid #000;
-          margin-top: 4mm;
+          margin: 4mm 0;
           line-height: 1.3;
         }
         .footer {
           display: flex;
           justify-content: space-between;
           align-items: flex-end;
-          margin-top: auto;
-          padding-bottom: 3mm;
+          margin-top: 2mm;
+          font-size: 10px;
+        }
+        .assinatura {
+          border-top: 1px solid #000;
+          width: 60mm;
+          text-align: center;
+          padding-top: 1mm;
+          font-size: 10px;
         }
         b {
           text-transform: uppercase;
-        }
-        * {
-          box-sizing: border-box;
         }
       </style>
     </head>
     <body>
       <div class="ticket">
         <div class="header">
-          <h2 style="margin:2mm 0;">PROTOCOLO DE SOLICITAÇÃO</h2>
+          <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
           <span class="id-destaque">Nº BOLETO: ${boleto}</span>
         </div>
-        <div class="content">
-          <div class="row"><span><b>NOME:</b> ${nome ? nome.toUpperCase() : ''}</span><span><b>DATA:</b> ${data ? data.split(' ')[0] : ''}</span></div>
-          <div class="row"><span><b>CPF:</b> ${cpf}</span><span><b>VIA:</b> ${via}</span></div>
-          <div class="row"><span><b>MUNICÍPIO:</b> ${municipio ? municipio.toUpperCase() : ''}</span><span><b>ATENDENTE:</b> ${atendente}</span></div>
-          
-          <div class="lgpd">
-            Não nos responsabilizamos por informações no formulário entregue que divergirem dos documentos anexos, conforme Art. 9º da Lei 13.709/2018 (LGPD). A veracidade é de responsabilidade do declarante.
-          </div>
+        
+        <div class="row">
+          <span><b>NOME:</b> ${nome ? nome.toUpperCase() : ''}</span>
+          <span><b>DATA:</b> ${data ? data.split(' ')[0] : ''}</span>
+        </div>
+        
+        <div class="row">
+          <span><b>CPF:</b> ${cpf}</span>
+          <span><b>VIA:</b> ${via}</span>
+        </div>
+        
+        <div class="row">
+          <span><b>MUNICÍPIO:</b> ${municipio ? municipio.toUpperCase() : ''}</span>
+          <span><b>ATENDENTE:</b> ${atendente}</span>
+        </div>
+        
+        <div class="lgpd">
+          Não nos responsabilizamos por informações no formulário entregue que divergirem dos documentos anexos, conforme Art. 9º da Lei 13.709/2018 (LGPD). A veracidade é de responsabilidade do declarante.
+        </div>
 
-          <div class="rules">
-            <strong>Procedimento para Entrega da Carteira Estudantil:</strong><br>
-            • Aluno, mãe, pai, irmãos ou filhos: Apresentar o comprovante de solicitação original e um documento oficial com foto.<br>
-            • (Em caso de perda ou extravio do comprovante, apresentar uma cópia do documento oficial com foto de quem for receber.)<br>
-            • Tios, primos, demais parentes ou terceiros: Apresentar o comprovante de solicitação original e um documento oficial com foto de quem estiver recebendo, juntamente com uma cópia do documento oficial do aluno.<br><br>
-            <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
-          </div>
+        <div class="rules">
+          <strong>Procedimento para Entrega da Carteira Estudantil:</strong><br>
+          • Aluno, mãe, pai, irmãos ou filhos: Apresentar o comprovante de solicitação original e um documento oficial com foto.<br>
+          • (Em caso de perda ou extravio do comprovante, apresentar uma cópia do documento oficial com foto de quem for receber.)<br>
+          • Tios, primos, demais parentes ou terceiros: Apresentar o comprovante de solicitação original e um documento oficial com foto de quem estiver recebendo, juntamente com uma cópia do documento oficial do aluno.<br><br>
+          <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
         </div>
 
         <div class="footer">
-          <div style="border-top:1px solid #000; width:60mm; text-align:center; font-size:12px; margin-top: 5mm;">Assinatura do Requerente</div>
-          <div style="font-size:12px;">Via do Aluno / ${parceiro} / ID: ${id}</div>
+          <div class="assinatura">Assinatura do Requerente</div>
+          <div>Via do Aluno / ${parceiro} / ID: ${id}</div>
         </div>
       </div>
       <script>
@@ -1208,54 +1223,50 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
     <head>
       <title>Entrega CTR ${ctr}</title>
       <style>
-        @page {
-          size: A4;
-          margin: 0;
-        }
+        /* SEM @page - Deixa a impressora definir o tamanho */
         body {
           margin: 0;
-          padding: 0;
-          width: 210mm;
-          height: 297mm;
+          padding: 5mm;
           font-family: Arial, sans-serif;
-          position: relative;
+          background: white;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start; /* Alinha no topo */
+          min-height: 100vh;
         }
         .ticket {
-          width: 148mm;
-          height: 200mm;
+          width: 100%;
+          max-width: 130mm; /* Largura máxima para caber no A5 */
           border: 2px solid #000;
           padding: 5mm;
           box-sizing: border-box;
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
-          position: absolute;
-          top: 0; /* COLADO NO TOPO */
-          left: 50%;
-          transform: translateX(-50%); /* Centraliza horizontalmente */
+          background: white;
         }
         .header {
           text-align: center;
           border-bottom: 2px solid #000;
           padding-bottom: 2mm;
+          margin-bottom: 3mm;
         }
         .header h2 {
           margin: 0;
-          font-size: 20px;
+          font-size: 18px;
           text-transform: uppercase;
         }
         .section-title {
-          font-size: 13px;
+          font-size: 12px;
           font-weight: bold;
           background: #f2f2f2;
           padding: 1.5mm 3mm;
           border: 1px solid #000;
-          margin-top: 3mm;
+          margin: 3mm 0 2mm 0;
         }
         .info-group {
           display: flex;
           width: 100%;
-          font-size: 14px;
+          font-size: 12px;
           margin: 2mm 0;
         }
         .info-item {
@@ -1263,24 +1274,24 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
           line-height: 1.4;
         }
         .declaracao {
-          font-size: 13px;
-          line-height: 1.5;
+          font-size: 11px;
+          line-height: 1.4;
           text-align: justify;
           border: 1px dashed #000;
-          padding: 4mm;
+          padding: 3mm;
           margin: 3mm 0;
         }
         .assinatura-area {
           text-align: center;
-          margin-top: 3mm;
+          margin: 3mm 0 2mm 0;
         }
         .assinatura-linha {
           border-top: 1.5px solid #000;
-          width: 60%;
+          width: 70%;
           margin: 0 auto;
         }
         .assinatura-texto {
-          font-size: 11px;
+          font-size: 10px;
           margin-top: 1mm;
           font-weight: bold;
           text-transform: uppercase;
@@ -1288,16 +1299,13 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
         .meta-info {
           display: flex;
           justify-content: space-between;
-          font-size: 10px;
-          border-top: 1px solid #eee;
+          font-size: 9px;
+          border-top: 1px solid #ccc;
           padding-top: 2mm;
           margin-top: 2mm;
         }
         b {
           text-transform: uppercase;
-        }
-        * {
-          box-sizing: border-box;
         }
       </style>
     </head>
