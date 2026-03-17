@@ -638,73 +638,76 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
     <head>
       <title>Protocolo CTR - ${id}</title>
       <style>
-        @page { 
-          size: A5 portrait; 
+        @page {
+          size: A4; /* Usando A4 como base */
+          margin: 0; /* Sem margens */
+        }
+        body {
           margin: 0;
-        }
-        body { 
-          font-family: Arial, sans-serif; 
-          margin: 0; 
           padding: 0;
-          width: 148mm;
-          height: 210mm;
-          display: flex;
-          justify-content: center;
-          align-items: center;
+          width: 210mm; /* Largura A4 */
+          height: 297mm; /* Altura A4 */
+          font-family: Arial, sans-serif;
           background: white;
+          position: relative;
         }
-        .ticket { 
-          width: 140mm; 
-          height: 200mm; 
-          border: 2px solid #000; 
-          padding: 5mm; 
+        .ticket {
+          width: 148mm; /* Largura A5 */
+          height: 200mm; /* Altura A5 reduzida para caber */
+          border: 2px solid #000;
+          padding: 5mm;
           box-sizing: border-box;
-          display: flex; 
-          flex-direction: column; 
-          justify-content: space-between;
+          display: flex;
+          flex-direction: column;
+          position: absolute;
+          top: 0; /* COLADO NO TOPO */
+          left: 50%;
+          transform: translateX(-50%); /* Centraliza horizontalmente */
           background: white;
-          margin: 0 auto;
         }
-        .header { 
-          text-align: center; 
-          border-bottom: 2px solid #000; 
-          margin-bottom: 5mm; 
+        .header {
+          text-align: center;
+          border-bottom: 2px solid #000;
+          margin-bottom: 5mm;
         }
-        .id-destaque { 
-          font-size: 22px; 
-          font-weight: bold; 
+        .id-destaque {
+          font-size: 22px;
+          font-weight: bold;
         }
-        .row { 
-          display: flex; 
-          justify-content: space-between; 
-          margin-bottom: 4mm; 
-          font-size: 14px; 
+        .row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 4mm;
+          font-size: 14px;
         }
-        .lgpd { 
-          font-size: 9px; 
-          font-style: italic; 
-          margin-top: 5mm; 
-          border-top: 1px solid #ccc; 
-          padding-top: 3mm; 
-          text-align: justify; 
+        .lgpd {
+          font-size: 9px;
+          font-style: italic;
+          margin-top: 5mm;
+          border-top: 1px solid #ccc;
+          padding-top: 3mm;
+          text-align: justify;
         }
-        .rules { 
-          font-size: 10px; 
-          background: #f2f2f2; 
-          padding: 4mm; 
-          border: 1px solid #000; 
-          margin-top: 4mm; 
-          line-height: 1.3; 
+        .rules {
+          font-size: 10px;
+          background: #f2f2f2;
+          padding: 4mm;
+          border: 1px solid #000;
+          margin-top: 4mm;
+          line-height: 1.3;
         }
-        .footer { 
-          display: flex; 
-          justify-content: space-between; 
-          align-items: flex-end; 
-          margin-top: auto; 
-          padding-bottom: 3mm; 
+        .footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          margin-top: auto;
+          padding-bottom: 3mm;
         }
-        b { 
-          text-transform: uppercase; 
+        b {
+          text-transform: uppercase;
+        }
+        * {
+          box-sizing: border-box;
         }
       </style>
     </head>
@@ -739,10 +742,8 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
       </div>
       <script>
         window.onload = function() { 
-          setTimeout(function() { 
-            window.print(); 
-            window.onafterprint = function() { window.close(); };
-          }, 500);
+          window.print();
+          window.onafterprint = function() { window.close(); };
         };
       <\/script>
     </body>
@@ -1208,26 +1209,30 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
       <title>Entrega CTR ${ctr}</title>
       <style>
         @page {
-          size: A5 portrait;
+          size: A4;
           margin: 0;
         }
         body {
           margin: 0;
           padding: 0;
-          width: 148mm;
-          height: 210mm;
+          width: 210mm;
+          height: 297mm;
           font-family: Arial, sans-serif;
+          position: relative;
         }
         .ticket {
-          width: 146mm;
-          height: 208mm;
-          margin: 1mm auto;
+          width: 148mm;
+          height: 200mm;
           border: 2px solid #000;
           padding: 5mm;
           box-sizing: border-box;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
+          position: absolute;
+          top: 0; /* COLADO NO TOPO */
+          left: 50%;
+          transform: translateX(-50%); /* Centraliza horizontalmente */
         }
         .header {
           text-align: center;
@@ -1350,7 +1355,6 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
   `);
   telaPrint.document.close();
 }
-
 
 function mascaraData(campo) {
   var v = campo.value.replace(/\D/g, "");
