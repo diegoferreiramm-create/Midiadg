@@ -661,86 +661,95 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
     <head>
       <title>Protocolo CTR - ${id}</title>
       <style>
+        /* FORÇA A FOLHA A4 EM RETRATO */
         @page {
-          size: A4 portrait; /* Folha A4 em RETRATO */
+          size: A4 portrait;
           margin: 0;
         }
-        body {
+        
+        /* FORÇA O NAVEGADOR A RESPEITAR */
+        * {
           margin: 0;
           padding: 0;
-          width: 210mm; /* Largura A4 */
-          height: 297mm; /* Altura A4 */
-          font-family: Arial, sans-serif;
-          position: relative;
-          background: white;
-        }
-        .ticket {
-          width: 277mm; /* Largura do A4 paisagem - 10mm de margem */
-          height: 100mm; /* Altura reduzida para caber na metade superior */
-          border: 2px solid #000;
-          padding: 3mm;
           box-sizing: border-box;
-          position: absolute;
-          top: 5mm; /* Pequena margem no topo */
-          left: 50%;
-          transform: translateX(-50%); /* Centraliza horizontalmente */
+        }
+        
+        body {
+          width: 210mm; /* Largura exata do A4 retrato */
+          height: 297mm; /* Altura exata do A4 retrato */
+          font-family: Arial, sans-serif;
           background: white;
-          font-size: 11px; /* Fonte reduzida */
           display: flex;
           flex-direction: column;
-          transform-origin: center top;
+          align-items: center;
         }
+        
+        /* CONTEÚDO NA METADE SUPERIOR */
+        .ticket {
+          width: 200mm; /* Largura com pequena margem nas laterais */
+          margin-top: 5mm; /* Margem superior */
+          border: 2px solid #000;
+          padding: 3mm;
+          background: white;
+          font-size: 11px;
+        }
+        
         .header {
           text-align: center;
-          border-bottom: 1px solid #000;
-          margin-bottom: 2mm;
+          border-bottom: 2px solid #000;
+          margin-bottom: 3mm;
           padding-bottom: 1mm;
         }
+        
         .header h2 {
-          margin: 0;
+          font-size: 16px;
+          margin: 1mm 0;
+        }
+        
+        .id-destaque {
           font-size: 14px;
           font-weight: bold;
         }
-        .id-destaque {
-          font-size: 12px;
-          font-weight: bold;
-        }
+        
         .row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 1.5mm;
-          font-size: 11px;
+          margin-bottom: 2mm;
         }
+        
         .lgpd {
-          font-size: 7px;
+          font-size: 8px;
           font-style: italic;
-          margin: 2mm 0;
+          margin: 3mm 0;
           border-top: 1px solid #ccc;
           border-bottom: 1px solid #ccc;
           padding: 1mm 0;
           text-align: justify;
         }
+        
         .rules {
-          font-size: 8px;
+          font-size: 9px;
           background: #f2f2f2;
           padding: 2mm;
           border: 1px solid #000;
-          margin: 2mm 0;
-          line-height: 1.2;
+          margin: 3mm 0;
+          line-height: 1.3;
         }
+        
         .footer {
           display: flex;
           justify-content: space-between;
-          align-items: flex-end;
-          margin-top: auto;
-          font-size: 9px;
+          margin-top: 3mm;
+          font-size: 10px;
         }
+        
         .assinatura {
           border-top: 1px solid #000;
           width: 80mm;
           text-align: center;
-          padding-top: 0.5mm;
+          padding-top: 1mm;
         }
+        
         b {
           text-transform: uppercase;
         }
@@ -750,7 +759,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
       <div class="ticket">
         <div class="header">
           <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
-          <span class="id-destaque">Nº BOLETO: ${boleto}</span>
+          <div class="id-destaque">Nº BOLETO: ${boleto}</div>
         </div>
         
         <div class="row">
