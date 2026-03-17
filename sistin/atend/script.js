@@ -684,14 +684,15 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         
         .ticket {
           width: 190mm;
-          margin-top: 5mm; /* Só uma margem pequena no topo */
+          margin-top: 5mm;
           border: 2px solid #000;
           padding: 5mm;
           background: white;
           font-size: 11px;
-          height: 140mm; /* Altura fixa para ocupar metade superior */
+          height: 140mm;
           display: flex;
           flex-direction: column;
+          position: relative;
         }
         
         .header {
@@ -737,43 +738,31 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           line-height: 1.4;
         }
         
-        /* ÁREA DE ASSINATURA E CARIMBO */
-        .signature-area {
-          margin-top: auto; /* EMPURRA PARA O FUNDO */
+        /* ÁREA DA ASSINATURA NO FINAL */
+        .signature-section {
+          margin-top: auto;
           display: flex;
           flex-direction: column;
-          align-items: center;
-          gap: 8mm;
-          padding: 5mm 0;
-          border-top: 2px solid #000;
         }
         
         .assinatura {
           border-top: 2px solid #000;
-          width: 120mm;
+          width: 100%;
           text-align: center;
           padding-top: 3mm;
+          padding-bottom: 10mm;
           font-size: 12px;
           font-weight: bold;
+          margin-bottom: 5mm;
         }
         
-        .carimbo-area {
-          border: 2px dashed #000;
-          width: 60mm;
-          height: 25mm;
+        /* INFORMAÇÃO NO CANTO INFERIOR DIREITO */
+        .info-rodape {
           display: flex;
-          align-items: center;
-          justify-content: center;
+          justify-content: flex-end;
           font-size: 11px;
           font-weight: bold;
-          background: #fafafa;
-        }
-        
-        .id-info {
-          font-size: 10px;
-          margin-top: 3mm;
-          text-align: center;
-          color: #333;
+          margin-top: 2mm;
         }
         
         b {
@@ -815,17 +804,14 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
         </div>
 
-        <!-- ÁREA DE ASSINATURA E CARIMBO NO FINAL -->
-        <div class="signature-area">
+        <!-- SEÇÃO DA ASSINATURA -->
+        <div class="signature-section">
           <div class="assinatura">
             Assinatura do Requerente
           </div>
           
-          <div class="carimbo-area">
-            ÁREA PARA CARIMBO
-          </div>
-          
-          <div class="id-info">
+          <!-- INFORMAÇÃO NO CANTO INFERIOR DIREITO -->
+          <div class="info-rodape">
             Via do Aluno / ${parceiro} / ID: ${id}
           </div>
         </div>
