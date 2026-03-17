@@ -299,20 +299,28 @@ document.addEventListener('blur', function(e) {
           if (res.nascimento) {
             try {
               let dataStr = res.nascimento.toString();
-              let dataFinal = "";
-              if (dataStr.includes('/')) {
-                const p = dataStr.split('/');
-                dataFinal = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
-              } else {
+              
+              // VERIFICA SE VEIO NO FORMATO ISO (yyyy-mm-dd)
+              if (dataStr.includes('-')) {
+                const partes = dataStr.split('-');
+                // CONVERTE PARA dd/mm/yyyy PARA EXIBIÇÃO
+                const dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                document.getElementById("nascimento").value = dataFormatada;
+              } 
+              // SE JÁ VEIO NO FORMATO BRASILEIRO (dd/mm/aaaa)
+              else if (dataStr.includes('/')) {
+                document.getElementById("nascimento").value = dataStr;
+              }
+              // SE FOR OUTRO FORMATO (OBJETO DATE)
+              else {
                 let d = new Date(res.nascimento);
                 if (!isNaN(d.getTime())) {
-                  let ano = d.getFullYear();
-                  let mes = String(d.getMonth() + 1).padStart(2, '0');
                   let dia = String(d.getDate()).padStart(2, '0');
-                  dataFinal = `${ano}-${mes}-${dia}`;
+                  let mes = String(d.getMonth() + 1).padStart(2, '0');
+                  let ano = d.getFullYear();
+                  document.getElementById("nascimento").value = `${dia}/${mes}/${ano}`;
                 }
               }
-              if (dataFinal) document.getElementById("nascimento").value = dataFinal;
             } catch(err) { console.error(err); }
           }
         } else {
