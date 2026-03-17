@@ -737,29 +737,36 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           line-height: 1.4;
         }
         
-        /* CONTEÚDO EMPURRADO PARA O FINAL */
-        .footer-content {
+        /* ÁREA FINAL - ASSINATURA E RODAPÉ */
+        .final-section {
           margin-top: auto;
           display: flex;
           flex-direction: column;
         }
         
-        /* LINHA DA ASSINATURA */
+        /* CONTAINER DA ASSINATURA */
+        .assinatura-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-bottom: 15mm; /* Espaço generoso no meio */
+        }
+        
+        /* LINHA CURTA DA ASSINATURA */
         .assinatura-linha {
           border-top: 2px solid #000;
-          width: 100%;
-          margin: 5mm 0 15mm 0;
+          width: 80mm; /* Linha mais curta */
+          margin: 2mm 0 3mm 0;
         }
         
-        /* TEXTO DA ASSINATURA ACIMA DA LINHA */
+        /* TEXTO DA ASSINATURA ABAIXO DA LINHA */
         .assinatura-texto {
-          text-align: center;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: bold;
-          margin-bottom: 2mm;
+          text-align: center;
         }
         
-        /* RODAPÉ COM INFORMAÇÃO À DIREITA */
+        /* RODAPÉ COM INFORMAÇÃO NO CANTO DIREITO */
         .rodape {
           display: flex;
           justify-content: flex-end;
@@ -807,12 +814,15 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
         </div>
 
-        <!-- ÁREA FINAL - APENAS ASSINATURA -->
-        <div class="footer-content">
-          <div class="assinatura-texto">Assinatura do Requerente</div>
-          <div class="assinatura-linha"></div>
+        <!-- SEÇÃO FINAL COM ASSINATURA E RODAPÉ -->
+        <div class="final-section">
+          <div class="assinatura-container">
+            <div class="assinatura-linha"></div>
+            <div class="assinatura-texto">Assinatura do Requerente</div>
+          </div>
           
-          <!-- INFORMAÇÃO NO CANTO DIREITO -->
+          <!-- ESPAÇO VAZIO NO MEIO (já garantido pelo margin-bottom:15mm) -->
+          
           <div class="rodape">
             Via do Aluno / ${parceiro} / ID: ${id}
           </div>
@@ -829,7 +839,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
   `);
   telaPrint.document.close();
 }
-
 
 // --- TROCAR SENHA (ADAPTADA) ---
 function salvarSenha() {
