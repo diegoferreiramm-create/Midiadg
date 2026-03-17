@@ -836,13 +836,22 @@ function salvarSenha() {
   const atual = document.getElementById("senhaAtual").value.trim();
   const nova = document.getElementById("novaSenha").value.trim();
   const conf = document.getElementById("confSenha").value.trim();
-  if(nova !== conf) { alert("A nova senha não coincide!"); return; }
+  
+  if(nova !== conf) { 
+    alert("A nova senha não coincide!"); 
+    return; 
+  }
 
-  fetch(`${urlSistema}?action=trocarSenha&user=${login}&passAtual=${atual}&passNova=${nova}`)
+  fetch(`${WEB_APP_URL}?action=trocarSenha&user=${login}&passAtual=${atual}&passNova=${nova}`)
     .then(res => res.json())
     .then(res => {
-      if(res.sucesso) { alert("Senha alterada!"); fecharSenha(); }
-      else { alert("Erro ao alterar senha: " + (res.erro || "Verifique os dados")); }
+      if(res.sucesso) { 
+        alert("Senha alterada!"); 
+        fecharSenha(); 
+      }
+      else { 
+        alert("Erro ao alterar senha: " + (res.erro || "Verifique os dados")); 
+      }
     })
     .catch(err => alert("Erro de conexão"));
 }
