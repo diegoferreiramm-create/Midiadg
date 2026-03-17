@@ -1,12 +1,6 @@
-// --- CONFIGURAÇÃO DE COMUNICAÇÃO ---
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
-const TOKEN_SECRETO = "MACRO@MACRO";
+// CONFIGURAÇÃO INICIAL - TOPO DO SCRIPT.JS
+const urlSistema = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
 
-// 🔥 LINHA MÁGICA - DEFINE urlSistema com o mesmo valor
-const urlSistema = WEB_APP_URL;
-
-
-// ... todas as suas funções ...
 let modoEdicao = false;
 let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
@@ -68,7 +62,7 @@ function entrar() {
 
   if (msg) msg.innerText = "Verificando...";
 
-  fetch(`${WEB_APP_URL}?action=validarLogin&user=${login}&pass=${senha}`)
+  fetch(`${urlSistema}?action=validarLogin&user=${login}&pass=${senha}`)
     .then(response => response.json())
     .then(res => {
       if (res.sucesso) {
@@ -842,22 +836,13 @@ function salvarSenha() {
   const atual = document.getElementById("senhaAtual").value.trim();
   const nova = document.getElementById("novaSenha").value.trim();
   const conf = document.getElementById("confSenha").value.trim();
-  
-  if(nova !== conf) { 
-    alert("A nova senha não coincide!"); 
-    return; 
-  }
+  if(nova !== conf) { alert("A nova senha não coincide!"); return; }
 
-  fetch(`${WEB_APP_URL}?action=trocarSenha&user=${login}&passAtual=${atual}&passNova=${nova}`)
+  fetch(`${urlSistema}?action=trocarSenha&user=${login}&passAtual=${atual}&passNova=${nova}`)
     .then(res => res.json())
     .then(res => {
-      if(res.sucesso) { 
-        alert("Senha alterada!"); 
-        fecharSenha(); 
-      }
-      else { 
-        alert("Erro ao alterar senha: " + (res.erro || "Verifique os dados")); 
-      }
+      if(res.sucesso) { alert("Senha alterada!"); fecharSenha(); }
+      else { alert("Erro ao alterar senha: " + (res.erro || "Verifique os dados")); }
     })
     .catch(err => alert("Erro de conexão"));
 }
