@@ -1059,19 +1059,73 @@ function salvarEntrega() {
 }
 
 // FUNÇÃO PARA MOSTRAR/ESCONDER CAMPOS DE TERCEIRO
+// FUNÇÃO PARA MOSTRAR/ESCONDER CAMPOS DE TERCEIRO
 function toggleTerceiro() {
     const checkTerceiro = document.getElementById("checkTerceiro");
     const camposTerceiro = document.getElementById("camposTerceiro");
+    const nomeTerceiro = document.getElementById("nomeTerceiro");
+    const cpfTerceiro = document.getElementById("cpfTerceiro");
+    const parentesco = document.getElementById("parentesco");
     
     if (checkTerceiro && camposTerceiro) {
         if (checkTerceiro.checked) {
+            // Mostra os campos
             camposTerceiro.style.display = "block";
-            // Limpa os campos quando abre
-            document.getElementById("nomeTerceiro").value = "";
-            document.getElementById("cpfTerceiro").value = "";
-            document.getElementById("parentesco").value = "";
+            
+            // Remove disabled e readOnly se existirem
+            if (nomeTerceiro) {
+                nomeTerceiro.disabled = false;
+                nomeTerceiro.readOnly = false;
+                nomeTerceiro.required = true;
+                nomeTerceiro.style.background = "#1e293b";
+            }
+            
+            if (cpfTerceiro) {
+                cpfTerceiro.disabled = false;
+                cpfTerceiro.readOnly = false;
+                cpfTerceiro.required = true;
+                cpfTerceiro.style.background = "#1e293b";
+            }
+            
+            if (parentesco) {
+                parentesco.disabled = false;
+                parentesco.required = true;
+                parentesco.style.background = "#1e293b";
+            }
+            
+            // Limpa os campos
+            if (nomeTerceiro) nomeTerceiro.value = "";
+            if (cpfTerceiro) cpfTerceiro.value = "";
+            if (parentesco) parentesco.value = "";
+            
         } else {
+            // Esconde os campos
             camposTerceiro.style.display = "none";
+            
+            // Desabilita e limpa os campos
+            if (nomeTerceiro) {
+                nomeTerceiro.disabled = true;
+                nomeTerceiro.readOnly = true;
+                nomeTerceiro.value = "";
+                nomeTerceiro.style.background = "#0f172a";
+            }
+            
+            if (cpfTerceiro) {
+                cpfTerceiro.disabled = true;
+                cpfTerceiro.readOnly = true;
+                cpfTerceiro.value = "";
+                cpfTerceiro.style.background = "#0f172a";
+            }
+            
+            if (parentesco) {
+                parentesco.disabled = true;
+                parentesco.value = "";
+                parentesco.style.background = "#0f172a";
+            }
+            
+            // Limpa mensagem de CPF
+            const msgCpf = document.getElementById("msgCPFTerceiro");
+            if (msgCpf) msgCpf.innerText = "";
         }
     }
 }
