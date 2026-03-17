@@ -1,3 +1,11 @@
+// --- CONFIGURAÇÃO DE COMUNICAÇÃO ---
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
+const TOKEN_SECRETO = "MACRO@MACRO";
+
+// 🔥 LINHA MÁGICA - DEFINE urlSistema com o mesmo valor
+const urlSistema = WEB_APP_URL;
+
+
 // ... todas as suas funções ...
 let modoEdicao = false;
 let idSendoEditado = null;
