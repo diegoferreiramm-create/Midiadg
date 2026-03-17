@@ -662,73 +662,78 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
       <title>Protocolo CTR - ${id}</title>
       <style>
         @page {
-          size: A5 portrait;
-          margin: 0;
+          size: A4 landscape; /* A4 em modo paisagem */
+          margin: 2mm;
         }
         body {
           margin: 0;
           padding: 0;
-          width: 148mm;
-          height: 210mm;
           font-family: Arial, sans-serif;
-          position: relative;
+          font-size: 10px; /* Fonte reduzida */
+          width: 297mm;
+          height: 210mm;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start; /* Alinha no topo */
         }
         .ticket {
-          width: 148mm;
-          height: 210mm;
-          border: 2px solid #000;
-          padding: 5mm;
+          width: 280mm; /* Quase toda largura do A4 paisagem */
+          border: 1.5px solid #000;
+          padding: 3mm;
+          margin-top: 2mm;
           box-sizing: border-box;
-          display: flex;
-          flex-direction: column;
-          position: absolute;
-          top: 0;
-          left: 0;
+          background: white;
         }
         .header {
           text-align: center;
-          border-bottom: 2px solid #000;
-          margin-bottom: 5mm;
+          border-bottom: 1.5px solid #000;
+          margin-bottom: 2mm;
+          padding-bottom: 1mm;
+        }
+        .header h2 {
+          margin: 0;
+          font-size: 14px;
+          font-weight: bold;
         }
         .id-destaque {
-          font-size: 16px;
+          font-size: 12px;
           font-weight: bold;
         }
         .row {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 4mm;
-          font-size: 12px;
+          margin-bottom: 1.5mm;
+          font-size: 10px;
         }
         .lgpd {
-          font-size: 8px;
+          font-size: 7px;
           font-style: italic;
-          margin: 5mm 0;
+          margin: 2mm 0;
           border-top: 1px solid #ccc;
           border-bottom: 1px solid #ccc;
-          padding: 2mm 0;
+          padding: 1mm 0;
           text-align: justify;
         }
         .rules {
-          font-size: 9px;
+          font-size: 8px;
           background: #f2f2f2;
-          padding: 3mm;
+          padding: 2mm;
           border: 1px solid #000;
-          margin: 4mm 0;
-          line-height: 1.3;
+          margin: 2mm 0;
+          line-height: 1.2;
         }
         .footer {
           display: flex;
           justify-content: space-between;
           align-items: flex-end;
-          margin-top: auto;
-          font-size: 10px;
+          margin-top: 2mm;
+          font-size: 8px;
         }
         .assinatura {
           border-top: 1px solid #000;
-          width: 60mm;
+          width: 80mm;
           text-align: center;
-          padding-top: 1mm;
+          padding-top: 0.5mm;
         }
         b {
           text-transform: uppercase;
@@ -738,7 +743,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
     <body>
       <div class="ticket">
         <div class="header">
-          <h2 style="margin:2mm 0; font-size:16px;">PROTOCOLO DE SOLICITAÇÃO</h2>
+          <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
           <span class="id-destaque">Nº BOLETO: ${boleto}</span>
         </div>
         
