@@ -1,6 +1,8 @@
-// CONFIGURAÇÃO INICIAL - TOPO DO SCRIPT.JS
-const urlSistema = "https://script.google.com/macros/s/AKfycbxeyoKG99zETrrx6BdF7--w_-1cVe-S0tctxKOAfgFFQ3_as64oRqONoditWtXWsrRF/exec";
+// --- CONFIGURAÇÃO DE COMUNICAÇÃO GITHUB -> GOOGLE ---
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0Ls9ct32TDn6N1x7n3w5gMByQRUYRr7izo-0RtbKFqie3KYYAAtWuJLi2MRKbDc1F/exec";
+const TOKEN_SECRETO = "MACRO@MACRO";
 
+// ... todas as suas funções ...
 let modoEdicao = false;
 let idSendoEditado = null;
 let alunoEncontradoGlobal = null;
