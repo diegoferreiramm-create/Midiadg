@@ -662,31 +662,37 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
       <title>Protocolo CTR - ${id}</title>
       <style>
         @page {
-          size: A4 landscape; /* A4 em modo paisagem */
-          margin: 2mm;
+          size: A4 portrait; /* Folha A4 em RETRATO */
+          margin: 0;
         }
         body {
           margin: 0;
           padding: 0;
+          width: 210mm; /* Largura A4 */
+          height: 297mm; /* Altura A4 */
           font-family: Arial, sans-serif;
-          font-size: 10px; /* Fonte reduzida */
-          width: 297mm;
-          height: 210mm;
-          display: flex;
-          justify-content: center;
-          align-items: flex-start; /* Alinha no topo */
+          position: relative;
+          background: white;
         }
         .ticket {
-          width: 280mm; /* Quase toda largura do A4 paisagem */
-          border: 1.5px solid #000;
+          width: 277mm; /* Largura do A4 paisagem - 10mm de margem */
+          height: 100mm; /* Altura reduzida para caber na metade superior */
+          border: 2px solid #000;
           padding: 3mm;
-          margin-top: 2mm;
           box-sizing: border-box;
+          position: absolute;
+          top: 5mm; /* Pequena margem no topo */
+          left: 50%;
+          transform: translateX(-50%); /* Centraliza horizontalmente */
           background: white;
+          font-size: 11px; /* Fonte reduzida */
+          display: flex;
+          flex-direction: column;
+          transform-origin: center top;
         }
         .header {
           text-align: center;
-          border-bottom: 1.5px solid #000;
+          border-bottom: 1px solid #000;
           margin-bottom: 2mm;
           padding-bottom: 1mm;
         }
@@ -703,7 +709,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           display: flex;
           justify-content: space-between;
           margin-bottom: 1.5mm;
-          font-size: 10px;
+          font-size: 11px;
         }
         .lgpd {
           font-size: 7px;
@@ -726,8 +732,8 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           display: flex;
           justify-content: space-between;
           align-items: flex-end;
-          margin-top: 2mm;
-          font-size: 8px;
+          margin-top: auto;
+          font-size: 9px;
         }
         .assinatura {
           border-top: 1px solid #000;
