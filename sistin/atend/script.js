@@ -859,6 +859,7 @@ function salvarSenha() {
     .catch(err => alert("Erro de conexão"));
 }
 
+
 // --- BUSCA GERAL (ADAPTADA) ---
 function executarBuscaGeral(tipo) {
   const user = JSON.parse(sessionStorage.getItem("usuario"));
