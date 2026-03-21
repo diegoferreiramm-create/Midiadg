@@ -674,23 +674,24 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         
         body {
           width: 210mm;
-          min-height: 297mm;
+          height: 297mm;
           font-family: Arial, sans-serif;
           background: white;
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: 5mm 0;
         }
         
         .ticket {
           width: 190mm;
+          margin-top: 5mm;
           border: 2px solid #000;
           padding: 5mm;
           background: white;
+          font-size: 11px;
+          height: 140mm;
           display: flex;
           flex-direction: column;
-          height: 100%;
         }
         
         .header {
@@ -702,13 +703,13 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         
         .header h2 {
           font-size: 18px;
-          margin: 0;
+          margin: 1mm 0;
         }
         
         .id-destaque {
           font-size: 14px;
           font-weight: bold;
-          margin-top: 2mm;
+          margin-bottom: 3mm;
         }
         
         .info-grid {
@@ -727,53 +728,54 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         .lgpd {
           font-size: 8px;
           font-style: italic;
-          margin: 2mm 0;
+          margin: 4mm 0;
           border-top: 1px solid #ccc;
           border-bottom: 1px solid #ccc;
-          padding: 1.5mm 0;
+          padding: 2mm 0;
           text-align: justify;
         }
         
         .rules {
           font-size: 8px;
           background: #f2f2f2;
-          padding: 2mm;
+          padding: 3mm;
           border: 1px solid #000;
-          margin: 2mm 0;
-          line-height: 1.3;
+          margin: 4mm 0;
+          line-height: 1.4;
         }
         
         .declaracao {
           font-size: 10px;
           background: #fff;
-          padding: 2mm;
+          padding: 3mm;
           border: 1px solid #000;
-          margin: 2mm 0;
-          line-height: 1.3;
+          margin: 4mm 0;
+          line-height: 1.4;
           text-align: justify;
         }
         
-        /* ÁREA FINAL - ASSINATURA COM ESPAÇO ADEQUADO */
+        /* ÁREA FINAL - ASSINATURA E RODAPÉ */
         .final-section {
-          margin-top: 8mm;
+          margin-top: auto;
           display: flex;
           flex-direction: column;
-          justify-content: flex-end;
         }
         
+        /* LINHA DA ASSINATURA */
         .assinatura-linha {
           border-top: 2px solid #000;
           width: 100%;
-          margin: 5mm 0 2mm 0;
+          margin: 5mm 0 1mm 0;
         }
         
+        /* CONTAINER DA ASSINATURA E VIA */
         .assinatura-container {
           display: flex;
           justify-content: space-between;
           align-items: center;
           font-size: 11px;
           font-weight: bold;
-          margin-top: 2mm;
+          margin-top: 1mm;
         }
         
         .via-info {
