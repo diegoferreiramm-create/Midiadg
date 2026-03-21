@@ -697,7 +697,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         .header {
           text-align: center;
           border-bottom: 2px solid #000;
-          margin-bottom: 4mm;
+          margin-bottom: 3mm;
           padding-bottom: 2mm;
         }
         
@@ -709,54 +709,54 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         .id-destaque {
           font-size: 14px;
           font-weight: bold;
-          margin-bottom: 3mm;
+          margin-bottom: 2mm;
         }
         
         .info-grid {
           display: flex;
           flex-wrap: wrap;
           justify-content: space-between;
-          margin-bottom: 3mm;
+          margin-bottom: 2mm;
           font-size: 12px;
         }
         
         .info-item {
           width: 48%;
-          margin-bottom: 2mm;
+          margin-bottom: 1.5mm;
         }
         
         .lgpd {
           font-size: 8px;
           font-style: italic;
-          margin: 4mm 0;
+          margin: 2mm 0;
           border-top: 1px solid #ccc;
           border-bottom: 1px solid #ccc;
-          padding: 2mm 0;
+          padding: 1.5mm 0;
           text-align: justify;
         }
         
         .rules {
           font-size: 8px;
           background: #f2f2f2;
-          padding: 3mm;
+          padding: 2mm;
           border: 1px solid #000;
-          margin: 4mm 0;
-          line-height: 1.4;
+          margin: 2mm 0;
+          line-height: 1.3;
         }
         
         .declaracao {
           font-size: 10px;
           background: #f2f2f2;
-          padding: 3mm;
+          padding: 2mm;
           border: 1px solid #000;
-          margin: 4mm 0;
-          line-height: 1.4;
+          margin: 2mm 0;
+          line-height: 1.3;
           text-align: justify;
         }
         
         /* ÁREA FINAL - ASSINATURA E RODAPÉ */
         .final-section {
-          margin-top: auto;
+          margin-top: 6mm;
           display: flex;
           flex-direction: column;
         }
@@ -765,25 +765,27 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         .assinatura-linha {
           border-top: 2px solid #000;
           width: 100%;
-          margin: 5mm 0 1mm 0;
+          margin: 3mm 0 2mm 0;
         }
         
-        /* CONTAINER DA ASSINATURA E VIA */
+        /* CONTAINER DA ASSINATURA E VIA - INVERTIDO */
         .assinatura-container {
           display: flex;
           justify-content: space-between;
           align-items: center;
           font-size: 11px;
           font-weight: bold;
-          margin-top: 1mm;
-        }
-        
-        .via-info {
-          white-space: nowrap;
+          margin-top: 2mm;
         }
         
         .assinatura-texto {
           white-space: nowrap;
+          order: 1;
+        }
+        
+        .via-info {
+          white-space: nowrap;
+          order: 2;
         }
         
         b {
@@ -824,12 +826,11 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           Declaro que o pagamento destina-se à solicitação da Carteira de Identidade Estudantil, para identificação como estudante, usufruto da meia cultural e conforme critérios da ARCE os benefício do transporte. Estou ciente de que NÃO HAVERÁ DEVOLUÇÃO do valor em caso de não atendimento aos critérios da ARCE. Havendo indeferimento, terei 90 (noventa) dias corridos para regularizar a documentação. Não havendo regularização, a carteira será emitida apenas para a meia cultural. A solicitação somente será INICIADA APÓS A ENTREGA INTEGRAL DA DOCUMENTAÇÃO em posto de atendimento. A apresentação de documento falso é crime, conforme o Código Penal.
         </div>	
 
-        <!-- SEÇÃO FINAL - EXATAMENTE COMO NA SUA IMAGEM -->
         <div class="final-section">
           <div class="assinatura-linha"></div>
           <div class="assinatura-container">
-            <span class="via-info">Via do Aluno / ${parceiro} / ID: ${id}</span>
             <span class="assinatura-texto">Assinatura do Requerente</span>
+            <span class="via-info">Via do Aluno / ${parceiro} / ID: ${id}</span>
           </div>
         </div>
       </div>
@@ -843,23 +844,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
     </html>
   `);
   telaPrint.document.close();
-}
-
-// --- TROCAR SENHA (ADAPTADA) ---
-function salvarSenha() {
-  const login = document.getElementById("usuarioTroca").value.trim();
-  const atual = document.getElementById("senhaAtual").value.trim();
-  const nova = document.getElementById("novaSenha").value.trim();
-  const conf = document.getElementById("confSenha").value.trim();
-  if(nova !== conf) { alert("A nova senha não coincide!"); return; }
-
-  fetch(`${urlSistema}?action=trocarSenha&user=${login}&passAtual=${atual}&passNova=${nova}`)
-    .then(res => res.json())
-    .then(res => {
-      if(res.sucesso) { alert("Senha alterada!"); fecharSenha(); }
-      else { alert("Erro ao alterar senha: " + (res.erro || "Verifique os dados")); }
-    })
-    .catch(err => alert("Erro de conexão"));
 }
 
 // --- BUSCA GERAL (ADAPTADA) ---
