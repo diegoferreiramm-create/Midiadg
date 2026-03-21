@@ -746,7 +746,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         
         .declaracao {
           font-size: 10px;
-          background: #fff;
+          background: #f2f2f2;
           padding: 3mm;
           border: 1px solid #000;
           margin: 4mm 0;
@@ -824,6 +824,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           Declaro que o pagamento destina-se à solicitação da Carteira de Identidade Estudantil, para identificação como estudante, usufruto da meia cultural e conforme critérios da ARCE os benefício do transporte. Estou ciente de que NÃO HAVERÁ DEVOLUÇÃO do valor em caso de não atendimento aos critérios da ARCE. Havendo indeferimento, terei 90 (noventa) dias corridos para regularizar a documentação. Não havendo regularização, a carteira será emitida apenas para a meia cultural. A solicitação somente será INICIADA APÓS A ENTREGA INTEGRAL DA DOCUMENTAÇÃO em posto de atendimento. A apresentação de documento falso é crime, conforme o Código Penal.
         </div>	
 
+        <!-- SEÇÃO FINAL - EXATAMENTE COMO NA SUA IMAGEM -->
         <div class="final-section">
           <div class="assinatura-linha"></div>
           <div class="assinatura-container">
