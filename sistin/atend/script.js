@@ -647,7 +647,7 @@ async function salvarCadastro() {
   }
 }
 
-// --- IMPRIMIR PROTOCOLO (CORRIGIDA PARA EVITAR ERRO DE POP-UP) ---
+// --- IMPRIMIR PROTOCOLO ---
 function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
   const telaPrint = window.open('', '_blank');
 
@@ -665,13 +665,11 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           size: A4 portrait;
           margin: 0;
         }
-        
         * {
           margin: 0;
           padding: 0;
           box-sizing: border-box;
         }
-        
         body {
           width: 210mm;
           height: 297mm;
@@ -681,7 +679,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           flex-direction: column;
           align-items: center;
         }
-        
         .ticket {
           width: 190mm;
           margin-top: 5mm;
@@ -693,38 +690,32 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           display: flex;
           flex-direction: column;
         }
-        
         .header {
           text-align: center;
           border-bottom: 2px solid #000;
-          margin-bottom: 3mm;
+          margin-bottom: 4mm;
           padding-bottom: 2mm;
         }
-        
         .header h2 {
           font-size: 18px;
           margin: 1mm 0;
         }
-        
         .id-destaque {
           font-size: 14px;
           font-weight: bold;
-          margin-bottom: 2mm;
+          margin-bottom: 3mm;
         }
-        
         .info-grid {
           display: flex;
           flex-wrap: wrap;
           justify-content: space-between;
-          margin-bottom: 2mm;
+          margin-bottom: 3mm;
           font-size: 12px;
         }
-        
         .info-item {
           width: 48%;
-          margin-bottom: 1.5mm;
+          margin-bottom: 2mm;
         }
-        
         .lgpd {
           font-size: 8px;
           font-style: italic;
@@ -734,7 +725,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           padding: 1.5mm 0;
           text-align: justify;
         }
-        
         .rules {
           font-size: 8px;
           background: #f2f2f2;
@@ -743,7 +733,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           margin: 2mm 0;
           line-height: 1.3;
         }
-        
         .declaracao {
           font-size: 10px;
           background: #f2f2f2;
@@ -753,41 +742,29 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           line-height: 1.3;
           text-align: justify;
         }
-        
-        /* ÁREA FINAL - ASSINATURA E RODAPÉ */
         .final-section {
-          margin-top: 6mm;
+          margin-top: 8mm;
           display: flex;
           flex-direction: column;
         }
-        
-        /* LINHA DA ASSINATURA */
         .assinatura-linha {
           border-top: 2px solid #000;
           width: 100%;
-          margin: 3mm 0 2mm 0;
+          margin: 5mm 0 2mm 0;
         }
-        
-        /* CONTAINER DA ASSINATURA E VIA - INVERTIDO */
         .assinatura-container {
           display: flex;
           justify-content: space-between;
           align-items: center;
           font-size: 11px;
           font-weight: bold;
-          margin-top: 2mm;
         }
-        
         .assinatura-texto {
-          white-space: nowrap;
           order: 1;
         }
-        
         .via-info {
-          white-space: nowrap;
           order: 2;
         }
-        
         b {
           text-transform: uppercase;
         }
@@ -799,7 +776,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
           <div class="id-destaque">Nº BOLETO: ${boleto}</div>
         </div>
-        
         <div class="info-grid">
           <div class="info-item"><b>NOME:</b> ${nome ? nome.toUpperCase() : ''}</div>
           <div class="info-item"><b>DATA:</b> ${data ? data.split(' ')[0] : ''}</div>
@@ -808,11 +784,9 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <div class="info-item"><b>MUNICÍPIO:</b> ${municipio ? municipio.toUpperCase() : ''}</div>
           <div class="info-item"><b>ATENDENTE:</b> ${atendente}</div>
         </div>
-        
         <div class="lgpd">
           Não nos responsabilizamos por informações no formulário entregue que divergirem dos documentos anexos, conforme Art. 9º da Lei 13.709/2018 (LGPD). A veracidade é de responsabilidade do declarante.
         </div>
-
         <div class="rules">
           <strong>Procedimento para Entrega da Carteira Estudantil:</strong><br>
           • Aluno, mãe, pai, irmãos ou filhos: Apresentar o comprovante de solicitação original e um documento oficial com foto.<br>
@@ -820,12 +794,10 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           • Tios, primos, demais parentes ou terceiros: Apresentar o comprovante de solicitação original e um documento oficial com foto de quem estiver recebendo, juntamente com uma cópia do documento oficial do aluno.<br><br>
           <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
         </div>
-
         <div class="declaracao">
           <strong>DECLARAÇÃO DO REQUERENTE:</strong><br><br>
           Declaro que o pagamento destina-se à solicitação da Carteira de Identidade Estudantil, para identificação como estudante, usufruto da meia cultural e conforme critérios da ARCE os benefício do transporte. Estou ciente de que NÃO HAVERÁ DEVOLUÇÃO do valor em caso de não atendimento aos critérios da ARCE. Havendo indeferimento, terei 90 (noventa) dias corridos para regularizar a documentação. Não havendo regularização, a carteira será emitida apenas para a meia cultural. A solicitação somente será INICIADA APÓS A ENTREGA INTEGRAL DA DOCUMENTAÇÃO em posto de atendimento. A apresentação de documento falso é crime, conforme o Código Penal.
-        </div>	
-
+        </div>
         <div class="final-section">
           <div class="assinatura-linha"></div>
           <div class="assinatura-container">
@@ -845,7 +817,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
   `);
   telaPrint.document.close();
 }
-
 // --- BUSCA GERAL (ADAPTADA) ---
 function executarBuscaGeral(tipo) {
   const user = JSON.parse(sessionStorage.getItem("usuario"));
