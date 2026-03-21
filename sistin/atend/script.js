@@ -674,32 +674,39 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         
         body {
           width: 210mm;
+          min-height: 297mm;
           font-family: Arial, sans-serif;
           background: white;
-          padding: 5mm;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 5mm 0;
         }
         
         .ticket {
-          width: 100%;
+          width: 190mm;
           border: 2px solid #000;
           padding: 5mm;
           background: white;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
         }
         
         .header {
           text-align: center;
           border-bottom: 2px solid #000;
-          margin-bottom: 3mm;
+          margin-bottom: 4mm;
           padding-bottom: 2mm;
         }
         
         .header h2 {
-          font-size: 16px;
+          font-size: 18px;
           margin: 0;
         }
         
         .id-destaque {
-          font-size: 12px;
+          font-size: 14px;
           font-weight: bold;
           margin-top: 2mm;
         }
@@ -708,33 +715,32 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           display: flex;
           flex-wrap: wrap;
           justify-content: space-between;
-          margin-bottom: 2mm;
-          font-size: 11px;
+          margin-bottom: 3mm;
+          font-size: 12px;
         }
         
         .info-item {
           width: 48%;
-          margin-bottom: 1mm;
+          margin-bottom: 2mm;
         }
         
         .lgpd {
-          font-size: 7px;
+          font-size: 8px;
           font-style: italic;
-          margin: 1mm 0;
+          margin: 2mm 0;
           border-top: 1px solid #ccc;
           border-bottom: 1px solid #ccc;
-          padding: 1mm 0;
+          padding: 1.5mm 0;
           text-align: justify;
-          line-height: 1.2;
         }
         
         .rules {
-          font-size: 7px;
+          font-size: 8px;
           background: #f2f2f2;
-          padding: 1.5mm;
+          padding: 2mm;
           border: 1px solid #000;
-          margin: 1.5mm 0;
-          line-height: 1.2;
+          margin: 2mm 0;
+          line-height: 1.3;
         }
         
         .declaracao {
@@ -747,35 +753,39 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           text-align: justify;
         }
         
+        /* ÁREA FINAL - ASSINATURA COM ESPAÇO ADEQUADO */
         .final-section {
-          margin-top: 2mm;
+          margin-top: 8mm;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
         }
         
         .assinatura-linha {
           border-top: 2px solid #000;
           width: 100%;
-          margin: 3mm 0 1mm 0;
+          margin: 5mm 0 2mm 0;
         }
         
         .assinatura-container {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          font-size: 10px;
+          font-size: 11px;
           font-weight: bold;
+          margin-top: 2mm;
         }
         
-        .via-info, .assinatura-texto {
+        .via-info {
+          white-space: nowrap;
+        }
+        
+        .assinatura-texto {
           white-space: nowrap;
         }
         
         b {
           text-transform: uppercase;
-        }
-        
-        .rules strong, .declaracao strong {
-          text-transform: uppercase;
-          font-size: 8px;
         }
       </style>
     </head>
@@ -822,10 +832,8 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
       </div>
       <script>
         window.onload = function() { 
-          setTimeout(function() {
-            window.print();
-            setTimeout(function() { window.close(); }, 500);
-          }, 500);
+          window.print();
+          window.onafterprint = function() { window.close(); };
         };
       <\/script>
     </body>
