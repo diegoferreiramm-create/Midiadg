@@ -881,6 +881,8 @@ function executarBuscaGeral(tipo) {
             <b>CARTEIRA:</b> ${item.numCarteira || 'N/A'}<br>
             <b>STATUS:</b> ${item.status || 'Pendente'} | <b>MOTIVO:</b> ${item.motivo || '-'}<br>
             <b>DATA STATUS:</b> ${dStat}<br>
+            <b>BOLETO:</b> ${item.situacao || item.r || '-'}<br>
+            <b>PRAZO PENDÊNCIA:</b> ${item.prazoPendencia || item.s || '-'}<br>
             <b>ATENDENTE:</b> ${item.atendente}<br>
             <small>Última Atualização: ${item.dataAtu}</small>
           </div>
