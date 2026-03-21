@@ -674,114 +674,98 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         
         body {
           width: 210mm;
-          height: 297mm;
           font-family: Arial, sans-serif;
           background: white;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
+          padding: 5mm;
         }
         
         .ticket {
-          width: 190mm;
-          margin-top: 5mm;
+          width: 100%;
           border: 2px solid #000;
           padding: 5mm;
           background: white;
-          font-size: 11px;
-          display: flex;
-          flex-direction: column;
         }
         
         .header {
           text-align: center;
           border-bottom: 2px solid #000;
-          margin-bottom: 4mm;
+          margin-bottom: 3mm;
           padding-bottom: 2mm;
         }
         
         .header h2 {
-          font-size: 18px;
-          margin: 1mm 0;
+          font-size: 16px;
+          margin: 0;
         }
         
         .id-destaque {
-          font-size: 14px;
+          font-size: 12px;
           font-weight: bold;
-          margin-bottom: 3mm;
+          margin-top: 2mm;
         }
         
         .info-grid {
           display: flex;
           flex-wrap: wrap;
           justify-content: space-between;
-          margin-bottom: 3mm;
-          font-size: 12px;
+          margin-bottom: 2mm;
+          font-size: 11px;
         }
         
         .info-item {
           width: 48%;
-          margin-bottom: 2mm;
+          margin-bottom: 1mm;
         }
         
         .lgpd {
-          font-size: 8px;
+          font-size: 7px;
           font-style: italic;
-          margin: 2mm 0;
+          margin: 1mm 0;
           border-top: 1px solid #ccc;
           border-bottom: 1px solid #ccc;
-          padding: 1.5mm 0;
+          padding: 1mm 0;
           text-align: justify;
+          line-height: 1.2;
         }
         
         .rules {
-          font-size: 8px;
+          font-size: 7px;
           background: #f2f2f2;
-          padding: 2mm;
+          padding: 1.5mm;
           border: 1px solid #000;
-          margin: 2mm 0;
-          line-height: 1.3;
+          margin: 1.5mm 0;
+          line-height: 1.2;
         }
         
         .declaracao {
           font-size: 10px;
           background: #fff;
-          padding: 3mm;
+          padding: 2mm;
           border: 1px solid #000;
           margin: 2mm 0;
-          line-height: 1.4;
+          line-height: 1.3;
           text-align: justify;
         }
         
-        /* ÁREA FINAL - ASSINATURA E RODAPÉ */
         .final-section {
           margin-top: 2mm;
-          display: flex;
-          flex-direction: column;
         }
         
-        /* LINHA DA ASSINATURA */
         .assinatura-linha {
           border-top: 2px solid #000;
           width: 100%;
           margin: 3mm 0 1mm 0;
         }
         
-        /* CONTAINER DA ASSINATURA E VIA */
         .assinatura-container {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: bold;
-          margin-top: 1mm;
         }
         
-        .via-info {
-          white-space: nowrap;
-        }
-        
-        .assinatura-texto {
+        .via-info, .assinatura-texto {
           white-space: nowrap;
         }
         
@@ -791,6 +775,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         
         .rules strong, .declaracao strong {
           text-transform: uppercase;
+          font-size: 8px;
         }
       </style>
     </head>
@@ -827,7 +812,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           Declaro que o pagamento destina-se à solicitação da Carteira de Identidade Estudantil, para identificação como estudante, usufruto da meia cultural e conforme critérios da ARCE os benefício do transporte. Estou ciente de que NÃO HAVERÁ DEVOLUÇÃO do valor em caso de não atendimento aos critérios da ARCE. Havendo indeferimento, terei 90 (noventa) dias corridos para regularizar a documentação. Não havendo regularização, a carteira será emitida apenas para a meia cultural. A solicitação somente será INICIADA APÓS A ENTREGA INTEGRAL DA DOCUMENTAÇÃO em posto de atendimento. A apresentação de documento falso é crime, conforme o Código Penal.
         </div>	
 
-        <!-- SEÇÃO FINAL -->
         <div class="final-section">
           <div class="assinatura-linha"></div>
           <div class="assinatura-container">
@@ -838,8 +822,10 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
       </div>
       <script>
         window.onload = function() { 
-          window.print();
-          window.onafterprint = function() { window.close(); };
+          setTimeout(function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 500);
+          }, 500);
         };
       <\/script>
     </body>
