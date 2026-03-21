@@ -735,6 +735,16 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           text-align: justify;
         }
         
+        .declaracao {
+          font-size: 9px;
+          background: #fff;
+          padding: 3mm;
+          border: 1px solid #000;
+          margin: 4mm 0;
+          line-height: 1.4;
+          text-align: justify;
+        }
+        
         .rules {
           font-size: 10px;
           background: #f2f2f2;
@@ -801,9 +811,10 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           Não nos responsabilizamos por informações no formulário entregue que divergirem dos documentos anexos, conforme Art. 9º da Lei 13.709/2018 (LGPD). A veracidade é de responsabilidade do declarante.
         </div>
 
-        <div class="lgpd">
-      	Declaro que o pagamento destina-se à solicitação da Carteira de Identidade Estudantil, para identificação como estudante, usufruto da meia cultural e conforme critérios da ARCE os benefício do transporte. Estou ciente de que NÃO HAVERÁ DEVOLUÇÃO do valor em caso de não atendimento aos critérios da ARCE. Havendo indeferimento, terei 90 (noventa) dias corridos para regularizar a documentação. Não havendo regularização, a carteira será emitida apenas para a meia cultural. A solicitação somente será INICIADA APÓS A ENTREGA INTEGRAL DA DOCUMENTAÇÃO em posto de atendimento. A apresentação de documento falso é crime, conforme o Código Penal.
-      	</div>
+        <div class="declaracao">
+          <strong>DECLARAÇÃO DO REQUERENTE:</strong><br><br>
+          Declaro que o pagamento destina-se à solicitação da Carteira de Identidade Estudantil, para identificação como estudante, usufruto da meia cultural e conforme critérios da ARCE os benefício do transporte. Estou ciente de que NÃO HAVERÁ DEVOLUÇÃO do valor em caso de não atendimento aos critérios da ARCE. Havendo indeferimento, terei 90 (noventa) dias corridos para regularizar a documentação. Não havendo regularização, a carteira será emitida apenas para a meia cultural. A solicitação somente será INICIADA APÓS A ENTREGA INTEGRAL DA DOCUMENTAÇÃO em posto de atendimento. A apresentação de documento falso é crime, conforme o Código Penal.
+        </div>	
 
         <div class="rules">
           <strong>Procedimento para Entrega da Carteira Estudantil:</strong><br>
@@ -813,7 +824,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
         </div>
 
-        <!-- SEÇÃO FINAL - EXATAMENTE COMO NA SUA IMAGEM -->
+        <!-- SEÇÃO FINAL -->
         <div class="final-section">
           <div class="assinatura-linha"></div>
           <div class="assinatura-container">
