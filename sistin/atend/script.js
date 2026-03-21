@@ -689,7 +689,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           padding: 5mm;
           background: white;
           font-size: 11px;
-          height: 140mm;
           display: flex;
           flex-direction: column;
         }
@@ -728,35 +727,35 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         .lgpd {
           font-size: 8px;
           font-style: italic;
-          margin: 4mm 0;
+          margin: 2mm 0;
           border-top: 1px solid #ccc;
           border-bottom: 1px solid #ccc;
-          padding: 2mm 0;
-          text-align: justify;
-        }
-        
-        .declaracao {
-          font-size: 9px;
-          background: #fff;
-          padding: 3mm;
-          border: 1px solid #000;
-          margin: 4mm 0;
-          line-height: 1.4;
+          padding: 1.5mm 0;
           text-align: justify;
         }
         
         .rules {
-          font-size: 10px;
+          font-size: 8px;
           background: #f2f2f2;
+          padding: 2mm;
+          border: 1px solid #000;
+          margin: 2mm 0;
+          line-height: 1.3;
+        }
+        
+        .declaracao {
+          font-size: 10px;
+          background: #fff;
           padding: 3mm;
           border: 1px solid #000;
-          margin: 4mm 0;
+          margin: 2mm 0;
           line-height: 1.4;
+          text-align: justify;
         }
         
         /* ÁREA FINAL - ASSINATURA E RODAPÉ */
         .final-section {
-          margin-top: auto;
+          margin-top: 2mm;
           display: flex;
           flex-direction: column;
         }
@@ -765,7 +764,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         .assinatura-linha {
           border-top: 2px solid #000;
           width: 100%;
-          margin: 5mm 0 1mm 0;
+          margin: 3mm 0 1mm 0;
         }
         
         /* CONTAINER DA ASSINATURA E VIA */
@@ -787,6 +786,10 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         }
         
         b {
+          text-transform: uppercase;
+        }
+        
+        .rules strong, .declaracao strong {
           text-transform: uppercase;
         }
       </style>
@@ -811,11 +814,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           Não nos responsabilizamos por informações no formulário entregue que divergirem dos documentos anexos, conforme Art. 9º da Lei 13.709/2018 (LGPD). A veracidade é de responsabilidade do declarante.
         </div>
 
-        <div class="declaracao">
-          <strong>DECLARAÇÃO DO REQUERENTE:</strong><br><br>
-          Declaro que o pagamento destina-se à solicitação da Carteira de Identidade Estudantil, para identificação como estudante, usufruto da meia cultural e conforme critérios da ARCE os benefício do transporte. Estou ciente de que NÃO HAVERÁ DEVOLUÇÃO do valor em caso de não atendimento aos critérios da ARCE. Havendo indeferimento, terei 90 (noventa) dias corridos para regularizar a documentação. Não havendo regularização, a carteira será emitida apenas para a meia cultural. A solicitação somente será INICIADA APÓS A ENTREGA INTEGRAL DA DOCUMENTAÇÃO em posto de atendimento. A apresentação de documento falso é crime, conforme o Código Penal.
-        </div>	
-
         <div class="rules">
           <strong>Procedimento para Entrega da Carteira Estudantil:</strong><br>
           • Aluno, mãe, pai, irmãos ou filhos: Apresentar o comprovante de solicitação original e um documento oficial com foto.<br>
@@ -823,6 +821,11 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           • Tios, primos, demais parentes ou terceiros: Apresentar o comprovante de solicitação original e um documento oficial com foto de quem estiver recebendo, juntamente com uma cópia do documento oficial do aluno.<br><br>
           <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
         </div>
+
+        <div class="declaracao">
+          <strong>DECLARAÇÃO DO REQUERENTE:</strong><br><br>
+          Declaro que o pagamento destina-se à solicitação da Carteira de Identidade Estudantil, para identificação como estudante, usufruto da meia cultural e conforme critérios da ARCE os benefício do transporte. Estou ciente de que NÃO HAVERÁ DEVOLUÇÃO do valor em caso de não atendimento aos critérios da ARCE. Havendo indeferimento, terei 90 (noventa) dias corridos para regularizar a documentação. Não havendo regularização, a carteira será emitida apenas para a meia cultural. A solicitação somente será INICIADA APÓS A ENTREGA INTEGRAL DA DOCUMENTAÇÃO em posto de atendimento. A apresentação de documento falso é crime, conforme o Código Penal.
+        </div>	
 
         <!-- SEÇÃO FINAL -->
         <div class="final-section">
