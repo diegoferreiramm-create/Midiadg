@@ -1052,10 +1052,22 @@ function fecharLotePorParceiro() {
     .then(res => res.json())
     .then(res => {
       if(res.sucesso) {
-        alert(`Lote ${res.loteGerado} fechado com sucesso! Total: ${res.totalRegistros} registros`);
+        alert(`Lote ${res.loteGerado} fechado com sucesso!`);
         
-        // IMPRIME O RELATÓRIO DO LOTE COM A LISTA COMPLETA
-        imprimirRelatorioLote(res.loteGerado, user.parceiro, user.nome, res.totalRegistros, res.dataFechamento, res.registros);
+        // AGORA BUSCA OS REGISTROS DO LOTE PARA IMPRIMIR
+        fetch(`${urlSistema}?action=buscarRegistrosDoLote&parceiro=${user.parceiro}&lote=${res.loteGerado}`)
+          .then(res2 => res2.json())
+          .then(res2 => {
+            if(res2.sucesso) {
+              imprimirRelatorioLote(res.loteGerado, user.parceiro, user.nome, res2.total, new Date().toLocaleString('pt-BR'), res2.registros);
+            } else {
+              alert("Lote fechado, mas erro ao gerar relatório: " + (res2.erro || "Desconhecido"));
+            }
+          })
+          .catch(err => {
+            console.error("Erro ao buscar registros:", err);
+            alert("Lote fechado, mas erro ao gerar relatório completo.");
+          });
         
         carregarLista();
       } else {
