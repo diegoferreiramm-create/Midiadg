@@ -1052,10 +1052,10 @@ function fecharLotePorParceiro() {
     .then(res => res.json())
     .then(res => {
       if(res.sucesso) {
-        alert(`Lote ${res.loteGerado} fechado com sucesso!`);
+        alert(`Lote ${res.loteGerado} fechado com sucesso! Total: ${res.totalRegistros} registros`);
         
-        // IMPRIME O RELATÓRIO DO LOTE
-        imprimirRelatorioLote(res.loteGerado, user.parceiro, user.nome, res.totalRegistros, res.dataFechamento);
+        // IMPRIME O RELATÓRIO DO LOTE COM A LISTA COMPLETA
+        imprimirRelatorioLote(res.loteGerado, user.parceiro, user.nome, res.totalRegistros, res.dataFechamento, res.registros);
         
         carregarLista();
       } else {
@@ -1071,7 +1071,7 @@ function fecharLotePorParceiro() {
     });
 }
 
-function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFechamento) {
+function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFechamento, registros) {
   const telaPrint = window.open('', '_blank');
   
   if (!telaPrint || telaPrint.closed || typeof telaPrint.document === 'undefined') {
@@ -1082,6 +1082,36 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
   const dataAtual = new Date();
   const dataFormatada = dataAtual.toLocaleString('pt-BR');
   const dataLote = dataFechamento ? new Date(dataFechamento).toLocaleString('pt-BR') : dataFormatada;
+  
+  // CONSTRÓI AS LINHAS DA TABELA COM OS REGISTROS DO LOTE
+  let tabelaHtml = '';
+  if (registros && registros.length > 0) {
+    registros.forEach((reg, index) => {
+      tabelaHtml += `
+        <tr>
+          <td style="text-align:center;">${index + 1}</td>
+          <td>${reg.id || ''}</td>
+          <td>${reg.cpf || ''}</td>
+          <td>${reg.nome || ''}</td>
+          <td>${reg.nasc || ''}</td>
+          <td>${reg.municipio || ''}</td>
+          <td>${reg.tel || ''}</td>
+          <td style="text-align:center;">${reg.via || ''}</td>
+          <td>${reg.boleto || ''}</td>
+          <td>${reg.status || 'Pendente'}</td>
+          <td>${reg.atendente || ''}</td>
+        </tr>
+      `;
+    });
+  } else {
+    tabelaHtml = `
+      <tr>
+        <td colspan="11" style="text-align:center; color:#ef4444;">
+          Nenhum registro encontrado neste lote
+        </td>
+      </tr>
+    `;
+  }
   
   telaPrint.document.write(`
     <html>
@@ -1100,34 +1130,35 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         }
         
         body {
-          font-family: Arial, sans-serif;
+          font-family: 'Courier New', monospace;
           background: white;
-          padding: 10mm;
+          padding: 5mm;
+          font-size: 10px;
         }
         
         .header {
           text-align: center;
           border-bottom: 3px solid #000;
-          margin-bottom: 10mm;
-          padding-bottom: 5mm;
+          margin-bottom: 8mm;
+          padding-bottom: 4mm;
         }
         
         .header h1 {
-          font-size: 24px;
+          font-size: 20px;
           margin: 2mm 0;
-          color: #1e3a8a;
+          font-weight: bold;
         }
         
         .header h2 {
-          font-size: 18px;
+          font-size: 16px;
           margin: 1mm 0;
         }
         
         .info-box {
           background: #f2f2f2;
-          padding: 5mm;
+          padding: 4mm;
           border: 1px solid #000;
-          margin-bottom: 8mm;
+          margin-bottom: 6mm;
           display: flex;
           justify-content: space-between;
           flex-wrap: wrap;
@@ -1135,64 +1166,72 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         
         .info-item {
           width: 33%;
-          margin-bottom: 3mm;
-          font-size: 12px;
+          margin-bottom: 2mm;
+          font-size: 11px;
         }
         
         .info-item b {
-          text-transform: uppercase;
-          color: #1e3a8a;
+          font-weight: bold;
         }
         
         table {
           width: 100%;
           border-collapse: collapse;
-          margin-top: 5mm;
-          font-size: 10px;
+          margin-top: 3mm;
+          font-size: 9px;
         }
         
         th, td {
           border: 1px solid #000;
-          padding: 3px;
+          padding: 2px 3px;
           text-align: left;
+          vertical-align: top;
         }
         
         th {
           background: #e5e7eb;
           font-weight: bold;
           text-align: center;
+          font-size: 9px;
         }
         
         .footer {
-          margin-top: 10mm;
+          margin-top: 8mm;
           text-align: center;
-          font-size: 9px;
+          font-size: 8px;
           border-top: 1px solid #ccc;
-          padding-top: 5mm;
+          padding-top: 4mm;
         }
         
         .assinatura-linha {
           border-top: 2px solid #000;
           width: 100%;
-          margin: 8mm 0 2mm 0;
+          margin: 6mm 0 2mm 0;
         }
         
         .assinatura-container {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: bold;
           margin-top: 2mm;
         }
         
         .total-registros {
-          font-size: 14px;
+          font-size: 12px;
           font-weight: bold;
-          margin-top: 5mm;
+          margin: 5mm 0;
           text-align: right;
-          padding: 3mm;
+          padding: 2mm;
           background: #f2f2f2;
+          border: 1px solid #000;
+        }
+        
+        .page-number {
+          text-align: center;
+          font-size: 8px;
+          margin-top: 3mm;
         }
       </style>
     </head>
@@ -1207,11 +1246,34 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         <div class="info-item"><b>ATENDENTE:</b> ${atendente}</div>
         <div class="info-item"><b>DATA FECHAMENTO:</b> ${dataLote}</div>
         <div class="info-item"><b>TOTAL DE REGISTROS:</b> ${totalRegistros || '0'}</div>
-        <div class="info-item"><b>EMISSÃO:</b> ${dataFormatada}</div>
+        <div class="info-item"><b>EMISSÃO DO RELATÓRIO:</b> ${dataFormatada}</div>
       </div>
       
+      <h3 style="margin: 5mm 0 2mm 0; font-size: 12px;">LISTA COMPLETA DOS REGISTROS DO LOTE ${lote}</h3>
+      
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 5%;">#</th>
+            <th style="width: 6%;">ID</th>
+            <th style="width: 12%;">CPF</th>
+            <th style="width: 20%;">NOME</th>
+            <th style="width: 8%;">NASC</th>
+            <th style="width: 12%;">MUNICÍPIO</th>
+            <th style="width: 10%;">TEL</th>
+            <th style="width: 5%;">VIA</th>
+            <th style="width: 12%;">Nº BOLETO</th>
+            <th style="width: 5%;">STATUS</th>
+            <th style="width: 10%;">ATENDENTE</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tabelaHtml}
+        </tbody>
+      </table>
+      
       <div class="total-registros">
-        TOTAL DE CARTEIRAS NO LOTE: ${totalRegistros || '0'}
+        TOTAL DE REGISTROS NO LOTE ${lote}: ${totalRegistros || '0'}
       </div>
       
       <div class="assinatura-linha"></div>
@@ -1225,8 +1287,12 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
       </div>
       
       <div class="footer">
-        <p>Documento emitido pelo Sistema MTECH - Protocolo de Entrega de Carteiras Estudantis</p>
-        <p>Este documento comprova o fechamento do lote ${lote} com ${totalRegistros || '0'} carteira(s) processada(s).</p>
+        <p>Documento emitido pelo Sistema MTECH - Relatório de Fechamento de Lote</p>
+        <p>Este documento lista todos os ${totalRegistros || '0'} registro(s) contido(s) no lote ${lote} fechado em ${dataLote}</p>
+      </div>
+      
+      <div class="page-number">
+        Página 1 de 1
       </div>
       
       <script>
