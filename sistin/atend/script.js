@@ -1186,6 +1186,17 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
   const segundos = String(dataAtual.getSeconds()).padStart(2, '0');
   const dataFormatada = `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
   
+  // ORDENA OS REGISTROS EM ORDEM ALFABÉTICA PELO NOME ANTES DE MONTAR A TABELA
+  if (registros && registros.length > 0) {
+    registros.sort((a, b) => {
+      const nomeA = a.nome ? a.nome.toUpperCase() : "";
+      const nomeB = b.nome ? b.nome.toUpperCase() : "";
+      if (nomeA < nomeB) return -1;
+      if (nomeA > nomeB) return 1;
+      return 0;
+    });
+  }
+  
   let tabelaHtml = '';
   if (registros && registros.length > 0) {
     registros.forEach((reg, index) => {
@@ -1201,7 +1212,7 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
           <td style="padding: 4px 2px; text-align:center; font-size:12px;">${reg.via || ''}</td>
           <td style="padding: 4px 2px; font-size:12px;">${reg.boleto || ''}</td>
           <td style="padding: 4px 2px; font-size:12px;">${reg.atendente || ''}</td>
-         </tr>
+        </tr>
       `;
     });
   } else {
@@ -1336,7 +1347,7 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         
         <table>
           <thead>
-             <tr>
+            <tr>
               <th style="width:5%">#</th>
               <th style="width:6%">ID</th>
               <th style="width:12%">CPF</th>
@@ -1347,7 +1358,7 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
               <th style="width:5%">VIA</th>
               <th style="width:12%">Nº BOLETO</th>
               <th style="width:10%">ATENDENTE</th>
-             </tr>
+            </tr>
           </thead>
           <tbody>
             ${tabelaHtml}
