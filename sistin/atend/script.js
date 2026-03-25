@@ -817,6 +817,90 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
   `);
   telaPrint.document.close();
 }
+
+// Função para abrir modal de reimpressão
+function reimprimirLote() {
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  const isAdmin = (user.parceiro.toString() === "97");
+  
+  const modal = document.getElementById("modalReimprimirLote");
+  const selectParceiro = document.getElementById("modalParceiro");
+  
+  if (isAdmin) {
+    // Se for admin, carrega a lista de parceiros da planilha
+    fetch(`${urlSistema}?action=obterListaParceiros`)
+      .then(res => res.json())
+      .then(parceiros => {
+        selectParceiro.innerHTML = '<option value="">SELECIONE O PARCEIRO</option>';
+        parceiros.forEach(p => {
+          selectParceiro.innerHTML += `<option value="${p}">${p}</option>`;
+        });
+        selectParceiro.disabled = false;
+      })
+      .catch(err => {
+        console.error("Erro ao carregar parceiros:", err);
+        selectParceiro.innerHTML = '<option value="">ERRO AO CARREGAR</option>';
+      });
+  } else {
+    // Se não for admin, bloqueia o select e coloca o parceiro logado
+    selectParceiro.innerHTML = `<option value="${user.parceiro}">${user.parceiro}</option>`;
+    selectParceiro.disabled = true;
+  }
+  
+  modal.style.display = "flex";
+}
+
+// Função para fechar modal
+function fecharModalReimprimir() {
+  document.getElementById("modalReimprimirLote").style.display = "none";
+  document.getElementById("modalLote").value = "";
+}
+
+// Função para confirmar e buscar reimpressão
+function confirmarReimprimirLote() {
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  const selectParceiro = document.getElementById("modalParceiro");
+  const lote = document.getElementById("modalLote").value.trim();
+  
+  let parceiroBusca = "";
+  
+  if (user.parceiro.toString() === "97") {
+    parceiroBusca = selectParceiro.value;
+    if (!parceiroBusca) {
+      alert("Selecione um parceiro!");
+      return;
+    }
+  } else {
+    parceiroBusca = user.parceiro;
+  }
+  
+  if (!lote) {
+    alert("Digite o número do lote!");
+    return;
+  }
+  
+  const btn = event?.target;
+  if(btn) btn.disabled = true;
+  
+  fetch(`${urlSistema}?action=reimprimirLoteFechado&parceiro=${parceiroBusca}&lote=${lote}`)
+    .then(res => res.json())
+    .then(res => {
+      if(res.sucesso && res.registros && res.registros.length > 0) {
+        fecharModalReimprimir();
+        imprimirRelatorioLote(lote, parceiroBusca, user.nome, res.total, res.dataFechamento, res.registros);
+      } else {
+        alert("Lote não encontrado ou sem registros para este parceiro.");
+      }
+    })
+    .catch(err => {
+      console.error("Erro:", err);
+      alert("Erro ao buscar lote.");
+    })
+    .finally(() => {
+      if(btn) btn.disabled = false;
+    });
+}
+
 // --- BUSCA GERAL (ADAPTADA) ---
 function executarBuscaGeral(tipo) {
   const user = JSON.parse(sessionStorage.getItem("usuario"));
