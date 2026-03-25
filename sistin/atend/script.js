@@ -1080,36 +1080,41 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
   }
   
   const dataAtual = new Date();
-  const dataFormatada = dataAtual.toLocaleString('pt-BR');
-  const dataLote = dataFechamento ? new Date(dataFechamento).toLocaleString('pt-BR') : dataFormatada;
+  const dia = String(dataAtual.getDate()).padStart(2, '0');
+  const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
+  const ano = dataAtual.getFullYear();
+  const horas = String(dataAtual.getHours()).padStart(2, '0');
+  const minutos = String(dataAtual.getMinutes()).padStart(2, '0');
+  const segundos = String(dataAtual.getSeconds()).padStart(2, '0');
+  const dataFormatada = `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
   
   // CONSTRÓI AS LINHAS DA TABELA COM OS REGISTROS DO LOTE
   let tabelaHtml = '';
   if (registros && registros.length > 0) {
     registros.forEach((reg, index) => {
       tabelaHtml += `
-        <tr>
-          <td style="text-align:center;">${index + 1}</td>
-          <td>${reg.id || ''}</td>
-          <td>${reg.cpf || ''}</td>
-          <td>${reg.nome || ''}</td>
-          <td>${reg.nasc || ''}</td>
-          <td>${reg.municipio || ''}</td>
-          <td>${reg.tel || ''}</td>
-          <td style="text-align:center;">${reg.via || ''}</td>
-          <td>${reg.boleto || ''}</td>
-          <td>${reg.status || 'Pendente'}</td>
-          <td>${reg.atendente || ''}</td>
-        </tr>
+         <tr>
+          <td style="text-align:center; padding:4px;">${index + 1}</td>
+          <td style="padding:4px;">${reg.id || ''}</td>
+          <td style="padding:4px;">${reg.cpf || ''}</td>
+          <td style="padding:4px;">${reg.nome || ''}</td>
+          <td style="padding:4px;">${reg.nasc || ''}</td>
+          <td style="padding:4px;">${reg.municipio || ''}</td>
+          <td style="padding:4px;">${reg.tel || ''}</td>
+          <td style="text-align:center; padding:4px;">${reg.via || ''}</td>
+          <td style="padding:4px;">${reg.boleto || ''}</td>
+          <td style="padding:4px;">${reg.status || 'Pendente'}</td>
+          <td style="padding:4px;">${reg.atendente || ''}</td>
+         </tr>
       `;
     });
   } else {
     tabelaHtml = `
-      <tr>
-        <td colspan="11" style="text-align:center; color:#ef4444;">
+       <tr>
+        <td colspan="11" style="text-align:center; padding:20px; color:#ef4444;">
           Nenhum registro encontrado neste lote
         </td>
-      </tr>
+       </tr>
     `;
   }
   
@@ -1130,7 +1135,7 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         }
         
         body {
-          font-family: 'Courier New', monospace;
+          font-family: Arial, sans-serif;
           background: white;
           padding: 5mm;
           font-size: 10px;
@@ -1183,7 +1188,7 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         
         th, td {
           border: 1px solid #000;
-          padding: 2px 3px;
+          padding: 3px 4px;
           text-align: left;
           vertical-align: top;
         }
@@ -1244,7 +1249,7 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
       <div class="info-box">
         <div class="info-item"><b>PARCEIRO:</b> ${parceiro}</div>
         <div class="info-item"><b>ATENDENTE:</b> ${atendente}</div>
-        <div class="info-item"><b>DATA FECHAMENTO:</b> ${dataLote}</div>
+        <div class="info-item"><b>DATA FECHAMENTO:</b> ${dataFechamento || dataFormatada}</div>
         <div class="info-item"><b>TOTAL DE REGISTROS:</b> ${totalRegistros || '0'}</div>
         <div class="info-item"><b>EMISSÃO DO RELATÓRIO:</b> ${dataFormatada}</div>
       </div>
@@ -1253,7 +1258,7 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
       
       <table>
         <thead>
-          <tr>
+           <tr>
             <th style="width: 5%;">#</th>
             <th style="width: 6%;">ID</th>
             <th style="width: 12%;">CPF</th>
@@ -1265,7 +1270,7 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
             <th style="width: 12%;">Nº BOLETO</th>
             <th style="width: 5%;">STATUS</th>
             <th style="width: 10%;">ATENDENTE</th>
-          </tr>
+           </tr>
         </thead>
         <tbody>
           ${tabelaHtml}
@@ -1288,7 +1293,7 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
       
       <div class="footer">
         <p>Documento emitido pelo Sistema MTECH - Relatório de Fechamento de Lote</p>
-        <p>Este documento lista todos os ${totalRegistros || '0'} registro(s) contido(s) no lote ${lote} fechado em ${dataLote}</p>
+        <p>Este documento lista todos os ${totalRegistros || '0'} registro(s) contido(s) no lote ${lote} fechado em ${dataFechamento || dataFormatada}</p>
       </div>
       
       <div class="page-number">
