@@ -1134,27 +1134,26 @@ function fecharLotePorParceiro() {
   const btn = event?.target;
   if(btn) { btn.disabled = true; btn.innerText = "FECHANDO LOTE..."; }
   
-  fetch(`${urlSistema}?action=fecharLoteAppsScript&parceiro=${user.parceiro}`)
+  // Envia o nome do usuário logado para o servidor
+  fetch(`${urlSistema}?action=fecharLoteAppsScript&parceiro=${user.parceiro}&nomeUsuario=${encodeURIComponent(user.nome)}`)
     .then(res => res.json())
     .then(res => {
       if(res.sucesso) {
         alert(`Lote ${res.loteGerado} fechado com sucesso!`);
         
-        // Tenta buscar os registros do lote usando a função que já existe
+        // Busca os registros do lote para imprimir
         fetch(`${urlSistema}?action=buscarRegistrosDoLote&parceiro=${user.parceiro}&lote=${res.loteGerado}`)
           .then(res2 => res2.json())
           .then(res2 => {
             if(res2.sucesso && res2.registros) {
-              imprimirRelatorioLote(res.loteGerado, user.parceiro, user.nome, res2.total, new Date().toLocaleString('pt-BR'), res2.registros);
+              imprimirRelatorioLote(res.loteGerado, user.parceiro, user.nome, res2.total, res.dataFechamento, res2.registros);
             } else {
-              // Se não conseguir buscar, imprime só com os dados básicos
-              imprimirRelatorioLote(res.loteGerado, user.parceiro, user.nome, 0, new Date().toLocaleString('pt-BR'), []);
+              imprimirRelatorioLote(res.loteGerado, user.parceiro, user.nome, 0, res.dataFechamento, []);
             }
           })
           .catch(err => {
             console.error("Erro ao buscar registros:", err);
-            // Se der erro, imprime só com os dados básicos
-            imprimirRelatorioLote(res.loteGerado, user.parceiro, user.nome, 0, new Date().toLocaleString('pt-BR'), []);
+            imprimirRelatorioLote(res.loteGerado, user.parceiro, user.nome, 0, res.dataFechamento, []);
           });
         
         carregarLista();
