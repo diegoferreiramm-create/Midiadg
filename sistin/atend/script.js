@@ -1045,17 +1045,200 @@ function fecharLotePorParceiro() {
   const user = JSON.parse(sessionStorage.getItem("usuario"));
   if(!confirm("Deseja fechar o lote atual para o parceiro " + user.parceiro + "?")) return;
   
+  const btn = event?.target;
+  if(btn) { btn.disabled = true; btn.innerText = "FECHANDO LOTE..."; }
+  
   fetch(`${urlSistema}?action=fecharLoteAppsScript&parceiro=${user.parceiro}`)
     .then(res => res.json())
     .then(res => {
       if(res.sucesso) {
-        alert("Lote fechado com sucesso! Lote: " + res.loteGerado);
+        alert(`Lote ${res.loteGerado} fechado com sucesso!`);
+        
+        // IMPRIME O RELATÓRIO DO LOTE
+        imprimirRelatorioLote(res.loteGerado, user.parceiro, user.nome, res.totalRegistros, res.dataFechamento);
+        
         carregarLista();
       } else {
         alert("Erro ao fechar lote: " + res.erro);
       }
     })
-    .catch(err => alert("Erro na conexão ao fechar lote."));
+    .catch(err => {
+      console.error("Erro ao fechar lote:", err);
+      alert("Erro na conexão ao fechar lote.");
+    })
+    .finally(() => {
+      if(btn) { btn.disabled = false; btn.innerText = "FECHAR LOTE"; }
+    });
+}
+
+function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFechamento) {
+  const telaPrint = window.open('', '_blank');
+  
+  if (!telaPrint || telaPrint.closed || typeof telaPrint.document === 'undefined') {
+    alert("⚠️ O lote foi fechado, mas o seu navegador BLOQUEOU a janela de impressão.\n\nVerifique a barra de endereços e clique em 'Sempre permitir pop-ups' para este site.");
+    return;
+  }
+  
+  const dataAtual = new Date();
+  const dataFormatada = dataAtual.toLocaleString('pt-BR');
+  const dataLote = dataFechamento ? new Date(dataFechamento).toLocaleString('pt-BR') : dataFormatada;
+  
+  telaPrint.document.write(`
+    <html>
+    <head>
+      <title>Relatório de Fechamento de Lote - ${lote}</title>
+      <style>
+        @page {
+          size: A4 landscape;
+          margin: 0.5cm;
+        }
+        
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        body {
+          font-family: Arial, sans-serif;
+          background: white;
+          padding: 10mm;
+        }
+        
+        .header {
+          text-align: center;
+          border-bottom: 3px solid #000;
+          margin-bottom: 10mm;
+          padding-bottom: 5mm;
+        }
+        
+        .header h1 {
+          font-size: 24px;
+          margin: 2mm 0;
+          color: #1e3a8a;
+        }
+        
+        .header h2 {
+          font-size: 18px;
+          margin: 1mm 0;
+        }
+        
+        .info-box {
+          background: #f2f2f2;
+          padding: 5mm;
+          border: 1px solid #000;
+          margin-bottom: 8mm;
+          display: flex;
+          justify-content: space-between;
+          flex-wrap: wrap;
+        }
+        
+        .info-item {
+          width: 33%;
+          margin-bottom: 3mm;
+          font-size: 12px;
+        }
+        
+        .info-item b {
+          text-transform: uppercase;
+          color: #1e3a8a;
+        }
+        
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 5mm;
+          font-size: 10px;
+        }
+        
+        th, td {
+          border: 1px solid #000;
+          padding: 3px;
+          text-align: left;
+        }
+        
+        th {
+          background: #e5e7eb;
+          font-weight: bold;
+          text-align: center;
+        }
+        
+        .footer {
+          margin-top: 10mm;
+          text-align: center;
+          font-size: 9px;
+          border-top: 1px solid #ccc;
+          padding-top: 5mm;
+        }
+        
+        .assinatura-linha {
+          border-top: 2px solid #000;
+          width: 100%;
+          margin: 8mm 0 2mm 0;
+        }
+        
+        .assinatura-container {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 11px;
+          font-weight: bold;
+          margin-top: 2mm;
+        }
+        
+        .total-registros {
+          font-size: 14px;
+          font-weight: bold;
+          margin-top: 5mm;
+          text-align: right;
+          padding: 3mm;
+          background: #f2f2f2;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>RELATÓRIO DE FECHAMENTO DE LOTE</h1>
+        <h2>LOTE Nº ${lote}</h2>
+      </div>
+      
+      <div class="info-box">
+        <div class="info-item"><b>PARCEIRO:</b> ${parceiro}</div>
+        <div class="info-item"><b>ATENDENTE:</b> ${atendente}</div>
+        <div class="info-item"><b>DATA FECHAMENTO:</b> ${dataLote}</div>
+        <div class="info-item"><b>TOTAL DE REGISTROS:</b> ${totalRegistros || '0'}</div>
+        <div class="info-item"><b>EMISSÃO:</b> ${dataFormatada}</div>
+      </div>
+      
+      <div class="total-registros">
+        TOTAL DE CARTEIRAS NO LOTE: ${totalRegistros || '0'}
+      </div>
+      
+      <div class="assinatura-linha"></div>
+      <div class="assinatura-container">
+        <span>_________________________________</span>
+        <span>_________________________________</span>
+      </div>
+      <div class="assinatura-container">
+        <span style="font-size: 9px;">Assinatura do Responsável pelo Lote</span>
+        <span style="font-size: 9px;">Carimbo/Validação</span>
+      </div>
+      
+      <div class="footer">
+        <p>Documento emitido pelo Sistema MTECH - Protocolo de Entrega de Carteiras Estudantis</p>
+        <p>Este documento comprova o fechamento do lote ${lote} com ${totalRegistros || '0'} carteira(s) processada(s).</p>
+      </div>
+      
+      <script>
+        window.onload = function() { 
+          window.print();
+          window.onafterprint = function() { window.close(); };
+        };
+      <\/script>
+    </body>
+    </html>
+  `);
+  telaPrint.document.close();
 }
 
 // --- BUSCA ÚNICA (Corrigida para GitHub) ---
