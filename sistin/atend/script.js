@@ -1070,7 +1070,6 @@ function fecharLotePorParceiro() {
       if(btn) { btn.disabled = false; btn.innerText = "FECHAR LOTE"; }
     });
 }
-
 function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFechamento, registros) {
   const telaPrint = window.open('', '_blank');
   
