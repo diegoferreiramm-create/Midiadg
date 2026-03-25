@@ -286,6 +286,41 @@
   </div>
 </div>
 
+<!-- MODAL PARA REIMPRESSÃO DE LOTE -->
+<div id="modalReimprimirLote" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10001; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+  <div style="width:100%; max-width:400px; background:#1e293b; border:1px solid #334155; padding:30px; border-radius:16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+    
+    <div style="text-align:center; margin-bottom:20px;">
+      <h2 style="color:#10b981; margin:0; font-size:24px;">Reimprimir Lote</h2>
+      <p style="color:#94a3b8; font-size:13px; margin-top:5px;">Informe os dados do lote que deseja reimprimir</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr; gap:20px;">
+      
+      <div>
+        <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:8px; display:block;">PARCEIRO</label>
+        <select id="modalParceiro" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:12px; border-radius:8px; outline:none; font-size:14px;">
+          <option value="">SELECIONE O PARCEIRO</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:8px; display:block;">NÚMERO DO LOTE</label>
+        <input id="modalLote" type="number" placeholder="Digite o número do lote" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:12px; border-radius:8px; outline:none; font-size:14px;">
+      </div>
+
+    </div>
+
+    <div style="display:flex; gap:12px; margin-top:30px;">
+      <button onclick="confirmarReimprimirLote()" style="flex:1; background:#10b981; color:#fff; font-weight:700; border:none; padding:12px; border-radius:8px; cursor:pointer; font-size:14px;">REIMPRIMIR</button>
+      <button onclick="fecharModalReimprimir()" style="flex:1; background:#334155; color:#fff; font-weight:600; border:none; padding:12px; border-radius:8px; cursor:pointer; font-size:14px;">CANCELAR</button>
+    </div>
+
+  </div>
+</div>
+
+
+  
 <script src="script.js"></script>
 
 </body>
