@@ -1,0 +1,46 @@
+// Busca Geral
+function executarBuscaGeral(tipo) {
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  const valor = document.getElementById("valorPesquisa").value;
+  if(!valor) return alert("Digite algo para pesquisar");
+  document.getElementById("resultadoPesquisa").innerHTML = "Pesquisando...";
+  fetch(`${urlSistema}?action=pesquisarNoCadastroGeral&valor=${valor}&tipo=${tipo}&parceiro=${user.parceiro}`)
+    .then(res => res.json())
+    .then(res => {
+      const div = document.getElementById("resultadoPesquisa");
+      div.innerHTML = "";
+      if(!res || res.length === 0) {
+        div.innerHTML = "Nenhum registro encontrado ou sem permissão.";
+        return;
+      }
+      res.forEach(item => {
+        let dStat = "";
+        for(let key in item) {
+          if(key.toUpperCase().replace(/\s/g,'') === "DATASTATUS") dStat = item[key];
+        }
+        if(!dStat) dStat = item.dataStatus || item.data_status || item["DATA STATUS"] || "";
+        div.innerHTML += `
+          <div class="res-card">
+            <b>NOME:</b> ${item.nome}<br>
+            <b>CPF:</b> ${item.cpf} | <b>VIA:</b> ${item.via}<br>
+            <b>MUNICÍPIO:</b> ${item.municipio} | <b>PARCEIRO:</b> ${item.parceiro}<br>
+            <b>CARTEIRA:</b> ${item.numCarteira || 'N/A'}<br>
+            <b>STATUS:</b> ${item.status || 'Pendente'} | <b>MOTIVO:</b> ${item.motivo || '-'}<br>
+            <b>DATA STATUS:</b> ${dStat}<br>
+            <b>BOLETO:</b> ${item.situacao || item.r || '-'}<br>
+            <b>PRAZO PENDÊNCIA:</b> ${item.prazoPendencia || item.s || '-'}<br>
+            <b>ATENDENTE:</b> ${item.atendente}<br>
+            <small>Última Atualização: ${item.dataAtu}</small>
+          </div>
+        `;
+      });
+    })
+    .catch(err => alert("Erro ao pesquisar"));
+}
+
+function mascaraData(campo) {
+  var v = campo.value.replace(/\D/g, "");
+  if (v.length >= 2) v = v.substring(0, 2) + "/" + v.substring(2);
+  if (v.length >= 5) v = v.substring(0, 5) + "/" + v.substring(5, 9);
+  campo.value = v;
+}
