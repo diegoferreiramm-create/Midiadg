@@ -1088,33 +1088,32 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
   const segundos = String(dataAtual.getSeconds()).padStart(2, '0');
   const dataFormatada = `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
   
-  // CONSTRÓI AS LINHAS DA TABELA COM OS REGISTROS DO LOTE
   let tabelaHtml = '';
   if (registros && registros.length > 0) {
     registros.forEach((reg, index) => {
       tabelaHtml += `
-         <tr>
-          <td style="text-align:center; padding:4px;">${index + 1}</td>
-          <td style="padding:4px;">${reg.id || ''}</td>
-          <td style="padding:4px;">${reg.cpf || ''}</td>
-          <td style="padding:4px;">${reg.nome || ''}</td>
-          <td style="padding:4px;">${reg.nasc || ''}</td>
-          <td style="padding:4px;">${reg.municipio || ''}</td>
-          <td style="padding:4px;">${reg.tel || ''}</td>
-          <td style="text-align:center; padding:4px;">${reg.via || ''}</td>
-          <td style="padding:4px;">${reg.boleto || ''}</td>
-          <td style="padding:4px;">${reg.status || 'Pendente'}</td>
-          <td style="padding:4px;">${reg.atendente || ''}</td>
-         </tr>
+          <tr>
+            <td style="text-align:center; padding:4px;">${index + 1}</td>
+            <td style="padding:4px;">${reg.id || ''}</td>
+            <td style="padding:4px;">${reg.cpf || ''}</td>
+            <td style="padding:4px;">${reg.nome || ''}</td>
+            <td style="padding:4px;">${reg.nasc || ''}</td>
+            <td style="padding:4px;">${reg.municipio || ''}</td>
+            <td style="padding:4px;">${reg.tel || ''}</td>
+            <td style="text-align:center; padding:4px;">${reg.via || ''}</td>
+            <td style="padding:4px;">${reg.boleto || ''}</td>
+            <td style="padding:4px;">${reg.status || 'Pendente'}</td>
+            <td style="padding:4px;">${reg.atendente || ''}</td>
+          </tr>
       `;
     });
   } else {
     tabelaHtml = `
-       <tr>
-        <td colspan="11" style="text-align:center; padding:20px; color:#ef4444;">
-          Nenhum registro encontrado neste lote
-        </td>
-       </tr>
+        <tr>
+          <td colspan="11" style="text-align:center; padding:20px; color:#ef4444;">
+            Nenhum registro encontrado neste lote
+          </td>
+        </tr>
     `;
   }
   
@@ -1123,121 +1122,22 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
     <head>
       <title>Relatório de Fechamento de Lote - ${lote}</title>
       <style>
-        @page {
-          size: A4 landscape;
-          margin: 0.5cm;
-        }
-        
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        
-        body {
-          font-family: Arial, sans-serif;
-          background: white;
-          padding: 5mm;
-          font-size: 10px;
-        }
-        
-        .header {
-          text-align: center;
-          border-bottom: 3px solid #000;
-          margin-bottom: 8mm;
-          padding-bottom: 4mm;
-        }
-        
-        .header h1 {
-          font-size: 20px;
-          margin: 2mm 0;
-          font-weight: bold;
-        }
-        
-        .header h2 {
-          font-size: 16px;
-          margin: 1mm 0;
-        }
-        
-        .info-box {
-          background: #f2f2f2;
-          padding: 4mm;
-          border: 1px solid #000;
-          margin-bottom: 6mm;
-          display: flex;
-          justify-content: space-between;
-          flex-wrap: wrap;
-        }
-        
-        .info-item {
-          width: 33%;
-          margin-bottom: 2mm;
-          font-size: 11px;
-        }
-        
-        .info-item b {
-          font-weight: bold;
-        }
-        
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 3mm;
-          font-size: 9px;
-        }
-        
-        th, td {
-          border: 1px solid #000;
-          padding: 3px 4px;
-          text-align: left;
-          vertical-align: top;
-        }
-        
-        th {
-          background: #e5e7eb;
-          font-weight: bold;
-          text-align: center;
-          font-size: 9px;
-        }
-        
-        .footer {
-          margin-top: 8mm;
-          text-align: center;
-          font-size: 8px;
-          border-top: 1px solid #ccc;
-          padding-top: 4mm;
-        }
-        
-        .assinatura-linha {
-          border-top: 2px solid #000;
-          width: 100%;
-          margin: 6mm 0 2mm 0;
-        }
-        
-        .assinatura-container {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: 10px;
-          font-weight: bold;
-          margin-top: 2mm;
-        }
-        
-        .total-registros {
-          font-size: 12px;
-          font-weight: bold;
-          margin: 5mm 0;
-          text-align: right;
-          padding: 2mm;
-          background: #f2f2f2;
-          border: 1px solid #000;
-        }
-        
-        .page-number {
-          text-align: center;
-          font-size: 8px;
-          margin-top: 3mm;
-        }
+        @page { size: A4 landscape; margin: 0.5cm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: white; padding: 5mm; font-size: 10px; }
+        .header { text-align: center; border-bottom: 3px solid #000; margin-bottom: 8mm; padding-bottom: 4mm; }
+        .header h1 { font-size: 20px; margin: 2mm 0; }
+        .header h2 { font-size: 16px; margin: 1mm 0; }
+        .info-box { background: #f2f2f2; padding: 4mm; border: 1px solid #000; margin-bottom: 6mm; display: flex; justify-content: space-between; flex-wrap: wrap; }
+        .info-item { width: 33%; margin-bottom: 2mm; font-size: 11px; }
+        .info-item b { font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 3mm; font-size: 9px; }
+        th, td { border: 1px solid #000; padding: 3px 4px; text-align: left; }
+        th { background: #e5e7eb; text-align: center; }
+        .footer { margin-top: 8mm; text-align: center; font-size: 8px; border-top: 1px solid #ccc; padding-top: 4mm; }
+        .assinatura-linha { border-top: 2px solid #000; width: 100%; margin: 6mm 0 2mm 0; }
+        .assinatura-container { display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: bold; margin-top: 2mm; }
+        .total-registros { font-size: 12px; font-weight: bold; margin: 5mm 0; text-align: right; padding: 2mm; background: #f2f2f2; border: 1px solid #000; }
       </style>
     </head>
     <body>
@@ -1251,35 +1151,22 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         <div class="info-item"><b>ATENDENTE:</b> ${atendente}</div>
         <div class="info-item"><b>DATA FECHAMENTO:</b> ${dataFechamento || dataFormatada}</div>
         <div class="info-item"><b>TOTAL DE REGISTROS:</b> ${totalRegistros || '0'}</div>
-        <div class="info-item"><b>EMISSÃO DO RELATÓRIO:</b> ${dataFormatada}</div>
+        <div class="info-item"><b>EMISSÃO:</b> ${dataFormatada}</div>
       </div>
       
-      <h3 style="margin: 5mm 0 2mm 0; font-size: 12px;">LISTA COMPLETA DOS REGISTROS DO LOTE ${lote}</h3>
+      <h3 style="margin: 5mm 0 2mm 0;">LISTA COMPLETA DOS REGISTROS DO LOTE ${lote}</h3>
       
       <table>
         <thead>
-           <tr>
-            <th style="width: 5%;">#</th>
-            <th style="width: 6%;">ID</th>
-            <th style="width: 12%;">CPF</th>
-            <th style="width: 20%;">NOME</th>
-            <th style="width: 8%;">NASC</th>
-            <th style="width: 12%;">MUNICÍPIO</th>
-            <th style="width: 10%;">TEL</th>
-            <th style="width: 5%;">VIA</th>
-            <th style="width: 12%;">Nº BOLETO</th>
-            <th style="width: 5%;">STATUS</th>
-            <th style="width: 10%;">ATENDENTE</th>
-           </tr>
+          <tr>
+            <th>#</th><th>ID</th><th>CPF</th><th>NOME</th><th>NASC</th>
+            <th>MUNICÍPIO</th><th>TEL</th><th>VIA</th><th>Nº BOLETO</th><th>STATUS</th><th>ATENDENTE</th>
+          </tr>
         </thead>
-        <tbody>
-          ${tabelaHtml}
-        </tbody>
+        <tbody>${tabelaHtml}</tbody>
       </table>
       
-      <div class="total-registros">
-        TOTAL DE REGISTROS NO LOTE ${lote}: ${totalRegistros || '0'}
-      </div>
+      <div class="total-registros">TOTAL: ${totalRegistros || '0'} registro(s)</div>
       
       <div class="assinatura-linha"></div>
       <div class="assinatura-container">
@@ -1287,24 +1174,14 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         <span>_________________________________</span>
       </div>
       <div class="assinatura-container">
-        <span style="font-size: 9px;">Assinatura do Responsável pelo Lote</span>
-        <span style="font-size: 9px;">Carimbo/Validação</span>
+        <span>Assinatura do Responsável</span>
+        <span>Carimbo/Validação</span>
       </div>
       
-      <div class="footer">
-        <p>Documento emitido pelo Sistema MTECH - Relatório de Fechamento de Lote</p>
-        <p>Este documento lista todos os ${totalRegistros || '0'} registro(s) contido(s) no lote ${lote} fechado em ${dataFechamento || dataFormatada}</p>
-      </div>
-      
-      <div class="page-number">
-        Página 1 de 1
-      </div>
+      <div class="footer">Sistema MTECH - Relatório de Fechamento de Lote</div>
       
       <script>
-        window.onload = function() { 
-          window.print();
-          window.onafterprint = function() { window.close(); };
-        };
+        window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };
       <\/script>
     </body>
     </html>
