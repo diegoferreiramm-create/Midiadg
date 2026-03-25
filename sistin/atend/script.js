@@ -887,7 +887,9 @@ function confirmarReimprimirLote() {
     .then(res => {
       if(res.sucesso && res.registros && res.registros.length > 0) {
         fecharModalReimprimir();
-        imprimirRelatorioLote(lote, parceiroBusca, user.nome, res.total, res.dataFechamento, res.registros);
+        // Usa o nome do usuário que fechou o lote (vindo da coluna V)
+        const atendenteImpressao = res.usuarioFechamento || user.nome;
+        imprimirRelatorioLote(lote, parceiroBusca, atendenteImpressao, res.total, res.dataFechamento, res.registros);
       } else {
         alert("Lote não encontrado ou sem registros para este parceiro.");
       }
