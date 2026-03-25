@@ -1096,28 +1096,31 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
   const dia = String(dataAtual.getDate()).padStart(2, '0');
   const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
   const ano = dataAtual.getFullYear();
-  const dataFormatada = `${dia}/${mes}/${ano} ${dataAtual.getHours()}:${dataAtual.getMinutes()}:${dataAtual.getSeconds()}`;
+  const horas = String(dataAtual.getHours()).padStart(2, '0');
+  const minutos = String(dataAtual.getMinutes()).padStart(2, '0');
+  const segundos = String(dataAtual.getSeconds()).padStart(2, '0');
+  const dataFormatada = `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
   
   let tabelaHtml = '';
   if (registros && registros.length > 0) {
     registros.forEach((reg, index) => {
       tabelaHtml += `
-        <tr>
-          <td style="text-align:center;">${index + 1}</td>
-          <td>${reg.id || ''}</td>
-          <td>${reg.cpf || ''}</td>
-          <td>${reg.nome || ''}</td>
-          <td>${reg.nasc || ''}</td>
-          <td>${reg.municipio || ''}</td>
-          <td>${reg.tel || ''}</td>
-          <td style="text-align:center;">${reg.via || ''}</td>
-          <td>${reg.boleto || ''}</td>
-          <td>${reg.atendente || ''}</td>
-         </tr>
+        <tr style="border-bottom: 1px solid #ccc;">
+          <td style="padding: 4px 2px; text-align:center;">${index + 1}</td>
+          <td style="padding: 4px 2px;">${reg.id || ''}</td>
+          <td style="padding: 4px 2px;">${reg.cpf || ''}</td>
+          <td style="padding: 4px 2px;">${reg.nome || ''}</td>
+          <td style="padding: 4px 2px;">${reg.nasc || ''}</td>
+          <td style="padding: 4px 2px;">${reg.municipio || ''}</td>
+          <td style="padding: 4px 2px;">${reg.tel || ''}</td>
+          <td style="padding: 4px 2px; text-align:center;">${reg.via || ''}</td>
+          <td style="padding: 4px 2px;">${reg.boleto || ''}</td>
+          <td style="padding: 4px 2px;">${reg.atendente || ''}</td>
+        </tr>
       `;
     });
   } else {
-    tabelaHtml = '<tr><td colspan="10" style="text-align:center;">Nenhum registro encontrado neste lote</td></tr>';
+    tabelaHtml = '<tr><td colspan="10" style="text-align:center; padding:20px;">Nenhum registro encontrado neste lote</td></tr>';
   }
   
   telaPrint.document.write(`
@@ -1125,62 +1128,159 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
     <head>
       <title>Relatório Lote ${lote}</title>
       <style>
-        @page { size: A4 landscape; margin: 0.5cm; }
-        body { font-family: Arial; padding: 5mm; }
-        h1, h2 { text-align: center; }
-        .info { background: #f2f2f2; padding: 5mm; margin: 5mm 0; display: flex; justify-content: space-between; flex-wrap: wrap; }
-        .info-item { margin: 2mm 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5mm; }
-        th, td { border: 1px solid #000; padding: 3px; font-size: 9px; }
-        th { background: #e5e7eb; }
-        .total { text-align: right; margin-top: 5mm; font-weight: bold; padding: 3mm; background: #f2f2f2; }
-        .assinatura { margin-top: 10mm; border-top: 1px solid #000; padding-top: 3mm; display: flex; justify-content: space-between; }
-        .footer { margin-top: 5mm; text-align: center; font-size: 8px; color: #666; }
+        @page {
+          size: A4 landscape;
+          margin: 0.5cm;
+        }
+        
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        body {
+          font-family: 'Courier New', monospace;
+          font-size: 9px;
+          margin: 0;
+          padding: 0;
+        }
+        
+        .container {
+          width: 100%;
+        }
+        
+        .header {
+          text-align: center;
+          border-bottom: 2px solid #000;
+          margin-bottom: 5px;
+          padding-bottom: 3px;
+        }
+        
+        .header h1 {
+          font-size: 14px;
+          margin: 2px 0;
+        }
+        
+        .header h2 {
+          font-size: 12px;
+          margin: 1px 0;
+        }
+        
+        .info {
+          background: #f2f2f2;
+          padding: 4px;
+          margin: 5px 0;
+          display: flex;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          border: 1px solid #ccc;
+        }
+        
+        .info-item {
+          margin: 1px 0;
+          font-size: 8px;
+        }
+        
+        .info-item b {
+          font-weight: bold;
+        }
+        
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 3px 0;
+          font-size: 7px;
+        }
+        
+        th, td {
+          border: 1px solid #000;
+          padding: 2px 2px;
+          text-align: left;
+          vertical-align: top;
+        }
+        
+        th {
+          background: #e5e7eb;
+          font-weight: bold;
+          text-align: center;
+          font-size: 7px;
+        }
+        
+        .total {
+          text-align: right;
+          margin: 5px 0;
+          font-weight: bold;
+          padding: 3px;
+          background: #f2f2f2;
+          border: 1px solid #ccc;
+          font-size: 8px;
+        }
+        
+        .assinatura {
+          margin-top: 8px;
+          border-top: 1px solid #000;
+          padding-top: 3px;
+          display: flex;
+          justify-content: space-between;
+          font-size: 8px;
+        }
+        
+        .footer {
+          margin-top: 5px;
+          text-align: center;
+          font-size: 6px;
+          color: #666;
+        }
       </style>
     </head>
     <body>
-      <h1>RELATÓRIO DE FECHAMENTO DE LOTE</h1>
-      <h2>LOTE Nº ${lote}</h2>
-      
-      <div class="info">
-        <div class="info-item"><b>PARCEIRO:</b> ${parceiro}</div>
-        <div class="info-item"><b>ATENDENTE:</b> ${atendente}</div>
-        <div class="info-item"><b>DATA FECHAMENTO:</b> ${dataFechamento}</div>
-        <div class="info-item"><b>EMISSÃO:</b> ${dataFormatada}</div>
-        <div class="info-item"><b>TOTAL REGISTROS:</b> ${totalRegistros}</div>
-      </div>
-      
-      <table>
-        <thead>
-          <tr>
-            <th style="width:5%">#</th>
-            <th style="width:5%">ID</th>
-            <th style="width:12%">CPF</th>
-            <th style="width:20%">NOME</th>
-            <th style="width:8%">NASC</th>
-            <th style="width:12%">MUNICÍPIO</th>
-            <th style="width:10%">TEL</th>
-            <th style="width:5%">VIA</th>
-            <th style="width:13%">Nº BOLETO</th>
-            <th style="width:10%">ATENDENTE</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tabelaHtml}
-        </tbody>
-      </table>
-      
-      <div class="total">
-        TOTAL DE REGISTROS NO LOTE ${lote}: ${totalRegistros}
-      </div>
-      
-      <div class="assinatura">
-        <span>_________________________________<br>Assinatura do Responsável</span>
-        <span>_________________________________<br>Carimbo/Validação</span>
-      </div>
-      
-      <div class="footer">
-        Sistema MTECH - Relatório de Fechamento de Lote
+      <div class="container">
+        <div class="header">
+          <h1>RELATÓRIO DE FECHAMENTO DE LOTE</h1>
+          <h2>LOTE Nº ${lote}</h2>
+        </div>
+        
+        <div class="info">
+          <div class="info-item"><b>PARCEIRO:</b> ${parceiro}</div>
+          <div class="info-item"><b>ATENDENTE:</b> ${atendente}</div>
+          <div class="info-item"><b>DATA FECHAMENTO:</b> ${dataFechamento || dataFormatada}</div>
+          <div class="info-item"><b>EMISSÃO:</b> ${dataFormatada}</div>
+          <div class="info-item"><b>TOTAL:</b> ${totalRegistros}</div>
+        </div>
+        
+        <table>
+          <thead>
+            <tr>
+              <th style="width:5%">#</th>
+              <th style="width:6%">ID</th>
+              <th style="width:12%">CPF</th>
+              <th style="width:20%">NOME</th>
+              <th style="width:8%">NASC</th>
+              <th style="width:12%">MUNICÍPIO</th>
+              <th style="width:10%">TEL</th>
+              <th style="width:5%">VIA</th>
+              <th style="width:12%">Nº BOLETO</th>
+              <th style="width:10%">ATENDENTE</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tabelaHtml}
+          </tbody>
+        </table>
+        
+        <div class="total">
+          TOTAL DE REGISTROS NO LOTE ${lote}: ${totalRegistros}
+        </div>
+        
+        <div class="assinatura">
+          <span>_________________________________<br>Assinatura do Responsável</span>
+          <span>_________________________________<br>Carimbo/Validação</span>
+        </div>
+        
+        <div class="footer">
+          Sistema MTECH - Relatório de Fechamento de Lote
+        </div>
       </div>
       
       <script>
@@ -1188,7 +1288,7 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
           window.print();
           window.onafterprint = function() { window.close(); };
         };
-      </script>
+      <\/script>
     </body>
     </html>
   `);
