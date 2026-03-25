@@ -201,10 +201,10 @@
     <div class="tabela-container" id="areaImpressao" style="margin-top: 5px;">
       <table id="tabelaListas" style="font-size: 11px;">
         <thead>
-          <tr id="cabecalhoTabela"></tr>
+          <tr id="cabecalhoTabela"> </tr>
         </thead>
         <tbody id="corpoTabelaListas"></tbody>
-      </table>
+       </table>
     </div>
 
     <div style="display: flex; flex-direction: column; align-items: center; margin-top: 10px; width: 100%; gap: 8px;">
@@ -216,6 +216,9 @@
       <div style="display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap;">
         
         <button onclick="fecharLotePorParceiro()" style="width: 150px; background: #ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; padding: 8px 0;">FECHAR LOTE</button>
+        
+        <!-- NOVO BOTÃO DE REIMPRESSÃO DE LOTE -->
+        <button onclick="reimprimirLote()" style="width: 150px; background: #10b981; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; padding: 8px 0;">REIMPRIMIR LOTE</button>
         
         <button onclick="imprimirLista()" style="width: 150px; background: #3b82f6; margin:0; padding: 8px 0;">Imprimir Lista</button>
         
