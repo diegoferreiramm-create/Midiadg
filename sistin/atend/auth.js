@@ -23,3 +23,47 @@ function entrar() {
       if (msg) msg.innerText = "Erro de conexão";
     });
 }
+
+// TROCAR SENHA
+function salvarSenha() {
+  const usuario = document.getElementById("usuarioTroca").value.trim();
+  const senhaAtual = document.getElementById("senhaAtual").value.trim();
+  const novaSenha = document.getElementById("novaSenha").value.trim();
+  const confSenha = document.getElementById("confSenha").value.trim();
+
+  if (!usuario || !senhaAtual || !novaSenha || !confSenha) {
+    alert("Preencha todos os campos!");
+    return;
+  }
+
+  if (novaSenha !== confSenha) {
+    alert("Nova senha e confirmação não conferem!");
+    return;
+  }
+
+  if (novaSenha.length < 4) {
+    alert("A nova senha deve ter no mínimo 4 caracteres!");
+    return;
+  }
+
+  const btn = event?.target;
+  if (btn) btn.disabled = true;
+
+  fetch(`${urlSistema}?action=trocarSenha&user=${encodeURIComponent(usuario)}&passAtual=${encodeURIComponent(senhaAtual)}&passNova=${encodeURIComponent(novaSenha)}`)
+    .then(res => res.json())
+    .then(res => {
+      if (res.sucesso) {
+        alert("✅ Senha alterada com sucesso!");
+        fecharSenha();
+      } else {
+        alert("❌ Erro ao alterar senha: " + (res.erro || "Verifique os dados"));
+      }
+    })
+    .catch(err => {
+      console.error("Erro:", err);
+      alert("Erro de conexão com o servidor.");
+    })
+    .finally(() => {
+      if (btn) btn.disabled = false;
+    });
+}
