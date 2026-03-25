@@ -1085,8 +1085,8 @@ function fecharLotePorParceiro() {
 function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFechamento, registros) {
   const telaPrint = window.open('', '_blank');
   
-  if (!telaPrint || telaPrint.closed || typeof telaPrint.document === 'undefined') {
-    alert("⚠️ O lote foi fechado, mas o seu navegador BLOQUEOU a janela de impressão.\n\nVerifique a barra de endereços e clique em 'Sempre permitir pop-ups' para este site.");
+  if (!telaPrint) {
+    alert("Pop-up bloqueado! Permita pop-ups para imprimir.");
     return;
   }
   
@@ -1094,106 +1094,99 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
   const dia = String(dataAtual.getDate()).padStart(2, '0');
   const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
   const ano = dataAtual.getFullYear();
-  const horas = String(dataAtual.getHours()).padStart(2, '0');
-  const minutos = String(dataAtual.getMinutes()).padStart(2, '0');
-  const segundos = String(dataAtual.getSeconds()).padStart(2, '0');
-  const dataFormatada = `${dia}/${mes}/${ano} ${horas}:${minutos}:${segundos}`;
+  const dataFormatada = `${dia}/${mes}/${ano} ${dataAtual.getHours()}:${dataAtual.getMinutes()}:${dataAtual.getSeconds()}`;
   
   let tabelaHtml = '';
   if (registros && registros.length > 0) {
     registros.forEach((reg, index) => {
       tabelaHtml += `
-          <tr>
-            <td style="text-align:center; padding:4px;">${index + 1}</td>
-            <td style="padding:4px;">${reg.id || ''}</td>
-            <td style="padding:4px;">${reg.cpf || ''}</td>
-            <td style="padding:4px;">${reg.nome || ''}</td>
-            <td style="padding:4px;">${reg.nasc || ''}</td>
-            <td style="padding:4px;">${reg.municipio || ''}</td>
-            <td style="padding:4px;">${reg.tel || ''}</td>
-            <td style="text-align:center; padding:4px;">${reg.via || ''}</td>
-            <td style="padding:4px;">${reg.boleto || ''}</td>
-            <td style="padding:4px;">${reg.status || 'Pendente'}</td>
-            <td style="padding:4px;">${reg.atendente || ''}</td>
-          </tr>
+        <tr>
+          <td style="text-align:center;">${index + 1}</td>
+          <td>${reg.id || ''}</td>
+          <td>${reg.cpf || ''}</td>
+          <td>${reg.nome || ''}</td>
+          <td>${reg.nasc || ''}</td>
+          <td>${reg.municipio || ''}</td>
+          <td>${reg.tel || ''}</td>
+          <td style="text-align:center;">${reg.via || ''}</td>
+          <td>${reg.boleto || ''}</td>
+          <td>${reg.atendente || ''}</td>
+         </tr>
       `;
     });
   } else {
-    tabelaHtml = `
-        <tr>
-          <td colspan="11" style="text-align:center; padding:20px; color:#ef4444;">
-            Nenhum registro encontrado neste lote
-          </td>
-        </tr>
-    `;
+    tabelaHtml = '<tr><td colspan="10" style="text-align:center;">Nenhum registro encontrado neste lote</td></tr>';
   }
   
   telaPrint.document.write(`
     <html>
     <head>
-      <title>Relatório de Fechamento de Lote - ${lote}</title>
+      <title>Relatório Lote ${lote}</title>
       <style>
         @page { size: A4 landscape; margin: 0.5cm; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: white; padding: 5mm; font-size: 10px; }
-        .header { text-align: center; border-bottom: 3px solid #000; margin-bottom: 8mm; padding-bottom: 4mm; }
-        .header h1 { font-size: 20px; margin: 2mm 0; }
-        .header h2 { font-size: 16px; margin: 1mm 0; }
-        .info-box { background: #f2f2f2; padding: 4mm; border: 1px solid #000; margin-bottom: 6mm; display: flex; justify-content: space-between; flex-wrap: wrap; }
-        .info-item { width: 33%; margin-bottom: 2mm; font-size: 11px; }
-        .info-item b { font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 3mm; font-size: 9px; }
-        th, td { border: 1px solid #000; padding: 3px 4px; text-align: left; }
-        th { background: #e5e7eb; text-align: center; }
-        .footer { margin-top: 8mm; text-align: center; font-size: 8px; border-top: 1px solid #ccc; padding-top: 4mm; }
-        .assinatura-linha { border-top: 2px solid #000; width: 100%; margin: 6mm 0 2mm 0; }
-        .assinatura-container { display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: bold; margin-top: 2mm; }
-        .total-registros { font-size: 12px; font-weight: bold; margin: 5mm 0; text-align: right; padding: 2mm; background: #f2f2f2; border: 1px solid #000; }
+        body { font-family: Arial; padding: 5mm; }
+        h1, h2 { text-align: center; }
+        .info { background: #f2f2f2; padding: 5mm; margin: 5mm 0; display: flex; justify-content: space-between; flex-wrap: wrap; }
+        .info-item { margin: 2mm 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5mm; }
+        th, td { border: 1px solid #000; padding: 3px; font-size: 9px; }
+        th { background: #e5e7eb; }
+        .total { text-align: right; margin-top: 5mm; font-weight: bold; padding: 3mm; background: #f2f2f2; }
+        .assinatura { margin-top: 10mm; border-top: 1px solid #000; padding-top: 3mm; display: flex; justify-content: space-between; }
+        .footer { margin-top: 5mm; text-align: center; font-size: 8px; color: #666; }
       </style>
     </head>
     <body>
-      <div class="header">
-        <h1>RELATÓRIO DE FECHAMENTO DE LOTE</h1>
-        <h2>LOTE Nº ${lote}</h2>
-      </div>
+      <h1>RELATÓRIO DE FECHAMENTO DE LOTE</h1>
+      <h2>LOTE Nº ${lote}</h2>
       
-      <div class="info-box">
+      <div class="info">
         <div class="info-item"><b>PARCEIRO:</b> ${parceiro}</div>
         <div class="info-item"><b>ATENDENTE:</b> ${atendente}</div>
-        <div class="info-item"><b>DATA FECHAMENTO:</b> ${dataFechamento || dataFormatada}</div>
-        <div class="info-item"><b>TOTAL DE REGISTROS:</b> ${totalRegistros || '0'}</div>
+        <div class="info-item"><b>DATA FECHAMENTO:</b> ${dataFechamento}</div>
         <div class="info-item"><b>EMISSÃO:</b> ${dataFormatada}</div>
+        <div class="info-item"><b>TOTAL REGISTROS:</b> ${totalRegistros}</div>
       </div>
-      
-      <h3 style="margin: 5mm 0 2mm 0;">LISTA COMPLETA DOS REGISTROS DO LOTE ${lote}</h3>
       
       <table>
         <thead>
           <tr>
-            <th>#</th><th>ID</th><th>CPF</th><th>NOME</th><th>NASC</th>
-            <th>MUNICÍPIO</th><th>TEL</th><th>VIA</th><th>Nº BOLETO</th><th>STATUS</th><th>ATENDENTE</th>
+            <th style="width:5%">#</th>
+            <th style="width:5%">ID</th>
+            <th style="width:12%">CPF</th>
+            <th style="width:20%">NOME</th>
+            <th style="width:8%">NASC</th>
+            <th style="width:12%">MUNICÍPIO</th>
+            <th style="width:10%">TEL</th>
+            <th style="width:5%">VIA</th>
+            <th style="width:13%">Nº BOLETO</th>
+            <th style="width:10%">ATENDENTE</th>
           </tr>
         </thead>
-        <tbody>${tabelaHtml}</tbody>
+        <tbody>
+          ${tabelaHtml}
+        </tbody>
       </table>
       
-      <div class="total-registros">TOTAL: ${totalRegistros || '0'} registro(s)</div>
-      
-      <div class="assinatura-linha"></div>
-      <div class="assinatura-container">
-        <span>_________________________________</span>
-        <span>_________________________________</span>
-      </div>
-      <div class="assinatura-container">
-        <span>Assinatura do Responsável</span>
-        <span>Carimbo/Validação</span>
+      <div class="total">
+        TOTAL DE REGISTROS NO LOTE ${lote}: ${totalRegistros}
       </div>
       
-      <div class="footer">Sistema MTECH - Relatório de Fechamento de Lote</div>
+      <div class="assinatura">
+        <span>_________________________________<br>Assinatura do Responsável</span>
+        <span>_________________________________<br>Carimbo/Validação</span>
+      </div>
+      
+      <div class="footer">
+        Sistema MTECH - Relatório de Fechamento de Lote
+      </div>
       
       <script>
-        window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };
-      <\/script>
+        window.onload = function() { 
+          window.print();
+          window.onafterprint = function() { window.close(); };
+        };
+      </script>
     </body>
     </html>
   `);
