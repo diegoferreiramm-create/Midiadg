@@ -1190,21 +1190,21 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
     registros.forEach((reg, index) => {
       tabelaHtml += `
         <tr style="border-bottom: 1px solid #ccc;">
-          <td style="padding: 4px 2px; text-align:center;">${index + 1}</td>
-          <td style="padding: 4px 2px;">${reg.id || ''}</td>
-          <td style="padding: 4px 2px;">${reg.cpf || ''}</td>
-          <td style="padding: 4px 2px;">${reg.nome || ''}</td>
-          <td style="padding: 4px 2px;">${reg.nasc || ''}</td>
-          <td style="padding: 4px 2px;">${reg.municipio || ''}</td>
-          <td style="padding: 4px 2px;">${reg.tel || ''}</td>
-          <td style="padding: 4px 2px; text-align:center;">${reg.via || ''}</td>
-          <td style="padding: 4px 2px;">${reg.boleto || ''}</td>
-          <td style="padding: 4px 2px;">${reg.atendente || ''}</td>
-        </tr>
+          <td style="padding: 4px 2px; text-align:center; font-size:12px;">${index + 1}</td>
+          <td style="padding: 4px 2px; font-size:12px;">${reg.id || ''}</td>
+          <td style="padding: 4px 2px; font-size:12px;">${reg.cpf || ''}</td>
+          <td style="padding: 4px 2px; font-size:12px;">${reg.nome || ''}</td>
+          <td style="padding: 4px 2px; font-size:12px;">${reg.nasc || ''}</td>
+          <td style="padding: 4px 2px; font-size:12px;">${reg.municipio || ''}</td>
+          <td style="padding: 4px 2px; font-size:12px;">${reg.tel || ''}</td>
+          <td style="padding: 4px 2px; text-align:center; font-size:12px;">${reg.via || ''}</td>
+          <td style="padding: 4px 2px; font-size:12px;">${reg.boleto || ''}</td>
+          <td style="padding: 4px 2px; font-size:12px;">${reg.atendente || ''}</td>
+         </tr>
       `;
     });
   } else {
-    tabelaHtml = '<tr><td colspan="10" style="text-align:center; padding:20px;">Nenhum registro encontrado neste lote</td></tr>';
+    tabelaHtml = '<tr><td colspan="10" style="text-align:center; padding:20px; font-size:12px;">Nenhum registro encontrado neste lote</td></tr>';
   }
   
   telaPrint.document.write(`
@@ -1224,8 +1224,8 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         }
         
         body {
-          font-family: 'Courier New', monospace;
-          font-size: 9px;
+          font-family: Arial, sans-serif;
+          font-size: 12px;
           margin: 0;
           padding: 0;
         }
@@ -1242,18 +1242,18 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         }
         
         .header h1 {
-          font-size: 14px;
+          font-size: 16px;
           margin: 2px 0;
         }
         
         .header h2 {
-          font-size: 12px;
+          font-size: 14px;
           margin: 1px 0;
         }
         
         .info {
           background: #f2f2f2;
-          padding: 4px;
+          padding: 6px;
           margin: 5px 0;
           display: flex;
           justify-content: space-between;
@@ -1262,8 +1262,8 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         }
         
         .info-item {
-          margin: 1px 0;
-          font-size: 8px;
+          margin: 2px 0;
+          font-size: 11px;
         }
         
         .info-item b {
@@ -1273,13 +1273,13 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         table {
           width: 100%;
           border-collapse: collapse;
-          margin: 3px 0;
-          font-size: 7px;
+          margin: 5px 0;
+          font-size: 12px;
         }
         
         th, td {
           border: 1px solid #000;
-          padding: 2px 2px;
+          padding: 4px 3px;
           text-align: left;
           vertical-align: top;
         }
@@ -1288,32 +1288,32 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
           background: #e5e7eb;
           font-weight: bold;
           text-align: center;
-          font-size: 7px;
+          font-size: 12px;
         }
         
         .total {
           text-align: right;
           margin: 5px 0;
           font-weight: bold;
-          padding: 3px;
+          padding: 4px;
           background: #f2f2f2;
           border: 1px solid #ccc;
-          font-size: 8px;
+          font-size: 12px;
         }
         
         .assinatura {
-          margin-top: 8px;
+          margin-top: 10px;
           border-top: 1px solid #000;
-          padding-top: 3px;
+          padding-top: 5px;
           display: flex;
           justify-content: space-between;
-          font-size: 8px;
+          font-size: 11px;
         }
         
         .footer {
           margin-top: 5px;
           text-align: center;
-          font-size: 6px;
+          font-size: 9px;
           color: #666;
         }
       </style>
@@ -1335,7 +1335,7 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
         
         <table>
           <thead>
-            <tr>
+             <tr>
               <th style="width:5%">#</th>
               <th style="width:6%">ID</th>
               <th style="width:12%">CPF</th>
@@ -1346,7 +1346,7 @@ function imprimirRelatorioLote(lote, parceiro, atendente, totalRegistros, dataFe
               <th style="width:5%">VIA</th>
               <th style="width:12%">Nº BOLETO</th>
               <th style="width:10%">ATENDENTE</th>
-            </tr>
+             </tr>
           </thead>
           <tbody>
             ${tabelaHtml}
