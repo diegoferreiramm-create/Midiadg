@@ -48,32 +48,30 @@ function filtrarTabelaAvancado(valorForcado) {
     if (!td[0]) continue;
     let mostrar = true;
 
-    // CPF - usa indexOf
-    if (fCpf && td[1]) {
+    // CPF
+    if (fCpf !== "" && td[1]) {
       const cpfLimpoTabela = td[1].innerText.replace(/\D/g, "");
       if (cpfLimpoTabela.indexOf(fCpf) === -1) mostrar = false;
     }
-    // NOME - usa indexOf
-    if (fNome && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
-    // STATUS - usa !== (exato)
-    if (fStatus && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
-    
-    // SITUAÇÃO - igual ao CPF (indexOf)
-    if (fSituacao && td[16]) {
+    // NOME
+    if (fNome !== "" && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
+    // STATUS
+    if (fStatus !== "" && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
+    // SITUAÇÃO
+    if (fSituacao !== "" && td[16]) {
       const valorTabela = td[16].innerText.trim().toUpperCase();
       if (valorTabela.indexOf(fSituacao) === -1) mostrar = false;
     }
-    // PRAZO - igual ao CPF (indexOf)
-    if (fPrazo && td[17]) {
+    // PRAZO
+    if (fPrazo !== "" && td[17]) {
       const valorTabela = td[17].innerText.trim().toUpperCase();
       if (valorTabela.indexOf(fPrazo) === -1) mostrar = false;
     }
-    // Nº ARCE - igual ao CPF (indexOf)
-    if (fProcessoArce && td[18]) {
+    // Nº ARCE
+    if (fProcessoArce !== "" && td[18]) {
       const valorTabela = td[18].innerText.trim().toUpperCase();
       if (valorTabela.indexOf(fProcessoArce) === -1) mostrar = false;
     }
-    
     // LOTE
     if (fLote !== "") {
         let txtLote = td[15] ? td[15].innerText.trim().toUpperCase() : "";
@@ -81,9 +79,9 @@ function filtrarTabelaAvancado(valorForcado) {
     }
     // ADMIN
     if (isAdmin) {
-      if (fVia && td[6] && td[6].innerText.toUpperCase().indexOf(fVia) === -1) mostrar = false;
-      if (fParc && td[7] && td[7].innerText.toUpperCase().indexOf(fParc) === -1) mostrar = false;
-      if (fAtend && td[9] && td[9].innerText.toUpperCase().indexOf(fAtend) === -1) mostrar = false;
+      if (fVia !== "" && td[6] && td[6].innerText.toUpperCase().indexOf(fVia) === -1) mostrar = false;
+      if (fParc !== "" && td[7] && td[7].innerText.toUpperCase().indexOf(fParc) === -1) mostrar = false;
+      if (fAtend !== "" && td[9] && td[9].innerText.toUpperCase().indexOf(fAtend) === -1) mostrar = false;
     }
     tr[i].style.display = mostrar ? "" : "none";
     if (mostrar) contadorVisiveis++;
@@ -104,6 +102,7 @@ function filtrarTabelaAvancado(valorForcado) {
     }
   });
 }
+
 function carregarLista() {
   const user = JSON.parse(sessionStorage.getItem("usuario"));
   const isAdmin = (user.parceiro.toString() === "97");
