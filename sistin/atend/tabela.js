@@ -24,8 +24,8 @@ function filtrarTabelaAvancado(valorForcado) {
   const fNome = document.getElementById("fNome").value.toUpperCase();
   const fStatus = document.getElementById("fStatus").value.trim();
   
-  const fSituacao = document.getElementById("fSituacao") ? document.getElementById("fSituacao").value.trim() : "";
-  const fPrazo = document.getElementById("fPrazo") ? document.getElementById("fPrazo").value.trim() : "";
+  const fSituacao = document.getElementById("fSituacao") ? document.getElementById("fSituacao").value.trim().toUpperCase() : "";
+  const fPrazo = document.getElementById("fPrazo") ? document.getElementById("fPrazo").value.trim().toUpperCase() : "";
   const fProcessoArce = document.getElementById("fProcessoArce") ? document.getElementById("fProcessoArce").value.trim().toUpperCase() : "";
   
   let fLote = "";
@@ -48,16 +48,26 @@ function filtrarTabelaAvancado(valorForcado) {
     if (!td[0]) continue;
     let mostrar = true;
 
-    // SÓ APLICA O FILTRO SE O CAMPO NÃO ESTIVER VAZIO
     if (fCpf !== "" && td[1]) {
       const cpfLimpoTabela = td[1].innerText.replace(/\D/g, "");
       if (cpfLimpoTabela.indexOf(fCpf) === -1) mostrar = false;
     }
     if (fNome !== "" && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
     if (fStatus !== "" && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
-    if (fSituacao !== "" && td[16] && td[16].innerText.trim().toUpperCase().indexOf(fSituacao) === -1) mostrar = false;
-    if (fPrazo !== "" && td[17] && td[17].innerText.trim() !== fPrazo) mostrar = false;
-    if (fProcessoArce !== "" && td[18] && td[18].innerText.trim().toUpperCase().indexOf(fProcessoArce) === -1) mostrar = false;
+    
+    // FILTROS DAS NOVAS COLUNAS
+    if (fSituacao !== "" && td[16]) {
+      const valorTabela = td[16].innerText.trim().toUpperCase();
+      if (valorTabela.indexOf(fSituacao) === -1) mostrar = false;
+    }
+    if (fPrazo !== "" && td[17]) {
+      const valorTabela = td[17].innerText.trim().toUpperCase();
+      if (valorTabela !== fPrazo) mostrar = false;
+    }
+    if (fProcessoArce !== "" && td[18]) {
+      const valorTabela = td[18].innerText.trim().toUpperCase();
+      if (valorTabela.indexOf(fProcessoArce) === -1) mostrar = false;
+    }
     
     if (fLote !== "") {
         let txtLote = td[15] ? td[15].innerText.trim().toUpperCase() : "";
