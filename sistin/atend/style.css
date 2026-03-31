@@ -286,3 +286,124 @@ button:hover{ background:#16a34a; }
 input:not(#login):not(#senha):not(#usuarioTroca):not(#senhaAtual):not(#novaSenha):not(#confSenha) {
   text-transform: uppercase;
 }
+
+/* MELHORIAS PARA OS FILTROS */
+#filtrosAdmin {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  background: #0f172a;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+#filtrosAdmin input,
+#filtrosAdmin select,
+#filtrosAdmin button {
+  height: 36px;
+  padding: 0 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: white;
+  box-sizing: border-box;
+}
+
+#filtrosAdmin button {
+  background: #3b82f6;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+#filtrosAdmin button:hover {
+  background: #2563eb;
+}
+
+/* RESPONSIVIDADE PARA TELAS MENORES */
+@media (max-width: 768px) {
+  #filtrosAdmin {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  #filtrosAdmin input,
+  #filtrosAdmin select,
+  #filtrosAdmin button {
+    width: 100% !important;
+  }
+}
+
+/* MELHORIA PARA O CONTAINER DAS CHECKBOXES */
+#containerChecks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px;
+  background: #1e293b;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #334155;
+}
+
+#containerChecks label {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #22c55e;
+}
+
+/* TABELA COM SCROLL */
+.tabela-container {
+  background: #1e293b;
+  width: 100%;
+  border-radius: 12px;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 60vh;
+  border: 1px solid #334155;
+}
+
+#tabelaListas {
+  width: 100%;
+  border-collapse: collapse;
+  color: #f1f5f9;
+  min-width: 1200px;
+}
+
+#tabelaListas th,
+#tabelaListas td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #334155;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+#tabelaListas thead th {
+  position: sticky;
+  top: 0;
+  background: #0f172a;
+  color: #22c55e;
+  z-index: 10;
+  font-weight: bold;
+}
+
+/* CONTADOR DE REGISTROS */
+#contadorLinhas {
+  font-weight: bold;
+  color: #22c55e;
+  font-size: 13px;
+  background: #0f172a;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+}
