@@ -108,68 +108,118 @@ function carregarLista() {
   const isAdmin = (user.parceiro.toString() === "97");
   
   const fAdmin = document.getElementById("filtrosAdmin");
-  if(fAdmin) {
-    fAdmin.style.display = "flex";
-    fAdmin.style.flexDirection = "row";
-    fAdmin.style.flexWrap = "wrap";
-    fAdmin.style.gap = "5px";
-    fAdmin.style.alignItems = "center";
-    fAdmin.style.padding = "10px";
-    fAdmin.style.background = "#0f172a";
-    fAdmin.style.borderRadius = "8px";
-    fAdmin.style.marginBottom = "10px";
-    
-    if(!document.getElementById("fLote")){
-       const inputLote = document.createElement("input");
-       inputLote.id = "fLote";
-       inputLote.placeholder = "LOTE";
-       inputLote.onkeyup = filtrarTabelaAvancado;
-       inputLote.style.width = "70px";
-       fAdmin.appendChild(inputLote);
-    }
-    
-    if(!document.getElementById("fSituacao")){
-       const selectSituacao = document.createElement("select");
-       selectSituacao.id = "fSituacao";
-       selectSituacao.onchange = filtrarTabelaAvancado;
-       selectSituacao.style.width = "100px";
-       selectSituacao.innerHTML = '<option value="">SITUAÇÃO</option><option value="PAGO">PAGO</option><option value="ABERTO">ABERTO</option><option value="PENDENTE">PENDENTE</option>';
-       fAdmin.appendChild(selectSituacao);
-    }
-    
-    if(!document.getElementById("fPrazo")){
-       const inputPrazo = document.createElement("input");
-       inputPrazo.id = "fPrazo";
-       inputPrazo.placeholder = "PRAZO";
-       inputPrazo.onkeyup = filtrarTabelaAvancado;
-       inputPrazo.style.width = "70px";
-       fAdmin.appendChild(inputPrazo);
-    }
-    
-    if(!document.getElementById("fProcessoArce")){
-       const inputProcesso = document.createElement("input");
-       inputProcesso.id = "fProcessoArce";
-       inputProcesso.placeholder = "Nº ARCE";
-       inputProcesso.onkeyup = filtrarTabelaAvancado;
-       inputProcesso.style.width = "100px";
-       fAdmin.appendChild(inputProcesso);
-    }
-
-    const inputsFiltro = fAdmin.querySelectorAll("input, select");
-    inputsFiltro.forEach(el => {
-       el.style.width = el.id === "fNome" ? "200px" : 
-                        el.id === "fLote" ? "70px" : 
-                        el.id === "fPrazo" ? "70px" :
-                        el.id === "fSituacao" ? "100px" :
-                        el.id === "fProcessoArce" ? "100px" : "auto";
-       el.style.padding = "5px";
-       el.style.fontSize = "12px";
-       el.style.border = "1px solid #334155";
-       el.style.borderRadius = "4px";
-       el.style.background = "#1e293b";
-       el.style.color = "white";
-    });
+if(fAdmin) {
+  fAdmin.style.display = "flex";
+  fAdmin.style.flexDirection = "row";
+  fAdmin.style.flexWrap = "wrap";
+  fAdmin.style.gap = "8px";
+  fAdmin.style.alignItems = "center";
+  fAdmin.style.justifyContent = "flex-start";
+  fAdmin.style.padding = "12px";
+  fAdmin.style.background = "#0f172a";
+  fAdmin.style.borderRadius = "8px";
+  fAdmin.style.marginBottom = "10px";
+  
+  if(!document.getElementById("fLote")){
+     const inputLote = document.createElement("input");
+     inputLote.id = "fLote";
+     inputLote.placeholder = "LOTE";
+     inputLote.onkeyup = function() { filtrarTabelaAvancado(); };
+     inputLote.style.width = "70px";
+     fAdmin.appendChild(inputLote);
   }
+  
+  if(!document.getElementById("fSituacao")){
+     const selectSituacao = document.createElement("select");
+     selectSituacao.id = "fSituacao";
+     selectSituacao.onchange = function() { filtrarTabelaAvancado(); };
+     selectSituacao.style.width = "100px";
+     selectSituacao.innerHTML = '<option value="">SITUAÇÃO</option><option value="PAGO">PAGO</option><option value="ABERTO">ABERTO</option><option value="PENDENTE">PENDENTE</option>';
+     fAdmin.appendChild(selectSituacao);
+  }
+  
+  if(!document.getElementById("fPrazo")){
+     const inputPrazo = document.createElement("input");
+     inputPrazo.id = "fPrazo";
+     inputPrazo.placeholder = "PRAZO";
+     inputPrazo.onkeyup = function() { filtrarTabelaAvancado(); };
+     inputPrazo.style.width = "70px";
+     fAdmin.appendChild(inputPrazo);
+  }
+  
+  if(!document.getElementById("fProcessoArce")){
+     const inputProcesso = document.createElement("input");
+     inputProcesso.id = "fProcessoArce";
+     inputProcesso.placeholder = "Nº ARCE";
+     inputProcesso.onkeyup = function() { filtrarTabelaAvancado(); };
+     inputProcesso.style.width = "100px";
+     fAdmin.appendChild(inputProcesso);
+  }
+  
+  // Botão VER ABERTOS
+  if(!document.getElementById("btnVerAbertos")){
+     const btnAbertos = document.createElement("button");
+     btnAbertos.id = "btnVerAbertos";
+     btnAbertos.innerHTML = "VER ABERTOS";
+     btnAbertos.onclick = function() { filtrarTabelaAvancado('#'); };
+     btnAbertos.style.height = "36px";
+     btnAbertos.style.padding = "0 12px";
+     btnAbertos.style.borderRadius = "4px";
+     btnAbertos.style.border = "none";
+     btnAbertos.style.background = "#3b82f6";
+     btnAbertos.style.color = "white";
+     btnAbertos.style.cursor = "pointer";
+     btnAbertos.style.fontSize = "12px";
+     btnAbertos.style.fontWeight = "bold";
+     fAdmin.appendChild(btnAbertos);
+  }
+
+  const inputsFiltro = fAdmin.querySelectorAll("input, select, button");
+  inputsFiltro.forEach(el => {
+     if(el.id === "fCpf") {
+       el.style.width = "120px";
+     } else if(el.id === "fNome") {
+       el.style.width = "200px";
+     } else if(el.id === "fStatus") {
+       el.style.width = "250px";
+     } else if(el.id === "fLote") {
+       el.style.width = "70px";
+     } else if(el.id === "fPrazo") {
+       el.style.width = "70px";
+     } else if(el.id === "fSituacao") {
+       el.style.width = "100px";
+     } else if(el.id === "fProcessoArce") {
+       el.style.width = "100px";
+     } else if(el.id === "fParceiro") {
+       el.style.width = "120px";
+     } else if(el.id === "fAtend") {
+       el.style.width = "130px";
+     } else if(el.id === "fVia") {
+       el.style.width = "80px";
+     } else if(el.id === "btnVerAbertos") {
+       el.style.width = "auto";
+     } else {
+       el.style.width = "auto";
+     }
+     
+     el.style.padding = "6px 10px";
+     el.style.fontSize = "12px";
+     el.style.border = "1px solid #334155";
+     el.style.borderRadius = "4px";
+     el.style.background = "#1e293b";
+     el.style.color = "white";
+     el.style.height = "36px";
+     el.style.boxSizing = "border-box";
+  });
+  
+  // Ajuste específico para o botão
+  const btnVerAbertos = document.getElementById("btnVerAbertos");
+  if(btnVerAbertos) {
+    btnVerAbertos.style.background = "#3b82f6";
+    btnVerAbertos.style.border = "none";
+    btnVerAbertos.style.cursor = "pointer";
+  }
+}
   
   const cabecalho = document.getElementById("cabecalhoTabela");
   const colNames = ["ID", "CPF", "NOME", "NASC", "MUNICIPIO", "TEL", "VIA", "PARCEIRO", "DATA", "ATENDENTE", "BOLETO", "STATUS", "MOTIVO", "DATA STATUS", "NUM CARTEIRA", "LOTE", "SITUAÇÃO", "PRAZO", "Nº ARCE", "AÇÕES"];
@@ -177,13 +227,33 @@ function carregarLista() {
   cabecalho.innerHTML = colNames.map((name, idx) => `<th class="col-${idx}">${name}</th>`).join("");
 
   if(!document.getElementById("containerChecks")){
+    // DEFINA AQUI AS COLUNAS QUE DEVEM COMEÇAR DESMARCADAS
+    // Coloque o índice das colunas que você NÃO quer que apareçam inicialmente
+    const colunasDesmarcadas = [
+      // 3,   // NASC - descomente para desmarcar
+      // 4,   // MUNICIPIO - descomente para desmarcar
+      // 5,   // TEL - descomente para desmarcar
+      // 6,   // VIA - descomente para desmarcar
+      // 7,   // PARCEIRO - descomente para desmarcar
+      // 8,   // DATA - descomente para desmarcar
+      // 9,   // ATENDENTE - descomente para desmarcar
+      // 10,  // BOLETO - descomente para desmarcar
+      // 15,  // LOTE - descomente para desmarcar
+      // 16,  // SITUAÇÃO - descomente para desmarcar
+      // 17   // PRAZO - descomente para desmarcar
+    ];
+    
     const divChecks = document.createElement("div");
     divChecks.id = "containerChecks";
     divChecks.style = "display:flex; flex-wrap:wrap; gap:10px; padding:10px; background:#1e293b; border-radius:8px; margin-bottom:10px; font-size:11px; color:#22c55e; border:1px solid #334155;";
     divChecks.innerHTML = "<div style='width:100%; color:white; font-weight:bold; margin-bottom:5px;'>Exibir/Ocultar Colunas:</div>";
+    
     colNames.forEach((name, idx) => {
-      divChecks.innerHTML += `<label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(${idx})"> ${name}</label>`;
+      // Se o índice estiver na lista de desmarcadas, NÃO coloca "checked"
+      const isChecked = !colunasDesmarcadas.includes(idx) ? "checked" : "";
+      divChecks.innerHTML += `<label style="cursor:pointer;"><input type="checkbox" ${isChecked} onclick="alternarColuna(${idx})"> ${name}</label>`;
     });
+    
     document.getElementById("listasBox").prepend(divChecks);
   }
 
