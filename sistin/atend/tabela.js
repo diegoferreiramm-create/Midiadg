@@ -160,7 +160,6 @@ function carregarLista() {
   
   cabecalho.innerHTML = colNames.map((name, idx) => `<th class="col-${idx}">${name}</th>`).join("");
 
-  // CRIA O CONTAINER CHECKS SOMENTE SE NÃO EXISTIR (ISSO FICA ABAIXO DOS FILTROS)
   if(!document.getElementById("containerChecks")){
     const divChecks = document.createElement("div");
     divChecks.id = "containerChecks";
@@ -169,17 +168,10 @@ function carregarLista() {
     colNames.forEach((name, idx) => {
       divChecks.innerHTML += `<label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(${idx})"> ${name}</label>`;
     });
-    // INSERE DEPOIS DOS FILTROS
-    const listasBox = document.getElementById("listasBox");
-    const filtrosAdmin = document.getElementById("filtrosAdmin");
-    if(filtrosAdmin && filtrosAdmin.parentNode === listasBox) {
-      filtrosAdmin.insertAdjacentElement('afterend', divChecks);
-    } else {
-      listasBox.insertBefore(divChecks, listasBox.firstChild.nextSibling);
-    }
+    document.getElementById("listasBox").prepend(divChecks);
   }
 
-  document.getElementById("corpoTabelaListas").innerHTML = "作用<td colspan='20'>Carregando dados......</td>";
+  document.getElementById("corpoTabelaListas").innerHTML = "作用<td colspan='20'>Carregando dados...作用";
 
   fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
     .then(res => res.json())
@@ -188,12 +180,6 @@ function carregarLista() {
       tbody.innerHTML = "";
       
       dados.forEach(item => {
-        // DEBUG - VER O QUE ESTÁ VINDO DO BACKEND
-        console.log("Item recebido:", item);
-        console.log("situacao:", item.situacao);
-        console.log("prazoPendencia:", item.prazoPendencia);
-        console.log("numeroArce:", item.numeroArce);
-        
         let valDataStatus = "";
         for (let key in item) {
           let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
@@ -207,32 +193,32 @@ function carregarLista() {
         }
 
         tbody.innerHTML += ``
-          <td class="col-0">${item.id || ''}</td>
-          <td class="col-1">${item.cpf || ''}</td>
-          <td class="col-2">${item.nome || ''}</td>
-          <td class="col-3">${item.nasc || ''}</td>
-          <td class="col-4">${item.municipio || ''}</td>
-          <td class="col-5">${valTel}</td>
-          <td class="col-6">${item.via || ''}</td>
-          <td class="col-7">${item.parceiro || ''}</td>
-          <td class="col-8">${item.data || ''}</td>
-          <td class="col-9">${item.atendente || ''}</td>
-          <td class="col-10">${item.boleto || ''}</td>
-          <td class="col-11"><b>${item.status || ''}</b></td>
-          <td class="col-12">${item.motivo || ''}</td>
-          <td class="col-13">${valDataStatus}</td>
-          <td class="col-14">${item.carteira || ''}</td>
-          <td class="col-15">${item.lote || ''}</td>
-          <td class="col-16">${item.situacao || ''}</td>
-          <td class="col-17">${item.prazoPendencia || ''}</td>
-          <td class="col-18">${item.numeroArce || ''}</td>
+          <td class="col-0">${item.id || ''}``
+          <td class="col-1">${item.cpf || ''}``
+          <td class="col-2">${item.nome || ''}``
+          <td class="col-3">${item.nasc || ''}``
+          <td class="col-4">${item.municipio || ''}``
+          <td class="col-5">${valTel}``
+          <td class="col-6">${item.via || ''}``
+          <td class="col-7">${item.parceiro || ''}``
+          <td class="col-8">${item.data || ''}``
+          <td class="col-9">${item.atendente || ''}``
+          <td class="col-10">${item.boleto || ''}``
+          <td class="col-11"><b>${item.status || ''}</b>``
+          <td class="col-12">${item.motivo || ''}``
+          <td class="col-13">${valDataStatus}``
+          <td class="col-14">${item.carteira || ''}``
+          <td class="col-15">${item.lote || ''}``
+          <td class="col-16">${item.situacao || ''}``
+          <td class="col-17">${item.prazoPendencia || ''}``
+          <td class="col-18">${item.numeroArce || ''}``
           <td class="col-19">
-            <button onclick="prepararEdicao({id:'${item.id || ''}',cpf:'${item.cpf || ''}',nome:'${(item.nome || '').replace(/'/g, "\\'")}',nasc:'${item.nasc || ''}',municipio:'${(item.municipio || '').replace(/'/g, "\\'")}',tel:'${item.tel || ''}',via:'${item.via || ''}',parceiro:'${item.parceiro || ''}',data:'${item.data || ''}',atendente:'${(item.atendente || '').replace(/'/g, "\\'")}',boleto:'${item.boleto || ''}',status:'${(item.status || '').replace(/'/g, "\\'")}',motivo:'${(item.motivo || '').replace(/'/g, "\\'")}',dataStatus:'${item.dataStatus || ''}',carteira:'${item.carteira || ''}',lote:'${item.lote || ''}',situacao:'${item.situacao || ''}',prazoPendencia:'${item.prazoPendencia || ''}',numeroArce:'${item.numeroArce || ''}'})" style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
-          </td>
-        </tr>`;
+            <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "&#39;")})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
+          ``
+         `;
       });
       
-      const checks = document.querySelectorAll('#containerChecks input[type="checkbox"]');
+      const checks = document.getElementById("containerChecks").querySelectorAll("input");
       checks.forEach((chk, i) => { if(!chk.checked) aplicarOcultacao(i, false); });
       
       if(typeof filtrarTabelaAvancado === 'function') {
@@ -241,7 +227,7 @@ function carregarLista() {
     })
     .catch(err => {
       console.error("Erro:", err);
-      document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='20' style='color:red;'>Erro ao carregar lista do servidor.</td></tr>";
+      document.getElementById("corpoTabelaListas").innerHTML = "器<td colspan='20' style='color:red;'>Erro ao carregar lista do servidor.器</td></tr>";
     });
 }
 
