@@ -14,24 +14,20 @@ function executarBuscaGeral(tipo) {
         return;
       }
       res.forEach(item => {
+        // DATA SOLICITAÇÃO (coluna I)
+        let dataSolicitacao = item.dataSolicitacao || item["DATA SOLICITAÇÃO"] || "-";
+        
         // DATA STATUS (coluna N)
-        let dStat = "";
-        for(let key in item) {
-          if(key.toUpperCase().replace(/\s/g,'') === "DATASTATUS") dStat = item[key];
-        }
-        if(!dStat) dStat = item.dataStatus || item.data_status || item["DATA STATUS"] || "";
+        let dStat = item.dataStatus || item["DATA STATUS"] || "";
         
         // SITUAÇÃO (coluna R)
-        let situacao = item.situacao || item.pagamento || item["SITUACAO"] || item["PAGAMENTO"] || "-";
+        let situacao = item.situacao || item.pagamento || item["SITUACAO"] || "-";
         
         // PRAZO (coluna S)
         let prazo = item.prazoPendencia || item.prazo || item["PRAZO"] || "-";
         
         // Nº ARCE (coluna W)
-        let numeroArce = item.numeroArce || item.processo || item["NUMERO_ARCE"] || item["PROCESSO"] || "-";
-        
-        // DATA SOLICITAÇÃO (coluna I)
-        let dataSolicitacao = item.dataSolicitacao || item["DATA SOLICITAÇÃO"] || "-";
+        let numeroArce = item.numeroArce || item.processo || item["NUMERO_ARCE"] || "-";
         
         div.innerHTML += `
           <div class="res-card">
