@@ -15,6 +15,7 @@ function gerarChecksColunas() {
 }
 
 function filtrarTabelaAvancado(valorForcado) {
+function filtrarTabelaAvancado(valorForcado) {
   const sessao = sessionStorage.getItem("usuario");
   if (!sessao) return;
   const user = JSON.parse(sessao);
@@ -48,24 +49,25 @@ function filtrarTabelaAvancado(valorForcado) {
     if (!td[0]) continue;
     let mostrar = true;
 
-    if (fCpf && td[1]) {
+    // SÓ APLICA O FILTRO SE O CAMPO NÃO ESTIVER VAZIO
+    if (fCpf !== "" && td[1]) {
       const cpfLimpoTabela = td[1].innerText.replace(/\D/g, "");
       if (cpfLimpoTabela.indexOf(fCpf) === -1) mostrar = false;
     }
-    if (fNome && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
-    if (fStatus && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
-    if (fSituacao && td[16] && td[16].innerText.trim().toUpperCase().indexOf(fSituacao) === -1) mostrar = false;
-    if (fPrazo && td[17] && td[17].innerText.trim() !== fPrazo) mostrar = false;
-    if (fProcessoArce && td[18] && td[18].innerText.trim().toUpperCase().indexOf(fProcessoArce) === -1) mostrar = false;
+    if (fNome !== "" && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
+    if (fStatus !== "" && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
+    if (fSituacao !== "" && td[16] && td[16].innerText.trim().toUpperCase().indexOf(fSituacao) === -1) mostrar = false;
+    if (fPrazo !== "" && td[17] && td[17].innerText.trim() !== fPrazo) mostrar = false;
+    if (fProcessoArce !== "" && td[18] && td[18].innerText.trim().toUpperCase().indexOf(fProcessoArce) === -1) mostrar = false;
     
     if (fLote !== "") {
         let txtLote = td[15] ? td[15].innerText.trim().toUpperCase() : "";
         if (txtLote !== fLote) mostrar = false;
     }
     if (isAdmin) {
-      if (fVia && td[6] && td[6].innerText.toUpperCase().indexOf(fVia) === -1) mostrar = false;
-      if (fParc && td[7] && td[7].innerText.toUpperCase().indexOf(fParc) === -1) mostrar = false;
-      if (fAtend && td[9] && td[9].innerText.toUpperCase().indexOf(fAtend) === -1) mostrar = false;
+      if (fVia !== "" && td[6] && td[6].innerText.toUpperCase().indexOf(fVia) === -1) mostrar = false;
+      if (fParc !== "" && td[7] && td[7].innerText.toUpperCase().indexOf(fParc) === -1) mostrar = false;
+      if (fAtend !== "" && td[9] && td[9].innerText.toUpperCase().indexOf(fAtend) === -1) mostrar = false;
     }
     tr[i].style.display = mostrar ? "" : "none";
     if (mostrar) contadorVisiveis++;
