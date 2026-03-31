@@ -160,8 +160,27 @@ function carregarLista() {
   
   cabecalho.innerHTML = colNames.map((name, idx) => `<th class="col-${idx}">${name}</th>`).join("");
 
-  document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='20'>Carregando dados...</td></tr>";
-  
+  // CRIA O CONTAINER CHECKS SOMENTE SE NÃO EXISTIR (ISSO FICA ABAIXO DOS FILTROS)
+  if(!document.getElementById("containerChecks")){
+    const divChecks = document.createElement("div");
+    divChecks.id = "containerChecks";
+    divChecks.style = "display:flex; flex-wrap:wrap; gap:10px; padding:10px; background:#1e293b; border-radius:8px; margin-bottom:10px; font-size:11px; color:#22c55e; border:1px solid #334155;";
+    divChecks.innerHTML = "<div style='width:100%; color:white; font-weight:bold; margin-bottom:5px;'>Exibir/Ocultar Colunas:</div>";
+    colNames.forEach((name, idx) => {
+      divChecks.innerHTML += `<label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(${idx})"> ${name}</label>`;
+    });
+    // INSERE DEPOIS DOS FILTROS
+    const listasBox = document.getElementById("listasBox");
+    const filtrosAdmin = document.getElementById("filtrosAdmin");
+    if(filtrosAdmin && filtrosAdmin.parentNode === listasBox) {
+      filtrosAdmin.insertAdjacentElement('afterend', divChecks);
+    } else {
+      listasBox.insertBefore(divChecks, listasBox.firstChild.nextSibling);
+    }
+  }
+
+  document.getElementById("corpoTabelaListas").innerHTML = "作用<td colspan='20'>Carregando dados......</td>";
+
   fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
     .then(res => res.json())
     .then(dados => {
@@ -169,6 +188,12 @@ function carregarLista() {
       tbody.innerHTML = "";
       
       dados.forEach(item => {
+        // DEBUG - VER O QUE ESTÁ VINDO DO BACKEND
+        console.log("Item recebido:", item);
+        console.log("situacao:", item.situacao);
+        console.log("prazoPendencia:", item.prazoPendencia);
+        console.log("numeroArce:", item.numeroArce);
+        
         let valDataStatus = "";
         for (let key in item) {
           let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
@@ -181,7 +206,7 @@ function carregarLista() {
           if (normalizedKey === "TEL" || normalizedKey === "TELEFONE") { valTel = item[key]; break; }
         }
 
-        tbody.innerHTML += `<tr>
+        tbody.innerHTML += ``
           <td class="col-0">${item.id || ''}</td>
           <td class="col-1">${item.cpf || ''}</td>
           <td class="col-2">${item.nome || ''}</td>
