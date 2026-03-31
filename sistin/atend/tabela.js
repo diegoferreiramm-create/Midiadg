@@ -175,17 +175,23 @@ function carregarLista() {
     // DEFINA AQUI AS COLUNAS QUE DEVEM COMEÇAR DESMARCADAS
     // Coloque o índice das colunas que você NÃO quer que apareçam inicialmente
     const colunasDesmarcadas = [
-      // 3,   // NASC - descomente para desmarcar
-      // 4,   // MUNICIPIO - descomente para desmarcar
-      // 5,   // TEL - descomente para desmarcar
-      // 6,   // VIA - descomente para desmarcar
-      // 7,   // PARCEIRO - descomente para desmarcar
-      // 8,   // DATA - descomente para desmarcar
-      // 9,   // ATENDENTE - descomente para desmarcar
-      // 10,  // BOLETO - descomente para desmarcar
-      // 15,  // LOTE - descomente para desmarcar
-      // 16,  // SITUAÇÃO - descomente para desmarcar
-      // 17   // PRAZO - descomente para desmarcar
+      // 3,   // NASC
+      // 4,   // MUNICIPIO
+      // 5,   // TEL
+      // 6,   // VIA
+      // 7,   // PARCEIRO
+      // 8,   // DATA
+      // 9,   // ATENDENTE
+      // 10,  // BOLETO
+      // 15,  // LOTE
+      // 17,  // PRAZO
+      11,   // STATUS - desmarcado
+      12,   // MOTIVO - desmarcado
+      13,   // DATA STATUS - desmarcado
+      14,   // NUM CARTEIRA - desmarcado
+      16,  // SITUAÇÃO - desmarcado
+      18,   // Nº ARCE - desmarcado
+      19    // AÇÕES - desmarcado
     ];
     
     const divChecks = document.createElement("div");
