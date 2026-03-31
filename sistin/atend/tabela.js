@@ -179,33 +179,35 @@ function carregarLista() {
       const tbody = document.getElementById("corpoTabelaListas");
       tbody.innerHTML = "";
       
-     dados.forEach(item => {
+      dados.forEach(item => {
+        // Pega os valores diretamente dos campos que vêm do backend
+        const dataStatus = item.dataStatus || '';
         const telefone = item.tel || '';
         
-        tbody.innerHTML += ``
-          <td class="col-0">${item.id || ''}``
-          <td class="col-1">${item.cpf || ''}``
-          <td class="col-2">${item.nome || ''}``
-          <td class="col-3">${item.nasc || ''}``
-          <td class="col-4">${item.municipio || ''}``
-          <td class="col-5">${telefone}``
-          <td class="col-6">${item.via || ''}``
-          <td class="col-7">${item.parceiro || ''}``
-          <td class="col-8">${item.dataSolicitacao || ''}``
-          <td class="col-9">${item.atendente || ''}``
-          <td class="col-10">${item.boleto || ''}``
-          <td class="col-11"><b>${item.status || ''}</b>``
-          <td class="col-12">${item.motivo || ''}``
-          <td class="col-13">${item.dataStatus || ''}``
-          <td class="col-14">${item.carteira || ''}``
-          <td class="col-15">${item.lote || ''}``
-          <td class="col-16">${item.situacao || ''}``
-          <td class="col-17">${item.prazoPendencia || ''}``
-          <td class="col-18">${item.numeroArce || ''}``
+        tbody.innerHTML += `<table>
+          <td class="col-0">${item.id || ''}</td>
+          <td class="col-1">${item.cpf || ''}</td>
+          <td class="col-2">${item.nome || ''}</td>
+          <td class="col-3">${item.nasc || ''}</td>
+          <td class="col-4">${item.municipio || ''}</td>
+          <td class="col-5">${telefone}</td>
+          <td class="col-6">${item.via || ''}</td>
+          <td class="col-7">${item.parceiro || ''}</td>
+          <td class="col-8">${item.dataSolicitacao || item.data || ''}</td>
+          <td class="col-9">${item.atendente || ''}</td>
+          <td class="col-10">${item.boleto || ''}</td>
+          <td class="col-11"><b>${item.status || ''}</b></td>
+          <td class="col-12">${item.motivo || ''}</td>
+          <td class="col-13">${dataStatus}</td>
+          <td class="col-14">${item.carteira || ''}</td>
+          <td class="col-15">${item.lote || ''}</td>
+          <td class="col-16">${item.situacao || ''}</td>
+          <td class="col-17">${item.prazoPendencia || ''}</td>
+          <td class="col-18">${item.numeroArce || ''}</td>
           <td class="col-19">
-            <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "&#39;")})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
-          ``
-         `;
+            <button onclick='prepararEdicao(${JSON.stringify(item)})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
+          </td>
+        </tr>`;
       });
       
       const checks = document.getElementById("containerChecks").querySelectorAll("input");
