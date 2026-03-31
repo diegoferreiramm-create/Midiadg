@@ -1,19 +1,4 @@
 // Tabela e Filtros
-function gerarChecksColunas() {
-  const container = document.getElementById("containerChecks");
-  if (!container) return;
-  container.innerHTML = ""; 
-
-  colunasDef.forEach((col) => {
-    const label = document.createElement("label");
-    label.style.cssText = "margin-right:10px; display:inline-flex; align-items:center; gap:5px; cursor:pointer; font-size:12px; white-space:nowrap;";
-    const marcado = colunasParaMarcar.includes(col.label) ? "checked" : "";
-    label.innerHTML = `<input type="checkbox" ${marcado} onchange="filtrarTabelaAvancado()" data-idx="${col.idx}"> ${col.label}`;
-    container.appendChild(label);
-  });
-  setTimeout(filtrarTabelaAvancado, 200);
-}
-
 function filtrarTabelaAvancado(valorForcado) {
   const sessao = sessionStorage.getItem("usuario");
   if (!sessao) return;
