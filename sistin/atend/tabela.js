@@ -58,20 +58,11 @@ function filtrarTabelaAvancado(valorForcado) {
     // STATUS
     if (fStatus !== "" && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
     // SITUAÇÃO
-    if (fSituacao !== "" && td[16]) {
-      const valorTabela = td[16].innerText.trim().toUpperCase();
-      if (valorTabela.indexOf(fSituacao) === -1) mostrar = false;
-    }
+    if (fSituacao !== "" && td[16] && td[16].innerText.trim() !== fSituacao) mostrar = false;
     // PRAZO
-    if (fPrazo !== "" && td[17]) {
-      const valorTabela = td[17].innerText.trim().toUpperCase();
-      if (valorTabela.indexOf(fPrazo) === -1) mostrar = false;
-    }
+    if (fPrazo !== "" && td[17] && td[11].innerText.trim() !== fPrazo) mostrar = false;
     // Nº ARCE
-    if (fProcessoArce !== "" && td[18]) {
-      const valorTabela = td[18].innerText.trim().toUpperCase();
-      if (valorTabela.indexOf(fProcessoArce) === -1) mostrar = false;
-    }
+    if (fProcessoArce !== "" && td[18] && td[11].innerText.trim() !== fProcessoArce) mostrar = false;
     // LOTE
     if (fLote !== "") {
         let txtLote = td[15] ? td[15].innerText.trim().toUpperCase() : "";
