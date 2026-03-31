@@ -171,7 +171,7 @@ function carregarLista() {
     document.getElementById("listasBox").prepend(divChecks);
   }
 
-  document.getElementById("corpoTabelaListas").innerHTML = "作用<td colspan='20'>Carregando dados...</td>";
+  document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='20'>Carregando dados...</td></tr>";
 
   fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
     .then(res => res.json())
@@ -182,36 +182,35 @@ function carregarLista() {
       dados.forEach(item => {
         const telefone = item.tel || '';
         
-        tbody.innerHTML += ``
-          <td class="col-0">${item.id || ''}``
-          <td class="col-1">${item.cpf || ''}``
-          <td class="col-2">${item.nome || ''}``
-          <td class="col-3">${item.nasc || ''}``
-          <td class="col-4">${item.municipio || ''}``
-          <td class="col-5">${telefone}``
-          <td class="col-6">${item.via || ''}``
-          <td class="col-7">${item.parceiro || ''}``
-          <td class="col-8">${item.data || ''}``
-          <td class="col-9">${item.atendente || ''}``
-          <td class="col-10">${item.boleto || ''}``
-          <td class="col-11"><b>${item.status || ''}</b>``
-          <td class="col-12">${item.motivo || ''}``
-          <td class="col-13">${item.dataStatus || ''}``
-          <td class="col-14">${item.carteira || ''}``
-          <td class="col-15">${item.lote || ''}``
-          <td class="col-16">${item.situacao || ''}``
-          <td class="col-17">${item.prazoPendencia || ''}``
-          <td class="col-18">${item.numeroArce || ''}``
+        tbody.innerHTML += `<tr>
+          <td class="col-0">${item.id || ''}</td>
+          <td class="col-1">${item.cpf || ''}</td>
+          <td class="col-2">${item.nome || ''}</td>
+          <td class="col-3">${item.nasc || ''}</td>
+          <td class="col-4">${item.municipio || ''}</td>
+          <td class="col-5">${telefone}</td>
+          <td class="col-6">${item.via || ''}</td>
+          <td class="col-7">${item.parceiro || ''}</td>
+          <td class="col-8">${item.data || ''}</td>
+          <td class="col-9">${item.atendente || ''}</td>
+          <td class="col-10">${item.boleto || ''}</td>
+          <td class="col-11"><b>${item.status || ''}</b></td>
+          <td class="col-12">${item.motivo || ''}</td>
+          <td class="col-13">${item.dataStatus || ''}</td>
+          <td class="col-14">${item.carteira || ''}</td>
+          <td class="col-15">${item.lote || ''}</td>
+          <td class="col-16">${item.situacao || ''}</td>
+          <td class="col-17">${item.prazoPendencia || ''}</td>
+          <td class="col-18">${item.numeroArce || ''}</td>
           <td class="col-19">
-            <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "&#39;")})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
-          ``
-         `;
+            <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "\\'")})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
+          </td>
+        </tr>`;
       });
       
       const checks = document.getElementById("containerChecks").querySelectorAll("input");
       checks.forEach((chk, i) => { if(!chk.checked) aplicarOcultacao(i, false); });
       
-      // Atualiza o contador
       if(typeof filtrarTabelaAvancado === 'function') {
         filtrarTabelaAvancado();
       }
@@ -222,8 +221,10 @@ function carregarLista() {
     });
 }
 
+function alternarColuna(idx) { 
+  aplicarOcultacao(idx, event.target.checked); 
+}
 
-function alternarColuna(idx) { aplicarOcultacao(idx, event.target.checked); }
 function aplicarOcultacao(idx, exibir) {
   document.querySelectorAll(`.col-${idx}`).forEach(c => c.style.display = exibir ? "" : "none");
 }
