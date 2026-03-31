@@ -36,16 +36,13 @@ function executarBuscaGeral(tipo) {
         div.innerHTML += `
           <div class="res-card">
             <b>NOME:</b> ${item.nome}<br>
-            <b>CPF:</b> ${item.cpf} | <b>VIA:</b> ${item.via}<br>
-            <b>DATA SOLICITAÇÃO:</b> ${dataSolicitacao}<br>
-            <b>MUNICÍPIO:</b> ${item.municipio} | <b>PARCEIRO:</b> ${item.parceiro}<br>
+            <b>CPF:</b> ${item.cpf} | <b>VIA:</b> ${item.via} | <b>CADASTRADO:</b> ${dataSolicitacao}<br>
+            <b>MUNICÍPIO:</b> ${item.municipio} | <b>COD. parc.:</b> ${item.parceiro}<br>
             <b>CARTEIRA:</b> ${item.numCarteira || item.carteira || 'N/A'}<br>
-            <b>STATUS:</b> ${item.status || 'Pendente'} | <b>MOTIVO:</b> ${item.motivo || '-'}<br>
-            <b>DATA STATUS:</b> ${dStat}<br>
-            <b>SITUAÇÃO:</b> ${situacao}<br>
-            <b>PRAZO:</b> ${prazo}<br>
-            <b>Nº ARCE:</b> ${numeroArce}<br>
-            <b>ATENDENTE:</b> ${item.atendente}<br>
+            <b>STATUS:</b> ${item.status || 'Pendente'}<br>
+            <b>MOTIVO:</b> ${item.motivo || '-'}<br>
+            <b>DATA STATUS:</b> ${dStat} | <b>SITUAÇÃO:</b> ${situacao} | <b>PRAZO:</b> ${prazo}<br>
+            <b>Nº ARCE:</b> ${numeroArce} | <b>ATENDENTE:</b> ${item.atendente}<br>
           </div>
         `;
       });
