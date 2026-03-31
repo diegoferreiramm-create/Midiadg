@@ -180,6 +180,15 @@ function carregarLista() {
       tbody.innerHTML = "";
       
       dados.forEach(item => {
+        console.log('=== ITEM COMPLETO ===');
+        console.log(item);
+        console.log('dataStatus:', item.dataStatus);
+        console.log('carteira:', item.carteira);
+        console.log('lote:', item.lote);
+        console.log('situacao:', item.situacao);
+        console.log('prazoPendencia:', item.prazoPendencia);
+        console.log('numeroArce:', item.numeroArce);
+        
         const telefone = item.tel || '';
         
         tbody.innerHTML += `<tr>
