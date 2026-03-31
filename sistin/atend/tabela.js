@@ -24,6 +24,10 @@ function filtrarTabelaAvancado(valorForcado) {
   const fNome = document.getElementById("fNome").value.toUpperCase();
   const fStatus = document.getElementById("fStatus").value.trim();
   
+  const fSituacao = document.getElementById("fSituacao") ? document.getElementById("fSituacao").value.trim() : "";
+  const fPrazo = document.getElementById("fPrazo") ? document.getElementById("fPrazo").value.trim() : "";
+  const fProcessoArce = document.getElementById("fProcessoArce") ? document.getElementById("fProcessoArce").value.trim().toUpperCase() : "";
+  
   let fLote = "";
   if (valorForcado) {
     fLote = valorForcado;
@@ -50,10 +54,13 @@ function filtrarTabelaAvancado(valorForcado) {
     }
     if (fNome && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
     if (fStatus && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
+    if (fSituacao && td[16] && td[16].innerText.trim().toUpperCase().indexOf(fSituacao) === -1) mostrar = false;
+    if (fPrazo && td[17] && td[17].innerText.trim() !== fPrazo) mostrar = false;
+    if (fProcessoArce && td[18] && td[18].innerText.trim().toUpperCase().indexOf(fProcessoArce) === -1) mostrar = false;
+    
     if (fLote !== "") {
-        let txtLote = td[16] ? td[16].innerText.trim().toUpperCase() : "";
-        let txtLoteSec = td[15] ? td[15].innerText.trim().toUpperCase() : "";
-        if (txtLote !== fLote && txtLoteSec !== fLote) mostrar = false;
+        let txtLote = td[15] ? td[15].innerText.trim().toUpperCase() : "";
+        if (txtLote !== fLote) mostrar = false;
     }
     if (isAdmin) {
       if (fVia && td[6] && td[6].innerText.toUpperCase().indexOf(fVia) === -1) mostrar = false;
@@ -104,10 +111,41 @@ function carregarLista() {
        inputLote.style.width = "70px";
        fAdmin.appendChild(inputLote);
     }
+    
+    if(!document.getElementById("fSituacao")){
+       const selectSituacao = document.createElement("select");
+       selectSituacao.id = "fSituacao";
+       selectSituacao.onchange = filtrarTabelaAvancado;
+       selectSituacao.style.width = "100px";
+       selectSituacao.innerHTML = '<option value="">SITUAÇÃO</option><option value="PAGO">PAGO</option><option value="ABERTO">ABERTO</option><option value="PENDENTE">PENDENTE</option>';
+       fAdmin.appendChild(selectSituacao);
+    }
+    
+    if(!document.getElementById("fPrazo")){
+       const inputPrazo = document.createElement("input");
+       inputPrazo.id = "fPrazo";
+       inputPrazo.placeholder = "PRAZO";
+       inputPrazo.onkeyup = filtrarTabelaAvancado;
+       inputPrazo.style.width = "70px";
+       fAdmin.appendChild(inputPrazo);
+    }
+    
+    if(!document.getElementById("fProcessoArce")){
+       const inputProcesso = document.createElement("input");
+       inputProcesso.id = "fProcessoArce";
+       inputProcesso.placeholder = "Nº ARCE";
+       inputProcesso.onkeyup = filtrarTabelaAvancado;
+       inputProcesso.style.width = "100px";
+       fAdmin.appendChild(inputProcesso);
+    }
 
     const inputsFiltro = fAdmin.querySelectorAll("input, select");
     inputsFiltro.forEach(el => {
-       el.style.width = el.id === "fNome" ? "200px" : el.id === "fLote" ? "70px" : "auto";
+       el.style.width = el.id === "fNome" ? "200px" : 
+                        el.id === "fLote" ? "70px" : 
+                        el.id === "fPrazo" ? "70px" :
+                        el.id === "fSituacao" ? "100px" :
+                        el.id === "fProcessoArce" ? "100px" : "auto";
        el.style.padding = "5px";
        el.style.fontSize = "12px";
        el.style.border = "1px solid #334155";
@@ -118,7 +156,7 @@ function carregarLista() {
   }
   
   const cabecalho = document.getElementById("cabecalhoTabela");
-  const colNames = ["ID", "CPF", "NOME", "NASC", "MUNICIPIO", "TEL", "VIA", "PARCEIRO", "DATA", "ATENDENTE", "BOLETO", "STATUS", "MOTIVO", "DATA STATUS", "NUM CARTEIRA", "LOTE", "AÇÕES"];
+  const colNames = ["ID", "CPF", "NOME", "NASC", "MUNICIPIO", "TEL", "VIA", "PARCEIRO", "DATA", "ATENDENTE", "BOLETO", "STATUS", "MOTIVO", "DATA STATUS", "NUM CARTEIRA", "LOTE", "SITUAÇÃO", "PRAZO", "Nº ARCE", "AÇÕES"];
   
   cabecalho.innerHTML = colNames.map((name, idx) => `<th class="col-${idx}">${name}</th>`).join("");
 
@@ -133,7 +171,7 @@ function carregarLista() {
     document.getElementById("listasBox").prepend(divChecks);
   }
 
-  document.getElementById("corpoTabelaListas").innerHTML = "]<tr><td colspan='17'>Carregando dados...</td></tr>";
+  document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='20'>Carregando dados...</td></tr>";
   
   fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
     .then(res => res.json())
@@ -171,7 +209,10 @@ function carregarLista() {
           <td class="col-13">${valDataStatus}</td>
           <td class="col-14">${item.carteira || ''}</td>
           <td class="col-15">${item.lote || ''}</td>
-          <td class="col-16">
+          <td class="col-16">${item.situacao || item.pagamento || '-'}</td>
+          <td class="col-17">${item.prazo || item.prazoPendencia || '-'}</td>
+          <td class="col-18">${item.numeroArce || item.processo || '-'}</td>
+          <td class="col-19">
             <button onclick='prepararEdicao(${JSON.stringify(item)})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
           </td>
         </tr>`;
@@ -181,7 +222,7 @@ function carregarLista() {
       checks.forEach((chk, i) => { if(!chk.checked) aplicarOcultacao(i, false); });
     })
     .catch(err => {
-      document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='17' style='color:red;'>Erro ao carregar lista do servidor.</td></tr>";
+      document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='20' style='color:red;'>Erro ao carregar lista do servidor.</td></tr>";
     });
 }
 
