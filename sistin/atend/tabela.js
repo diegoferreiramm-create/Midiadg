@@ -160,19 +160,8 @@ function carregarLista() {
   
   cabecalho.innerHTML = colNames.map((name, idx) => `<th class="col-${idx}">${name}</th>`).join("");
 
-  if(!document.getElementById("containerChecks")){
-    const divChecks = document.createElement("div");
-    divChecks.id = "containerChecks";
-    divChecks.style = "display:flex; flex-wrap:wrap; gap:10px; padding:10px; background:#1e293b; border-radius:8px; margin-bottom:10px; font-size:11px; color:#22c55e; border:1px solid #334155;";
-    divChecks.innerHTML = "<div style='width:100%; color:white; font-weight:bold; margin-bottom:5px;'>Exibir/Ocultar Colunas:</div>";
-    colNames.forEach((name, idx) => {
-      divChecks.innerHTML += `<label style="cursor:pointer;"><input type="checkbox" checked onclick="alternarColuna(${idx})"> ${name}</label>`;
-    });
-    document.getElementById("listasBox").prepend(divChecks);
-  }
-
-  document.getElementById("corpoTabelaListas").innerHTML = "作用<td colspan='20'>Carregando dados...</td>";
-
+  document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='20'>Carregando dados...</td></tr>";
+  
   fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
     .then(res => res.json())
     .then(dados => {
@@ -180,40 +169,47 @@ function carregarLista() {
       tbody.innerHTML = "";
       
       dados.forEach(item => {
-        // Pega os valores diretamente dos campos que vêm do backend
-        const dataStatus = item.dataStatus || '';
-        const telefone = item.tel || '';
+        let valDataStatus = "";
+        for (let key in item) {
+          let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
+          if (normalizedKey === "DATASTATUS") { valDataStatus = item[key]; break; }
+        }
         
-        tbody.innerHTML += `<table>
+        let valTel = "";
+        for (let key in item) {
+          let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
+          if (normalizedKey === "TEL" || normalizedKey === "TELEFONE") { valTel = item[key]; break; }
+        }
+
+        tbody.innerHTML += `<tr>
           <td class="col-0">${item.id || ''}</td>
           <td class="col-1">${item.cpf || ''}</td>
           <td class="col-2">${item.nome || ''}</td>
           <td class="col-3">${item.nasc || ''}</td>
           <td class="col-4">${item.municipio || ''}</td>
-          <td class="col-5">${telefone}</td>
+          <td class="col-5">${valTel}</td>
           <td class="col-6">${item.via || ''}</td>
           <td class="col-7">${item.parceiro || ''}</td>
-          <td class="col-8">${item.dataSolicitacao || item.data || ''}</td>
+          <td class="col-8">${item.data || ''}</td>
           <td class="col-9">${item.atendente || ''}</td>
           <td class="col-10">${item.boleto || ''}</td>
           <td class="col-11"><b>${item.status || ''}</b></td>
           <td class="col-12">${item.motivo || ''}</td>
-          <td class="col-13">${dataStatus}</td>
+          <td class="col-13">${valDataStatus}</td>
           <td class="col-14">${item.carteira || ''}</td>
           <td class="col-15">${item.lote || ''}</td>
           <td class="col-16">${item.situacao || ''}</td>
           <td class="col-17">${item.prazoPendencia || ''}</td>
           <td class="col-18">${item.numeroArce || ''}</td>
           <td class="col-19">
-            <button onclick='prepararEdicao(${JSON.stringify(item)})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
+            <button onclick="prepararEdicao({id:'${item.id || ''}',cpf:'${item.cpf || ''}',nome:'${(item.nome || '').replace(/'/g, "\\'")}',nasc:'${item.nasc || ''}',municipio:'${(item.municipio || '').replace(/'/g, "\\'")}',tel:'${item.tel || ''}',via:'${item.via || ''}',parceiro:'${item.parceiro || ''}',data:'${item.data || ''}',atendente:'${(item.atendente || '').replace(/'/g, "\\'")}',boleto:'${item.boleto || ''}',status:'${(item.status || '').replace(/'/g, "\\'")}',motivo:'${(item.motivo || '').replace(/'/g, "\\'")}',dataStatus:'${item.dataStatus || ''}',carteira:'${item.carteira || ''}',lote:'${item.lote || ''}',situacao:'${item.situacao || ''}',prazoPendencia:'${item.prazoPendencia || ''}',numeroArce:'${item.numeroArce || ''}'})" style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
           </td>
         </tr>`;
       });
       
-      const checks = document.getElementById("containerChecks").querySelectorAll("input");
+      const checks = document.querySelectorAll('#containerChecks input[type="checkbox"]');
       checks.forEach((chk, i) => { if(!chk.checked) aplicarOcultacao(i, false); });
       
-      // Atualiza o contador
       if(typeof filtrarTabelaAvancado === 'function') {
         filtrarTabelaAvancado();
       }
@@ -224,8 +220,8 @@ function carregarLista() {
     });
 }
 
-
 function alternarColuna(idx) { aplicarOcultacao(idx, event.target.checked); }
+
 function aplicarOcultacao(idx, exibir) {
   document.querySelectorAll(`.col-${idx}`).forEach(c => c.style.display = exibir ? "" : "none");
 }
