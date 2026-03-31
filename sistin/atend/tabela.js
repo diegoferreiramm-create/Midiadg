@@ -15,7 +15,6 @@ function gerarChecksColunas() {
 }
 
 function filtrarTabelaAvancado(valorForcado) {
-function filtrarTabelaAvancado(valorForcado) {
   const sessao = sessionStorage.getItem("usuario");
   if (!sessao) return;
   const user = JSON.parse(sessao);
