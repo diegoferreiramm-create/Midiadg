@@ -180,43 +180,43 @@ function carregarLista() {
       tbody.innerHTML = "";
       
       dados.forEach(item => {
-        let valDataStatus = "";
-        for (let key in item) {
-          let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
-          if (normalizedKey === "DATASTATUS") { valDataStatus = item[key]; break; }
-        }
-        
-        let valTel = "";
-        for (let key in item) {
-          let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
-          if (normalizedKey === "TEL" || normalizedKey === "TELEFONE") { valTel = item[key]; break; }
-        }
+  let valDataStatus = "";
+  for (let key in item) {
+    let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
+    if (normalizedKey === "DATASTATUS") { valDataStatus = item[key]; break; }
+  }
+  
+  let valTel = "";
+  for (let key in item) {
+    let normalizedKey = key.toUpperCase().replace(/\s|_/g, "");
+    if (normalizedKey === "TEL" || normalizedKey === "TELEFONE") { valTel = item[key]; break; }
+  }
 
-        tbody.innerHTML += ``
-          <td class="col-0">${item.id || ''}``
-          <td class="col-1">${item.cpf || ''}``
-          <td class="col-2">${item.nome || ''}``
-          <td class="col-3">${item.nasc || ''}``
-          <td class="col-4">${item.municipio || ''}``
-          <td class="col-5">${valTel}``
-          <td class="col-6">${item.via || ''}``
-          <td class="col-7">${item.parceiro || ''}``
-          <td class="col-8">${item.data || ''}``
-          <td class="col-9">${item.atendente || ''}``
-          <td class="col-10">${item.boleto || ''}``
-          <td class="col-11"><b>${item.status || ''}</b>``
-          <td class="col-12">${item.motivo || ''}``
-          <td class="col-13">${valDataStatus}``
-          <td class="col-14">${item.carteira || ''}``
-          <td class="col-15">${item.lote || ''}``
-          <td class="col-16">${item.situacao || ''}``
-          <td class="col-17">${item.prazoPendencia || ''}``
-          <td class="col-18">${item.numeroArce || ''}``
-          <td class="col-19">
-            <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "&#39;")})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
-          ``
-         `;
-      });
+  tbody.innerHTML += ``
+    <td class="col-0">${item.id || ''}``
+    <td class="col-1">${item.cpf || ''}``
+    <td class="col-2">${item.nome || ''}``
+    <td class="col-3">${item.nasc || ''}``
+    <td class="col-4">${item.municipio || ''}``
+    <td class="col-5">${valTel}``
+    <td class="col-6">${item.via || ''}``
+    <td class="col-7">${item.parceiro || ''}``
+    <td class="col-8">${item.data || ''}``
+    <td class="col-9">${item.atendente || ''}``
+    <td class="col-10">${item.boleto || ''}``
+    <td class="col-11"><b>${item.status || ''}</b>``
+    <td class="col-12">${item.motivo || ''}``
+    <td class="col-13">${valDataStatus}``
+    <td class="col-14">${item.carteira || ''}``
+    <td class="col-15">${item.lote || ''}``
+    <td class="col-16">${item.situacao || ''}``
+    <td class="col-17">${item.prazoPendencia || ''}``
+    <td class="col-18">${item.numeroArce || ''}``
+    <td class="col-19">
+      <button onclick='prepararEdicao(${JSON.stringify(item)})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
+    ``
+   `;
+});
       
       const checks = document.getElementById("containerChecks").querySelectorAll("input");
       checks.forEach((chk, i) => { if(!chk.checked) aplicarOcultacao(i, false); });
