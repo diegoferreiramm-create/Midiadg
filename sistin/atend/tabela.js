@@ -103,12 +103,9 @@ function filtrarTabelaAvancado(valorForcado) {
   });
 }
 
-function carregarLista() {
-  const user = JSON.parse(sessionStorage.getItem("usuario"));
-  const isAdmin = (user.parceiro.toString() === "97");
-  
-  const fAdmin = document.getElementById("filtrosAdmin");
+const fAdmin = document.getElementById("filtrosAdmin");
 if(fAdmin) {
+  // APENAS OS ESTILOS, SEM CRIAR NOVOS FILTROS
   fAdmin.style.display = "flex";
   fAdmin.style.flexDirection = "row";
   fAdmin.style.flexWrap = "wrap";
@@ -119,61 +116,8 @@ if(fAdmin) {
   fAdmin.style.background = "#0f172a";
   fAdmin.style.borderRadius = "8px";
   fAdmin.style.marginBottom = "10px";
-  
-  if(!document.getElementById("fLote")){
-     const inputLote = document.createElement("input");
-     inputLote.id = "fLote";
-     inputLote.placeholder = "LOTE";
-     inputLote.onkeyup = function() { filtrarTabelaAvancado(); };
-     inputLote.style.width = "70px";
-     fAdmin.appendChild(inputLote);
-  }
-  
-  if(!document.getElementById("fSituacao")){
-     const selectSituacao = document.createElement("select");
-     selectSituacao.id = "fSituacao";
-     selectSituacao.onchange = function() { filtrarTabelaAvancado(); };
-     selectSituacao.style.width = "100px";
-     selectSituacao.innerHTML = '<option value="">SITUAÇÃO</option><option value="PAGO">PAGO</option><option value="ABERTO">ABERTO</option><option value="PENDENTE">PENDENTE</option>';
-     fAdmin.appendChild(selectSituacao);
-  }
-  
-  if(!document.getElementById("fPrazo")){
-     const inputPrazo = document.createElement("input");
-     inputPrazo.id = "fPrazo";
-     inputPrazo.placeholder = "PRAZO";
-     inputPrazo.onkeyup = function() { filtrarTabelaAvancado(); };
-     inputPrazo.style.width = "70px";
-     fAdmin.appendChild(inputPrazo);
-  }
-  
-  if(!document.getElementById("fProcessoArce")){
-     const inputProcesso = document.createElement("input");
-     inputProcesso.id = "fProcessoArce";
-     inputProcesso.placeholder = "Nº ARCE";
-     inputProcesso.onkeyup = function() { filtrarTabelaAvancado(); };
-     inputProcesso.style.width = "100px";
-     fAdmin.appendChild(inputProcesso);
-  }
-  
-  // Botão VER ABERTOS
-  if(!document.getElementById("btnVerAbertos")){
-     const btnAbertos = document.createElement("button");
-     btnAbertos.id = "btnVerAbertos";
-     btnAbertos.innerHTML = "VER ABERTOS";
-     btnAbertos.onclick = function() { filtrarTabelaAvancado('#'); };
-     btnAbertos.style.height = "36px";
-     btnAbertos.style.padding = "0 12px";
-     btnAbertos.style.borderRadius = "4px";
-     btnAbertos.style.border = "none";
-     btnAbertos.style.background = "#3b82f6";
-     btnAbertos.style.color = "white";
-     btnAbertos.style.cursor = "pointer";
-     btnAbertos.style.fontSize = "12px";
-     btnAbertos.style.fontWeight = "bold";
-     fAdmin.appendChild(btnAbertos);
-  }
 
+  // SÓ APLICA OS ESTILOS NOS FILTROS EXISTENTES
   const inputsFiltro = fAdmin.querySelectorAll("input, select, button");
   inputsFiltro.forEach(el => {
      if(el.id === "fCpf") {
@@ -212,7 +156,6 @@ if(fAdmin) {
      el.style.boxSizing = "border-box";
   });
   
-  // Ajuste específico para o botão
   const btnVerAbertos = document.getElementById("btnVerAbertos");
   if(btnVerAbertos) {
     btnVerAbertos.style.background = "#3b82f6";
