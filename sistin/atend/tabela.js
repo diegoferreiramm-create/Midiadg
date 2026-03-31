@@ -103,66 +103,68 @@ function filtrarTabelaAvancado(valorForcado) {
   });
 }
 
-const fAdmin = document.getElementById("filtrosAdmin");
-if(fAdmin) {
-  // APENAS OS ESTILOS, SEM CRIAR NOVOS FILTROS
-  fAdmin.style.display = "flex";
-  fAdmin.style.flexDirection = "row";
-  fAdmin.style.flexWrap = "wrap";
-  fAdmin.style.gap = "8px";
-  fAdmin.style.alignItems = "center";
-  fAdmin.style.justifyContent = "flex-start";
-  fAdmin.style.padding = "12px";
-  fAdmin.style.background = "#0f172a";
-  fAdmin.style.borderRadius = "8px";
-  fAdmin.style.marginBottom = "10px";
-
-  // SÓ APLICA OS ESTILOS NOS FILTROS EXISTENTES
-  const inputsFiltro = fAdmin.querySelectorAll("input, select, button");
-  inputsFiltro.forEach(el => {
-     if(el.id === "fCpf") {
-       el.style.width = "120px";
-     } else if(el.id === "fNome") {
-       el.style.width = "200px";
-     } else if(el.id === "fStatus") {
-       el.style.width = "250px";
-     } else if(el.id === "fLote") {
-       el.style.width = "70px";
-     } else if(el.id === "fPrazo") {
-       el.style.width = "70px";
-     } else if(el.id === "fSituacao") {
-       el.style.width = "100px";
-     } else if(el.id === "fProcessoArce") {
-       el.style.width = "100px";
-     } else if(el.id === "fParceiro") {
-       el.style.width = "120px";
-     } else if(el.id === "fAtend") {
-       el.style.width = "130px";
-     } else if(el.id === "fVia") {
-       el.style.width = "80px";
-     } else if(el.id === "btnVerAbertos") {
-       el.style.width = "auto";
-     } else {
-       el.style.width = "auto";
-     }
-     
-     el.style.padding = "6px 10px";
-     el.style.fontSize = "12px";
-     el.style.border = "1px solid #334155";
-     el.style.borderRadius = "4px";
-     el.style.background = "#1e293b";
-     el.style.color = "white";
-     el.style.height = "36px";
-     el.style.boxSizing = "border-box";
-  });
+function carregarLista() {
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  const isAdmin = (user.parceiro.toString() === "97");
   
-  const btnVerAbertos = document.getElementById("btnVerAbertos");
-  if(btnVerAbertos) {
-    btnVerAbertos.style.background = "#3b82f6";
-    btnVerAbertos.style.border = "none";
-    btnVerAbertos.style.cursor = "pointer";
+  const fAdmin = document.getElementById("filtrosAdmin");
+  if(fAdmin) {
+    fAdmin.style.display = "flex";
+    fAdmin.style.flexDirection = "row";
+    fAdmin.style.flexWrap = "wrap";
+    fAdmin.style.gap = "8px";
+    fAdmin.style.alignItems = "center";
+    fAdmin.style.justifyContent = "flex-start";
+    fAdmin.style.padding = "12px";
+    fAdmin.style.background = "#0f172a";
+    fAdmin.style.borderRadius = "8px";
+    fAdmin.style.marginBottom = "10px";
+
+    const inputsFiltro = fAdmin.querySelectorAll("input, select, button");
+    inputsFiltro.forEach(el => {
+       if(el.id === "fCpf") {
+         el.style.width = "120px";
+       } else if(el.id === "fNome") {
+         el.style.width = "200px";
+       } else if(el.id === "fStatus") {
+         el.style.width = "250px";
+       } else if(el.id === "fLote") {
+         el.style.width = "70px";
+       } else if(el.id === "fPrazo") {
+         el.style.width = "70px";
+       } else if(el.id === "fSituacao") {
+         el.style.width = "100px";
+       } else if(el.id === "fProcessoArce") {
+         el.style.width = "100px";
+       } else if(el.id === "fParceiro") {
+         el.style.width = "120px";
+       } else if(el.id === "fAtend") {
+         el.style.width = "130px";
+       } else if(el.id === "fVia") {
+         el.style.width = "80px";
+       } else if(el.id === "btnVerAbertos") {
+         el.style.width = "auto";
+       } else {
+         el.style.width = "auto";
+       }
+       
+       el.style.padding = "6px 10px";
+       el.style.fontSize = "12px";
+       el.style.border = "1px solid #334155";
+       el.style.borderRadius = "4px";
+       el.style.background = "#1e293b";
+       el.style.color = "white";
+       el.style.height = "36px";
+       el.style.boxSizing = "border-box";
+    });
+    
+    const btnVerAbertos = document.getElementById("btnVerAbertos");
+    if(btnVerAbertos) {
+      btnVerAbertos.style.background = "#3b82f6";
+      btnVerAbertos.style.border = "none";
+      btnVerAbertos.style.cursor = "pointer";
+    }
   }
-}
   
   const cabecalho = document.getElementById("cabecalhoTabela");
   const colNames = ["ID", "CPF", "NOME", "NASC", "MUNICIPIO", "TEL", "VIA", "PARCEIRO", "DATA", "ATENDENTE", "BOLETO", "STATUS", "MOTIVO", "DATA STATUS", "NUM CARTEIRA", "LOTE", "SITUAÇÃO", "PRAZO", "Nº ARCE", "AÇÕES"];
