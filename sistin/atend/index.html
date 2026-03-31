@@ -33,8 +33,6 @@
     <div class="card" onclick="abrirTela('entregarBox')">Entregar</div>
     <div class="card" onclick="abrirTela('listasBox')">Listas</div>
   </div> 
-  <div style="position: absolute; left: 30px; bottom: 30px;">
-</div>
 </div>
 
 <div id="cadastrarBox" style="display:none;">
@@ -75,10 +73,10 @@
 
     <div class="via-container">
       <label class="via-option">
-        <input type="radio" name="viaEntrega" id="via1" value="1" checked> 1ª VIA
+        <input type="radio" name="viaEntrega" id="viaEntrega1" value="1" checked> 1ª VIA
       </label>
       <label class="via-option">
-        <input type="radio" name="viaEntrega" id="via2" value="2"> 2ª VIA
+        <input type="radio" name="viaEntrega" id="viaEntrega2" value="2"> 2ª VIA
       </label>
     </div>
 
@@ -153,49 +151,57 @@
     
     <h2 style="margin: 0 0 8px 0; text-align: center; font-size: 1.6rem;">Relatório Geral de Cadastros</h2>
     
-    <div class="filtros-lista" style="display: flex; flex-direction: row; flex-wrap: nowrap; gap: 5px; justify-content: flex-start; align-items: center; background: #0f172a; padding: 6px; border-radius: 8px; overflow-x: auto;">
+    <!-- CONTAINER DE FILTROS - TODOS OS FILTROS ESTÃO AQUI -->
+    <div id="filtrosAdmin" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-start; background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
       
-      <input type="text" id="fCpf" placeholder="CPF..." onkeyup="filtrarTabelaAvancado()" style="width: 130px; height: 38px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
-
-      <input type="text" id="fNome" placeholder="NOME..." onkeyup="filtrarTabelaAvancado()" style="width: 180px; height: 38px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      <input type="text" id="fCpf" placeholder="CPF..." onkeyup="filtrarTabelaAvancado()" style="width: 120px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
       
-      <select id="fStatus" onchange="filtrarTabelaAvancado()" style="width: 280px; height: 38px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; cursor: pointer; box-sizing: border-box;">
-          <option value="">STATUS (TODOS)</option>
-          <option value="Pedido a caminho da ARCE">Pedido a caminho da ARCE</option>
-          <option value="Pedido entregue pela Entidade à ARCE">Pedido entregue pela Entidade à ARCE</option>
-          <option value="Em análise pela ARCE">Em análise pela ARCE</option>
-          <option value="Solicitação Indeferida pela ARCE">Solicitação Indeferida pela ARCE</option>
-          <option value="Solicitação Indeferida na Entidade Estudantil">Solicitação Indeferida na Entidade Estudantil</option>
-          <option value="Aguardando Fechamento do Lote pela ARCE">Aguardando Fechamento do Lote pela ARCE</option>
-          <option value="Lote Disponível para Gráfica">Lote Disponível para Gráfica</option>
-          <option value="Lote Recebido pela Gráfica">Lote Recebido pela Gráfica</option>
-          <option value="Lote Enviado ao Sindiônibus">Lote Enviado ao Sindiônibus</option>
-          <option value="Lote Recebido pelo Sindiônibus">Lote Recebido pelo Sindiônibus</option>
-          <option value="Lote Enviado para a Entidade Estudantil">Lote Enviado para a Entidade Estudantil</option>
-          <option value="Lote Recebido pela Entidade Estudantil">Lote Recebido pela Entidade Estudantil</option>
-          <option value="Carteira Pronta para Entrega">Carteira Pronta para Entrega</option>
-          <option value="Carteira Recebida pelo Aluno">Carteira Recebida pelo Aluno</option>
+      <input type="text" id="fNome" placeholder="NOME..." onkeyup="filtrarTabelaAvancado()" style="width: 200px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <select id="fStatus" onchange="filtrarTabelaAvancado()" style="width: 250px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; cursor: pointer; box-sizing: border-box;">
+        <option value="">STATUS (TODOS)</option>
+        <option value="Pedido a caminho da ARCE">Pedido a caminho da ARCE</option>
+        <option value="Pedido entregue pela Entidade à ARCE">Pedido entregue pela Entidade à ARCE</option>
+        <option value="Em análise pela ARCE">Em análise pela ARCE</option>
+        <option value="Solicitação Indeferida pela ARCE">Solicitação Indeferida pela ARCE</option>
+        <option value="Solicitação Indeferida na Entidade Estudantil">Solicitação Indeferida na Entidade Estudantil</option>
+        <option value="Aguardando Fechamento do Lote pela ARCE">Aguardando Fechamento do Lote pela ARCE</option>
+        <option value="Lote Disponível para Gráfica">Lote Disponível para Gráfica</option>
+        <option value="Lote Recebido pela Gráfica">Lote Recebido pela Gráfica</option>
+        <option value="Lote Enviado ao Sindiônibus">Lote Enviado ao Sindiônibus</option>
+        <option value="Lote Recebido pelo Sindiônibus">Lote Recebido pelo Sindiônibus</option>
+        <option value="Lote Enviado para a Entidade Estudantil">Lote Enviado para a Entidade Estudantil</option>
+        <option value="Lote Recebido pela Entidade Estudantil">Lote Recebido pela Entidade Estudantil</option>
+        <option value="Carteira Pronta para Entrega">Carteira Pronta para Entrega</option>
+        <option value="Carteira Recebida pelo Aluno">Carteira Recebida pelo Aluno</option>
       </select>
-
-      <div id="filtrosAdmin" style="display: none; flex-direction: row; gap: 5px; align-items: center;">
-        <input type="text" id="fParceiro" placeholder="PARCEIRO" onkeyup="filtrarTabelaAvancado()" style="width: 100px; height: 38px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
-        <input type="text" id="fAtend" placeholder="ATENDENTE" onkeyup="filtrarTabelaAvancado()" style="width: 110px; height: 38px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
-        <select id="fVia" onchange="filtrarTabelaAvancado()" style="width: 80px; height: 38px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
-          <option value="">VIA</option>
-          <option value="1ª">1ª Via</option>
-          <option value="2ª">2ª Via</option>
-        </select>
-        
-        <div style="display: flex; gap: 4px; align-items: center;">
-          <input type="text" id="fLote" placeholder="LOTE" onkeyup="filtrarTabelaAvancado()" 
-                 style="width: 70px; height: 38px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
-          
-          <button type="button" onclick="filtrarTabelaAvancado('#')" 
-                  style="height: 38px; padding: 0 10px; border-radius: 4px; border: none; background: #3b82f6; color: white; cursor: pointer; font-size: 11px; font-weight: bold; white-space: nowrap;">
-            VER ABERTOS
-          </button>
-        </div>
-      </div>
+      
+      <input type="text" id="fParceiro" placeholder="PARCEIRO" onkeyup="filtrarTabelaAvancado()" style="width: 120px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <input type="text" id="fAtend" placeholder="ATENDENTE" onkeyup="filtrarTabelaAvancado()" style="width: 130px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <select id="fVia" onchange="filtrarTabelaAvancado()" style="width: 80px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+        <option value="">VIA</option>
+        <option value="1ª">1ª Via</option>
+        <option value="2ª">2ª Via</option>
+      </select>
+      
+      <input type="text" id="fLote" placeholder="LOTE" onkeyup="filtrarTabelaAvancado()" style="width: 70px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <select id="fSituacao" onchange="filtrarTabelaAvancado()" style="width: 100px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+        <option value="">SITUAÇÃO</option>
+        <option value="PAGO">PAGO</option>
+        <option value="ABERTO">ABERTO</option>
+        <option value="PENDENTE">PENDENTE</option>
+      </select>
+      
+      <input type="text" id="fPrazo" placeholder="PRAZO" onkeyup="filtrarTabelaAvancado()" style="width: 70px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <input type="text" id="fProcessoArce" placeholder="Nº ARCE" onkeyup="filtrarTabelaAvancado()" style="width: 100px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <button type="button" onclick="filtrarTabelaAvancado('#')" style="height: 36px; padding: 0 12px; border-radius: 4px; border: none; background: #3b82f6; color: white; cursor: pointer; font-size: 12px; font-weight: bold; white-space: nowrap;">
+        VER ABERTOS
+      </button>
     </div>
       
     <div class="tabela-container" id="areaImpressao" style="margin-top: 5px;">
@@ -204,7 +210,7 @@
           <tr id="cabecalhoTabela"> </tr>
         </thead>
         <tbody id="corpoTabelaListas"></tbody>
-       </table>
+      </table>
     </div>
 
     <div style="display: flex; flex-direction: column; align-items: center; margin-top: 10px; width: 100%; gap: 8px;">
@@ -214,46 +220,38 @@
       </div>
 
       <div style="display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap;">
-        
         <button onclick="fecharLotePorParceiro()" style="width: 150px; background: #ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; padding: 8px 0;">FECHAR LOTE</button>
-        
-        <!-- NOVO BOTÃO DE REIMPRESSÃO DE LOTE -->
         <button onclick="reimprimirLote()" style="width: 150px; background: #10b981; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; padding: 8px 0;">REIMPRIMIR LOTE</button>
-        
         <button onclick="imprimirLista()" style="width: 150px; background: #3b82f6; margin:0; padding: 8px 0;">Imprimir Lista</button>
-        
         <button class="cancel" onclick="abrirTela('menuBox')" style="width: 150px; margin:0; padding: 8px 0;">Voltar ao Menu</button>
       </div>
     </div>
   </div>
 </div>
   
-<div id="corrigirBox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; display:none; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+<div id="corrigirBox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
   <div style="width:100%; max-width:480px; background:#1e293b; border:1px solid #334155; padding:30px; border-radius:16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
     
     <div style="text-align:center; margin-bottom:20px;">
-      <h2 style="color:#eab308; margin:0; font-size:24px; letter-spacing: -0.5px;">Corrigir Registro</h2>
+      <h2 style="color:#eab308; margin:0; font-size:24px;">Corrigir Registro</h2>
       <p style="color:#94a3b8; font-size:13px; margin-top:5px;">Ajuste as informações do aluno abaixo</p>
     </div>
 
     <div style="background:#0f172a; padding:12px; border-radius:10px; margin-bottom:20px; border:1px solid #eab308; text-align:center; position:relative;">
-      <span style="position:absolute; top:-8px; left:50%; transform:translateX(-50%); background:#1e293b; padding:0 10px; color:#eab308; font-size:10px; font-weight:bold; text-transform:uppercase;">Via Atual</span>
-      <div id="edit_label_via" style="color:#fff; font-weight:bold; font-size:16px; letter-spacing:1px;">---</div>
+      <span style="position:absolute; top:-8px; left:50%; transform:translateX(-50%); background:#1e293b; padding:0 10px; color:#eab308; font-size:10px; font-weight:bold;">Via Atual</span>
+      <div id="edit_label_via" style="color:#fff; font-weight:bold; font-size:16px;">---</div>
       <input type="hidden" id="edit_via_hidden">
     </div>
 
     <div style="display:grid; grid-template-columns: 1fr; gap:15px;">
-      
       <div>
         <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">CPF</label>
         <input id="edit_cpf" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;" readonly>
       </div>
-
       <div>
         <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">NOME COMPLETO</label>
         <input id="edit_nome" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;">
       </div>
-
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
         <div>
           <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">NASCIMENTO</label>
@@ -264,61 +262,49 @@
           <input id="edit_codigoBoleto" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;">
         </div>
       </div>
-
       <div>
         <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">MUNICÍPIO</label>
         <input id="edit_municipio" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;">
       </div>
-
       <div>
         <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">TELEFONE</label>
         <input id="edit_telefone" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;">
       </div>
-
     </div>
 
     <div style="display:flex; gap:12px; margin-top:30px;">
-      <button onclick="executarEdicao()" style="flex:1; background:#eab308; color:#000; font-weight:700; border:none; padding:14px; border-radius:10px; cursor:pointer; font-size:14px; transition: 0.2s; text-transform:uppercase;">Salvar Dados</button>
-      <button onclick="document.getElementById('corrigirBox').style.display='none'" style="flex:1; background:#334155; color:#fff; font-weight:600; border:none; padding:14px; border-radius:10px; cursor:pointer; font-size:14px; transition: 0.2s;">Voltar</button>
+      <button onclick="executarEdicao()" style="flex:1; background:#eab308; color:#000; font-weight:700; border:none; padding:14px; border-radius:10px; cursor:pointer; font-size:14px;">Salvar Dados</button>
+      <button onclick="document.getElementById('corrigirBox').style.display='none'" style="flex:1; background:#334155; color:#fff; font-weight:600; border:none; padding:14px; border-radius:10px; cursor:pointer; font-size:14px;">Voltar</button>
     </div>
-
-    <div id="msgCorrecao" style="text-align:center; margin-top:15px; font-size:13px; font-weight:bold; color:#eab308;"></div>
+    <div id="msgCorrecao" style="text-align:center; margin-top:15px; font-size:13px; color:#eab308;"></div>
   </div>
 </div>
 
 <!-- MODAL PARA REIMPRESSÃO DE LOTE -->
 <div id="modalReimprimirLote" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10001; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
-  <div style="width:100%; max-width:400px; background:#1e293b; border:1px solid #334155; padding:30px; border-radius:16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
-    
+  <div style="width:100%; max-width:400px; background:#1e293b; border:1px solid #334155; padding:30px; border-radius:16px;">
     <div style="text-align:center; margin-bottom:20px;">
       <h2 style="color:#10b981; margin:0; font-size:24px;">Reimprimir Lote</h2>
-      <p style="color:#94a3b8; font-size:13px; margin-top:5px;">Informe os dados do lote que deseja reimprimir</p>
+      <p style="color:#94a3b8; font-size:13px;">Informe os dados do lote que deseja reimprimir</p>
     </div>
-
     <div style="display:grid; grid-template-columns: 1fr; gap:20px;">
-      
       <div>
         <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:8px; display:block;">PARCEIRO</label>
-        <select id="modalParceiro" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:12px; border-radius:8px; outline:none; font-size:14px;">
+        <select id="modalParceiro" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:12px; border-radius:8px;">
           <option value="">SELECIONE O PARCEIRO</option>
         </select>
       </div>
-
       <div>
         <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:8px; display:block;">NÚMERO DO LOTE</label>
-        <input id="modalLote" type="number" placeholder="Digite o número do lote" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:12px; border-radius:8px; outline:none; font-size:14px;">
+        <input id="modalLote" type="number" placeholder="Digite o número do lote" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:12px; border-radius:8px;">
       </div>
-
     </div>
-
     <div style="display:flex; gap:12px; margin-top:30px;">
-      <button onclick="confirmarReimprimirLote()" style="flex:1; background:#10b981; color:#fff; font-weight:700; border:none; padding:12px; border-radius:8px; cursor:pointer; font-size:14px;">REIMPRIMIR</button>
-      <button onclick="fecharModalReimprimir()" style="flex:1; background:#334155; color:#fff; font-weight:600; border:none; padding:12px; border-radius:8px; cursor:pointer; font-size:14px;">CANCELAR</button>
+      <button onclick="confirmarReimprimirLote()" style="flex:1; background:#10b981; color:#fff; font-weight:700; border:none; padding:12px; border-radius:8px; cursor:pointer;">REIMPRIMIR</button>
+      <button onclick="fecharModalReimprimir()" style="flex:1; background:#334155; color:#fff; font-weight:600; border:none; padding:12px; border-radius:8px; cursor:pointer;">CANCELAR</button>
     </div>
-
   </div>
 </div>
-
 
 <script src="config.js"></script>
 <script src="ui.js"></script>
