@@ -351,19 +351,19 @@ async function executarConserto() {
     nascParaEnvio = `${p[2]}/${p[1]}/${p[0]}`;
   }
   
-  const urlFinal = urlSistema + 
-    "?action=" + acao +
-    "&id=" + encodeURIComponent(idFinal) + 
-    "&cpf=" + encodeURIComponent(cpf) +
-    "&nome=" + encodeURIComponent(nome) +
-    "&nasc=" + encodeURIComponent(nascRaw) +
-    "&municipio=" + encodeURIComponent(mun) +
-    "&tel=" + encodeURIComponent(tel) +
-    "&email=" + encodeURIComponent(email) +
-    "&via=" + encodeURIComponent(via) +
-    "&parceiro=" + encodeURIComponent(user.parceiro) +  // ← 8º PARCEIRO
-    "&atendente=" + encodeURIComponent(user.nome) +     // ← 9º ATENDENTE
-    "&boleto=" + encodeURIComponent(boleto);
+ const urlFinal = urlSistema + 
+  "?action=" + acao +
+  "&id=" + encodeURIComponent(idFinal) + 
+  "&cpf=" + encodeURIComponent(cpf) +        // 1º
+  "&nome=" + encodeURIComponent(nome) +      // 2º
+  "&nasc=" + encodeURIComponent(nascRaw) +   // 3º
+  "&municipio=" + encodeURIComponent(mun) +  // 4º
+  "&tel=" + encodeURIComponent(tel) +        // 5º
+  "&via=" + encodeURIComponent(via) +        // 6º ← VIA
+  "&parceiro=" + encodeURIComponent(user.parceiro) + // 7º ← PARCEIRO
+  "&atendente=" + encodeURIComponent(user.nome) +    // 8º ← ATENDENTE
+  "&boleto=" + encodeURIComponent(boleto) +  // 9º
+  "&email=" + encodeURIComponent(email);     // 10º ← EMAIL (ÚLTIMO)
   
   const btn = document.querySelector("button[onclick='executarConserto()']");
   if(btn) { btn.disabled = true; btn.innerText = "ATUALIZANDO..."; }
