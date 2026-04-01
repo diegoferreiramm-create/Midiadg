@@ -48,6 +48,18 @@
     <input id="nascimento" type="text" placeholder="Data de Nascimento (dd/mm/aaaa)" maxlength="10" oninput="mascaraData(this)">
     <input id="municipio" placeholder="Município">
     <input id="telefone" placeholder="Telefone (xx) xxxxx-xxxx">
+
+    <!-- NOVO CAMPO DE EMAIL -->
+<input id="email" type="email" placeholder="E-mail (obrigatório)" style="margin-top: 10px;">
+
+<div class="via-container">
+  <label class="via-option">
+    <input type="radio" name="via" id="via1" value="1ª" checked> 1ª Via
+  </label>
+  <label class="via-option">
+    <input type="radio" name="via" id="via2" value="2ª"> 2ª Via
+  </label>
+</div>
     
     <div class="via-container">
       <label class="via-option">
@@ -275,7 +287,12 @@
         <input id="edit_telefone" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;">
       </div>
     </div>
-
+    <!-- NOVO CAMPO DE EMAIL NA EDIÇÃO -->
+    <div>
+      <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">E-MAIL</label>
+      <input id="edit_email" type="email" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;" required>
+    </div>
+    
     <div style="display:flex; gap:12px; margin-top:30px;">
       <button onclick="executarEdicao()" style="flex:1; background:#eab308; color:#000; font-weight:700; border:none; padding:14px; border-radius:10px; cursor:pointer; font-size:14px;">Salvar Dados</button>
       <button onclick="document.getElementById('corrigirBox').style.display='none'" style="flex:1; background:#334155; color:#fff; font-weight:600; border:none; padding:14px; border-radius:10px; cursor:pointer; font-size:14px;">Voltar</button>
