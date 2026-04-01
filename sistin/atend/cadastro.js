@@ -90,17 +90,17 @@ async function salvarCadastro() {
   const urlFinal = urlSistema + 
     "?action=" + acao +
     "&id=" + encodeURIComponent(idFinal) + 
-    "&cpf=" + encodeURIComponent(cpf) +
-    "&nome=" + encodeURIComponent(nome) +
-    "&nasc=" + encodeURIComponent(nascRaw) +
-    "&municipio=" + encodeURIComponent(mun) +
-    "&tel=" + encodeURIComponent(tel) +
-    "&email=" + encodeURIComponent(email) + // NOVO CAMPO
-    "&via=" + encodeURIComponent(via) +
-    "&atendente=" + encodeURIComponent(user.nome) +
-    "&parceiro=" + encodeURIComponent(user.parceiro) +
-    "&boleto=" + encodeURIComponent(boleto);
-
+    "&cpf=" + encodeURIComponent(cpf) +        // 1º
+    "&nome=" + encodeURIComponent(nome) +      // 2º
+    "&nasc=" + encodeURIComponent(nascRaw) +   // 3º
+    "&municipio=" + encodeURIComponent(mun) +  // 4º
+    "&tel=" + encodeURIComponent(tel) +        // 5º
+    "&email=" + encodeURIComponent(email) +    // 6º ← EMAIL
+    "&via=" + encodeURIComponent(via) +        // 7º
+    "&atendente=" + encodeURIComponent(user.nome) +     // 8º
+    "&parceiro=" + encodeURIComponent(user.parceiro) + // 9º
+    "&boleto=" + encodeURIComponent(boleto);   // 10º
+  
   try {
     const response = await fetch(urlFinal);
     const res = await response.json();
