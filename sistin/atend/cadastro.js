@@ -352,17 +352,17 @@ async function executarConserto() {
   }
   
   const urlFinal = urlSistema + 
-    "?action=editarCadastroAppsScript" +
-    "&id=" + encodeURIComponent(id) + 
+    "?action=" + acao +
+    "&id=" + encodeURIComponent(idFinal) + 
     "&cpf=" + encodeURIComponent(cpf) +
     "&nome=" + encodeURIComponent(nome) +
-    "&nasc=" + encodeURIComponent(nascParaEnvio) +
+    "&nasc=" + encodeURIComponent(nascRaw) +
     "&municipio=" + encodeURIComponent(mun) +
     "&tel=" + encodeURIComponent(tel) +
-    "&email=" + encodeURIComponent(email) + // NOVO CAMPO
+    "&email=" + encodeURIComponent(email) +
     "&via=" + encodeURIComponent(via) +
-    "&atendente=" + encodeURIComponent(user.nome) +
-    "&parceiro=" + encodeURIComponent(user.parceiro) +
+    "&parceiro=" + encodeURIComponent(user.parceiro) +  // ← 8º PARCEIRO
+    "&atendente=" + encodeURIComponent(user.nome) +     // ← 9º ATENDENTE
     "&boleto=" + encodeURIComponent(boleto);
   
   const btn = document.querySelector("button[onclick='executarConserto()']");
