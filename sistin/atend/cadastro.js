@@ -167,19 +167,19 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
       <style>
         @page { size: A4 portrait; margin: 0; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { width: 210mm; height: 297mm; font-family: Arial, sans-serif; background: white; display: flex; flex-direction: column; align-items: center; }
-        .ticket { width: 190mm; margin-top: 5mm; border: 2px solid #000; padding: 5mm; background: white; font-size: 11px; height: 140mm; display: flex; flex-direction: column; }
-        .header { text-align: center; border-bottom: 2px solid #000; margin-bottom: 4mm; padding-bottom: 2mm; }
+        body { width: 210mm; height: 297mm; font-family: Arial, sans-serif; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .ticket { width: 190mm; border: 2px solid #000; padding: 5mm; background: white; font-size: 11px; display: flex; flex-direction: column; }
+        .header { text-align: center; border-bottom: 2px solid #000; margin-bottom: 3mm; padding-bottom: 2mm; }
         .header h2 { font-size: 18px; margin: 1mm 0; }
-        .id-destaque { font-size: 14px; font-weight: bold; margin-bottom: 3mm; }
-        .info-grid { display: flex; flex-wrap: wrap; justify-content: space-between; margin-bottom: 3mm; font-size: 12px; }
-        .info-item { width: 48%; margin-bottom: 2mm; }
-        .lgpd { font-size: 8px; font-style: italic; margin: 2mm 0; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 1.5mm 0; text-align: justify; }
-        .rules { font-size: 8px; background: #f2f2f2; padding: 2mm; border: 1px solid #000; margin: 2mm 0; line-height: 1.3; }
-        .declaracao { font-size: 10px; background: #f2f2f2; padding: 2mm; border: 1px solid #000; margin: 2mm 0; line-height: 1.3; text-align: justify; }
-        .final-section { margin-top: 8mm; display: flex; flex-direction: column; }
-        .assinatura-linha { border-top: 2px solid #000; width: 100%; margin: 5mm 0 2mm 0; }
-        .assinatura-container { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: bold; }
+        .id-destaque { font-size: 14px; font-weight: bold; margin-bottom: 2mm; }
+        .info-grid { display: flex; flex-wrap: wrap; justify-content: space-between; margin-bottom: 2mm; font-size: 11px; }
+        .info-item { width: 48%; margin-bottom: 1.5mm; }
+        .lgpd { font-size: 7px; font-style: italic; margin: 1.5mm 0; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 1mm 0; text-align: justify; }
+        .rules { font-size: 7px; background: #f2f2f2; padding: 1.5mm; border: 1px solid #000; margin: 1.5mm 0; line-height: 1.2; }
+        .declaracao { font-size: 8px; background: #f2f2f2; padding: 1.5mm; border: 1px solid #000; margin: 1.5mm 0; line-height: 1.2; text-align: justify; }
+        .final-section { margin-top: 3mm; display: flex; flex-direction: column; }
+        .assinatura-linha { border-top: 2px solid #000; width: 100%; margin: 3mm 0 1.5mm 0; }
+        .assinatura-container { display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: bold; }
         b { text-transform: uppercase; }
       </style>
     </head>
