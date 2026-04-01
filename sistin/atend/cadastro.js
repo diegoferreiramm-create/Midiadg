@@ -1,4 +1,7 @@
-// Cadastro e Edição
+// ============================================
+// PARTE 1: CADASTRO E EDIÇÃO (COM EMAIL)
+// ============================================
+
 document.addEventListener('blur', function(e) {
   if (e.target.id === 'cpf' && (typeof modoEdicao !== 'undefined' && !modoEdicao)) { 
     const valorCpf = e.target.value;
@@ -12,6 +15,7 @@ document.addEventListener('blur', function(e) {
           document.getElementById("nome").value = res.nome || "";
           document.getElementById("municipio").value = res.municipio || "";
           document.getElementById("telefone").value = res.telefone || "";
+          document.getElementById("email").value = res.email || ""; // NOVO CAMPO
           if (res.nascimento) {
             try {
               let dataStr = res.nascimento.toString();
@@ -45,13 +49,21 @@ async function salvarCadastro() {
   const nascRaw = document.getElementById("nascimento").value;
   const mun = document.getElementById("municipio").value;
   const tel = document.getElementById("telefone").value;
+  const email = document.getElementById("email").value; // NOVO CAMPO
   const viaEl = document.querySelector('input[name="via"]:checked');
   const via = viaEl ? viaEl.value : "1ª VIA";
   const boleto = document.getElementById("codigoBoleto").value.trim();
 
-  if(!cpf || !nome || !nascRaw || !boleto) { 
-    alert("ERRO: CPF, Nome, Nascimento e Número do Boleto são obrigatórios!"); 
+  // VALIDAÇÃO COM EMAIL OBRIGATÓRIO
+  if(!cpf || !nome || !nascRaw || !boleto || !email) { 
+    alert("ERRO: CPF, Nome, Nascimento, E-mail e Número do Boleto são obrigatórios!"); 
     return; 
+  }
+  
+  // Validação básica de email
+  if(email && !validarEmail(email)) {
+    alert("ERRO: Por favor, digite um e-mail válido (exemplo@dominio.com)");
+    return;
   }
 
   if (!idSendoEditado) {
@@ -83,6 +95,7 @@ async function salvarCadastro() {
     "&nasc=" + encodeURIComponent(nascRaw) +
     "&municipio=" + encodeURIComponent(mun) +
     "&tel=" + encodeURIComponent(tel) +
+    "&email=" + encodeURIComponent(email) + // NOVO CAMPO
     "&via=" + encodeURIComponent(via) +
     "&atendente=" + encodeURIComponent(user.nome) +
     "&parceiro=" + encodeURIComponent(user.parceiro) +
@@ -105,15 +118,19 @@ async function salvarCadastro() {
               user.nome, 
               user.parceiro, 
               res.data, 
-              res.boleto || boleto
+              res.boleto || boleto,
+              email // NOVO PARÂMETRO
             );
           }
       } catch (errPrint) { console.error("Erro na impressão:", errPrint); }
+      
+      // Limpar campos incluindo o email
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
       document.getElementById("municipio").value = "";
       document.getElementById("telefone").value = "";
+      document.getElementById("email").value = ""; // NOVO CAMPO
       document.getElementById("codigoBoleto").value = "";
       if(typeof idSendoEditado !== 'undefined') idSendoEditado = null;
     } else {
@@ -127,7 +144,17 @@ async function salvarCadastro() {
   }
 }
 
-function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
+// FUNÇÃO AUXILIAR PARA VALIDAR EMAIL
+function validarEmail(email) {
+  const regex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+  return regex.test(email);
+}
+
+// ============================================
+// PARTE 2: FUNÇÃO DE IMPRESSÃO ATUALIZADA
+// ============================================
+
+function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto, email) {
   const telaPrint = window.open('', '_blank');
   if (!telaPrint || telaPrint.closed || typeof telaPrint.document === 'undefined') {
     alert("⚠️ O cadastro foi salvo, mas o seu navegador BLOQUEOU a janela de impressão.\n\nVerifique a barra de endereços e clique em 'Sempre permitir pop-ups' para este site.");
@@ -166,9 +193,10 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <div class="info-item"><b>NOME:</b> ${nome ? nome.toUpperCase() : ''}</div>
           <div class="info-item"><b>DATA:</b> ${data ? data.split(' ')[0] : ''}</div>
           <div class="info-item"><b>CPF:</b> ${cpf}</div>
+          <div class="info-item"><b>E-MAIL:</b> ${email || 'NÃO INFORMADO'}</div>
           <div class="info-item"><b>VIA:</b> ${via}</div>
-          <div class="info-item"><b>MUNICÍPIO:</b> ${municipio ? municipio.toUpperCase() : ''}</div>
           <div class="info-item"><b>ATENDENTE:</b> ${atendente}</div>
+          <div class="info-item"><b>MUNICÍPIO:</b> ${municipio ? municipio.toUpperCase() : ''}</div>
         </div>
         <div class="lgpd">
           Não nos responsabilizamos por informações no formulário entregue que divergirem dos documentos anexos, conforme Art. 9º da Lei 13.709/2018 (LGPD). A veracidade é de responsabilidade do declarante.
@@ -199,6 +227,10 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
   telaPrint.document.close();
 }
 
+// ============================================
+// PARTE 3: FUNÇÕES DE EDIÇÃO ATUALIZADAS
+// ============================================
+
 function prepararEdicao(item) {
   idSendoEditado = item.id; 
   const popUp = document.getElementById('corrigirBox');
@@ -207,6 +239,7 @@ function prepararEdicao(item) {
   if(document.getElementById("edit_nome")) document.getElementById("edit_nome").value = item.nome || "";
   if(document.getElementById("edit_municipio")) document.getElementById("edit_municipio").value = item.municipio || "";
   if(document.getElementById("edit_telefone")) document.getElementById("edit_telefone").value = item.tel || "";
+  if(document.getElementById("edit_email")) document.getElementById("edit_email").value = item.email || ""; // NOVO CAMPO
   if(document.getElementById("edit_codigoBoleto")) document.getElementById("edit_codigoBoleto").value = item.boleto || "";
   const viaValor = item.via || "1ª VIA";
   const labelVia = document.getElementById("edit_label_via");
@@ -231,16 +264,32 @@ async function executarEdicao() {
   const nasc = document.getElementById("edit_nascimento").value;
   const mun = document.getElementById("edit_municipio").value;
   const tel = document.getElementById("edit_telefone").value;
+  const email = document.getElementById("edit_email").value; // NOVO CAMPO
   const boleto = document.getElementById("edit_codigoBoleto").value;
   const via = document.getElementById("edit_via_hidden").value;
+  
+  // Validação com email obrigatório
+  if(!cpf || !nome || !email) {
+    alert("ERRO: CPF, Nome e E-mail são obrigatórios!");
+    return;
+  }
+  
+  if(email && !validarEmail(email)) {
+    alert("ERRO: Por favor, digite um e-mail válido!");
+    return;
+  }
+  
   if(!via) { alert("Erro: Via não detectada."); return; }
+  
   let dataFormatada = nasc;
   if(nasc && nasc.includes("-")) {
     const p = nasc.split("-");
     dataFormatada = `${p[2]}/${p[1]}/${p[0]}`;
   }
+  
   const btn = document.querySelector("#corrigirBox button[onclick='executarEdicao()']");
   if(btn) { btn.disabled = true; btn.innerText = "SALVANDO..."; }
+  
   const urlFinal = `${urlSistema}?action=editarCadastroAppsScript` +
     `&id=${encodeURIComponent(id)}` +
     `&cpf=${encodeURIComponent(cpf)}` +
@@ -248,10 +297,12 @@ async function executarEdicao() {
     `&nasc=${encodeURIComponent(dataFormatada)}` +
     `&municipio=${encodeURIComponent(mun)}` +
     `&tel=${encodeURIComponent(tel)}` +
+    `&email=${encodeURIComponent(email)}` + // NOVO CAMPO
     `&via=${encodeURIComponent(via)}` + 
     `&atendente=${encodeURIComponent(user.nome)}` +
     `&parceiro=${encodeURIComponent(user.parceiro)}` +
     `&boleto=${encodeURIComponent(boleto)}`;
+  
   try {
     const response = await fetch(urlFinal);
     const res = await response.json();
@@ -279,18 +330,27 @@ async function executarConserto() {
   const nascRaw = document.getElementById("nascimento").value;
   const mun = document.getElementById("municipio").value;
   const tel = document.getElementById("telefone").value;
+  const email = document.getElementById("email").value; // NOVO CAMPO
   const boleto = document.getElementById("codigoBoleto").value.trim();
   const viaEl = document.querySelector('input[name="via"]:checked');
   const via = viaEl ? viaEl.value : "1ª VIA";
-  if(!cpf || !nome || !nascRaw || !boleto) { 
-    alert("ERRO: CPF, Nome, Nascimento e Número do Boleto são obrigatórios!"); 
+  
+  if(!cpf || !nome || !nascRaw || !boleto || !email) { 
+    alert("ERRO: CPF, Nome, Nascimento, E-mail e Número do Boleto são obrigatórios!"); 
     return; 
   }
+  
+  if(email && !validarEmail(email)) {
+    alert("ERRO: Por favor, digite um e-mail válido!");
+    return;
+  }
+  
   let nascParaEnvio = nascRaw;
   if(nascRaw.includes("-")) {
     const p = nascRaw.split("-");
     nascParaEnvio = `${p[2]}/${p[1]}/${p[0]}`;
   }
+  
   const urlFinal = urlSistema + 
     "?action=editarCadastroAppsScript" +
     "&id=" + encodeURIComponent(id) + 
@@ -299,25 +359,29 @@ async function executarConserto() {
     "&nasc=" + encodeURIComponent(nascParaEnvio) +
     "&municipio=" + encodeURIComponent(mun) +
     "&tel=" + encodeURIComponent(tel) +
+    "&email=" + encodeURIComponent(email) + // NOVO CAMPO
     "&via=" + encodeURIComponent(via) +
     "&atendente=" + encodeURIComponent(user.nome) +
     "&parceiro=" + encodeURIComponent(user.parceiro) +
     "&boleto=" + encodeURIComponent(boleto);
+  
   const btn = document.querySelector("button[onclick='executarConserto()']");
   if(btn) { btn.disabled = true; btn.innerText = "ATUALIZANDO..."; }
+  
   try {
     const response = await fetch(urlFinal);
     const res = await response.json();
     if (res.sucesso) {
       alert("✅ Registro consertado com sucesso!");
       if (typeof imprimirProtocolo === "function") {
-          imprimirProtocolo(id, cpf, nome, nascParaEnvio, mun, via, user.nome, user.parceiro, res.data, boleto);
+          imprimirProtocolo(id, cpf, nome, nascParaEnvio, mun, via, user.nome, user.parceiro, res.data, boleto, email);
       }
       document.getElementById("cpf").value = "";
       document.getElementById("nome").value = "";
       document.getElementById("nascimento").value = "";
       document.getElementById("municipio").value = "";
       document.getElementById("telefone").value = "";
+      document.getElementById("email").value = ""; // NOVO CAMPO
       document.getElementById("codigoBoleto").value = "";
       if(btn) {
         btn.innerText = "CADASTRAR";
