@@ -1,11 +1,11 @@
 // ============================================
-// CONFIGURAÇÕES (igual ao seu sistema)
+// CONFIGURAÇÕES - Usando proxy local
 // ============================================
 
-const urlSistema = "https://script.google.com/macros/s/AKfycbz4Oz1hxpYjRiRMTo1FaVc4FS8tLEe-VLZeXYhL6BwXTkcfGHMwg2ZN-4eRdXu_of3-/exec";
+const urlSistema = "https://midiadg.com.br/sistin/atend/busca/proxy.php";
 
 // ============================================
-// BUSCA IGUAL AO SEU SISTEMA
+// BUSCA (igual ao seu sistema que funciona)
 // ============================================
 
 function executarBusca() {
@@ -32,35 +32,23 @@ function executarBusca() {
     showLoading(true);
     document.getElementById("resultArea").style.display = "none";
     
-    // Usa o mesmo formato do seu sistema que funciona
-    fetch(`${urlSistema}?action=buscar&cpf=${cpfLimpo}&data_nasc=${dataFormatada}`, {
-        method: 'GET',
-        mode: 'no-cors',
-        headers: {
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => response.text())
-    .then(text => {
-        showLoading(false);
-        
-        // Tenta converter o texto para JSON
-        let res;
-        try {
-            res = JSON.parse(text);
-        } catch(e) {
-            // Se não for JSON, tenta extrair de outra forma
-            console.log("Resposta bruta:", text);
-            showToast("Erro na resposta do servidor", "error");
-            return;
-        }
-        
-        if(res && res.success) {
+    fetch(`${urlSistema}?action=buscar&cpf=${cpfLimpo}&data_nasc=${dataFormatada}`)
+        .then(res => res.json())
+        .then(res => {
+            showLoading(false);
+            
+            if(!res || !res.success) {
+                showToast(res.mensagem || "Nenhum registro encontrado", "error");
+                return;
+            }
+            
+            // Exibe o resultado
             const div = document.getElementById("resultContent");
             div.innerHTML = "";
             
             const item = res.dados;
             
+            // Verifica se é indeferido para mostrar prazo
             const isIndeferido = item.status && (item.status.toLowerCase().includes('indeferido') || item.status.toLowerCase().includes('negado'));
             
             let statusClass = 'status-error';
@@ -85,15 +73,12 @@ function executarBusca() {
             
             document.getElementById("resultArea").style.display = "block";
             showToast("Registro encontrado!", "success");
-        } else {
-            showToast(res?.mensagem || "Nenhum registro encontrado", "error");
-        }
-    })
-    .catch(err => {
-        showLoading(false);
-        console.error("Erro:", err);
-        showToast("Erro ao pesquisar. Verifique o Web App.", "error");
-    });
+        })
+        .catch(err => {
+            showLoading(false);
+            console.error("Erro:", err);
+            showToast("Erro ao pesquisar: " + err.message, "error");
+        });
 }
 
 function formatarCPF(cpf) {
@@ -110,14 +95,18 @@ function showLoading(show) {
 
 function showToast(message, type) {
     const toast = document.getElementById('toastMessage');
+    if(!toast) return;
+    
     toast.textContent = message;
     toast.className = `toast-message ${type}`;
     toast.style.display = 'block';
-    setTimeout(() => toast.style.display = 'none', 3000);
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
 }
 
 // ============================================
-// MÁSCARA CPF E EVENTOS (igual seu sistema)
+// MÁSCARA CPF E EVENTOS
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -137,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Submit do formulário
     if(form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -144,6 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Fechar resultado
     if(btnFechar) {
         btnFechar.addEventListener('click', function() {
             document.getElementById('resultArea').style.display = 'none';
