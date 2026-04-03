@@ -10,14 +10,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 $url = 'https://script.google.com/macros/s/AKfycbz4Oz1hxpYjRiRMTo1FaVc4FS8tLEe-VLZeXYhL6BwXTkcfGHMwg2ZN-4eRdXu_of3-/exec';
 $url .= '?' . $_SERVER['QUERY_STRING'];
 
+// Log para debug
+error_log("Proxy chamado: " . $url);
+
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+if(curl_error($ch)) {
+    $response = json_encode(['success' => false, 'mensagem' => 'Erro curl: ' . curl_error($ch)]);
+}
+
 curl_close($ch);
 
 http_response_code($httpCode);
