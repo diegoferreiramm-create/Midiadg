@@ -1,77 +1,37 @@
-// ============================================
-// CONFIGURAÇÕES - VOCÊ DEVE AJUSTAR AQUI!
-// ============================================
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz4Oz1hxpYjRiRMTo1FaVc4FS8tLEe-VLZeXYhL6BwXTkcfGHMwg2ZN-4eRdXu_of3-/exec";
 
-// URL do seu Web App do Google Apps Script
-// Depois de publicar o App Script, cole a URL aqui
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwDpfgFnL1S0RLP5QavKGY0he01KjQXBLZ2BZBEaA1PYWsvn3wBeBAIIBFgFhzNsGmt/exec";
-
-// Mapeamento das colunas da sua planilha (conforme sua estrutura)
-// A ordem das colunas A até W:
-// A=ID, B=CPF, C=NOME, D=NASC, E=MUNICIPIO, F=TEL, G=VIA, H=PARCEIRO, 
-// I=DATA, J=ATENDENTE, K=BOLETO, L=STATUS, M=MOTIVO, N=DATA_STATUS, 
-// O=TIPO, P=NUMERO_CARTEIRA, Q=lote, R=pagamento, S=prazo, 
-// T=fechamento lote, U=data fechamento, V=logado, W=processo arce
-
+// Mapeamento dos campos que serão exibidos (na ordem que você quer)
 const CAMPOS = {
-    id: "ID",
     cpf: "CPF",
-    nome: "NOME",
+    nome: "NOME COMPLETO",
     nasc: "DATA DE NASCIMENTO",
     municipio: "MUNICÍPIO",
-    telefone: "TELEFONE",
     via: "VIA",
     parceiro: "PARCEIRO",
-    data: "DATA CADASTRO",
-    atendente: "ATENDENTE",
-    boleto: "BOLETO",
+    data: "DATA SOLICITAÇÃO",
     status: "STATUS",
     motivo: "MOTIVO",
     data_status: "DATA STATUS",
-    tipo: "TIPO",
-    numero_carteira: "NÚMERO DA CARTEIRA",
-    lote: "LOTE",
-    pagamento: "PAGAMENTO",
-    prazo: "PRAZO",
-    fechamento_lote: "FECHAMENTO LOTE",
-    data_fechamento: "DATA FECHAMENTO",
-    logado: "LOGADO",
-    processo_arce: "PROCESSO ARCE"
+    prazo: "PRAZO"  // Será exibido apenas se status for indeferido
 };
 
-// ============================================
-// CÓDIGO PRINCIPAL - NÃO PRECISA MEXER
-// ============================================
-
-// Aguardar o DOM carregar
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('searchForm');
     const cpfInput = document.getElementById('cpf');
     const dataInput = document.getElementById('dataNascimento');
     const btnFechar = document.getElementById('btnFechar');
     
-    // Máscara para CPF
     if (cpfInput) {
         cpfInput.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length > 11) value = value.slice(0, 11);
-            
-            // Aplica máscara
-            if (value.length >= 4) {
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            }
-            if (value.length >= 8) {
-                value = value.replace(/(\d{3})(\d{3})(\d)/, '$1.$2.$3');
-            }
-            if (value.length >= 11) {
-                value = value.replace(/(\d{3})(\d{3})(\d{3})(\d)/, '$1.$2.$3-$4');
-            }
-            
+            if (value.length >= 4) value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            if (value.length >= 8) value = value.replace(/(\d{3})(\d{3})(\d)/, '$1.$2.$3');
+            if (value.length >= 11) value = value.replace(/(\d{3})(\d{3})(\d{3})(\d)/, '$1.$2.$3-$4');
             e.target.value = value;
         });
     }
     
-    // Submit do formulário
     if (form) {
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -79,16 +39,12 @@ document.addEventListener('DOMContentLoaded', function() {
             let cpf = cpfInput.value.replace(/\D/g, '');
             const dataNascimento = dataInput.value;
             
-            // Garante que o CPF tem 11 dígitos (adiciona zeros à esquerda se necessário)
-            if (cpf && cpf.length < 11) {
-                cpf = cpf.padStart(11, '0');
-            }
+            if (cpf && cpf.length < 11) cpf = cpf.padStart(11, '0');
             
             if (!cpf || cpf.length !== 11) {
                 showToast('CPF inválido! Digite 11 números.', 'error');
                 return;
             }
-            
             if (!dataNascimento) {
                 showToast('Selecione a data de nascimento!', 'error');
                 return;
@@ -98,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Fechar resultado
     if (btnFechar) {
         btnFechar.addEventListener('click', function() {
             document.getElementById('resultArea').style.display = 'none';
@@ -106,30 +61,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Função para buscar dados
 async function buscarDados(cpf, dataNascimento) {
     showLoading(true);
     
     try {
-        // Formata a data para DD/MM/AAAA (como está na planilha)
-        const dataFormatada = formatarDataBR(dataNascimento);
+        const [ano, mes, dia] = dataNascimento.split('-');
+        const dataFormatada = `${dia}/${mes}/${ano}`;
         
-        // Prepara os dados para enviar ao Web App
-        const dados = new URLSearchParams();
-        dados.append('cpf', cpf);
-        dados.append('data_nasc', dataFormatada);
-        dados.append('acao', 'buscar');
+        const url = `${WEB_APP_URL}?acao=buscar&cpf=${cpf}&data_nasc=${dataFormatada}`;
         
-        // Faz a requisição
-        const response = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: dados
+        console.log("🔍 Buscando:", url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors'
         });
         
         const resultado = await response.json();
+        
+        console.log("📦 Resultado:", resultado);
         
         if (resultado.success) {
             exibirResultado(resultado.dados);
@@ -140,34 +90,52 @@ async function buscarDados(cpf, dataNascimento) {
         }
         
     } catch (error) {
-        console.error('Erro:', error);
-        showToast('Erro ao consultar. Verifique sua conexão.', 'error');
-        document.getElementById('resultArea').style.display = 'none';
+        console.error('❌ Erro:', error);
+        showToast('Erro ao consultar: ' + error.message, 'error');
     } finally {
         showLoading(false);
     }
 }
 
-// Função para exibir o resultado
 function exibirResultado(dados) {
     const resultContent = document.getElementById('resultContent');
     const resultArea = document.getElementById('resultArea');
     
     let html = '';
     
-    // Percorre os campos definidos nas configurações
+    // Verifica se o status é indeferido para mostrar o prazo
+    const statusIndeferido = dados.status && (
+        dados.status.toLowerCase().includes('indeferido') || 
+        dados.status.toLowerCase().includes('negado')
+    );
+    
     for (const [chave, rotulo] of Object.entries(CAMPOS)) {
-        if (dados[chave] && dados[chave] !== '') {
-            let valor = dados[chave];
-            
-            // Formata CPF se existir
-            if (chave === 'cpf' && valor) {
+        // Pula o campo prazo se NÃO for indeferido
+        if (chave === 'prazo' && !statusIndeferido) {
+            continue;
+        }
+        
+        let valor = dados[chave];
+        
+        if (valor && valor !== '') {
+            // Formata CPF
+            if (chave === 'cpf') {
                 valor = formatarCPF(valor);
             }
             
-            // Formata status com badge
+            // Formata data de nascimento e data solicitação
+            if ((chave === 'nasc' || chave === 'data' || chave === 'data_status') && valor) {
+                valor = formatarDataExibicao(valor);
+            }
+            
+            // Formata status com badge colorido
             if (chave === 'status') {
-                const statusClass = (valor === 'Ativo' || valor === 'Aprovado' || valor === 'OK') ? 'status-ok' : 'status-error';
+                let statusClass = 'status-error';
+                if (valor === 'Ativo' || valor === 'Aprovado' || valor === 'Deferido') {
+                    statusClass = 'status-ok';
+                } else if (valor === 'Pedido a caminho da ARCE') {
+                    statusClass = 'status-warning';
+                }
                 html += `
                     <div class="info-row">
                         <div class="info-label">${rotulo}</div>
@@ -176,7 +144,17 @@ function exibirResultado(dados) {
                         </div>
                     </div>
                 `;
-            } else {
+            } 
+            // Formata prazo especial
+            else if (chave === 'prazo') {
+                html += `
+                    <div class="info-row prazo-row">
+                        <div class="info-label">${rotulo}</div>
+                        <div class="info-value prazo-value">⏰ ${valor}</div>
+                    </div>
+                `;
+            }
+            else {
                 html += `
                     <div class="info-row">
                         <div class="info-label">${rotulo}</div>
@@ -187,45 +165,59 @@ function exibirResultado(dados) {
         }
     }
     
+    // Se não mostrou nada, exibe mensagem
+    if (html === '') {
+        html = '<div class="info-row">Nenhuma informação disponível para este registro.</div>';
+    }
+    
     resultContent.innerHTML = html;
     resultArea.style.display = 'block';
-    
-    // Scroll suave até o resultado
-    resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    resultArea.scrollIntoView({ behavior: 'smooth' });
 }
 
-// Função para formatar data para DD/MM/AAAA
-function formatarDataBR(dataISO) {
-    if (!dataISO) return '';
-    const [ano, mes, dia] = dataISO.split('-');
-    return `${dia}/${mes}/${ano}`;
-}
-
-// Função para formatar CPF
 function formatarCPF(cpf) {
-    if (!cpf) return '';
     const numeros = cpf.replace(/\D/g, '');
     if (numeros.length !== 11) return cpf;
     return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
 
-// Função para mostrar/ocultar loading
-function showLoading(show) {
-    const loading = document.getElementById('loadingOverlay');
-    if (loading) {
-        loading.style.display = show ? 'flex' : 'none';
+function formatarDataExibicao(data) {
+    if (!data) return '';
+    
+    // Se já está no formato DD/MM/AAAA
+    if (typeof data === 'string' && data.includes('/')) {
+        return data;
     }
+    
+    // Se é objeto Date
+    if (data instanceof Date) {
+        const dia = String(data.getDate()).padStart(2, '0');
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const ano = data.getFullYear();
+        return `${dia}/${mes}/${ano}`;
+    }
+    
+    // Se é string no formato YYYY-MM-DD
+    if (typeof data === 'string' && data.match(/^\d{4}-\d{2}-\d{2}/)) {
+        const partes = data.split('-');
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+    
+    return data;
 }
 
-// Função para mostrar mensagem toast
-function showToast(message, type = 'info') {
+function showLoading(show) {
+    const loading = document.getElementById('loadingOverlay');
+    if (loading) loading.style.display = show ? 'flex' : 'none';
+}
+
+function showToast(message, type) {
     const toast = document.getElementById('toastMessage');
     if (!toast) return;
     
     toast.textContent = message;
     toast.className = `toast-message ${type}`;
     toast.style.display = 'block';
-    
     setTimeout(() => {
         toast.style.display = 'none';
     }, 3000);
