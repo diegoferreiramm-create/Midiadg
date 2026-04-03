@@ -50,25 +50,45 @@ body {
     }
 }
 
-/* Header */
+/* Header com Logo */
 .header {
     text-align: center;
     margin-bottom: 30px;
 }
 
+.logo-container {
+    margin-bottom: 20px;
+}
+
+.logo {
+    max-width: 120px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    background: var(--white);
+    padding: 8px;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
 .header h1 {
     color: var(--white);
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     margin-bottom: 8px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
+    flex-wrap: wrap;
+    letter-spacing: 1px;
 }
 
 .header h1 .icon {
-    font-size: 2rem;
+    font-size: 1.8rem;
 }
 
 .header p {
@@ -342,7 +362,17 @@ button[type="submit"]:active {
     }
     
     .header h1 {
-        font-size: 1.4rem;
+        font-size: 1.2rem;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .header h1 .icon {
+        font-size: 1.5rem;
+    }
+    
+    .logo {
+        max-width: 90px;
     }
     
     .info-row {
