@@ -18,12 +18,10 @@ function formatarCPF(cpf) {
 // Função para formatar data
 function formatarData(data) {
     if (!data || data === 'Não informado') return data;
-    
     if (typeof data === 'string' && data.match(/^\d{4}-\d{2}-\d{2}$/)) {
         const [ano, mes, dia] = data.split('-');
         return `${dia}/${mes}/${ano}`;
     }
-    
     return data;
 }
 
@@ -31,17 +29,15 @@ function formatarData(data) {
 function showToast(message, type = 'error') {
     const toast = document.getElementById('toastMessage');
     if (!toast) return;
-    
     toast.textContent = message;
     toast.className = `toast-message ${type}`;
     toast.classList.add('show');
-    
     setTimeout(() => {
         toast.classList.remove('show');
     }, 5000);
 }
 
-// Função para mostrar loading
+// Funções de loading
 function showLoading() {
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) overlay.style.display = 'flex';
@@ -52,7 +48,7 @@ function hideLoading() {
     if (overlay) overlay.style.display = 'none';
 }
 
-// Função para mostrar resultado
+// Funções de resultado
 function showResult() {
     const resultArea = document.getElementById('resultArea');
     if (resultArea) {
@@ -72,30 +68,17 @@ async function buscarDadosPlanilha(cpf, dataNascimento) {
         const response = await fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                cpf: cpf,
-                dataNascimento: dataNascimento
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cpf: cpf, dataNascimento: dataNascimento })
         });
         
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
-        
-        if (!result.success) {
-            throw new Error(result.message || 'Erro na consulta');
-        }
-        
+        if (!result.success) throw new Error(result.message || 'Erro na consulta');
         return result;
-        
     } catch (error) {
-        console.error('Erro na requisição:', error);
-        throw new Error('Não foi possível conectar ao servidor. Verifique sua conexão.');
+        console.error('Erro:', error);
+        throw new Error('Não foi possível conectar ao servidor.');
     }
 }
 
@@ -110,182 +93,109 @@ function exibirResultado(resultado) {
                 <span class="error-icon">⚠️</span>
                 <h3>Nenhum registro encontrado</h3>
                 <p>${resultado.message || 'Verifique se o CPF e a data de nascimento estão corretos.'}</p>
-                <p><small>Caso o problema persista, entre em contato com o suporte.</small></p>
             </div>
         `;
         return;
     }
     
     const dados = resultado.data;
-    
     resultContent.innerHTML = `
         <div class="dados-usuario">
-            <div class="info-group">
-                <label>Número da Carteira:</label>
-                <span class="destaque">${dados.numeroCarteira || 'Não informado'}</span>
-            </div>
-            
-            <div class="info-group">
-                <label>Nome Completo:</label>
-                <span>${dados.nome || 'Não informado'}</span>
-            </div>
-            
-            <div class="info-group">
-                <label>CPF:</label>
-                <span>${dados.cpf || 'Não informado'}</span>
-            </div>
-            
-            <div class="info-group">
-                <label>Data de Nascimento:</label>
-                <span>${formatarData(dados.nascimento) || 'Não informado'}</span>
-            </div>
-            
-            <div class="info-group">
-                <label>Município:</label>
-                <span>${dados.municipio || 'Não informado'}</span>
-            </div>
-            
-            <div class="info-group">
-                <label>Telefone:</label>
-                <span>${dados.telefone || 'Não informado'}</span>
-            </div>
-            
-            <div class="info-group">
-                <label>Status:</label>
-                <span class="status-badge status-${(dados.status || '').toLowerCase().replace(/\s/g, '-')}">
-                    ${dados.status || 'Pendente'}
-                </span>
-            </div>
-            
-            <div class="info-group">
-                <label>Tipo:</label>
-                <span>${dados.tipo || 'Não informado'}</span>
-            </div>
-            
-            ${dados.parceiro ? `
-            <div class="info-group">
-                <label>Parceiro:</label>
-                <span>${dados.parceiro}</span>
-            </div>
-            ` : ''}
-            
-            ${dados.motivo ? `
-            <div class="info-group">
-                <label>Motivo:</label>
-                <span>${dados.motivo}</span>
-            </div>
-            ` : ''}
-            
-            ${dados.lote ? `
-            <div class="info-group">
-                <label>Lote:</label>
-                <span>${dados.lote}</span>
-            </div>
-            ` : ''}
-            
-            <div class="info-group">
-                <label>Data de Cadastro:</label>
-                <span>${formatarData(dados.data) || 'Não informada'}</span>
-            </div>
-            
-            ${dados.atendente ? `
-            <div class="info-group">
-                <label>Atendente:</label>
-                <span>${dados.atendente}</span>
-            </div>
-            ` : ''}
-            
+            <div class="info-group"><label>Número da Carteira:</label><span class="destaque">${dados.numeroCarteira || 'Não informado'}</span></div>
+            <div class="info-group"><label>Nome Completo:</label><span>${dados.nome || 'Não informado'}</span></div>
+            <div class="info-group"><label>CPF:</label><span>${dados.cpf || 'Não informado'}</span></div>
+            <div class="info-group"><label>Data de Nascimento:</label><span>${formatarData(dados.nascimento) || 'Não informado'}</span></div>
+            <div class="info-group"><label>Município:</label><span>${dados.municipio || 'Não informado'}</span></div>
+            <div class="info-group"><label>Telefone:</label><span>${dados.telefone || 'Não informado'}</span></div>
+            <div class="info-group"><label>Status:</label><span class="status-badge status-${(dados.status || '').toLowerCase().replace(/\s/g, '-')}">${dados.status || 'Pendente'}</span></div>
+            <div class="info-group"><label>Tipo:</label><span>${dados.tipo || 'Não informado'}</span></div>
+            ${dados.parceiro ? `<div class="info-group"><label>Parceiro:</label><span>${dados.parceiro}</span></div>` : ''}
+            ${dados.motivo ? `<div class="info-group"><label>Motivo:</label><span>${dados.motivo}</span></div>` : ''}
+            ${dados.lote ? `<div class="info-group"><label>Lote:</label><span>${dados.lote}</span></div>` : ''}
+            <div class="info-group"><label>Data de Cadastro:</label><span>${formatarData(dados.data) || 'Não informada'}</span></div>
+            ${dados.atendente ? `<div class="info-group"><label>Atendente:</label><span>${dados.atendente}</span></div>` : ''}
             <div class="info-actions">
-                <button onclick="window.print()" class="print-btn">
-                    🖨️ Imprimir
-                </button>
-                <button onclick="location.reload()" class="new-search-btn">
-                    🔍 Nova Consulta
-                </button>
+                <button onclick="window.print()" class="print-btn">🖨️ Imprimir</button>
+                <button onclick="location.reload()" class="new-search-btn">🔍 Nova Consulta</button>
             </div>
         </div>
     `;
 }
 
-// Evento de submit do formulário
-document.getElementById('searchForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const cpf = document.getElementById('cpf').value;
-    const dataNascimento = document.getElementById('dataNascimento').value;
-    
-    // Validações
-    if (!cpf || !dataNascimento) {
-        showToast('Por favor, preencha todos os campos', 'error');
-        return;
+// === EVENTOS ===
+document.addEventListener('DOMContentLoaded', function() {
+    // Submit do formulário
+    const form = document.getElementById('searchForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const cpf = document.getElementById('cpf').value;
+            const dataNascimento = document.getElementById('dataNascimento').value;
+            
+            if (!cpf || !dataNascimento) {
+                showToast('Por favor, preencha todos os campos', 'error');
+                return;
+            }
+            
+            const cpfLimpo = limparCPF(cpf);
+            if (cpfLimpo.length !== 11) {
+                showToast('CPF inválido. Digite um CPF válido com 11 dígitos', 'error');
+                return;
+            }
+            
+            hideResult();
+            showLoading();
+            
+            try {
+                const resultado = await buscarDadosPlanilha(cpf, dataNascimento);
+                exibirResultado(resultado);
+                showResult();
+                if (resultado.success) {
+                    showToast('Dados encontrados com sucesso!', 'success');
+                } else {
+                    showToast(resultado.message || 'Usuário não encontrado', 'warning');
+                }
+            } catch (error) {
+                showToast(error.message || 'Erro ao realizar consulta.', 'error');
+            } finally {
+                hideLoading();
+            }
+        });
     }
     
-    const cpfLimpo = limparCPF(cpf);
-    if (cpfLimpo.length !== 11) {
-        showToast('CPF inválido. Digite um CPF válido com 11 dígitos', 'error');
-        return;
+    // Botão fechar
+    const btnFechar = document.getElementById('btnFechar');
+    if (btnFechar) {
+        btnFechar.addEventListener('click', () => {
+            hideResult();
+            if (document.getElementById('searchForm')) document.getElementById('searchForm').reset();
+        });
     }
     
-    // Esconder resultado anterior e mostrar loading
-    hideResult();
-    showLoading();
-    
-    try {
-        // Buscar dados da planilha via Apps Script
-        const resultado = await buscarDadosPlanilha(cpf, dataNascimento);
-        
-        // Exibir resultado
-        exibirResultado(resultado);
-        showResult();
-        
-        if (resultado.success) {
-            showToast('Dados encontrados com sucesso!', 'success');
-        } else {
-            showToast(resultado.message || 'Usuário não encontrado', 'warning');
-        }
-        
-    } catch (error) {
-        console.error('Erro:', error);
-        showToast(error.message || 'Erro ao realizar consulta. Tente novamente mais tarde.', 'error');
-    } finally {
-        hideLoading();
+    // Formatação do CPF
+    const cpfInput = document.getElementById('cpf');
+    if (cpfInput) {
+        cpfInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+            if (value.length >= 11) {
+                value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            } else if (value.length >= 7) {
+                value = value.replace(/(\d{3})(\d{3})(\d+)/, '$1.$2.$3');
+            } else if (value.length >= 4) {
+                value = value.replace(/(\d{3})(\d+)/, '$1.$2');
+            }
+            e.target.value = value;
+        });
     }
+    
+    // Limitar data
+    const dataInput = document.getElementById('dataNascimento');
+    if (dataInput) {
+        const hoje = new Date().toISOString().split('T')[0];
+        dataInput.setAttribute('max', hoje);
+    }
+    
+    console.log('Sistema de consulta inicializado!');
 });
-
-// Botão fechar resultado
-const btnFechar = document.getElementById('btnFechar');
-if (btnFechar) {
-    btnFechar.addEventListener('click', () => {
-        hideResult();
-        document.getElementById('searchForm').reset();
-    });
-}
-
-// Formatação automática do CPF
-const cpfInput = document.getElementById('cpf');
-if (cpfInput) {
-    cpfInput.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length > 11) value = value.slice(0, 11);
-        
-        if (value.length >= 4 && value.length <= 6) {
-            value = value.replace(/(\d{3})(\d+)/, '$1.$2');
-        } else if (value.length >= 7 && value.length <= 9) {
-            value = value.replace(/(\d{3})(\d{3})(\d+)/, '$1.$2.$3');
-        } else if (value.length >= 10) {
-            value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-        }
-        
-        e.target.value = value;
-    });
-}
-
-// Limitar data de nascimento para não ser futura
-const dataInput = document.getElementById('dataNascimento');
-if (dataInput) {
-    const hoje = new Date().toISOString().split('T')[0];
-    dataInput.setAttribute('max', hoje);
-}
-
-console.log('Sistema de consulta inicializado com sucesso!');
-console.log('URL do Apps Script:', SCRIPT_URL);
