@@ -58,11 +58,23 @@ function formatarData(data) {
 // ==================== COMUNICAÇÃO COM O SERVIDOR ====================
 
 async function buscarDados(cpf, dataNasc) {
-    // Usamos URLSearchParams para garantir compatibilidade com o doGet/doPost do Apps Script
+    // Criamos um objeto com os dados
+    const dados = { 
+        cpf: cpf, 
+        dataNascimento: dataNasc 
+    };
+
+    // Usamos o modo 'no-cors' ou simplificamos o envio
     const response = await fetch(SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({ cpf: cpf, dataNascimento: dataNasc })
+        // Removendo headers complexos para evitar erro de CORS
+        body: JSON.stringify(dados) 
     });
+
+    if (!response.ok) {
+        throw new Error('Erro na rede: ' + response.statusText);
+    }
+
     return await response.json();
 }
 
