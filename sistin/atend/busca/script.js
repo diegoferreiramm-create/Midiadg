@@ -1,11 +1,11 @@
 // ============================================
-// CONFIGURAÇÕES - Usando proxy local
+// CONFIGURAÇÕES - Chamada direta (sem proxy)
 // ============================================
 
-const urlSistema = "https://midiadg.com.br/sistin/atend/busca/proxy.php";
+const urlSistema = "https://script.google.com/macros/s/AKfycbz4Oz1hxpYjRiRMTo1FaVc4FS8tLEe-VLZeXYhL6BwXTkcfGHMwg2ZN-4eRdXu_of3-/exec";
 
 // ============================================
-// BUSCA (igual ao seu sistema que funciona)
+// BUSCA
 // ============================================
 
 function executarBusca() {
@@ -22,33 +22,46 @@ function executarBusca() {
         return;
     }
     
-    // Formata a data
     const [ano, mes, dia] = dataNasc.split('-');
     const dataFormatada = `${dia}/${mes}/${ano}`;
-    
-    // Limpa CPF
     const cpfLimpo = cpf.replace(/\D/g, '');
     
     showLoading(true);
     document.getElementById("resultArea").style.display = "none";
     
-    fetch(`${urlSistema}?action=buscar&cpf=${cpfLimpo}&data_nasc=${dataFormatada}`)
-        .then(res => res.json())
-        .then(res => {
-            showLoading(false);
-            
-            if(!res || !res.success) {
-                showToast(res.mensagem || "Nenhum registro encontrado", "error");
-                return;
+    const url = `${urlSistema}?action=buscar&cpf=${cpfLimpo}&data_nasc=${dataFormatada}`;
+    
+    console.log("URL:", url);
+    
+    // Tenta com mode no-cors
+    fetch(url, {
+        method: 'GET',
+        mode: 'no-cors'
+    })
+    .then(response => response.text())
+    .then(text => {
+        showLoading(false);
+        console.log("Resposta:", text);
+        
+        // Tenta converter para JSON
+        let res;
+        try {
+            res = JSON.parse(text);
+        } catch(e) {
+            // Se não conseguir, tenta extrair de uma string
+            if(text.includes('success') && text.includes('true')) {
+                showToast("Registro encontrado! Mas resposta veio em texto.", "success");
+            } else {
+                showToast("Erro: Resposta não é JSON válido", "error");
             }
-            
-            // Exibe o resultado
+            return;
+        }
+        
+        if(res && res.success) {
             const div = document.getElementById("resultContent");
             div.innerHTML = "";
             
             const item = res.dados;
-            
-            // Verifica se é indeferido para mostrar prazo
             const isIndeferido = item.status && (item.status.toLowerCase().includes('indeferido') || item.status.toLowerCase().includes('negado'));
             
             let statusClass = 'status-error';
@@ -73,12 +86,15 @@ function executarBusca() {
             
             document.getElementById("resultArea").style.display = "block";
             showToast("Registro encontrado!", "success");
-        })
-        .catch(err => {
-            showLoading(false);
-            console.error("Erro:", err);
-            showToast("Erro ao pesquisar: " + err.message, "error");
-        });
+        } else {
+            showToast(res?.mensagem || "Nenhum registro encontrado", "error");
+        }
+    })
+    .catch(err => {
+        showLoading(false);
+        console.error("Erro:", err);
+        showToast("Erro ao pesquisar. Verifique o console.", "error");
+    });
 }
 
 function formatarCPF(cpf) {
@@ -105,16 +121,11 @@ function showToast(message, type) {
     }, 3000);
 }
 
-// ============================================
-// MÁSCARA CPF E EVENTOS
-// ============================================
-
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('searchForm');
     const cpfInput = document.getElementById('cpf');
     const btnFechar = document.getElementById('btnFechar');
     
-    // Máscara CPF
     if(cpfInput) {
         cpfInput.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
@@ -126,7 +137,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Submit do formulário
     if(form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -134,7 +144,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Fechar resultado
     if(btnFechar) {
         btnFechar.addEventListener('click', function() {
             document.getElementById('resultArea').style.display = 'none';
