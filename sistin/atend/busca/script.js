@@ -32,23 +32,35 @@ function executarBusca() {
     showLoading(true);
     document.getElementById("resultArea").style.display = "none";
     
-    fetch(`${urlSistema}?action=buscar&cpf=${cpfLimpo}&data_nasc=${dataFormatada}`)
-        .then(res => res.json())
-        .then(res => {
-            showLoading(false);
-            
-            if(!res || !res.success) {
-                showToast(res.mensagem || "Nenhum registro encontrado", "error");
-                return;
-            }
-            
-            // Exibe o resultado
+    // Usa o mesmo formato do seu sistema que funciona
+    fetch(`${urlSistema}?action=buscar&cpf=${cpfLimpo}&data_nasc=${dataFormatada}`, {
+        method: 'GET',
+        mode: 'no-cors',
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.text())
+    .then(text => {
+        showLoading(false);
+        
+        // Tenta converter o texto para JSON
+        let res;
+        try {
+            res = JSON.parse(text);
+        } catch(e) {
+            // Se não for JSON, tenta extrair de outra forma
+            console.log("Resposta bruta:", text);
+            showToast("Erro na resposta do servidor", "error");
+            return;
+        }
+        
+        if(res && res.success) {
             const div = document.getElementById("resultContent");
             div.innerHTML = "";
             
             const item = res.dados;
             
-            // Verifica se é indeferido para mostrar prazo
             const isIndeferido = item.status && (item.status.toLowerCase().includes('indeferido') || item.status.toLowerCase().includes('negado'));
             
             let statusClass = 'status-error';
@@ -73,12 +85,15 @@ function executarBusca() {
             
             document.getElementById("resultArea").style.display = "block";
             showToast("Registro encontrado!", "success");
-        })
-        .catch(err => {
-            showLoading(false);
-            console.error("Erro:", err);
-            showToast("Erro ao pesquisar: " + err.message, "error");
-        });
+        } else {
+            showToast(res?.mensagem || "Nenhum registro encontrado", "error");
+        }
+    })
+    .catch(err => {
+        showLoading(false);
+        console.error("Erro:", err);
+        showToast("Erro ao pesquisar. Verifique o Web App.", "error");
+    });
 }
 
 function formatarCPF(cpf) {
