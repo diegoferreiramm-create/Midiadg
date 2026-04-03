@@ -1,5 +1,4 @@
 // Configuração - URL do seu Web App do Google Apps Script
-// Depois de publicar o script, cole a URL aqui
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz3mlbt1TcoW03bZsm_C0zKhqKvO9yDx5o8b_oncsLGcctJT-NxQZMJiSrQZogJT95b/exec';
 
 // Função para limpar CPF
@@ -20,12 +19,51 @@ function formatarCPF(cpf) {
 function formatarData(data) {
     if (!data || data === 'Não informado') return data;
     
-    if (data.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    if (typeof data === 'string' && data.match(/^\d{4}-\d{2}-\d{2}$/)) {
         const [ano, mes, dia] = data.split('-');
         return `${dia}/${mes}/${ano}`;
     }
     
     return data;
+}
+
+// Função para mostrar mensagem toast
+function showToast(message, type = 'error') {
+    const toast = document.getElementById('toastMessage');
+    if (!toast) return;
+    
+    toast.textContent = message;
+    toast.className = `toast-message ${type}`;
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 5000);
+}
+
+// Função para mostrar loading
+function showLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.style.display = 'flex';
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+// Função para mostrar resultado
+function showResult() {
+    const resultArea = document.getElementById('resultArea');
+    if (resultArea) {
+        resultArea.style.display = 'block';
+        resultArea.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function hideResult() {
+    const resultArea = document.getElementById('resultArea');
+    if (resultArea) resultArea.style.display = 'none';
 }
 
 // Função para buscar dados via Apps Script
@@ -64,6 +102,7 @@ async function buscarDadosPlanilha(cpf, dataNascimento) {
 // Função para exibir os resultados
 function exibirResultado(resultado) {
     const resultContent = document.getElementById('resultContent');
+    if (!resultContent) return;
     
     if (!resultado.success || !resultado.data) {
         resultContent.innerHTML = `
@@ -168,17 +207,14 @@ function exibirResultado(resultado) {
     `;
 }
 
-// Resto do código permanece igual...
-// (incluir as funções showToast, showLoading, hideLoading, showResult, hideResult
-// e o event listener do formulário, adaptando para usar a nova função buscarDadosPlanilha)
-
-// Evento de submit do formulário (versão atualizada)
+// Evento de submit do formulário
 document.getElementById('searchForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const cpf = document.getElementById('cpf').value;
     const dataNascimento = document.getElementById('dataNascimento').value;
     
+    // Validações
     if (!cpf || !dataNascimento) {
         showToast('Por favor, preencha todos os campos', 'error');
         return;
@@ -190,11 +226,15 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
         return;
     }
     
+    // Esconder resultado anterior e mostrar loading
     hideResult();
     showLoading();
     
     try {
+        // Buscar dados da planilha via Apps Script
         const resultado = await buscarDadosPlanilha(cpf, dataNascimento);
+        
+        // Exibir resultado
         exibirResultado(resultado);
         showResult();
         
@@ -206,8 +246,46 @@ document.getElementById('searchForm').addEventListener('submit', async (e) => {
         
     } catch (error) {
         console.error('Erro:', error);
-        showToast(error.message || 'Erro ao realizar consulta', 'error');
+        showToast(error.message || 'Erro ao realizar consulta. Tente novamente mais tarde.', 'error');
     } finally {
         hideLoading();
     }
 });
+
+// Botão fechar resultado
+const btnFechar = document.getElementById('btnFechar');
+if (btnFechar) {
+    btnFechar.addEventListener('click', () => {
+        hideResult();
+        document.getElementById('searchForm').reset();
+    });
+}
+
+// Formatação automática do CPF
+const cpfInput = document.getElementById('cpf');
+if (cpfInput) {
+    cpfInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 11) value = value.slice(0, 11);
+        
+        if (value.length >= 4 && value.length <= 6) {
+            value = value.replace(/(\d{3})(\d+)/, '$1.$2');
+        } else if (value.length >= 7 && value.length <= 9) {
+            value = value.replace(/(\d{3})(\d{3})(\d+)/, '$1.$2.$3');
+        } else if (value.length >= 10) {
+            value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        }
+        
+        e.target.value = value;
+    });
+}
+
+// Limitar data de nascimento para não ser futura
+const dataInput = document.getElementById('dataNascimento');
+if (dataInput) {
+    const hoje = new Date().toISOString().split('T')[0];
+    dataInput.setAttribute('max', hoje);
+}
+
+console.log('Sistema de consulta inicializado com sucesso!');
+console.log('URL do Apps Script:', SCRIPT_URL);
