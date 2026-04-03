@@ -1,8 +1,11 @@
 // ============================================
-// CONFIGURAÇÕES - Chamada direta (sem proxy)
+// CONFIGURAÇÕES
 // ============================================
 
-const urlSistema = "https://script.google.com/macros/s/AKfycbz4Oz1hxpYjRiRMTo1FaVc4FS8tLEe-VLZeXYhL6BwXTkcfGHMwg2ZN-4eRdXu_of3-/exec";
+const URL_DIRETA = "https://script.google.com/macros/s/AKfycbz4Oz1hxpYjRiRMTo1FaVc4FS8tLEe-VLZeXYhL6BwXTkcfGHMwg2ZN-4eRdXu_of3-/exec";
+const URL_PROXY = "https://midiadg.com.br/sistin/atend/busca/proxy.php";
+
+let urlSistema = URL_PROXY; // Tenta proxy primeiro
 
 // ============================================
 // BUSCA
@@ -29,72 +32,67 @@ function executarBusca() {
     showLoading(true);
     document.getElementById("resultArea").style.display = "none";
     
-    const url = `${urlSistema}?action=buscar&cpf=${cpfLimpo}&data_nasc=${dataFormatada}`;
-    
-    console.log("URL:", url);
-    
-    // Tenta com mode no-cors
-    fetch(url, {
-        method: 'GET',
-        mode: 'no-cors'
-    })
-    .then(response => response.text())
-    .then(text => {
-        showLoading(false);
-        console.log("Resposta:", text);
-        
-        // Tenta converter para JSON
-        let res;
-        try {
-            res = JSON.parse(text);
-        } catch(e) {
-            // Se não conseguir, tenta extrair de uma string
-            if(text.includes('success') && text.includes('true')) {
-                showToast("Registro encontrado! Mas resposta veio em texto.", "success");
+    fetch(`${urlSistema}?action=buscar&cpf=${cpfLimpo}&data_nasc=${dataFormatada}`)
+        .then(res => {
+            if(!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+        })
+        .then(res => {
+            showLoading(false);
+            
+            if(res && res.success) {
+                const div = document.getElementById("resultContent");
+                div.innerHTML = "";
+                
+                const item = res.dados;
+                const isIndeferido = item.status && (item.status.toLowerCase().includes('indeferido') || item.status.toLowerCase().includes('negado'));
+                
+                let statusClass = 'status-error';
+                if(item.status === 'Ativo' || item.status === 'Aprovado' || item.status === 'Deferido') statusClass = 'status-ok';
+                if(item.status === 'Pedido a caminho da ARCE') statusClass = 'status-warning';
+                
+                div.innerHTML = `
+                    <div class="res-card">
+                        <b>CPF:</b> ${formatarCPF(item.cpf)}<br>
+                        <b>NOME:</b> ${item.nome || '-'}<br>
+                        <b>DATA DE NASCIMENTO:</b> ${item.nasc || '-'}<br>
+                        <b>MUNICÍPIO:</b> ${item.municipio || '-'}<br>
+                        <b>VIA:</b> ${item.via || '-'}<br>
+                        <b>PARCEIRO:</b> ${item.parceiro || '-'}<br>
+                        <b>DATA SOLICITAÇÃO:</b> ${item.data || '-'}<br>
+                        <b>STATUS:</b> <span class="status-badge ${statusClass}">${item.status || '-'}</span><br>
+                        <b>MOTIVO:</b> ${item.motivo || '-'}<br>
+                        <b>DATA STATUS:</b> ${item.data_status || '-'}<br>
+                        ${isIndeferido ? `<b>PRAZO:</b> ⏰ ${item.prazo || '-'}<br>` : ''}
+                    </div>
+                `;
+                
+                document.getElementById("resultArea").style.display = "block";
+                showToast("Registro encontrado!", "success");
             } else {
-                showToast("Erro: Resposta não é JSON válido", "error");
+                // Se proxy falhou, tenta URL direta
+                if(urlSistema === URL_PROXY) {
+                    console.log("Proxy falhou, tentando URL direta...");
+                    urlSistema = URL_DIRETA;
+                    executarBusca();
+                    return;
+                }
+                showToast(res?.mensagem || "Nenhum registro encontrado", "error");
             }
-            return;
-        }
-        
-        if(res && res.success) {
-            const div = document.getElementById("resultContent");
-            div.innerHTML = "";
+        })
+        .catch(err => {
+            // Se proxy falhou, tenta URL direta
+            if(urlSistema === URL_PROXY) {
+                console.log("Proxy falhou, tentando URL direta...");
+                urlSistema = URL_DIRETA;
+                executarBusca();
+                return;
+            }
             
-            const item = res.dados;
-            const isIndeferido = item.status && (item.status.toLowerCase().includes('indeferido') || item.status.toLowerCase().includes('negado'));
-            
-            let statusClass = 'status-error';
-            if(item.status === 'Ativo' || item.status === 'Aprovado' || item.status === 'Deferido') statusClass = 'status-ok';
-            if(item.status === 'Pedido a caminho da ARCE') statusClass = 'status-warning';
-            
-            div.innerHTML = `
-                <div class="res-card">
-                    <b>CPF:</b> ${formatarCPF(item.cpf)}<br>
-                    <b>NOME:</b> ${item.nome || '-'}<br>
-                    <b>DATA DE NASCIMENTO:</b> ${item.nasc || '-'}<br>
-                    <b>MUNICÍPIO:</b> ${item.municipio || '-'}<br>
-                    <b>VIA:</b> ${item.via || '-'}<br>
-                    <b>PARCEIRO:</b> ${item.parceiro || '-'}<br>
-                    <b>DATA SOLICITAÇÃO:</b> ${item.data || '-'}<br>
-                    <b>STATUS:</b> <span class="status-badge ${statusClass}">${item.status || '-'}</span><br>
-                    <b>MOTIVO:</b> ${item.motivo || '-'}<br>
-                    <b>DATA STATUS:</b> ${item.data_status || '-'}<br>
-                    ${isIndeferido ? `<b>PRAZO:</b> ⏰ ${item.prazo || '-'}<br>` : ''}
-                </div>
-            `;
-            
-            document.getElementById("resultArea").style.display = "block";
-            showToast("Registro encontrado!", "success");
-        } else {
-            showToast(res?.mensagem || "Nenhum registro encontrado", "error");
-        }
-    })
-    .catch(err => {
-        showLoading(false);
-        console.error("Erro:", err);
-        showToast("Erro ao pesquisar. Verifique o console.", "error");
-    });
+            showLoading(false);
+            console.error("Erro:", err);
+            showToast("Erro ao pesquisar. Verifique sua conexão.", "error");
+        });
 }
 
 function formatarCPF(cpf) {
