@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit(0);
 }
 
-$url = 'https://script.google.com/macros/s/AKfycbz4Oz1hxpYjRiRMTo1FaVc4FS8tLEe-VLZeXYhL6BwXTkcfGHMwg2ZN-4eRdXu_of3-/exec';
+$url = 'https://script.google.com/macros/s/AKfycbwDpfgFnL1S0RLP5QavKGY0he01KjQXBLZ2BZBEaA1PYWsvn3wBeBAIIBFgFhzNsGmt/exec';
 $url .= '?' . $_SERVER['QUERY_STRING'];
 
 // Log para debug
