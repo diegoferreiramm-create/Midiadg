@@ -1,35 +1,51 @@
 <?php
+// Desliga qualquer saída indesejada
+error_reporting(0);
+ini_set('display_errors', 0);
+
+// Headers CORS
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json');
 
+// Responde requisição OPTIONS (pre-flight)
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    exit(0);
+    http_response_code(200);
+    exit();
 }
 
-$url = 'https://script.google.com/macros/s/AKfycbwDpfgFnL1S0RLP5QavKGY0he01KjQXBLZ2BZBEaA1PYWsvn3wBeBAIIBFgFhzNsGmt/exec';
-$url .= '?' . $_SERVER['QUERY_STRING'];
+// Pega a URL do Google Apps Script
+$url = 'https://script.google.com/macros/s/AKfycbxPTOQE-4ciMg4PE5wkXwb9YD7Z6sltcZgOe1T9vXTNXOjyOs8DQ6IMW_tgRHw1NcrZ/exec';
 
-// Log para debug
-error_log("Proxy chamado: " . $url);
+// Adiciona os parâmetros da requisição
+if (!empty($_SERVER['QUERY_STRING'])) {
+    $url .= '?' . $_SERVER['QUERY_STRING'];
+}
 
+// Inicia CURL
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    'Content-Type: application/json'
+));
 
 $response = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-if(curl_error($ch)) {
-    $response = json_encode(['success' => false, 'mensagem' => 'Erro curl: ' . curl_error($ch)]);
+if (curl_errno($ch)) {
+    echo json_encode([
+        'success' => false, 
+        'mensagem' => 'Erro de conexão: ' . curl_error($ch)
+    ]);
+} else {
+    http_response_code($httpCode);
+    echo $response;
 }
 
 curl_close($ch);
-
-http_response_code($httpCode);
-header('Content-Type: application/json');
-echo $response;
 ?>
