@@ -1,27 +1,24 @@
 // ============================================
-// CONFIGURAÇÕES
+// CONFIGURAÇÃO - Proxy no servidor
 // ============================================
 
-const URL_DIRETA = "https://script.google.com/macros/s/AKfycbz4Oz1hxpYjRiRMTo1FaVc4FS8tLEe-VLZeXYhL6BwXTkcfGHMwg2ZN-4eRdXu_of3-/exec";
-const URL_PROXY = "https://midiadg.com.br/sistin/atend/busca/proxy.php";
-
-let urlSistema = URL_PROXY; // Tenta proxy primeiro
+const URL_BUSCA = "https://www.midiadg.com.br/sistin/atend/busca/proxy.php";
 
 // ============================================
-// BUSCA
+// FUNÇÃO PRINCIPAL
 // ============================================
 
 function executarBusca() {
     const cpf = document.getElementById("cpf").value;
     const dataNasc = document.getElementById("dataNascimento").value;
     
-    if(!cpf) {
-        showToast("Digite o CPF", "error");
+    if (!cpf) {
+        exibirMensagem("Digite o CPF", "erro");
         return;
     }
     
-    if(!dataNasc) {
-        showToast("Selecione a data de nascimento", "error");
+    if (!dataNasc) {
+        exibirMensagem("Selecione a data de nascimento", "erro");
         return;
     }
     
@@ -29,122 +26,110 @@ function executarBusca() {
     const dataFormatada = `${dia}/${mes}/${ano}`;
     const cpfLimpo = cpf.replace(/\D/g, '');
     
-    showLoading(true);
-    document.getElementById("resultArea").style.display = "none";
+    mostrarCarregando(true);
+    esconderResultado();
     
-    fetch(`${urlSistema}?action=buscar&cpf=${cpfLimpo}&data_nasc=${dataFormatada}`)
-        .then(res => {
-            if(!res.ok) throw new Error(`HTTP ${res.status}`);
-            return res.json();
-        })
-        .then(res => {
-            showLoading(false);
+    fetch(`${URL_BUSCA}?action=buscar&cpf=${cpfLimpo}&data_nasc=${dataFormatada}`)
+        .then(resposta => resposta.json())
+        .then(dados => {
+            mostrarCarregando(false);
             
-            if(res && res.success) {
-                const div = document.getElementById("resultContent");
-                div.innerHTML = "";
-                
-                const item = res.dados;
-                const isIndeferido = item.status && (item.status.toLowerCase().includes('indeferido') || item.status.toLowerCase().includes('negado'));
-                
-                let statusClass = 'status-error';
-                if(item.status === 'Ativo' || item.status === 'Aprovado' || item.status === 'Deferido') statusClass = 'status-ok';
-                if(item.status === 'Pedido a caminho da ARCE') statusClass = 'status-warning';
-                
-                div.innerHTML = `
-                    <div class="res-card">
-                        <b>CPF:</b> ${formatarCPF(item.cpf)}<br>
-                        <b>NOME:</b> ${item.nome || '-'}<br>
-                        <b>DATA DE NASCIMENTO:</b> ${item.nasc || '-'}<br>
-                        <b>MUNICÍPIO:</b> ${item.municipio || '-'}<br>
-                        <b>VIA:</b> ${item.via || '-'}<br>
-                        <b>PARCEIRO:</b> ${item.parceiro || '-'}<br>
-                        <b>DATA SOLICITAÇÃO:</b> ${item.data || '-'}<br>
-                        <b>STATUS:</b> <span class="status-badge ${statusClass}">${item.status || '-'}</span><br>
-                        <b>MOTIVO:</b> ${item.motivo || '-'}<br>
-                        <b>DATA STATUS:</b> ${item.data_status || '-'}<br>
-                        ${isIndeferido ? `<b>PRAZO:</b> ⏰ ${item.prazo || '-'}<br>` : ''}
-                    </div>
-                `;
-                
-                document.getElementById("resultArea").style.display = "block";
-                showToast("Registro encontrado!", "success");
+            if (dados && dados.success) {
+                exibirResultado(dados.dados);
+                exibirMensagem("Registro encontrado!", "sucesso");
             } else {
-                // Se proxy falhou, tenta URL direta
-                if(urlSistema === URL_PROXY) {
-                    console.log("Proxy falhou, tentando URL direta...");
-                    urlSistema = URL_DIRETA;
-                    executarBusca();
-                    return;
-                }
-                showToast(res?.mensagem || "Nenhum registro encontrado", "error");
+                exibirMensagem(dados?.mensagem || "Nenhum registro encontrado", "erro");
             }
         })
-        .catch(err => {
-            // Se proxy falhou, tenta URL direta
-            if(urlSistema === URL_PROXY) {
-                console.log("Proxy falhou, tentando URL direta...");
-                urlSistema = URL_DIRETA;
-                executarBusca();
-                return;
-            }
-            
-            showLoading(false);
-            console.error("Erro:", err);
-            showToast("Erro ao pesquisar. Verifique sua conexão.", "error");
+        .catch(erro => {
+            mostrarCarregando(false);
+            console.error("Erro:", erro);
+            exibirMensagem("Erro na consulta. Tente novamente.", "erro");
         });
+}
+
+function exibirResultado(item) {
+    const container = document.getElementById("resultadoConteudo");
+    
+    const isIndeferido = item.status && (
+        item.status.toLowerCase().includes('indeferido') || 
+        item.status.toLowerCase().includes('negado')
+    );
+    
+    let classeStatus = 'status-erro';
+    if (item.status === 'Ativo' || item.status === 'Aprovado' || item.status === 'Deferido') {
+        classeStatus = 'status-ok';
+    } else if (item.status === 'Pedido a caminho da ARCE') {
+        classeStatus = 'status-alerta';
+    }
+    
+    container.innerHTML = `
+        <div class="resultado-card">
+            <div class="resultado-linha"><strong>CPF:</strong> ${formatarCPF(item.cpf)}</div>
+            <div class="resultado-linha"><strong>NOME:</strong> ${item.nome || '-'}</div>
+            <div class="resultado-linha"><strong>DATA NASCIMENTO:</strong> ${item.nasc || '-'}</div>
+            <div class="resultado-linha"><strong>MUNICÍPIO:</strong> ${item.municipio || '-'}</div>
+            <div class="resultado-linha"><strong>VIA:</strong> ${item.via || '-'}</div>
+            <div class="resultado-linha"><strong>PARCEIRO:</strong> ${item.parceiro || '-'}</div>
+            <div class="resultado-linha"><strong>DATA SOLICITAÇÃO:</strong> ${item.data || '-'}</div>
+            <div class="resultado-linha"><strong>STATUS:</strong> <span class="status-badge ${classeStatus}">${item.status || '-'}</span></div>
+            <div class="resultado-linha"><strong>MOTIVO:</strong> ${item.motivo || '-'}</div>
+            <div class="resultado-linha"><strong>DATA STATUS:</strong> ${item.data_status || '-'}</div>
+            ${isIndeferido ? `<div class="resultado-linha"><strong>PRAZO:</strong> ⏰ ${item.prazo || '-'}</div>` : ''}
+        </div>
+    `;
+    
+    document.getElementById("areaResultado").style.display = "block";
 }
 
 function formatarCPF(cpf) {
-    if(!cpf) return '';
+    if (!cpf) return '';
     const numeros = cpf.replace(/\D/g, '');
-    if(numeros.length !== 11) return cpf;
+    if (numeros.length !== 11) return cpf;
     return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
 
-function showLoading(show) {
-    const loading = document.getElementById('loadingOverlay');
-    if(loading) loading.style.display = show ? 'flex' : 'none';
+function mostrarCarregando(mostrar) {
+    const loading = document.getElementById("loadingOverlay");
+    if (loading) loading.style.display = mostrar ? "flex" : "none";
 }
 
-function showToast(message, type) {
-    const toast = document.getElementById('toastMessage');
-    if(!toast) return;
-    
-    toast.textContent = message;
-    toast.className = `toast-message ${type}`;
-    toast.style.display = 'block';
+function exibirMensagem(texto, tipo) {
+    const toast = document.getElementById("toastMessage");
+    toast.textContent = texto;
+    toast.className = `toast-message ${tipo}`;
+    toast.style.display = "block";
     setTimeout(() => {
-        toast.style.display = 'none';
+        toast.style.display = "none";
     }, 3000);
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('searchForm');
-    const cpfInput = document.getElementById('cpf');
-    const btnFechar = document.getElementById('btnFechar');
-    
-    if(cpfInput) {
-        cpfInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if(value.length > 11) value = value.slice(0, 11);
-            if(value.length >= 4) value = value.replace(/(\d{3})(\d)/, '$1.$2');
-            if(value.length >= 8) value = value.replace(/(\d{3})(\d{3})(\d)/, '$1.$2.$3');
-            if(value.length >= 11) value = value.replace(/(\d{3})(\d{3})(\d{3})(\d)/, '$1.$2.$3-$4');
-            e.target.value = value;
-        });
-    }
-    
-    if(form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            executarBusca();
-        });
-    }
-    
-    if(btnFechar) {
-        btnFechar.addEventListener('click', function() {
-            document.getElementById('resultArea').style.display = 'none';
-        });
-    }
+function esconderResultado() {
+    document.getElementById("areaResultado").style.display = "none";
+}
+
+// ============================================
+// MÁSCARA DO CPF
+// ============================================
+
+document.getElementById("cpf").addEventListener("input", function(e) {
+    let valor = e.target.value.replace(/\D/g, '');
+    if (valor.length > 11) valor = valor.slice(0, 11);
+    if (valor.length >= 4) valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    if (valor.length >= 8) valor = valor.replace(/(\d{3})(\d{3})(\d)/, '$1.$2.$3');
+    if (valor.length >= 11) valor = valor.replace(/(\d{3})(\d{3})(\d{3})(\d)/, '$1.$2.$3-$4');
+    e.target.value = valor;
+});
+
+// ============================================
+// EVENTOS
+// ============================================
+
+document.getElementById("searchForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    executarBusca();
+});
+
+document.getElementById("btnFechar").addEventListener("click", function() {
+    document.getElementById("areaResultado").style.display = "none";
 });
