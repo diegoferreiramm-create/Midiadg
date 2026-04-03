@@ -4,7 +4,7 @@
 
 // URL do seu Web App do Google Apps Script
 // Depois de publicar o App Script, cole a URL aqui
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz4Oz1hxpYjRiRMTo1FaVc4FS8tLEe-VLZeXYhL6BwXTkcfGHMwg2ZN-4eRdXu_of3-/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwDpfgFnL1S0RLP5QavKGY0he01KjQXBLZ2BZBEaA1PYWsvn3wBeBAIIBFgFhzNsGmt/exec";
 
 // Mapeamento das colunas da sua planilha (conforme sua estrutura)
 // A ordem das colunas A até W:
