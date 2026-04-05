@@ -748,7 +748,6 @@ function gerarHTMLFormularioOriginal(dadosUsuario) {
                         };
                         
                         try {
-                            console.log('=== ENVIANDO VIA GET ===');
                             const dadosEnvio = {
                                 acao: 'enviar_documentos',
                                 cpf: '${dadosUsuario.cpf}',
