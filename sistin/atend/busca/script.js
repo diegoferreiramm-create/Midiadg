@@ -277,41 +277,6 @@ function abrirFormularioDocumentos(dadosUsuario) {
     const url = 'envio.html?cpf=' + encodeURIComponent(dadosUsuario.cpf) + '&nome=' + encodeURIComponent(dadosUsuario.nome) + '&status=' + encodeURIComponent(dadosUsuario.status) + '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento);
     window.open(url, '_blank');
 }
-    // Cria o modal
-    const modal = document.createElement('div');
-    modal.id = 'modalDocumentos';
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.95);
-        z-index: 10000;
-        overflow: auto;
-        padding: 20px;
-    `;
-    
-    // Gera o HTML do formulário (usando TODO o HTML original)
-    modal.innerHTML = gerarHTMLFormularioOriginal(dadosUsuario);
-    
-    document.body.appendChild(modal);
-    
-    // Fechar modal ao clicar no X (será criado dinamicamente)
-    const fecharBtn = modal.querySelector('#fecharModal');
-    if (fecharBtn) {
-        fecharBtn.onclick = () => {
-            modal.remove();
-            showResult();
-        };
-    }
-    
-    // Executar os scripts do formulário após inserir no DOM
-    const scriptTag = modal.querySelector('#formScript');
-    if (scriptTag) {
-        eval(scriptTag.textContent);
-    }
-}
 
 function gerarHTMLFormularioOriginal(dadosUsuario) {
     // TODO o seu HTML original, apenas com um botão de fechar adicionado
