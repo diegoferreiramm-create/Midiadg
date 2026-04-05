@@ -749,18 +749,19 @@ function gerarHTMLFormularioOriginal(dadosUsuario) {
                         
                         try {
                             console.log('=== ENVIANDO VIA GET ===');
-                            const params = new URLSearchParams();
-                            params.append('acao', 'enviar_documentos');
-                            params.append('cpf', '${dadosUsuario.cpf}');
-                            params.append('nome', '${dadosUsuario.nome}');
-                            params.append('status', '${dadosUsuario.status}');
-                            params.append('selfie', selfieInput.value || '');
-                            params.append('arquivos_json', JSON.stringify(arquivos));
-                            const urlCompleta = '${SCRIPT_URL}?' + params.toString();
-                            console.log('URL:', urlCompleta.substring(0, 300));
-                            const resp = await fetch(urlCompleta, {
-                                method: 'GET',
-                                headers: { 'Accept': 'application/json' }
+                            const dadosEnvio = {
+                                acao: 'enviar_documentos',
+                                cpf: '${dadosUsuario.cpf}',
+                                nome: '${dadosUsuario.nome}',
+                                status: '${dadosUsuario.status}',
+                                selfie: selfieInput.value || '',
+                                arquivos: arquivos
+                            };
+
+                            const resp = await fetch('${SCRIPT_URL}', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(dadosEnvio)
                             });
                             const res = await resp.json();
                             console.log('Resposta:', res);
