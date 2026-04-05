@@ -274,16 +274,7 @@ function escreverNaNovaAba(novaAba, result) {
 // ==================== FORMULÁRIO DE ENVIO DE DOCUMENTOS (SELFIE OPCIONAL) ====================
 
 function abrirFormularioDocumentos(dadosUsuario) {
-    // Garante que os valores não sejam undefined ou null
-    const cpf = dadosUsuario.cpf || '';
-    const nome = dadosUsuario.nome || '';
-    const status = dadosUsuario.status || '';
-    const nascimento = dadosUsuario.nascimento || '';
-
-    // Constrói a URL com parâmetros codificados
-    const url = `envio.html?cpf=${encodeURIComponent(cpf)}&nome=${encodeURIComponent(nome)}&status=${encodeURIComponent(status)}&nascimento=${encodeURIComponent(nascimento)}`;
-    
-    // Abre em nova aba
+    const url = 'envio.html?cpf=' + encodeURIComponent(dadosUsuario.cpf) + '&nome=' + encodeURIComponent(dadosUsuario.nome) + '&status=' + encodeURIComponent(dadosUsuario.status) + '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento);
     window.open(url, '_blank');
 }
     // Cria o modal
