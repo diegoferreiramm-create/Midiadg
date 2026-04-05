@@ -759,7 +759,6 @@ function gerarHTMLFormularioOriginal(dadosUsuario) {
 
                             const resp = await fetch('${SCRIPT_URL}', {
                                 method: 'POST',
-                                mode: 'cors',  // 👈 ADICIONE ESTA LINHA
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(dadosEnvio)
                             });
