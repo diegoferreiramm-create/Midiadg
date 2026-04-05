@@ -274,13 +274,10 @@ function escreverNaNovaAba(novaAba, result) {
 // ==================== FORMULÁRIO DE ENVIO DE DOCUMENTOS (SELFIE OPCIONAL) ====================
 
 function abrirFormularioDocumentos(dadosUsuario) {
-    // Esconde o resultado da busca
-    hideResult();
-    
-    // Remove modal anterior se existir
-    const modalAntigo = document.getElementById('modalDocumentos');
-    if (modalAntigo) modalAntigo.remove();
-    
+    // Abre em nova aba com o HTML separado
+    const url = `envio.html?cpf=${dadosUsuario.cpf}&nome=${encodeURIComponent(dadosUsuario.nome)}&status=${encodeURIComponent(dadosUsuario.status)}&nascimento=${dadosUsuario.nascimento}`;
+    window.open(url, '_blank');
+}
     // Cria o modal
     const modal = document.createElement('div');
     modal.id = 'modalDocumentos';
