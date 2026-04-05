@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Envio de Documentos</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h2 { text-align: center; color: #e67e22; margin-bottom: 20px; }
+        .info-box {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { opacity: 0.9; }
+        .loading { display: none; text-align: center; margin-top: 10px; color: #e67e22; }
+        .success { color: green; text-align: center; margin-top: 10px; }
+        .error { color: red; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📎 Envio de Documentos</h2>
+        <div class="info-box" id="infoUsuario"></div>
+        
+        <div class="form-group">
+            <label>📄 Declaração de Ensino</label>
+            <input type="file" id="doc1">
+        </div>
+        <div class="form-group">
+            <label>🏠 Comprovante de Residência</label>
+            <input type="file" id="doc2">
+        </div>
+        <div class="form-group">
+            <label>🆔 Foto do CPF</label>
+            <input type="file" id="doc3">
+        </div>
+        <div class="form-group" id="grupoResp">
+            <label>👨‍👩‍👧 Documento do Responsável</label>
+            <input type="file" id="doc4">
+        </div>
+        <div class="form-group">
+            <label>🤳 Selfie (opcional)</label>
+            <input type="file" id="selfieFile" accept="image/*">
+        </div>
+        
+        <button id="btnEnviar">📤 Enviar Documentos</button>
+        <div id="resultado" class="loading"></div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const dadosUsuario = {
+            cpf: urlParams.get('cpf'),
+            nome: urlParams.get('nome'),
+            status: urlParams.get('status'),
+            nascimento: urlParams.get('nascimento')
+        };
+        
+        document.getElementById('infoUsuario').innerHTML = `
+            <p><strong>Nome:</strong> ${dadosUsuario.nome}</p>
+            <p><strong>CPF:</strong> ${dadosUsuario.cpf}</p>
+            <p><strong>Status:</strong> ${dadosUsuario.status}</p>
+        `;
+        
+        // Verificar menor de idade
+        const anoNasc = parseInt(dadosUsuario.nascimento.split('/')[2]);
+        const idade = new Date().getFullYear() - anoNasc;
+        if (idade >= 18) {
+            document.getElementById('grupoResp').style.display = 'none';
+        }
+        
+        document.getElementById('btnEnviar').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('resultado');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = 'Enviando documentos...';
+            resultDiv.className = 'loading';
+            
+            const lerArquivo = (file) => {
+                return new Promise((resolve) => {
+                    if (!file || !file.name) { resolve(null); return; }
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve({ base64: e.target.result, nome: file.name });
+                    reader.readAsDataURL(file);
+                });
+            };
+            
+            const doc1 = await lerArquivo(document.getElementById('doc1').files[0]);
+            const doc2 = await lerArquivo(document.getElementById('doc2').files[0]);
+            const doc3 = await lerArquivo(document.getElementById('doc3').files[0]);
+            const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
+            const selfieFile = document.getElementById('selfieFile').files[0];
+            let selfie = '';
+            if (selfieFile) {
+                const selfieData = await lerArquivo(selfieFile);
+                selfie = selfieData ? selfieData.base64 : '';
+            }
+            
+            const arquivos = [];
+            if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
+            if (doc2) arquivos.push({ ...doc2, tipo: 'comprovante_residencia' });
+            if (doc3) arquivos.push({ ...doc3, tipo: 'cpf_documento' });
+            if (doc4) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
+            
+            const dadosEnvio = {
+                cpf: dadosUsuario.cpf,
+                nome: dadosUsuario.nome,
+                status: dadosUsuario.status,
+                selfie: selfie,
+                arquivos: arquivos
+            };
+            
+            try {
+                const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxO3a3KbHj8naVTrrTRlKQcfHrElbQ54HloepIT2Cvd1kxWJXjsJyV225-3pPVBEB0/exec';
+                const resp = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dadosEnvio)
+                });
+                const res = await resp.json();
+                
+                if (res.success) {
+                    resultDiv.innerHTML = '✅ Documentos enviados com sucesso!';
+                    resultDiv.className = 'success';
+                    setTimeout(() => window.close(), 2000);
+                } else {
+                    resultDiv.innerHTML = '❌ Erro: ' + (res.message || 'Erro desconhecido');
+                    resultDiv.className = 'error';
+                }
+            } catch(err) {
+                resultDiv.innerHTML = '❌ Erro de conexão: ' + err.message;
+                resultDiv.className = 'error';
+            }
+        });
+    </script>
+</body>
+</html>
