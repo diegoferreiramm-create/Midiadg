@@ -271,9 +271,7 @@ function escreverNaNovaAba(novaAba, result) {
     novaAba.document.close();
 }
 
-// ==================== FORMULÁRIO DE ENVIO DE DOCUMENTOS (VERSÃO SIMPLIFICADA CELULAR) ====================
-
-// ==================== FORMULÁRIO DE ENVIO DE DOCUMENTOS (SELFIE CORRIGIDA) ====================
+// ==================== FORMULÁRIO DE ENVIO DE DOCUMENTOS (SELFIE OPCIONAL) ====================
 
 function abrirFormularioDocumentos(dadosUsuario) {
     const novaAba = window.open('', '_blank');
@@ -286,11 +284,7 @@ function abrirFormularioDocumentos(dadosUsuario) {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
             <style>
-                * {
-                    margin: 0;
-                    padding: 0;
-                    box-sizing: border-box;
-                }
+                * { margin: 0; padding: 0; box-sizing: border-box; }
                 
                 body {
                     font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -353,9 +347,7 @@ function abrirFormularioDocumentos(dadosUsuario) {
                 .camera-area {
                     background: #000;
                     border-radius: 16px;
-                    padding: 0;
                     overflow: hidden;
-                    position: relative;
                 }
                 
                 .video-wrapper {
@@ -385,9 +377,7 @@ function abrirFormularioDocumentos(dadosUsuario) {
                     display: none;
                 }
                 
-                .face-oval.show {
-                    display: block;
-                }
+                .face-oval.show { display: block; }
                 
                 .status {
                     margin-top: 10px;
@@ -484,18 +474,7 @@ function abrirFormularioDocumentos(dadosUsuario) {
                 
                 .hidden { display: none; }
                 
-                .button-group {
-                    padding: 12px;
-                    background: #1a1a2e;
-                }
-                
-                small {
-                    display: block;
-                    margin-top: 8px;
-                    font-size: 0.7rem;
-                    color: #666;
-                    text-align: center;
-                }
+                .button-group { padding: 12px; background: #1a1a2e; }
                 
                 .info-text {
                     background: #e9ecef;
@@ -504,6 +483,17 @@ function abrirFormularioDocumentos(dadosUsuario) {
                     font-size: 0.7rem;
                     text-align: center;
                     margin-top: 8px;
+                }
+                
+                .opcional-badge {
+                    display: inline-block;
+                    background: #6c757d;
+                    color: white;
+                    font-size: 0.65rem;
+                    padding: 2px 8px;
+                    border-radius: 20px;
+                    margin-left: 8px;
+                    vertical-align: middle;
                 }
             </style>
         </head>
@@ -544,7 +534,7 @@ function abrirFormularioDocumentos(dadosUsuario) {
                         </div>
                         
                         <div class="form-group">
-                            <label>🤳 Selfie - Centralize o rosto na moldura oval</label>
+                            <label>🤳 Selfie <span class="opcional-badge">Opcional</span></label>
                             <div class="camera-area">
                                 <div class="video-wrapper">
                                     <video id="video" autoplay playsinline></video>
@@ -560,11 +550,11 @@ function abrirFormularioDocumentos(dadosUsuario) {
                                 <input type="hidden" id="selfieData">
                             </div>
                             <div class="info-text">
-                                💡 Dicas: Fundo claro | Rosto dentro da moldura oval | Boa iluminação
+                                💡 Opcional: Tire uma selfie para agilizar a análise | Fundo claro | Rosto na moldura
                             </div>
                         </div>
                         
-                        <button type="submit" id="submitBtn" class="btn-submit" disabled>📤 Enviar Documentos</button>
+                        <button type="submit" id="submitBtn" class="btn-submit">📤 Enviar Documentos</button>
                     </form>
                     
                     <div id="resultMsg"></div>
@@ -583,7 +573,7 @@ function abrirFormularioDocumentos(dadosUsuario) {
                     const selfieInput = document.getElementById('selfieData');
                     const submitBtn = document.getElementById('submitBtn');
                     let stream = null;
-                    let fotoOk = false;
+                    let selfieTirada = false;
                     
                     // Verificar menor de idade
                     const nascimento = '${dadosUsuario.nascimento}';
@@ -597,6 +587,20 @@ function abrirFormularioDocumentos(dadosUsuario) {
                     if (idade >= 18) {
                         const grupo = document.getElementById('grupoResp');
                         if (grupo) grupo.style.display = 'none';
+                    }
+                    
+                    // Melhorar qualidade da imagem
+                    function melhorarQualidadeImagem(ctx, width, height) {
+                        const imageData = ctx.getImageData(0, 0, width, height);
+                        const data = imageData.data;
+                        
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] = Math.min(255, data[i] * 1.1);
+                            data[i+1] = Math.min(255, data[i+1] * 1.1);
+                            data[i+2] = Math.min(255, data[i+2] * 1.1);
+                        }
+                        
+                        ctx.putImageData(imageData, 0, 0);
                     }
                     
                     btnCamera.addEventListener('click', async () => {
@@ -615,13 +619,12 @@ function abrirFormularioDocumentos(dadosUsuario) {
                             btnFoto.classList.remove('hidden');
                             statusDiv.classList.remove('hidden');
                             statusDiv.className = 'status status-info';
-                            statusDiv.innerHTML = '🎯 Posicione seu rosto dentro da moldura oval e clique em "Tirar Selfie"';
+                            statusDiv.innerHTML = '🎯 Posicione o rosto na moldura (opcional)';
                             
-                            // Aguardar o vídeo carregar
                             await new Promise(r => setTimeout(r, 500));
                         } catch(err) {
                             statusDiv.className = 'status status-error';
-                            statusDiv.innerHTML = '❌ Erro ao acessar câmera: ' + err.message;
+                            statusDiv.innerHTML = '❌ Erro na câmera: ' + err.message;
                             statusDiv.classList.remove('hidden');
                         }
                     });
@@ -629,81 +632,26 @@ function abrirFormularioDocumentos(dadosUsuario) {
                     btnFoto.addEventListener('click', () => {
                         const ctx = canvas.getContext('2d');
                         
-                        // Definir tamanho da foto (boa qualidade)
-                        const targetWidth = 1200;
-                        const targetHeight = 900;
+                        const targetWidth = 1024;
+                        const targetHeight = 768;
                         canvas.width = targetWidth;
                         canvas.height = targetHeight;
                         
-                        // Desenhar o vídeo no canvas
                         ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
+                        melhorarQualidadeImagem(ctx, targetWidth, targetHeight);
                         
-                        // Verificar qualidade (megapixels)
-                        const megapixels = (canvas.width * canvas.height) / 1000000;
-                        if (megapixels < 1.5) {
-                            statusDiv.className = 'status status-warning';
-                            statusDiv.innerHTML = '⚠️ Qualidade baixa (' + megapixels.toFixed(1) + 'MP). Tente melhorar a iluminação.';
-                            return;
-                        }
-                        
-                        // Verificar se tem rosto na imagem (detecção simples por cor de pele)
-                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                        const centerX = canvas.width / 2;
-                        const centerY = canvas.height / 2;
-                        const centerPixel = ctx.getImageData(centerX, centerY, 1, 1).data;
-                        
-                        // Verificar se a cor no centro é pele (tons médios)
-                        const r = centerPixel[0];
-                        const g = centerPixel[1];
-                        const b = centerPixel[2];
-                        const isSkinTone = (r > 60 && r < 200) && (g > 40 && g < 170) && (b > 30 && b < 150);
-                        
-                        if (!isSkinTone) {
-                            statusDiv.className = 'status status-warning';
-                            statusDiv.innerHTML = '⚠️ Rosto não detectado no centro. Centralize seu rosto na moldura oval.';
-                            return;
-                        }
-                        
-                        // Verificar fundo claro (simplificado - amostras nas bordas)
-                        let amostrasClaras = 0;
-                        let totalAmostras = 0;
-                        const bordas = [
-                            { x: 20, y: 20 }, { x: canvas.width - 20, y: 20 },
-                            { x: 20, y: canvas.height - 20 }, { x: canvas.width - 20, y: canvas.height - 20 },
-                            { x: canvas.width/2, y: 20 }, { x: canvas.width/2, y: canvas.height - 20 },
-                            { x: 20, y: canvas.height/2 }, { x: canvas.width - 20, y: canvas.height/2 }
-                        ];
-                        
-                        bordas.forEach(pos => {
-                            const pixel = ctx.getImageData(pos.x, pos.y, 1, 1).data;
-                            const brilho = (pixel[0] + pixel[1] + pixel[2]) / 3;
-                            totalAmostras++;
-                            if (brilho > 180) amostrasClaras++;
-                        });
-                        
-                        const percentualClaro = (amostrasClaras / totalAmostras) * 100;
-                        
-                        if (percentualClaro < 50) {
-                            statusDiv.className = 'status status-warning';
-                            statusDiv.innerHTML = '⚠️ Fundo escuro! Use um fundo claro (parede branca).';
-                            return;
-                        }
-                        
-                        // Tudo OK - salvar a selfie
                         const fotoData = canvas.toDataURL('image/jpeg', 0.85);
                         selfieInput.value = fotoData;
                         
-                        // Mostrar preview
                         previewDiv.classList.remove('hidden');
-                        previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie aprovada!</p>';
+                        previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie capturada!</p>';
                         
                         statusDiv.className = 'status status-success';
-                        statusDiv.innerHTML = '✅ Selfie capturada com sucesso!';
+                        statusDiv.innerHTML = '✅ Selfie capturada! (opcional)';
                         
-                        fotoOk = true;
+                        selfieTirada = true;
                         submitBtn.disabled = false;
                         
-                        // Fechar câmera
                         if (stream) {
                             stream.getTracks().forEach(track => track.stop());
                             video.style.display = 'none';
@@ -714,15 +662,11 @@ function abrirFormularioDocumentos(dadosUsuario) {
                         btnCamera.innerHTML = '📷 Reabrir Câmera';
                     });
                     
+                    // Botão de enviar sempre habilitado (selfie é opcional)
+                    submitBtn.disabled = false;
+                    
                     document.getElementById('formDocs').addEventListener('submit', async (e) => {
                         e.preventDefault();
-                        
-                        if (!fotoOk && !selfieInput.value) {
-                            statusDiv.className = 'status status-error';
-                            statusDiv.innerHTML = '❌ Você precisa tirar uma selfie primeiro!';
-                            statusDiv.classList.remove('hidden');
-                            return;
-                        }
                         
                         const resultDiv = document.getElementById('resultMsg');
                         resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
@@ -747,29 +691,51 @@ function abrirFormularioDocumentos(dadosUsuario) {
                         if (doc3) arquivos.push({ ...doc3, tipo: 'cpf_documento' });
                         if (doc4) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
                         
+                        // Verificar se pelo menos um documento foi anexado
+                        if (arquivos.length === 0 && !selfieInput.value) {
+                            resultDiv.innerHTML = '<div class="loading"><div style="background:white; padding:20px; border-radius:16px; text-align:center"><span style="font-size:3rem">⚠️</span><p style="margin-top:12px">Anexe pelo menos um documento ou selfie</p><button onclick="location.reload()" style="margin-top:16px; padding:10px 20px; background:#e67e22; color:white; border:none; border-radius:10px">Voltar</button></div></div>';
+                            return;
+                        }
+                        
                         const dados = {
                             cpf: '${dadosUsuario.cpf}',
                             nome: '${dadosUsuario.nome}',
                             status: '${dadosUsuario.status}',
-                            selfie: selfieInput.value,
+                            selfie: selfieInput.value || '',
                             arquivos: arquivos
                         };
                         
                         try {
-                            const resp = await fetch('${SCRIPT_URL}', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(dados)
+                            console.log('=== ENVIANDO VIA GET ===');
+                            
+                            // Preparar dados para enviar via URL
+                            const params = new URLSearchParams();
+                            params.append('acao', 'enviar_documentos');
+                            params.append('cpf', '${dadosUsuario.cpf}');
+                            params.append('nome', '${dadosUsuario.nome}');
+                            params.append('status', '${dadosUsuario.status}');
+                            params.append('selfie', selfieInput.value || '');
+                            params.append('arquivos_json', JSON.stringify(arquivos));
+                            
+                            const urlCompleta = '${SCRIPT_URL}?' + params.toString();
+                            console.log('URL:', urlCompleta.substring(0, 300));
+                            
+                            const resp = await fetch(urlCompleta, {
+                                method: 'GET',
+                                headers: { 'Accept': 'application/json' }
                             });
+                            
                             const res = await resp.json();
+                            console.log('Resposta:', res);
                             
                             if (res.success) {
-                                resultDiv.innerHTML = '<div class="loading" style="background:rgba(0,0,0,0.9)"><div style="background:white; padding:24px; border-radius:16px; text-align:center; max-width:280px"><span style="font-size:3rem">✅</span><p style="margin-top:12px; font-weight:600">Documentos enviados com sucesso!</p><button onclick="window.close()" style="margin-top:16px; padding:10px 24px; background:#27ae60; color:white; border:none; border-radius:10px">Fechar</button></div></div>';
+                                resultDiv.innerHTML = '<div class="loading" style="background:rgba(0,0,0,0.9)"><div style="background:white; padding:24px; border-radius:16px; text-align:center; max-width:280px"><span style="font-size:3rem">✅</span><p style="margin-top:12px; font-weight:600">Documentos enviados!</p><button onclick="window.close()" style="margin-top:16px; padding:10px 24px; background:#27ae60; color:white; border:none; border-radius:10px">Fechar</button></div></div>';
                             } else {
-                                resultDiv.innerHTML = '<div class="loading"><div style="background:white; padding:24px; border-radius:16px; text-align:center"><span style="font-size:3rem">❌</span><p style="margin-top:12px; color:#ef476f">Erro: ' + res.message + '</p><button onclick="location.reload()" style="margin-top:16px; padding:10px 20px; background:#e67e22; color:white; border:none; border-radius:10px">Tentar novamente</button></div></div>';
+                                resultDiv.innerHTML = '<div class="loading"><div style="background:white; padding:24px; border-radius:16px; text-align:center"><span style="font-size:3rem">❌</span><p style="margin-top:12px; color:#ef476f">Erro: ' + (res.message || 'Erro desconhecido') + '</p><button onclick="location.reload()" style="margin-top:16px; padding:10px 20px; background:#e67e22; color:white; border:none; border-radius:10px">Tentar novamente</button></div></div>';
                             }
                         } catch(err) {
-                            resultDiv.innerHTML = '<div class="loading"><div style="background:white; padding:24px; border-radius:16px; text-align:center"><span style="font-size:3rem">❌</span><p style="margin-top:12px; color:#ef476f">Erro de conexão</p><button onclick="location.reload()" style="margin-top:16px; padding:10px 20px; background:#e67e22; color:white; border:none; border-radius:10px">Tentar novamente</button></div></div>';
+                            console.error('Erro detalhado:', err);
+                            resultDiv.innerHTML = '<div class="loading"><div style="background:white; padding:24px; border-radius:16px; text-align:center"><span style="font-size:3rem">❌</span><p style="margin-top:12px; color:#ef476f">Erro de conexão: ' + err.message + '</p><button onclick="location.reload()" style="margin-top:16px; padding:10px 20px; background:#e67e22; color:white; border:none; border-radius:10px">Tentar novamente</button></div></div>';
                         }
                     });
                 })();
