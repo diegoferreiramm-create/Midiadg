@@ -748,32 +748,32 @@ function gerarHTMLFormularioOriginal(dadosUsuario) {
                         };
                         
                         try {
-                            const formData = new FormData();
-                            formData.append('cpf', '${dadosUsuario.cpf}');
-                            formData.append('nome', '${dadosUsuario.nome}');
-                            formData.append('status', '${dadosUsuario.status}');
-                            formData.append('selfie', selfieInput.value || '');
-                            
-                            for (let i = 0; i < arquivos.length; i++) {
-                                formData.append('arquivos', JSON.stringify(arquivos[i]));
-                            }
-                            
+                            const dadosEnvio = {
+                                acao: 'enviar_documentos',
+                                cpf: '${dadosUsuario.cpf}',
+                                nome: '${dadosUsuario.nome}',
+                                status: '${dadosUsuario.status}',
+                                selfie: selfieInput.value || '',
+                                arquivos: arquivos
+                            };
+
                             const resp = await fetch('${SCRIPT_URL}', {
                                 method: 'POST',
-                                body: formData
+                                mode: 'cors',  // 👈 ADICIONE ESTA LINHA
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(dadosEnvio)
                             });
-                            
                             const res = await resp.json();
                             console.log('Resposta:', res);
                             
                             if (res.success) {
-                                resultDiv.innerHTML = '<div class="success-msg">✅ Documentos enviados!</div>';
+                                resultDiv.innerHTML = '<div class="loading" style="background:rgba(0,0,0,0.9)"><div style="background:white; padding:24px; border-radius:16px; text-align:center; max-width:280px"><span style="font-size:3rem">✅</span><p style="margin-top:12px; font-weight:600">Documentos enviados!</p><button onclick="document.getElementById(\\'modalDocumentos\\').remove(); location.reload();" style="margin-top:16px; padding:10px 24px; background:#27ae60; color:white; border:none; border-radius:10px">Fechar</button></div></div>';
                             } else {
-                                resultDiv.innerHTML = '<div class="error-msg">❌ Erro: ' + res.message + '</div>';
+                                resultDiv.innerHTML = '<div class="loading"><div style="background:white; padding:24px; border-radius:16px; text-align:center"><span style="font-size:3rem">❌</span><p style="margin-top:12px; color:#ef476f">Erro: ' + (res.message || 'Erro desconhecido') + '</p><button onclick="location.reload()" style="margin-top:16px; padding:10px 20px; background:#e67e22; color:white; border:none; border-radius:10px">Tentar novamente</button></div></div>';
                             }
                         } catch(err) {
-                            console.error('Erro:', err);
-                            resultDiv.innerHTML = '<div class="error-msg">❌ Erro: ' + err.message + '</div>';
+                            console.error('Erro detalhado:', err);
+                            resultDiv.innerHTML = '<div class="loading"><div style="background:white; padding:24px; border-radius:16px; text-align:center"><span style="font-size:3rem">❌</span><p style="margin-top:12px; color:#ef476f">Erro de conexão: ' + err.message + '</p><button onclick="location.reload()" style="margin-top:16px; padding:10px 20px; background:#e67e22; color:white; border:none; border-radius:10px">Tentar novamente</button></div></div>';
                         }
                     });
                 })();
