@@ -271,9 +271,9 @@ function escreverNaNovaAba(novaAba, result) {
     novaAba.document.close();
 }
 
-// ==================== FORMULÁRIO DE ENVIO DE DOCUMENTOS ====================
+// ==================== FORMULÁRIO DE ENVIO DE DOCUMENTOS (VERSÃO SIMPLIFICADA CELULAR) ====================
 
-// ==================== FORMULÁRIO DE ENVIO DE DOCUMENTOS (VERSÃO SIMPLES) ====================
+// ==================== FORMULÁRIO DE ENVIO DE DOCUMENTOS (SELFIE CORRIGIDA) ====================
 
 function abrirFormularioDocumentos(dadosUsuario) {
     const novaAba = window.open('', '_blank');
@@ -282,445 +282,497 @@ function abrirFormularioDocumentos(dadosUsuario) {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Envio de Documentos - ${dadosUsuario.nome}</title>
+            <title>Envio de Documentos</title>
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
             <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body {
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    min-height: 100vh;
-                    padding: 40px 20px;
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
                 }
+                
+                body {
+                    font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    padding: 16px;
+                    min-height: 100vh;
+                }
+                
                 .container {
-                    max-width: 800px;
+                    max-width: 500px;
                     margin: 0 auto;
                     background: white;
                     border-radius: 20px;
-                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
                     overflow: hidden;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
                 }
+                
                 .header {
                     background: linear-gradient(135deg, #e67e22, #f39c12);
                     color: white;
-                    padding: 30px;
+                    padding: 16px;
                     text-align: center;
                 }
-                .header h1 { font-size: 24px; margin-bottom: 10px; }
-                .content { padding: 30px; }
-                .info-usuario {
+                
+                .header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+                .header p { font-size: 0.75rem; opacity: 0.9; }
+                
+                .content { padding: 16px; }
+                
+                .info-box {
                     background: #f0f7ff;
-                    padding: 15px;
-                    border-radius: 10px;
-                    margin-bottom: 25px;
+                    padding: 12px;
+                    border-radius: 12px;
+                    margin-bottom: 16px;
+                    font-size: 0.85rem;
                 }
-                .form-group { margin-bottom: 20px; }
-                label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; }
+                
+                .info-box p { margin-bottom: 4px; }
+                .info-box strong { color: #e67e22; }
+                
+                .form-group { margin-bottom: 16px; }
+                
+                label {
+                    display: block;
+                    font-weight: 600;
+                    margin-bottom: 6px;
+                    font-size: 0.85rem;
+                    color: #333;
+                }
+                
                 input[type="file"] {
                     width: 100%;
                     padding: 10px;
                     border: 2px dashed #ddd;
-                    border-radius: 8px;
-                    cursor: pointer;
-                }
-                .camera-container {
-                    background: #f5f5f5;
                     border-radius: 10px;
-                    padding: 15px;
-                    text-align: center;
+                    background: #fafafa;
+                    font-size: 0.8rem;
                 }
+                
+                .camera-area {
+                    background: #000;
+                    border-radius: 16px;
+                    padding: 0;
+                    overflow: hidden;
+                    position: relative;
+                }
+                
                 .video-wrapper {
                     position: relative;
-                    display: inline-block;
+                    width: 100%;
+                    background: #000;
                 }
+                
                 video {
                     width: 100%;
-                    max-width: 400px;
-                    border-radius: 10px;
-                    margin: 10px 0;
+                    height: auto;
+                    display: block;
                     transform: scaleX(-1);
                 }
-                canvas {
-                    display: none;
-                }
-                .face-guide {
+                
+                .face-oval {
                     position: absolute;
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
                     width: 180px;
-                    height: 180px;
+                    height: 220px;
                     border: 3px solid #27ae60;
                     border-radius: 50%;
                     pointer-events: none;
-                    box-shadow: 0 0 0 9999px rgba(0,0,0,0.3);
+                    box-shadow: 0 0 0 999px rgba(0,0,0,0.5);
                     display: none;
                 }
-                .face-guide.active { display: block; }
-                .status-message {
-                    margin-top: 10px;
-                    padding: 8px;
-                    border-radius: 8px;
-                    font-size: 14px;
+                
+                .face-oval.show {
+                    display: block;
                 }
-                .status-ok { background: #d4edda; color: #155724; }
+                
+                .status {
+                    margin-top: 10px;
+                    padding: 10px;
+                    border-radius: 10px;
+                    font-size: 0.8rem;
+                    text-align: center;
+                    font-weight: 500;
+                }
+                
+                .status-success { background: #d4edda; color: #155724; }
                 .status-warning { background: #fff3cd; color: #856404; }
                 .status-error { background: #f8d7da; color: #721c24; }
+                .status-info { background: #cce5ff; color: #004085; }
+                
+                button {
+                    border: none;
+                    border-radius: 12px;
+                    padding: 12px;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                }
+                
                 .btn-camera {
                     background: #2c3e50;
                     color: white;
-                    padding: 10px 20px;
-                    border: none;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    margin: 5px;
+                    margin-top: 10px;
+                    width: 100%;
                 }
-                .btn-capture { background: #27ae60; }
+                
+                .btn-capture {
+                    background: #27ae60;
+                    color: white;
+                    margin-top: 10px;
+                    width: 100%;
+                }
+                
                 .btn-submit {
                     width: 100%;
-                    padding: 14px;
                     background: linear-gradient(135deg, #e67e22, #f39c12);
                     color: white;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 16px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    margin-top: 20px;
+                    margin-top: 16px;
                 }
+                
                 .btn-submit:disabled {
                     opacity: 0.5;
                     cursor: not-allowed;
                 }
-                .preview-img { max-width: 100px; margin: 5px; border-radius: 5px; }
-                .status-badge {
-                    display: inline-block;
-                    padding: 4px 12px;
-                    border-radius: 20px;
-                    font-size: 12px;
-                    background: #e67e22;
-                    color: white;
+                
+                .preview {
+                    margin-top: 12px;
+                    text-align: center;
+                    padding: 8px;
+                    background: #f5f5f5;
+                    border-radius: 10px;
                 }
-                .loading-overlay {
+                
+                .preview img {
+                    max-width: 80px;
+                    border-radius: 12px;
+                    border: 3px solid #27ae60;
+                }
+                
+                canvas { display: none; }
+                
+                .loading {
                     position: fixed;
                     top: 0;
                     left: 0;
                     right: 0;
                     bottom: 0;
-                    background: rgba(0,0,0,0.8);
+                    background: rgba(0,0,0,0.9);
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     flex-direction: column;
                     z-index: 1000;
                 }
+                
                 .spinner {
-                    width: 50px;
-                    height: 50px;
-                    border: 5px solid #f3f3f3;
-                    border-top: 5px solid #e67e22;
+                    width: 45px;
+                    height: 45px;
+                    border: 4px solid #f3f3f3;
+                    border-top: 4px solid #e67e22;
                     border-radius: 50%;
                     animation: spin 1s linear infinite;
                 }
+                
                 @keyframes spin {
                     0% { transform: rotate(0deg); }
                     100% { transform: rotate(360deg); }
                 }
-                .success-msg { color: #27ae60; text-align: center; padding: 20px; }
-                .error-msg { color: #ef476f; text-align: center; padding: 20px; }
+                
+                .hidden { display: none; }
+                
+                .button-group {
+                    padding: 12px;
+                    background: #1a1a2e;
+                }
+                
+                small {
+                    display: block;
+                    margin-top: 8px;
+                    font-size: 0.7rem;
+                    color: #666;
+                    text-align: center;
+                }
+                
+                .info-text {
+                    background: #e9ecef;
+                    padding: 8px;
+                    border-radius: 8px;
+                    font-size: 0.7rem;
+                    text-align: center;
+                    margin-top: 8px;
+                }
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>📎 Envio de Documentos Pendentes</h1>
-                    <p>Regularize sua situação enviando os documentos solicitados</p>
+                    <h1>📎 Envio de Documentos</h1>
+                    <p>Regularize sua situação</p>
                 </div>
+                
                 <div class="content">
-                    <div class="info-usuario">
-                        <h3>👤 Dados do Beneficiário</h3>
-                        <p><strong>Nome:</strong> ${dadosUsuario.nome}</p>
-                        <p><strong>CPF:</strong> ${dadosUsuario.cpf}</p>
-                        <p><strong>Status:</strong> <span class="status-badge">${dadosUsuario.status}</span></p>
-                        <p><strong>Motivo:</strong> ${dadosUsuario.motivo || 'Documentação pendente'}</p>
+                    <div class="info-box">
+                        <p><strong>👤 Nome:</strong> ${dadosUsuario.nome}</p>
+                        <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf}</p>
+                        <p><strong>📊 Status:</strong> ${dadosUsuario.status}</p>
+                        <p><strong>💬 Motivo:</strong> ${dadosUsuario.motivo || 'Documentação pendente'}</p>
                     </div>
                     
-                    <form id="formDocumentos">
+                    <form id="formDocs">
                         <div class="form-group">
                             <label>📄 Declaração de Ensino</label>
-                            <input type="file" accept=".pdf,.jpg,.jpeg,.png" id="declaracao">
+                            <input type="file" id="doc1" accept=".pdf,.jpg,.jpeg,.png">
                         </div>
+                        
                         <div class="form-group">
                             <label>🏠 Comprovante de Residência</label>
-                            <input type="file" accept=".pdf,.jpg,.jpeg,.png" id="comprovante">
+                            <input type="file" id="doc2" accept=".pdf,.jpg,.jpeg,.png">
                         </div>
+                        
                         <div class="form-group">
-                            <label>🆔 CPF (foto do documento)</label>
-                            <input type="file" accept=".jpg,.jpeg,.png" id="cpfDoc">
+                            <label>🆔 Foto do CPF</label>
+                            <input type="file" id="doc3" accept=".jpg,.jpeg,.png">
                         </div>
-                        <div class="form-group" id="grupoResponsavel">
+                        
+                        <div class="form-group" id="grupoResp">
                             <label>👨‍👩‍👧 Documento do Responsável</label>
-                            <input type="file" accept=".pdf,.jpg,.jpeg,.png" id="responsavel">
+                            <input type="file" id="doc4" accept=".pdf,.jpg,.jpeg,.png">
                         </div>
+                        
                         <div class="form-group">
-                            <label>🤳 Selfie (fundo claro, rosto centralizado)</label>
-                            <div class="camera-container">
+                            <label>🤳 Selfie - Centralize o rosto na moldura oval</label>
+                            <div class="camera-area">
                                 <div class="video-wrapper">
                                     <video id="video" autoplay playsinline></video>
-                                    <div id="faceGuide" class="face-guide"></div>
+                                    <div id="faceOval" class="face-oval"></div>
                                 </div>
                                 <canvas id="canvas"></canvas>
-                                <div>
-                                    <button type="button" id="btnAbrirCamera" class="btn-camera">📷 Abrir Câmera</button>
-                                    <button type="button" id="btnTirarFoto" class="btn-camera btn-capture" style="display:none;">📸 Tirar Foto</button>
+                                <div class="button-group">
+                                    <button type="button" id="btnCamera" class="btn-camera">📷 Abrir Câmera</button>
+                                    <button type="button" id="btnFoto" class="btn-capture hidden">📸 Tirar Selfie</button>
                                 </div>
-                                <div id="cameraStatus" class="status-message" style="display:none;"></div>
-                                <div id="fotoPreview"></div>
+                                <div id="statusMsg" class="status hidden"></div>
+                                <div id="preview" class="preview hidden"></div>
                                 <input type="hidden" id="selfieData">
                             </div>
-                            <small>⚠️ Centralize o rosto no círculo e use fundo claro</small>
+                            <div class="info-text">
+                                💡 Dicas: Fundo claro | Rosto dentro da moldura oval | Boa iluminação
+                            </div>
                         </div>
-                        <button type="submit" id="submitBtn" class="btn-submit" disabled>📤 Enviar para Drive</button>
+                        
+                        <button type="submit" id="submitBtn" class="btn-submit" disabled>📤 Enviar Documentos</button>
                     </form>
-                    <div id="statusMsg"></div>
+                    
+                    <div id="resultMsg"></div>
                 </div>
             </div>
             
             <script>
-                const video = document.getElementById('video');
-                const canvas = document.getElementById('canvas');
-                const btnAbrirCamera = document.getElementById('btnAbrirCamera');
-                const btnTirarFoto = document.getElementById('btnTirarFoto');
-                const fotoPreview = document.getElementById('fotoPreview');
-                const selfieInput = document.getElementById('selfieData');
-                const cameraStatus = document.getElementById('cameraStatus');
-                const faceGuide = document.getElementById('faceGuide');
-                const submitBtn = document.getElementById('submitBtn');
-                let stream = null;
-                let fotoTirada = false;
-                let fotoAprovada = false;
-                
-                // Configurações
-                const MIN_MEGAPIXELS = 2;
-                const BRANCO_THRESHOLD = 200;
-                
-                function isMenorIdade(dataNasc) {
-                    const nasc = new Date(dataNasc);
-                    const hoje = new Date();
-                    let idade = hoje.getFullYear() - nasc.getFullYear();
-                    const mes = hoje.getMonth() - nasc.getMonth();
-                    if (mes < 0 || (mes === 0 && hoje.getDate() < nasc.getDate())) idade--;
-                    return idade < 18;
-                }
-                
-                if (!isMenorIdade('${dadosUsuario.nascimento}')) {
-                    document.getElementById('grupoResponsavel').style.display = 'none';
-                }
-                
-                // Verificar centralização (baseado na posição no círculo guia)
-                function verificarCentralizacao(videoElement, guideElement) {
-                    const videoRect = videoElement.getBoundingClientRect();
-                    const guideRect = guideElement.getBoundingClientRect();
-                    
-                    if (!videoRect.width || !guideRect.width) return true;
-                    
-                    // Calcula o centro do círculo guia relativo ao vídeo
-                    const guideCenterX = (guideRect.left + guideRect.right) / 2;
-                    const guideCenterY = (guideRect.top + guideRect.bottom) / 2;
-                    const videoCenterX = (videoRect.left + videoRect.right) / 2;
-                    const videoCenterY = (videoRect.top + videoRect.bottom) / 2;
-                    
-                    const tolerancia = 50;
-                    const centralizado = Math.abs(guideCenterX - videoCenterX) < tolerancia && 
-                                        Math.abs(guideCenterY - videoCenterY) < tolerancia;
-                    
-                    return centralizado;
-                }
-                
-                // Verificar fundo claro
-                function verificarFundoClaro(ctx, width, height) {
-                    const amostras = [];
-                    const margem = 20;
-                    
-                    // Amostra nas bordas
-                    for (let i = 0; i < 30; i++) {
-                        const x = margem + Math.random() * 100;
-                        const y = margem + Math.random() * 100;
-                        const pixel = ctx.getImageData(x, y, 1, 1).data;
-                        const brilho = (pixel[0] + pixel[1] + pixel[2]) / 3;
-                        amostras.push(brilho);
-                        
-                        const x2 = width - margem - Math.random() * 100;
-                        const y2 = height - margem - Math.random() * 100;
-                        const pixel2 = ctx.getImageData(x2, y2, 1, 1).data;
-                        const brilho2 = (pixel2[0] + pixel2[1] + pixel2[2]) / 3;
-                        amostras.push(brilho2);
-                    }
-                    
-                    const mediaBrilho = amostras.reduce((a, b) => a + b, 0) / amostras.length;
-                    const fundoClaro = mediaBrilho > BRANCO_THRESHOLD;
-                    
-                    return { fundoClaro, mediaBrilho };
-                }
-                
-                btnAbrirCamera.addEventListener('click', async () => {
-                    try {
-                        stream = await navigator.mediaDevices.getUserMedia({ 
-                            video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } 
-                        });
-                        video.srcObject = stream;
-                        video.style.display = 'block';
-                        faceGuide.classList.add('active');
-                        btnAbrirCamera.style.display = 'none';
-                        btnTirarFoto.style.display = 'inline-block';
-                        cameraStatus.style.display = 'block';
-                        cameraStatus.innerHTML = '<span class="status-warning">📐 Centralize o rosto no círculo</span>';
-                        cameraStatus.className = 'status-message status-warning';
-                        
-                        // Verificar centralização a cada segundo
-                        const checkPosition = setInterval(() => {
-                            if (video.videoWidth > 0) {
-                                const centralizado = verificarCentralizacao(video, faceGuide);
-                                if (centralizado) {
-                                    cameraStatus.innerHTML = '<span class="status-ok">✅ Rosto centralizado! Pode tirar a foto.</span>';
-                                    cameraStatus.className = 'status-message status-ok';
-                                } else {
-                                    cameraStatus.innerHTML = '<span class="status-warning">⚠️ Centralize o rosto no círculo</span>';
-                                    cameraStatus.className = 'status-message status-warning';
-                                }
-                            }
-                        }, 500);
-                        
-                        window.checkPositionInterval = checkPosition;
-                        
-                    } catch(err) {
-                        alert('Erro ao acessar câmera: ' + err.message);
-                    }
-                });
-                
-                btnTirarFoto.addEventListener('click', () => {
-                    if (window.checkPositionInterval) {
-                        clearInterval(window.checkPositionInterval);
-                    }
-                    
-                    const context = canvas.getContext('2d');
-                    const targetWidth = 1600;
-                    const targetHeight = 1200;
-                    canvas.width = targetWidth;
-                    canvas.height = targetHeight;
-                    
-                    context.drawImage(video, 0, 0, targetWidth, targetHeight);
-                    
-                    // Verificar megapixels
-                    const pixels = canvas.width * canvas.height;
-                    if (pixels < MIN_MEGAPIXELS * 1000000) {
-                        cameraStatus.innerHTML = '<span class="status-error">❌ Qualidade mínima: ' + MIN_MEGAPIXELS + ' megapixels</span>';
-                        cameraStatus.className = 'status-message status-error';
-                        return;
-                    }
-                    
-                    // Verificar fundo claro
-                    const { fundoClaro, mediaBrilho } = verificarFundoClaro(context, canvas.width, canvas.height);
-                    
-                    if (!fundoClaro) {
-                        cameraStatus.innerHTML = '<span class="status-error">❌ Fundo escuro! Use fundo claro. Brilho: ' + Math.round(mediaBrilho) + '/255</span>';
-                        cameraStatus.className = 'status-message status-error';
-                        return;
-                    }
-                    
-                    // Verificar centralização final
-                    const centralizado = verificarCentralizacao(video, faceGuide);
-                    if (!centralizado) {
-                        cameraStatus.innerHTML = '<span class="status-error">❌ Centralize o rosto no círculo antes de tirar a foto</span>';
-                        cameraStatus.className = 'status-message status-error';
-                        return;
-                    }
-                    
-                    // Tudo OK!
-                    const fotoData = canvas.toDataURL('image/jpeg', 0.9);
-                    selfieInput.value = fotoData;
-                    
-                    const img = document.createElement('img');
-                    img.src = fotoData;
-                    img.className = 'preview-img';
-                    fotoPreview.innerHTML = '';
-                    fotoPreview.appendChild(img);
-                    
-                    cameraStatus.innerHTML = '<span class="status-ok">✅ Selfie aprovada!</span>';
-                    cameraStatus.className = 'status-message status-ok';
-                    
-                    fotoTirada = true;
-                    fotoAprovada = true;
-                    submitBtn.disabled = false;
-                    
-                    if (stream) {
-                        stream.getTracks().forEach(track => track.stop());
-                        video.style.display = 'none';
-                    }
-                    btnTirarFoto.style.display = 'none';
-                    faceGuide.classList.remove('active');
-                });
-                
-                document.getElementById('formDocumentos').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    if (!fotoTirada || !fotoAprovada) {
-                        alert('É necessário tirar uma selfie válida antes de enviar!');
-                        return;
-                    }
-                    
+                (function() {
+                    const video = document.getElementById('video');
+                    const canvas = document.getElementById('canvas');
+                    const btnCamera = document.getElementById('btnCamera');
+                    const btnFoto = document.getElementById('btnFoto');
+                    const faceOval = document.getElementById('faceOval');
                     const statusDiv = document.getElementById('statusMsg');
-                    statusDiv.innerHTML = '<div class="loading-overlay"><div class="spinner"></div><p>Enviando documentos...</p></div>';
+                    const previewDiv = document.getElementById('preview');
+                    const selfieInput = document.getElementById('selfieData');
+                    const submitBtn = document.getElementById('submitBtn');
+                    let stream = null;
+                    let fotoOk = false;
                     
-                    const lerArquivo = (file) => {
-                        return new Promise((resolve) => {
-                            if (!file) { resolve(null); return; }
-                            const reader = new FileReader();
-                            reader.onload = function(e) {
-                                resolve({ base64: e.target.result, nome: file.name });
-                            };
-                            reader.readAsDataURL(file);
-                        });
-                    };
-                    
-                    const declaracao = await lerArquivo(document.getElementById('declaracao').files[0]);
-                    const comprovante = await lerArquivo(document.getElementById('comprovante').files[0]);
-                    const cpfDoc = await lerArquivo(document.getElementById('cpfDoc').files[0]);
-                    const responsavel = await lerArquivo(document.getElementById('responsavel').files[0]);
-                    const selfie = selfieInput.value;
-                    
-                    const arquivos = [];
-                    if (declaracao) arquivos.push({ ...declaracao, tipo: 'declaracao_ensino' });
-                    if (comprovante) arquivos.push({ ...comprovante, tipo: 'comprovante_residencia' });
-                    if (cpfDoc) arquivos.push({ ...cpfDoc, tipo: 'cpf_documento' });
-                    if (responsavel) arquivos.push({ ...responsavel, tipo: 'documento_responsavel' });
-                    
-                    const dadosEnvio = {
-                        cpf: '${dadosUsuario.cpf}',
-                        nome: '${dadosUsuario.nome}',
-                        status: '${dadosUsuario.status}',
-                        selfie: selfie,
-                        arquivos: arquivos
-                    };
-                    
-                    try {
-                        const response = await fetch('${SCRIPT_URL}', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(dadosEnvio)
-                        });
-                        const result = await response.json();
-                        
-                        if (result.success) {
-                            statusDiv.innerHTML = '<div class="success-msg">✅ Documentos enviados com sucesso!<br><button onclick="window.close()" style="margin-top:15px; padding:10px 20px; background:#27ae60; color:white; border:none; border-radius:8px;">Fechar</button></div>';
-                        } else {
-                            statusDiv.innerHTML = '<div class="error-msg">❌ Erro: ' + result.message + '</div>';
-                        }
-                    } catch(error) {
-                        statusDiv.innerHTML = '<div class="error-msg">❌ Erro ao enviar: ' + error.message + '</div>';
+                    // Verificar menor de idade
+                    const nascimento = '${dadosUsuario.nascimento}';
+                    let anoNasc = 0;
+                    if (nascimento.includes('/')) {
+                        anoNasc = parseInt(nascimento.split('/')[2]);
+                    } else if (nascimento.includes('-')) {
+                        anoNasc = parseInt(nascimento.split('-')[0]);
                     }
-                });
+                    const idade = new Date().getFullYear() - anoNasc;
+                    if (idade >= 18) {
+                        const grupo = document.getElementById('grupoResp');
+                        if (grupo) grupo.style.display = 'none';
+                    }
+                    
+                    btnCamera.addEventListener('click', async () => {
+                        try {
+                            stream = await navigator.mediaDevices.getUserMedia({ 
+                                video: { 
+                                    facingMode: 'user',
+                                    width: { ideal: 1280 },
+                                    height: { ideal: 720 }
+                                } 
+                            });
+                            video.srcObject = stream;
+                            video.style.display = 'block';
+                            faceOval.classList.add('show');
+                            btnCamera.classList.add('hidden');
+                            btnFoto.classList.remove('hidden');
+                            statusDiv.classList.remove('hidden');
+                            statusDiv.className = 'status status-info';
+                            statusDiv.innerHTML = '🎯 Posicione seu rosto dentro da moldura oval e clique em "Tirar Selfie"';
+                            
+                            // Aguardar o vídeo carregar
+                            await new Promise(r => setTimeout(r, 500));
+                        } catch(err) {
+                            statusDiv.className = 'status status-error';
+                            statusDiv.innerHTML = '❌ Erro ao acessar câmera: ' + err.message;
+                            statusDiv.classList.remove('hidden');
+                        }
+                    });
+                    
+                    btnFoto.addEventListener('click', () => {
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Definir tamanho da foto (boa qualidade)
+                        const targetWidth = 1200;
+                        const targetHeight = 900;
+                        canvas.width = targetWidth;
+                        canvas.height = targetHeight;
+                        
+                        // Desenhar o vídeo no canvas
+                        ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
+                        
+                        // Verificar qualidade (megapixels)
+                        const megapixels = (canvas.width * canvas.height) / 1000000;
+                        if (megapixels < 1.5) {
+                            statusDiv.className = 'status status-warning';
+                            statusDiv.innerHTML = '⚠️ Qualidade baixa (' + megapixels.toFixed(1) + 'MP). Tente melhorar a iluminação.';
+                            return;
+                        }
+                        
+                        // Verificar se tem rosto na imagem (detecção simples por cor de pele)
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const centerX = canvas.width / 2;
+                        const centerY = canvas.height / 2;
+                        const centerPixel = ctx.getImageData(centerX, centerY, 1, 1).data;
+                        
+                        // Verificar se a cor no centro é pele (tons médios)
+                        const r = centerPixel[0];
+                        const g = centerPixel[1];
+                        const b = centerPixel[2];
+                        const isSkinTone = (r > 60 && r < 200) && (g > 40 && g < 170) && (b > 30 && b < 150);
+                        
+                        if (!isSkinTone) {
+                            statusDiv.className = 'status status-warning';
+                            statusDiv.innerHTML = '⚠️ Rosto não detectado no centro. Centralize seu rosto na moldura oval.';
+                            return;
+                        }
+                        
+                        // Verificar fundo claro (simplificado - amostras nas bordas)
+                        let amostrasClaras = 0;
+                        let totalAmostras = 0;
+                        const bordas = [
+                            { x: 20, y: 20 }, { x: canvas.width - 20, y: 20 },
+                            { x: 20, y: canvas.height - 20 }, { x: canvas.width - 20, y: canvas.height - 20 },
+                            { x: canvas.width/2, y: 20 }, { x: canvas.width/2, y: canvas.height - 20 },
+                            { x: 20, y: canvas.height/2 }, { x: canvas.width - 20, y: canvas.height/2 }
+                        ];
+                        
+                        bordas.forEach(pos => {
+                            const pixel = ctx.getImageData(pos.x, pos.y, 1, 1).data;
+                            const brilho = (pixel[0] + pixel[1] + pixel[2]) / 3;
+                            totalAmostras++;
+                            if (brilho > 180) amostrasClaras++;
+                        });
+                        
+                        const percentualClaro = (amostrasClaras / totalAmostras) * 100;
+                        
+                        if (percentualClaro < 50) {
+                            statusDiv.className = 'status status-warning';
+                            statusDiv.innerHTML = '⚠️ Fundo escuro! Use um fundo claro (parede branca).';
+                            return;
+                        }
+                        
+                        // Tudo OK - salvar a selfie
+                        const fotoData = canvas.toDataURL('image/jpeg', 0.85);
+                        selfieInput.value = fotoData;
+                        
+                        // Mostrar preview
+                        previewDiv.classList.remove('hidden');
+                        previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie aprovada!</p>';
+                        
+                        statusDiv.className = 'status status-success';
+                        statusDiv.innerHTML = '✅ Selfie capturada com sucesso!';
+                        
+                        fotoOk = true;
+                        submitBtn.disabled = false;
+                        
+                        // Fechar câmera
+                        if (stream) {
+                            stream.getTracks().forEach(track => track.stop());
+                            video.style.display = 'none';
+                        }
+                        btnFoto.classList.add('hidden');
+                        faceOval.classList.remove('show');
+                        btnCamera.classList.remove('hidden');
+                        btnCamera.innerHTML = '📷 Reabrir Câmera';
+                    });
+                    
+                    document.getElementById('formDocs').addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        
+                        if (!fotoOk && !selfieInput.value) {
+                            statusDiv.className = 'status status-error';
+                            statusDiv.innerHTML = '❌ Você precisa tirar uma selfie primeiro!';
+                            statusDiv.classList.remove('hidden');
+                            return;
+                        }
+                        
+                        const resultDiv = document.getElementById('resultMsg');
+                        resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
+                        
+                        const lerArquivo = (file) => {
+                            return new Promise((resolve) => {
+                                if (!file || !file.name) { resolve(null); return; }
+                                const reader = new FileReader();
+                                reader.onload = (e) => resolve({ base64: e.target.result, nome: file.name });
+                                reader.readAsDataURL(file);
+                            });
+                        };
+                        
+                        const doc1 = await lerArquivo(document.getElementById('doc1').files[0]);
+                        const doc2 = await lerArquivo(document.getElementById('doc2').files[0]);
+                        const doc3 = await lerArquivo(document.getElementById('doc3').files[0]);
+                        const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
+                        
+                        const arquivos = [];
+                        if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
+                        if (doc2) arquivos.push({ ...doc2, tipo: 'comprovante_residencia' });
+                        if (doc3) arquivos.push({ ...doc3, tipo: 'cpf_documento' });
+                        if (doc4) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
+                        
+                        const dados = {
+                            cpf: '${dadosUsuario.cpf}',
+                            nome: '${dadosUsuario.nome}',
+                            status: '${dadosUsuario.status}',
+                            selfie: selfieInput.value,
+                            arquivos: arquivos
+                        };
+                        
+                        try {
+                            const resp = await fetch('${SCRIPT_URL}', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(dados)
+                            });
+                            const res = await resp.json();
+                            
+                            if (res.success) {
+                                resultDiv.innerHTML = '<div class="loading" style="background:rgba(0,0,0,0.9)"><div style="background:white; padding:24px; border-radius:16px; text-align:center; max-width:280px"><span style="font-size:3rem">✅</span><p style="margin-top:12px; font-weight:600">Documentos enviados com sucesso!</p><button onclick="window.close()" style="margin-top:16px; padding:10px 24px; background:#27ae60; color:white; border:none; border-radius:10px">Fechar</button></div></div>';
+                            } else {
+                                resultDiv.innerHTML = '<div class="loading"><div style="background:white; padding:24px; border-radius:16px; text-align:center"><span style="font-size:3rem">❌</span><p style="margin-top:12px; color:#ef476f">Erro: ' + res.message + '</p><button onclick="location.reload()" style="margin-top:16px; padding:10px 20px; background:#e67e22; color:white; border:none; border-radius:10px">Tentar novamente</button></div></div>';
+                            }
+                        } catch(err) {
+                            resultDiv.innerHTML = '<div class="loading"><div style="background:white; padding:24px; border-radius:16px; text-align:center"><span style="font-size:3rem">❌</span><p style="margin-top:12px; color:#ef476f">Erro de conexão</p><button onclick="location.reload()" style="margin-top:16px; padding:10px 20px; background:#e67e22; color:white; border:none; border-radius:10px">Tentar novamente</button></div></div>';
+                        }
+                    });
+                })();
             </script>
         </body>
         </html>
