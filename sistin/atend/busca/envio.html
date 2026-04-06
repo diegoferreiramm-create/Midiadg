@@ -358,13 +358,23 @@
             };
             
             try {
-               const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxO3a3KbHj8naVTrrTRlKQcfHrElbQ54HloepIT2Cvd1kxWJXjsJyV225-3pPVBEB0/exec';
-                const resp = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dadosEnvio)
+                const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxO3a3KbHj8naVTrrTRlKQcfHrElbQ54HloepIT2Cvd1kxWJXjsJyV225-3pPVBEB0/exec';
+                
+                // Usa GET em vez de POST para evitar CORS
+                const params = new URLSearchParams();
+                params.append('acao', 'enviar_documentos');
+                params.append('cpf', dadosUsuario.cpf);
+                params.append('nome', dadosUsuario.nome);
+                params.append('status', dadosUsuario.status);
+                params.append('selfie', selfie);
+                params.append('arquivos', JSON.stringify(arquivos));
+                
+                const urlCompleta = SCRIPT_URL + '?' + params.toString();
+                
+                const resp = await fetch(urlCompleta, {
+                    method: 'GET'
                 });
+                
                 const res = await resp.json();
                 
                 if (res.success) {
