@@ -1,5 +1,5 @@
 // URL do Google Apps Script (Verifique se é a versão mais atualizada)
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxO3a3KbHj8naVTrrTRlKQcfHrElbQ54HloepIT2Cvd1kxWJXjsJyV225-3pPVBEB0/exec';
+const SCRIPT_URL = '/sistin/atend/busca/proxy.php';
 
 // ==================== FUNÇÕES DE INTERFACE ====================
 
