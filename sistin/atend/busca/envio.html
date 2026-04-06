@@ -328,55 +328,38 @@
             const resultDiv = document.getElementById('resultMsg');
             resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
             
-            // Função para converter base64 para Blob
-            function base64ToBlob(base64, mimeType) {
-                const base64Data = base64.split(',')[1];
-                const byteCharacters = atob(base64Data);
-                const byteNumbers = new Array(byteCharacters.length);
-                for (let i = 0; i < byteCharacters.length; i++) {
-                    byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-                const byteArray = new Uint8Array(byteNumbers);
-                return new Blob([byteArray], { type: mimeType || 'application/octet-stream' });
-            }
+            const lerArquivo = (file) => {
+                return new Promise((resolve) => {
+                    if (!file || !file.name) { resolve(null); return; }
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve({ base64: e.target.result, nome: file.name });
+                    reader.readAsDataURL(file);
+                });
+            };
             
-            // Coletar arquivos dos inputs
-            const doc1File = document.getElementById('doc1').files[0];
-            const doc2File = document.getElementById('doc2').files[0];
-            const doc3File = document.getElementById('doc3').files[0];
-            const doc4File = document.getElementById('doc4').files[0];
-            const selfieBase64 = selfieInput.value;
+            const doc1 = await lerArquivo(document.getElementById('doc1').files[0]);
+            const doc2 = await lerArquivo(document.getElementById('doc2').files[0]);
+            const doc3 = await lerArquivo(document.getElementById('doc3').files[0]);
+            const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
+            const selfie = selfieInput.value || '';  // 👈 PEGA O VALOR DO CAMPO selfieInput
             
-            // Criar FormData
-            const formData = new FormData();
-            formData.append('acao', 'enviar_documentos');
-            formData.append('cpf', dadosUsuario.cpf);
-            formData.append('nome', dadosUsuario.nome);
-            formData.append('status', dadosUsuario.status);
+            const arquivos = [];
+            if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
+            if (doc2) arquivos.push({ ...doc2, tipo: 'comprovante_residencia' });
+            if (doc3) arquivos.push({ ...doc3, tipo: 'cpf_documento' });
+            if (doc4) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
             
-            // Adicionar selfie como arquivo
-            if (selfieBase64) {
-                const selfieBlob = base64ToBlob(selfieBase64, 'image/jpeg');
-                formData.append('selfie', selfieBlob, 'selfie.jpg');
-            }
-            
-            // Adicionar documentos
-            if (doc1File) formData.append('declaracao_ensino', doc1File);
-            if (doc2File) formData.append('comprovante_residencia', doc2File);
-            if (doc3File) formData.append('cpf_documento', doc3File);
-            if (doc4File) formData.append('documento_responsavel', doc4File);
+            const dadosEnvio = {
+                acao: 'enviar_documentos',
+                cpf: dadosUsuario.cpf,
+                nome: dadosUsuario.nome,
+                status: dadosUsuario.status,
+                selfie: selfie,
+                arquivos: arquivos
+            };
             
             try {
                 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxO3a3KbHj8naVTrrTRlKQcfHrElbQ54HloepIT2Cvd1kxWJXjsJyV225-3pPVBEB0/exec';
-                
-                const dadosEnvio = {
-                    acao: 'enviar_documentos',
-                    cpf: dadosUsuario.cpf,
-                    nome: dadosUsuario.nome,
-                    status: dadosUsuario.status,
-                    selfie: selfie,
-                    arquivos: arquivos
-                };
                 
                 const resp = await fetch(SCRIPT_URL, {
                     method: 'POST',
