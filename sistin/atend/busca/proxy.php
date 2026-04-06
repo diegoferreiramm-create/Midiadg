@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 }
 
 // Pega a URL do Google Apps Script
-$url = 'https://script.google.com/macros/s/AKfycbxPTOQE-4ciMg4PE5wkXwb9YD7Z6sltcZgOe1T9vXTNXOjyOs8DQ6IMW_tgRHw1NcrZ/exec';
+$url = 'https://script.google.com/macros/s/AKfycbxO3a3KbHj8naVTrrTRlKQcfHrElbQ54HloepIT2Cvd1kxWJXjsJyV225-3pPVBEB0/exec';
 
 // Adiciona os parâmetros da requisição
 if (!empty($_SERVER['QUERY_STRING'])) {
