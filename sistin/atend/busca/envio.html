@@ -7,9 +7,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
+            padding: 16px;
             min-height: 100vh;
         }
         .container {
@@ -17,99 +17,316 @@
             margin: 0 auto;
             background: white;
             border-radius: 20px;
-            padding: 20px;
+            overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
-        h2 { text-align: center; color: #e67e22; margin-bottom: 20px; }
+        .header {
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+            color: white;
+            padding: 16px;
+            text-align: center;
+        }
+        .header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+        .content { padding: 16px; }
         .info-box {
             background: #f0f7ff;
             padding: 12px;
             border-radius: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .info-box p { margin-bottom: 4px; }
+        .info-box strong { color: #e67e22; }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; color: #333; }
         input[type="file"] {
             width: 100%;
             padding: 10px;
             border: 2px dashed #ddd;
             border-radius: 10px;
             background: #fafafa;
+            font-size: 0.8rem;
         }
-        button {
+        .camera-area {
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .video-wrapper {
+            position: relative;
             width: 100%;
-            padding: 12px;
-            background: #e67e22;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
+            background: #000;
         }
-        button:hover { opacity: 0.9; }
-        .loading { display: none; text-align: center; margin-top: 10px; color: #e67e22; }
-        .success { color: green; text-align: center; margin-top: 10px; }
-        .error { color: red; text-align: center; margin-top: 10px; }
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+            transform: scaleX(-1);
+        }
+        .face-oval {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 220px;
+            border: 3px solid #27ae60;
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 0 999px rgba(0,0,0,0.5);
+            display: none;
+        }
+        .face-oval.show { display: block; }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            text-align: center;
+            font-weight: 500;
+        }
+        .status-success { background: #d4edda; color: #155724; }
+        .status-warning { background: #fff3cd; color: #856404; }
+        .status-error { background: #f8d7da; color: #721c24; }
+        .status-info { background: #cce5ff; color: #004085; }
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-camera {
+            background: #2c3e50;
+            color: white;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .btn-capture {
+            background: #27ae60;
+            color: white;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+            color: white;
+            margin-top: 16px;
+        }
+        .preview {
+            margin-top: 12px;
+            text-align: center;
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+        .preview img {
+            max-width: 80px;
+            border-radius: 12px;
+            border: 3px solid #27ae60;
+        }
+        canvas { display: none; }
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+        }
+        .spinner {
+            width: 45px;
+            height: 45px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #e67e22;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden { display: none; }
+        .button-group { padding: 12px; background: #1a1a2e; }
+        .info-text {
+            background: #e9ecef;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 8px;
+        }
+        .opcional-badge {
+            display: inline-block;
+            background: #6c757d;
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        .success-msg { color: #27ae60; text-align: center; padding: 20px; }
+        .error-msg { color: #ef476f; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>📎 Envio de Documentos</h2>
-        <div class="info-box" id="infoUsuario"></div>
-        
-        <div class="form-group">
-            <label>📄 Declaração de Ensino</label>
-            <input type="file" id="doc1">
+        <div class="header">
+            <h1>📎 Envio de Documentos</h1>
+            <p>Regularize sua situação</p>
         </div>
-        <div class="form-group">
-            <label>🏠 Comprovante de Residência</label>
-            <input type="file" id="doc2">
+        <div class="content">
+            <div class="info-box" id="infoUsuario"></div>
+            
+            <form id="formDocs">
+                <div class="form-group">
+                    <label>📄 Declaração de Ensino</label>
+                    <input type="file" id="doc1" accept=".pdf,.jpg,.jpeg,.png">
+                </div>
+                <div class="form-group">
+                    <label>🏠 Comprovante de Residência</label>
+                    <input type="file" id="doc2" accept=".pdf,.jpg,.jpeg,.png">
+                </div>
+                <div class="form-group">
+                    <label>🆔 Foto do CPF</label>
+                    <input type="file" id="doc3" accept=".jpg,.jpeg,.png">
+                </div>
+                <div class="form-group" id="grupoResp">
+                    <label>👨‍👩‍👧 Documento do Responsável</label>
+                    <input type="file" id="doc4" accept=".pdf,.jpg,.jpeg,.png">
+                </div>
+                <div class="form-group">
+                    <label>🤳 Selfie <span class="opcional-badge">Opcional</span></label>
+                    <div class="camera-area">
+                        <div class="video-wrapper">
+                            <video id="video" autoplay playsinline></video>
+                            <div id="faceOval" class="face-oval"></div>
+                        </div>
+                        <canvas id="canvas"></canvas>
+                        <div class="button-group">
+                            <button type="button" id="btnCamera" class="btn-camera">📷 Abrir Câmera</button>
+                            <button type="button" id="btnFoto" class="btn-capture hidden">📸 Tirar Selfie</button>
+                        </div>
+                        <div id="statusMsg" class="status hidden"></div>
+                        <div id="preview" class="preview hidden"></div>
+                        <input type="hidden" id="selfieData">
+                    </div>
+                    <div class="info-text">
+                        💡 Opcional: Tire uma selfie para agilizar a análise | Fundo claro | Rosto na moldura
+                    </div>
+                </div>
+                <button type="submit" id="submitBtn" class="btn-submit">📤 Enviar Documentos</button>
+            </form>
+            <div id="resultMsg"></div>
         </div>
-        <div class="form-group">
-            <label>🆔 Foto do CPF</label>
-            <input type="file" id="doc3">
-        </div>
-        <div class="form-group" id="grupoResp">
-            <label>👨‍👩‍👧 Documento do Responsável</label>
-            <input type="file" id="doc4">
-        </div>
-        <div class="form-group">
-            <label>🤳 Selfie (opcional)</label>
-            <input type="file" id="selfieFile" accept="image/*">
-        </div>
-        
-        <button id="btnEnviar">📤 Enviar Documentos</button>
-        <div id="resultado" class="loading"></div>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const dadosUsuario = {
-            cpf: urlParams.get('cpf'),
-            nome: urlParams.get('nome'),
-            status: urlParams.get('status'),
-            nascimento: urlParams.get('nascimento')
+            cpf: urlParams.get('cpf') || '',
+            nome: urlParams.get('nome') || '',
+            status: urlParams.get('status') || '',
+            nascimento: urlParams.get('nascimento') || ''
         };
         
         document.getElementById('infoUsuario').innerHTML = `
-            <p><strong>Nome:</strong> ${dadosUsuario.nome}</p>
-            <p><strong>CPF:</strong> ${dadosUsuario.cpf}</p>
-            <p><strong>Status:</strong> ${dadosUsuario.status}</p>
+            <p><strong>👤 Nome:</strong> ${dadosUsuario.nome}</p>
+            <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf}</p>
+            <p><strong>📊 Status:</strong> ${dadosUsuario.status}</p>
         `;
         
         // Verificar menor de idade
-        const anoNasc = parseInt(dadosUsuario.nascimento.split('/')[2]);
+        let anoNasc = 0;
+        if (dadosUsuario.nascimento.includes('/')) {
+            anoNasc = parseInt(dadosUsuario.nascimento.split('/')[2]);
+        } else if (dadosUsuario.nascimento.includes('-')) {
+            anoNasc = parseInt(dadosUsuario.nascimento.split('-')[0]);
+        }
         const idade = new Date().getFullYear() - anoNasc;
         if (idade >= 18) {
             document.getElementById('grupoResp').style.display = 'none';
         }
         
-        document.getElementById('btnEnviar').addEventListener('click', async () => {
-            const resultDiv = document.getElementById('resultado');
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = 'Enviando documentos...';
-            resultDiv.className = 'loading';
+        // ==================== CÂMERA E SELFIE ====================
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const btnCamera = document.getElementById('btnCamera');
+        const btnFoto = document.getElementById('btnFoto');
+        const faceOval = document.getElementById('faceOval');
+        const statusDiv = document.getElementById('statusMsg');
+        const previewDiv = document.getElementById('preview');
+        const selfieInput = document.getElementById('selfieData');
+        let stream = null;
+        
+        function melhorarQualidadeImagem(ctx, width, height) {
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = Math.min(255, data[i] * 1.1);
+                data[i+1] = Math.min(255, data[i+1] * 1.1);
+                data[i+2] = Math.min(255, data[i+2] * 1.1);
+            }
+            ctx.putImageData(imageData, 0, 0);
+        }
+        
+        btnCamera.addEventListener('click', async () => {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } 
+                });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                faceOval.classList.add('show');
+                btnCamera.classList.add('hidden');
+                btnFoto.classList.remove('hidden');
+                statusDiv.classList.remove('hidden');
+                statusDiv.className = 'status status-info';
+                statusDiv.innerHTML = '🎯 Posicione o rosto na moldura (opcional)';
+                await new Promise(r => setTimeout(r, 500));
+            } catch(err) {
+                statusDiv.className = 'status status-error';
+                statusDiv.innerHTML = '❌ Erro na câmera: ' + err.message;
+                statusDiv.classList.remove('hidden');
+            }
+        });
+        
+        btnFoto.addEventListener('click', () => {
+            const ctx = canvas.getContext('2d');
+            const targetWidth = 1024;
+            const targetHeight = 768;
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+            ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
+            melhorarQualidadeImagem(ctx, targetWidth, targetHeight);
+            const fotoData = canvas.toDataURL('image/jpeg', 0.85);
+            selfieInput.value = fotoData;
+            previewDiv.classList.remove('hidden');
+            previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie capturada!</p>';
+            statusDiv.className = 'status status-success';
+            statusDiv.innerHTML = '✅ Selfie capturada! (opcional)';
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.style.display = 'none';
+            }
+            btnFoto.classList.add('hidden');
+            faceOval.classList.remove('show');
+            btnCamera.classList.remove('hidden');
+            btnCamera.innerHTML = '📷 Reabrir Câmera';
+        });
+        
+        // ==================== ENVIO DOS DOCUMENTOS ====================
+        document.getElementById('formDocs').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('resultMsg');
+            resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
             
             const lerArquivo = (file) => {
                 return new Promise((resolve) => {
@@ -124,12 +341,7 @@
             const doc2 = await lerArquivo(document.getElementById('doc2').files[0]);
             const doc3 = await lerArquivo(document.getElementById('doc3').files[0]);
             const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
-            const selfieFile = document.getElementById('selfieFile').files[0];
-            let selfie = '';
-            if (selfieFile) {
-                const selfieData = await lerArquivo(selfieFile);
-                selfie = selfieData ? selfieData.base64 : '';
-            }
+            const selfie = selfieInput.value || '';
             
             const arquivos = [];
             if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
@@ -155,16 +367,12 @@
                 const res = await resp.json();
                 
                 if (res.success) {
-                    resultDiv.innerHTML = '✅ Documentos enviados com sucesso!';
-                    resultDiv.className = 'success';
-                    setTimeout(() => window.close(), 2000);
+                    resultDiv.innerHTML = '<div class="success-msg">✅ Documentos enviados com sucesso!<br><button onclick="window.close()" style="margin-top:15px; padding:10px 20px; background:#27ae60; color:white; border:none; border-radius:8px;">Fechar</button></div>';
                 } else {
-                    resultDiv.innerHTML = '❌ Erro: ' + (res.message || 'Erro desconhecido');
-                    resultDiv.className = 'error';
+                    resultDiv.innerHTML = '<div class="error-msg">❌ Erro: ' + (res.message || 'Erro desconhecido') + '</div>';
                 }
             } catch(err) {
-                resultDiv.innerHTML = '❌ Erro de conexão: ' + err.message;
-                resultDiv.className = 'error';
+                resultDiv.innerHTML = '<div class="error-msg">❌ Erro de conexão: ' + err.message + '</div>';
             }
         });
     </script>
