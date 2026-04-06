@@ -369,9 +369,19 @@
             try {
                 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxO3a3KbHj8naVTrrTRlKQcfHrElbQ54HloepIT2Cvd1kxWJXjsJyV225-3pPVBEB0/exec';
                 
+                const dadosEnvio = {
+                    acao: 'enviar_documentos',
+                    cpf: dadosUsuario.cpf,
+                    nome: dadosUsuario.nome,
+                    status: dadosUsuario.status,
+                    selfie: selfie,
+                    arquivos: arquivos
+                };
+                
                 const resp = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: formData
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dadosEnvio)
                 });
                 
                 const res = await resp.json();
