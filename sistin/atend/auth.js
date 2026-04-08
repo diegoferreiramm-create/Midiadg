@@ -67,3 +67,19 @@ function salvarSenha() {
       if (btn) btn.disabled = false;
     });
 }
+
+// Função mostrarMenu
+function mostrarMenu() {
+  const user = JSON.parse(sessionStorage.getItem("usuario"));
+  if(!user) return;
+  
+  document.getElementById("infoUsuario").innerText = user.nome + " | " + user.parceiro;
+  document.getElementById("hudUsuario").style.display = "flex";
+  
+  if(user.nome === 'admin' || user.parceiro.toString() === "97") {
+    const cardLog = document.getElementById("cardLog");
+    if(cardLog) cardLog.style.display = "block";
+  }
+  
+  abrirTela('menuBox');
+}
