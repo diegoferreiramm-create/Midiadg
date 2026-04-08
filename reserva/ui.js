@@ -186,7 +186,7 @@ async function reimprimirProtocolo() {
                             <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
                             <div class="id-destaque">
                                 <span>Nº BOLETO: ${dados.boleto || 'SEM BOLETO'}</span>
-                                <span style="background:#ffeb3b; padding:2px 6px; border-radius:4px;">🔁 REIMPRESSÃO - ${new Date().toLocaleString()}</span>
+                                <span style="background:#ffeb3b; padding:2px 6px; border-radius:4px;">🔁 REIMPRESSÃO - ${dados.dataSolicitacao ? dados.dataSolicitacao.split(' ')[0] + ' ' + (dados.dataSolicitacao.split(' ')[1] || '') : new Date().toLocaleString()}</span>
                             </div>
                         </div>
                         <div class="info-grid">
@@ -254,7 +254,7 @@ async function reimprimirProtocolo() {
                             <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
                             <div class="id-destaque">
                                 <span>Nº BOLETO: ${dados.boleto || 'SEM BOLETO'}</span>
-                                <span style="background:#ffeb3b; padding:2px 6px; border-radius:4px;">🔁 REIMPRESSÃO - ${new Date().toLocaleString()}</span>
+                                <span style="background:#ffeb3b; padding:2px 6px; border-radius:4px;">🔁 REIMPRESSÃO - ${dados.dataSolicitacao ? dados.dataSolicitacao.split(' ')[0] + ' ' + (dados.dataSolicitacao.split(' ')[1] || '') : new Date().toLocaleString()}</span>
                             </div>
                         </div>
                         <div class="info-grid">
