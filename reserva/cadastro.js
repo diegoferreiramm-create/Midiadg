@@ -66,6 +66,14 @@ async function salvarCadastro() {
     return;
   }
 
+  // ============================================
+  // VALIDAÇÃO DO BOLETO (NOVO)
+  // ============================================
+  if (!BOLETO.validar(boleto)) {
+    alert("❌ Boleto inválido! Deve ter:\n\n• 10 dígitos começando com 4 (ex: 4123 4567 89)\n• OU 16 dígitos começando com 8 (ex: 8123 4567 8901 2345)\n\nVerifique o número digitado.");
+    return;
+  }
+
   if (!idSendoEditado) {
     const btn = document.querySelector("button[onclick='salvarCadastro()']");
     if(btn) { btn.disabled = true; btn.innerText = "Verificando..."; }
@@ -107,21 +115,56 @@ async function salvarCadastro() {
     if (res.sucesso) {
       alert(idFinal ? `✅ ${via} ATUALIZADA com sucesso!` : "✅ Cadastro SALVO com sucesso!");
       try {
-          if (typeof imprimirProtocolo === "function") {
-            imprimirProtocolo(
-              res.id || idFinal, 
-              res.cpf || cpf, 
-              res.nome || nome, 
-              res.nasc || nascRaw, 
-              mun, 
-              via, 
-              user.nome, 
-              user.parceiro, 
-              res.data, 
-              res.boleto || boleto,
-              email // NOVO PARÂMETRO
-            );
-          }
+          // Verifica qual impressora está configurada
+const tipoImpressora = localStorage.getItem('tipoImpressora') || 'A4';
+
+if (tipoImpressora === 'TERMICA') {
+    // Usa impressão térmica
+    if (typeof imprimirProtocoloTermica === "function") {
+        imprimirProtocoloTermica(
+            res.id || idFinal,
+            res.cpf || cpf,
+            res.nome || nome,
+            res.nasc || nascRaw,
+            mun,
+            via,
+            user.nome,
+            user.parceiro,
+            res.data,
+            res.boleto || boleto
+        );
+    } else {
+        // Se não existir a função térmica, usa a normal
+        imprimirProtocolo(
+            res.id || idFinal,
+            res.cpf || cpf,
+            res.nome || nome,
+            res.nasc || nascRaw,
+            mun,
+            via,
+            user.nome,
+            user.parceiro,
+            res.data,
+            res.boleto || boleto,
+            email
+        );
+    }
+} else {
+    // Usa impressão A4 normal
+    imprimirProtocolo(
+        res.id || idFinal,
+        res.cpf || cpf,
+        res.nome || nome,
+        res.nasc || nascRaw,
+        mun,
+        via,
+        user.nome,
+        user.parceiro,
+        res.data,
+        res.boleto || boleto,
+        email
+    );
+}
       } catch (errPrint) { console.error("Erro na impressão:", errPrint); }
       
       // Limpar campos incluindo o email
