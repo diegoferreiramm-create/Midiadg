@@ -1,132 +1,327 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>MidiaDG | O Seu Portal de Conteúdo e Notícias</title>
-    <meta name="description" content="MidiaDG é um portal dedicado a explorar mistérios, tecnologia e curiosidades. Fique por dentro das últimas histórias do MidiaDG.">
-
-   <link rel="icon" type="image/png" href="imag/favicon.png?v=2">
-
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1234567890" crossorigin="anonymous"></script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <style>
-        /* CSS ORIGINAL PRESERVADO INTEGRALMENTE */
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fcfcfc; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
-        .header-top { background-color: white; padding: 10px 10%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
-        .logo img { max-width: 250px; height: auto; display: block; mix-blend-mode: multiply; filter: contrast(110%); }
-        .header-top-right { display: flex; align-items: center; gap: 20px; }
-        .social-icons a { color: #555; font-size: 1.1rem; text-decoration: none; margin-right: 10px; }
-        .search-input { padding: 8px 15px; border: 1px solid #ddd; border-radius: 20px; background-color: #f9f9f9; width: 150px; }
-        .header-menu { background-color: #f5f5f5; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: center; padding: 12px 0; }
-        .nav-links { list-style: none; margin: 0; padding: 0; display: flex; gap: 30px; }
-        .nav-links a { text-decoration: none; color: #444; font-size: 0.95rem; font-weight: 500; }
-        .nav-links a.active { color: #ff5722; font-weight: 600; }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
-        .card { text-decoration: none; position: relative; overflow: hidden; border-radius: 8px; height: 220px; display: flex; align-items: flex-end; background-size: cover; background-position: center; transition: transform 0.3s; }
-        .card:hover { transform: scale(1.02); }
-        .card-overlay { width: 100%; padding: 15px; color: white; background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%); box-sizing: border-box; }
-        .card h3 { margin: 0; font-size: 1.1rem; }
-        footer { background-color: #1a1a1a; color: #ffffff; padding: 50px 10% 20px 10%; margin-top: 60px; width: 100%; box-sizing: border-box; }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px; }
-        .footer-col h3, .footer-col h4 { color: #ffffff; margin-bottom: 20px; margin-top: 0; }
-        .footer-col p, .footer-col ul { color: #bbb; font-size: 0.9rem; line-height: 1.6; }
-        .footer-col ul { list-style: none; padding: 0; }
-        .footer-col ul li { margin-bottom: 10px; }
-        .footer-col ul li a { color: #bbb; text-decoration: none; }
-        .footer-col ul li a:hover { color: #ff5722; }
-        .copyright { border-top: 1px solid #333; padding-top: 20px; text-align: center; font-size: 0.8rem; color: #777; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<div id="hudUsuario">
+  <div id="dataHoraHud">00/00/0000 00:00:00</div>
+  <div id="infoUsuario"></div>
+  <div class="btns-hud">
+    <button onclick="clicouNoBotaoSair=true; window.location.reload();">SAIR</button>
+  </div>
+</div>
+
+<div id="loginBox">
+  <div class="box">
+    <!-- LOGO ADICIONADA AQUI -->
+    <div style="text-align: center; margin-bottom: 15px;">
+      <img src="https://www.midiadg.com.br/imag/logo_asesc.jpeg" alt="Logo Asesc" style="max-width: 100px; height: auto; border-radius: 8px;">
+    </div>
+    <h2>Sistema Carteiras</h2>
+    <input id="login" placeholder="Usuário">
+    <input id="senha" type="password" placeholder="Senha">
+    <button onclick="entrar()">Entrar</button>
+    <button class="sec" onclick="abrirSenha()">Trocar Senha</button>
+    <div id="msg"></div>
+  </div>
+</div>
+
+<div id="menuBox" style="display:none;">
+  <div class="container">
+    <div class="card" onclick="abrirTela('cadastrarBox')">Cadastrar</div>
+    <div class="card" onclick="abrirTela('pesquisarBox')">Pesquisar</div>
+    <div class="card" onclick="abrirTela('entregarBox')">Entregar</div>
+    <div class="card" onclick="abrirTela('listasBox')">Listas</div>
+  </div> 
+</div>
+
+<div id="cadastrarBox" style="display:none;">
+  <div class="box">
+    <h2>Cadastro de Carteira</h2>
+    <input id="cpf" placeholder="CPF (xxx.xxx.xxx-xx)" maxlength="14">
+    <div id="msgCPF"></div>
+    <input id="nome" placeholder="Nome completo">
+    <input id="nascimento" type="text" placeholder="Data de Nascimento (dd/mm/aaaa)" maxlength="10" oninput="mascaraData(this)">
+    <input id="municipio" placeholder="Município">
+    <input id="telefone" placeholder="Telefone (xx) xxxxx-xxxx">
+
+    <!-- NOVO CAMPO DE EMAIL -->
+<input id="email" type="email" placeholder="E-mail (obrigatório)" style="margin-top: 10px;">
+
+<div class="via-container">
+  <label class="via-option">
+    <input type="radio" name="via" id="via1" value="1ª" checked> 1ª Via
+  </label>
+  <label class="via-option">
+    <input type="radio" name="via" id="via2" value="2ª"> 2ª Via
+  </label>
+</div>
+
+    <input id="codigoBoleto" placeholder="Código do boleto (OBRIGATÓRIO)">
+    <button id="btnSalvar" onclick="salvarCadastro()">Salvar e Gerar Protocolo</button>
+    <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
+    <div id="msgCadastro"></div>
+  </div>
+</div>
+
+<div id="entregarBox" style="display:none;">
+  <div class="box">
+    <h2>Registrar Entrega</h2>
+    <input id="codigoCtr" placeholder="Código CTR (Somente números)" inputmode="numeric">
     
-    <div id="cabecalho-placeholder"></div>
+    <div id="infoAlunoEntrega">
+      <b>Aluno:</b> <span id="resNomeAluno">...</span><br>
+      <b>CPF:</b> <span id="resCpfAluno">...</span>
+    </div>
 
-    <div id="ads-topo-placeholder" style="max-width: 1200px; margin: 10px auto; text-align: center;"></div>
+    <div class="via-container">
+      <label class="via-option">
+        <input type="radio" name="viaEntrega" id="viaEntrega1" value="1" checked> 1ª VIA
+      </label>
+      <label class="via-option">
+        <input type="radio" name="viaEntrega" id="viaEntrega2" value="2"> 2ª VIA
+      </label>
+    </div>
 
-    <main style="flex: 1; max-width: 1200px; margin: 30px auto; padding: 0 20px; width: 100%; box-sizing: border-box;">
-        
-        <section style="margin-bottom: 40px;">
-            <h2 style="font-weight: 300; border-bottom: 1px solid #ddd; padding-bottom: 10px; margin-bottom: 20px; color: #777; text-transform: uppercase; font-size: 1.2rem;">
-                CHECK OUR LATEST ASSUNTS
-            </h2>
-            <div style="background: #e1f5fe; padding: 20px; border-left: 5px solid #03a9f4; border-radius: 4px;">
-                <strong style="color: #0277bd; display: block; margin-bottom: 5px;">🔥 Destaque da Semana:</strong>
-                <p style="margin: 0; font-size: 0.95rem; color: #444;">
-                    Comece agora a leitura de <a href="modelo/p1.html" style="color: #ff5722; font-weight: bold; text-decoration: none;">O Mistério das Pirâmides</a>. Uma jornada de 10 capítulos imperdível!
-                </p>
-            </div>
-        </section>
+    <div style="margin:15px 0; text-align: left; font-size: 14px; background: #0f172a; padding: 10px; border-radius: 8px;">
+      <label><input type="checkbox" id="checkTerceiro" onchange="toggleTerceiro()"> Entregar para Terceiro?</label>
+    </div>
 
-        <h2 style="font-size: 1.1rem; color: #777; border-left: 4px solid #ff5722; padding-left: 10px; margin-bottom: 20px; text-transform: uppercase; font-weight: 600;">
-            ÚLTIMAS HISTÓRIAS
-        </h2>
+    <div id="camposTerceiro" style="display: none; margin-top: 15px; padding: 15px; background: #0f172a; border-radius: 8px; border-left: 4px solid #fbbf24;">
+      <div style="margin-bottom: 12px;">
+        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">NOME COMPLETO DO RECEBEDOR</label>
+        <input id="nomeTerceiro" placeholder="Digite o nome completo" 
+               style="width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: white; box-sizing: border-box;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">CPF DO RECEBEDOR</label>
+        <input id="cpfTerceiro" placeholder="000.000.000-00" maxlength="14"
+               style="width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: white; box-sizing: border-box;">
+        <div id="msgCPFTerceiro" style="font-size: 11px; margin-top: 3px; min-height: 16px;"></div>
+      </div>
+      <div style="margin-bottom: 5px;">
+        <label style="color: #94a3b8; font-size: 12px; display: block; margin-bottom: 4px;">VÍNCULO / PARENTESCO</label>
+        <select id="parentesco" 
+                style="width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; color: white; cursor: pointer;">
+          <option value="">SELECIONE O VÍNCULO</option>
+          <option value="PAI">PAI</option>
+          <option value="MÃE">MÃE</option>
+          <option value="FILHO(A)">FILHO(A)</option>
+          <option value="IRMÃO(Ã)">IRMÃO(Ã)</option>
+          <option value="AVÔ(Ó)">AVÔ(Ó)</option>
+          <option value="TIO(A)">TIO(A)</option>
+          <option value="PRIMO(A)">PRIMO(A)</option>
+          <option value="CÔNJUGE">CÔNJUGE</option>
+          <option value="AMIGO(A)">AMIGO(A)</option>
+          <option value="OUTROS">OUTROS</option>
+        </select>
+      </div>
+    </div>
 
-        <div class="grid-container">
-            <a href="modelo/p1.html" class="card" style="background-image: url('https://images.pexels.com/photos/259915/pexels-photo-259915.jpeg?auto=compress&cs=tinysrgb&w=400')">
-                <div class="card-overlay"><h3>O Mistério das Pirâmides</h3></div>
-            </a>
-            <a href="#" class="card" style="background-image: url('https://images.pexels.com/photos/1103970/pexels-photo-1103970.jpeg?auto=compress&cs=tinysrgb&w=400')">
-                <div class="card-overlay"><h3>Cidades Perdidas</h3></div>
-            </a>
-            <a href="#" class="card" style="background-image: url('https://images.pexels.com/photos/991422/pexels-photo-991422.jpeg?auto=compress&cs=tinysrgb&w=400')">
-                <div class="card-overlay"><h3>Buracos Negros</h3></div>
-            </a>
+    <button onclick="salvarEntrega()">Confirmar e Imprimir</button>
+    <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
+    <div id="msgEntrega" style="margin-top:10px; font-size:13px;"></div>
+  </div>
+</div>
+
+<div id="modalSenha">
+  <div>
+    <h3>Trocar Senha</h3>
+    <input id="usuarioTroca" placeholder="Usuário">
+    <input id="senhaAtual" type="password" placeholder="Senha atual">
+    <input id="novaSenha" type="password" placeholder="Nova senha">
+    <input id="confSenha" type="password" placeholder="Confirmar nova senha">
+    <button onclick="salvarSenha()">Salvar</button>
+    <button class="cancel" onclick="fecharSenha()">Cancelar</button>
+  </div>
+</div>
+
+<div id="pesquisarBox" style="display:none;">
+  <div class="box" style="width: 500px;">
+    <h2>Pesquisar Carteira</h2>
+    <input id="valorPesquisa" placeholder="Digite CPF ou Nome para buscar">
+    <div style="display:flex; gap:10px;">
+      <button onclick="executarBuscaGeral('cpf')">Buscar por CPF</button>
+      <button class="sec" onclick="executarBuscaGeral('nome')">Buscar por Nome</button>
+    </div>
+    <div id="resultadoPesquisa"></div>
+    <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
+  </div>
+</div>
+
+<div id="listasBox" style="display:none; flex-direction:column; width:100%; align-items:center;">
+  <div class="box" style="width: 98%; max-width: 1400px; margin: 0 auto; padding: 5px;">
+    
+    <h2 style="margin: 0 0 8px 0; text-align: center; font-size: 1.6rem;">Relatório Geral de Cadastros</h2>
+    
+    <!-- CONTAINER DE FILTROS - TODOS OS FILTROS ESTÃO AQUI -->
+    <div id="filtrosAdmin" style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-start; background: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+      
+      <input type="text" id="fCpf" placeholder="CPF..." onkeyup="filtrarTabelaAvancado()" style="width: 120px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <input type="text" id="fNome" placeholder="NOME..." onkeyup="filtrarTabelaAvancado()" style="width: 200px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <select id="fStatus" onchange="filtrarTabelaAvancado()" style="width: 250px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; cursor: pointer; box-sizing: border-box;">
+        <option value="">STATUS (TODOS)</option>
+        <option value="Pedido a caminho da ARCE">Pedido a caminho da ARCE</option>
+        <option value="Pedido entregue pela Entidade à ARCE">Pedido entregue pela Entidade à ARCE</option>
+        <option value="Em análise pela ARCE">Em análise pela ARCE</option>
+        <option value="Solicitação Indeferida pela ARCE">Solicitação Indeferida pela ARCE</option>
+        <option value="Solicitação Indeferida na Entidade Estudantil">Solicitação Indeferida na Entidade Estudantil</option>
+        <option value="Aguardando Fechamento do Lote pela ARCE">Aguardando Fechamento do Lote pela ARCE</option>
+        <option value="Lote Disponível para Gráfica">Lote Disponível para Gráfica</option>
+        <option value="Lote Recebido pela Gráfica">Lote Recebido pela Gráfica</option>
+        <option value="Lote Enviado ao Sindiônibus">Lote Enviado ao Sindiônibus</option>
+        <option value="Lote Recebido pelo Sindiônibus">Lote Recebido pelo Sindiônibus</option>
+        <option value="Lote Enviado para a Entidade Estudantil">Lote Enviado para a Entidade Estudantil</option>
+        <option value="Lote Recebido pela Entidade Estudantil">Lote Recebido pela Entidade Estudantil</option>
+        <option value="Carteira Pronta para Entrega">Carteira Pronta para Entrega</option>
+        <option value="Carteira Recebida pelo Aluno">Carteira Recebida pelo Aluno</option>
+        <option value="Carteira Recebida pelo Aluno">Convertida para Meia-Cultural</option>
+      </select>
+      
+      <input type="text" id="fParceiro" placeholder="PARCEIRO" onkeyup="filtrarTabelaAvancado()" style="width: 120px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <input type="text" id="fAtend" placeholder="ATENDENTE" onkeyup="filtrarTabelaAvancado()" style="width: 130px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <input type="text" id="fLote" placeholder="LOTE" onkeyup="filtrarTabelaAvancado()" style="width: 70px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <select id="fSituacao" onchange="filtrarTabelaAvancado()" style="width: 100px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+        <option value="">SITUAÇÃO</option>
+        <option value="PAGO">PAGO</option>
+        <option value="ABERTO">ABERTO</option>
+        <option value="PENDENTE">PENDENTE</option>
+      </select>
+      
+      <input type="text" id="fPrazo" placeholder="PRAZO" onkeyup="filtrarTabelaAvancado()" style="width: 70px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <input type="text" id="fProcessoArce" placeholder="Nº ARCE" onkeyup="filtrarTabelaAvancado()" style="width: 100px; height: 36px; padding: 0 8px; border-radius: 4px; border: 1px solid #334155; background: #1e293b; color: white; box-sizing: border-box;">
+      
+      <button type="button" onclick="filtrarTabelaAvancado('#')" style="height: 36px; padding: 0 12px; border-radius: 4px; border: none; background: #3b82f6; color: white; cursor: pointer; font-size: 12px; font-weight: bold; white-space: nowrap;">
+        VER ABERTOS
+      </button>
+    </div>
+      
+    <div class="tabela-container" id="areaImpressao" style="margin-top: 5px;">
+      <table id="tabelaListas" style="font-size: 11px;">
+        <thead>
+          <tr id="cabecalhoTabela">  </tr>
+        </thead>
+        <tbody id="corpoTabelaListas"></tbody>
+      </table>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; margin-top: 10px; width: 100%; gap: 8px;">
+      
+      <div id="contadorLinhas" style="font-weight: bold; color: #22c55e; font-size: 13px; background: #0f172a; padding: 4px 12px; border-radius: 6px; border: 1px solid #334155;">
+        Registros: <span id="numLinhas">0</span>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap;">
+        <button onclick="fecharLotePorParceiro()" style="width: 150px; background: #ef4444; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; padding: 8px 0;">FECHAR LOTE</button>
+        <button onclick="reimprimirLote()" style="width: 150px; background: #10b981; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; padding: 8px 0;">REIMPRIMIR LOTE</button>
+        <button onclick="imprimirLista()" style="width: 150px; background: #3b82f6; margin:0; padding: 8px 0;">Imprimir Lista</button>
+        <button class="cancel" onclick="abrirTela('menuBox')" style="width: 150px; margin:0; padding: 8px 0;">Voltar ao Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+  
+<div id="corrigirBox" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+  <div style="width:100%; max-width:480px; background:#1e293b; border:1px solid #334155; padding:30px; border-radius:16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+    
+    <div style="text-align:center; margin-bottom:20px;">
+      <h2 style="color:#eab308; margin:0; font-size:24px;">Corrigir Registro</h2>
+      <p style="color:#94a3b8; font-size:13px; margin-top:5px;">Ajuste as informações do aluno abaixo</p>
+    </div>
+
+    <div style="background:#0f172a; padding:12px; border-radius:10px; margin-bottom:20px; border:1px solid #eab308; text-align:center; position:relative;">
+      <span style="position:absolute; top:-8px; left:50%; transform:translateX(-50%); background:#1e293b; padding:0 10px; color:#eab308; font-size:10px; font-weight:bold;">Via Atual</span>
+      <div id="edit_label_via" style="color:#fff; font-weight:bold; font-size:16px;">---</div>
+      <input type="hidden" id="edit_via_hidden">
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr; gap:15px;">
+      <div>
+        <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">CPF</label>
+        <input id="edit_cpf" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;" readonly>
+      </div>
+      <div>
+        <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">NOME COMPLETO</label>
+        <input id="edit_nome" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;">
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div>
+          <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">NASCIMENTO</label>
+          <input id="edit_nascimento" type="date" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;">
         </div>
-
-        <div id="ads-meio-placeholder" style="margin: 30px 0; text-align: center; width: 100%;"></div>
-
-        <div class="grid-container">
-            <a href="#" class="card" style="background-image: url('https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg?auto=compress&cs=tinysrgb&w=400')">
-                <div class="card-overlay"><h3>Oceano Profundo</h3></div>
-            </a>
-            <a href="#" class="card" style="background-image: url('https://images.pexels.com/photos/60132/pexels-photo-60132.jpeg?auto=compress&cs=tinysrgb&w=400')">
-                <div class="card-overlay"><h3>Civilização Maia</h3></div>
-            </a>
-            <a href="#" class="card" style="background-image: url('https://images.pexels.com/photos/733475/pexels-photo-733475.jpeg?auto=compress&cs=tinysrgb&w=400')">
-                <div class="card-overlay"><h3>Segredos da Área 51</h3></div>
-            </a>
-            <a href="#" class="card" style="background-image: url('https://images.pexels.com/photos/355948/pexels-photo-355948.jpeg?auto=compress&cs=tinysrgb&w=400')">
-                <div class="card-overlay"><h3>Tecnologia do Futuro</h3></div>
-            </a>
-            <a href="#" class="card" style="background-image: url('https://images.pexels.com/photos/127513/pexels-photo-127513.jpeg?auto=compress&cs=tinysrgb&w=400')">
-                <div class="card-overlay"><h3>Animais Extintos</h3></div>
-            </a>
-            <a href="#" class="card" style="background-image: url('https://images.pexels.com/photos/33109/fall-autumn-red-season.jpg?auto=compress&cs=tinysrgb&w=400')">
-                <div class="card-overlay"><h3>Florestas Lindas</h3></div>
-            </a>
+        <div>
+          <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">BOLETO</label>
+          <input id="edit_codigoBoleto" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;">
         </div>
-    </main>
+      </div>
+      <div>
+        <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">MUNICÍPIO</label>
+        <input id="edit_municipio" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;">
+      </div>
+      <div>
+        <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">TELEFONE</label>
+        <input id="edit_telefone" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;">
+      </div>
+    </div>
+    <!-- NOVO CAMPO DE EMAIL NA EDIÇÃO -->
+    <div>
+      <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">E-MAIL</label>
+      <input id="edit_email" type="email" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;" required>
+    </div>
+    
+    <div style="display:flex; gap:12px; margin-top:30px;">
+      <button onclick="executarEdicao()" style="flex:1; background:#eab308; color:#000; font-weight:700; border:none; padding:14px; border-radius:10px; cursor:pointer; font-size:14px;">Salvar Dados</button>
+      <button onclick="document.getElementById('corrigirBox').style.display='none'" style="flex:1; background:#334155; color:#fff; font-weight:600; border:none; padding:14px; border-radius:10px; cursor:pointer; font-size:14px;">Voltar</button>
+    </div>
+    <div id="msgCorrecao" style="text-align:center; margin-top:15px; font-size:13px; color:#eab308;"></div>
+  </div>
+</div>
 
-    <div id="ads-rodape-placeholder" style="max-width: 1200px; margin: 20px auto; text-align: center;"></div>
+<!-- MODAL PARA REIMPRESSÃO DE LOTE -->
+<div id="modalReimprimirLote" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10001; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+  <div style="width:100%; max-width:400px; background:#1e293b; border:1px solid #334155; padding:30px; border-radius:16px;">
+    <div style="text-align:center; margin-bottom:20px;">
+      <h2 style="color:#10b981; margin:0; font-size:24px;">Reimprimir Lote</h2>
+      <p style="color:#94a3b8; font-size:13px;">Informe os dados do lote que deseja reimprimir</p>
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr; gap:20px;">
+      <div>
+        <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:8px; display:block;">PARCEIRO</label>
+        <select id="modalParceiro" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:12px; border-radius:8px;">
+          <option value="">SELECIONE O PARCEIRO</option>
+        </select>
+      </div>
+      <div>
+        <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:8px; display:block;">NÚMERO DO LOTE</label>
+        <input id="modalLote" type="number" placeholder="Digite o número do lote" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:12px; border-radius:8px;">
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; margin-top:30px;">
+      <button onclick="confirmarReimprimirLote()" style="flex:1; background:#10b981; color:#fff; font-weight:700; border:none; padding:12px; border-radius:8px; cursor:pointer;">REIMPRIMIR</button>
+      <button onclick="fecharModalReimprimir()" style="flex:1; background:#334155; color:#fff; font-weight:600; border:none; padding:12px; border-radius:8px; cursor:pointer;">CANCELAR</button>
+    </div>
+  </div>
+</div>
 
-    <div id="rodape-placeholder"></div>
-
-    <script>
-        function incluirComponentes() {
-            // Carrega Cabeçalho
-            fetch('/cabecalho.html')
-                .then(response => response.text())
-                .then(data => document.getElementById('cabecalho-placeholder').innerHTML = data);
-
-            // Carrega Rodapé
-            fetch('/rodape.html')
-                .then(response => response.text())
-                .then(data => document.getElementById('rodape-placeholder').innerHTML = data);
-
-            // Carrega Anúncios (puxando do arquivo ads.html)
-            fetch('/ads.html')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('ads-topo-placeholder').innerHTML = data;
-                    document.getElementById('ads-meio-placeholder').innerHTML = data;
-                    document.getElementById('ads-rodape-placeholder').innerHTML = data;
-                }).catch(err => console.log("Aguardando arquivo ads.html..."));
-        }
-        window.onload = incluirComponentes;
-    </script>
+<script src="config.js"></script>
+<script src="ui.js"></script>
+<script src="auth.js"></script>
+<script src="tabela.js"></script>
+<script src="cadastro.js"></script>
+<script src="entrega.js"></script>
+<script src="lote.js"></script>
+<script src="busca-geral.js"></script>
+<script src="events.js"></script>
 
 </body>
 </html>
