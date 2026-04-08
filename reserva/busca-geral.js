@@ -52,3 +52,51 @@ function mascaraData(campo) {
   if (v.length >= 5) v = v.substring(0, 5) + "/" + v.substring(5, 9);
   campo.value = v;
 }
+
+// Formatação de Boleto
+function formatarBoleto(campo) {
+  let valor = campo.value;
+  let v = BOLETO.limpar(valor);
+  
+  if (v.length === 0) {
+    campo.value = '';
+    const msgDiv = document.getElementById("msgBoleto");
+    if (msgDiv) msgDiv.innerHTML = '';
+    return;
+  }
+  
+  // Boleto de 10 dígitos (começa com 4)
+  if (v[0] === '4') {
+    v = v.slice(0, 10);
+    if (v.length >= 5) v = v.substring(0, 4) + ' ' + v.substring(4);
+    if (v.length >= 9) v = v.substring(0, 9) + ' ' + v.substring(9);
+    campo.value = v;
+  }
+  // Boleto de 16 dígitos (começa com 8)
+  else if (v[0] === '8') {
+    v = v.slice(0, 16);
+    if (v.length >= 5) v = v.substring(0, 4) + ' ' + v.substring(4);
+    if (v.length >= 9) v = v.substring(0, 9) + ' ' + v.substring(9);
+    if (v.length >= 13) v = v.substring(0, 13) + ' ' + v.substring(13);
+    campo.value = v;
+  }
+  // Qualquer outro
+  else {
+    v = v.slice(0, 16);
+    campo.value = v;
+  }
+  
+  // Mostrar mensagem de validação
+  const msgDiv = document.getElementById("msgBoleto");
+  if (msgDiv) {
+    if (BOLETO.validar(campo.value)) {
+      msgDiv.innerHTML = "✅ Boleto válido!";
+      msgDiv.style.color = "#22c55e";
+    } else if (campo.value.length > 0) {
+      msgDiv.innerHTML = "❌ Boleto inválido! (Deve ter 10 dígitos começando com 4 ou 16 dígitos começando com 8)";
+      msgDiv.style.color = "#ef4444";
+    } else {
+      msgDiv.innerHTML = "";
+    }
+  }
+}
