@@ -135,3 +135,14 @@ async function reimprimirProtocolo() {
         if(msgDiv) msgDiv.innerHTML = '❌ Erro ao buscar dados.';
     }
 }
+
+// ============================================
+// WINDOW.ONLOAD CORRETO (sem gerarChecksColunas)
+// ============================================
+
+window.onload = function() {
+  if (typeof clicouNoBotaoSair !== 'undefined' && clicouNoBotaoSair) {
+    sessionStorage.clear();
+    if (typeof abrirTela === 'function') abrirTela('loginBox');
+  }
+};
