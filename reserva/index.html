@@ -41,30 +41,33 @@
 
 <div id="cadastrarBox" style="display:none;">
   <div class="box">
-    <h2>Cadastro de Carteira</h2>
+    <!-- TÍTULO NA MESMA LINHA COM ENGRENAGEM NO CANTO -->
+    <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; margin-bottom: 20px !important; width: 100% !important;">
+      <h2 style="margin: 0 !important;">Cadastro de Carteira</h2>
+      <button onclick="abrirConfigImpressora()" style="background: none !important; border: none !important; font-size: 28px !important; cursor: pointer !important; color: #888 !important; padding: 0 !important; width: auto !important;">⚙️</button>
+    </div>
+    
     <input id="cpf" placeholder="CPF (xxx.xxx.xxx-xx)" maxlength="14">
     <div id="msgCPF"></div>
     <input id="nome" placeholder="Nome completo">
     <input id="nascimento" type="text" placeholder="Data de Nascimento (dd/mm/aaaa)" maxlength="10" oninput="mascaraData(this)">
     <input id="municipio" placeholder="Município">
     <input id="telefone" placeholder="Telefone (xx) xxxxx-xxxx">
+    <input id="email" type="email" placeholder="E-mail (obrigatório)" style="margin-top: 10px;">
 
-    <!-- NOVO CAMPO DE EMAIL -->
-<input id="email" type="email" placeholder="E-mail (obrigatório)" style="margin-top: 10px;">
+    <div class="via-container">
+      <label class="via-option">
+        <input type="radio" name="via" id="via1" value="1ª" checked> 1ª Via
+      </label>
+      <label class="via-option">
+        <input type="radio" name="via" id="via2" value="2ª"> 2ª Via
+      </label>
+    </div>
 
-<div class="via-container">
-  <label class="via-option">
-    <input type="radio" name="via" id="via1" value="1ª" checked> 1ª Via
-  </label>
-  <label class="via-option">
-    <input type="radio" name="via" id="via2" value="2ª"> 2ª Via
-  </label>
-</div>
-
-    <input id="codigoBoleto" placeholder="Código do boleto (OBRIGATÓRIO)">
+    <input id="codigoBoleto" placeholder="Código do boleto" maxlength="19" oninput="formatarBoleto(this)">
+    <div id="msgBoleto" style="font-size: 12px; margin-top: 5px; min-height: 20px;"></div>
     <button id="btnSalvar" onclick="salvarCadastro()">Salvar e Gerar Protocolo</button>
     <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
-     <!-- BOTÃO REIMPRIMIR -->
     <button onclick="abrirModalReimprimir()" style="background: #4CAF50; color: white; margin-top: 10px;">🖨️ REIMPRIMIR PROTOCOLO</button>
 
     <div id="msgCadastro"></div>
@@ -260,7 +263,7 @@
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
         <div>
           <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">NASCIMENTO</label>
-          <input id="edit_nascimento" type="date" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;">
+          <input id="edit_nascimento" type="text" placeholder="dd/mm/aaaa" maxlength="10" oninput="mascaraData(this)" style="width:100%; background:#0f172a; border:1px solid #334155; color:#fff; padding:10px; border-radius:8px; outline:none; font-size:14px;">
         </div>
         <div>
           <label style="color:#e2e8f0; font-size:12px; font-weight:600; margin-bottom:5px; display:block;">BOLETO</label>
@@ -332,6 +335,23 @@
       <button onclick="fecharModalReimprimirProtocolo()" style="flex:1; background:#334155; color:#fff; font-weight:600; border:none; padding:12px; border-radius:8px; cursor:pointer;">CANCELAR</button>
     </div>
     <div id="msgReimprimir" style="text-align:center; margin-top:15px; font-size:13px; color:#eab308;"></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIGURAÇÃO IMPRESSORA -->
+<div id="modalConfigImpressora" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10003; align-items:center; justify-content:center;">
+  <div style="width:100%; max-width:350px; background:#1e293b; padding:25px; border-radius:16px; text-align:center;">
+    <h2 style="color:#fff; margin-bottom:20px;">⚙️ Configurar Impressora</h2>
+    <p style="color:#94a3b8; margin-bottom:20px;">Escolha a impressora padrão desta máquina:</p>
+    
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <button onclick="salvarConfigImpressora('A4')" style="background: #3b82f6; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px;">📄 IMPRESSORA A4 (Comum)</button>
+      <button onclick="salvarConfigImpressora('TERMICA')" style="background: #10b981; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px;">🖨️ IMPRESSORA TÉRMICA (80mm)</button>
+    </div>
+    
+    <button onclick="fecharConfigImpressora()" style="background: #334155; color: white; padding: 10px; margin-top: 20px; border: none; border-radius: 8px; cursor: pointer; width: 100%;">CANCELAR</button>
+    
+    <div id="msgConfig" style="margin-top: 15px; font-size: 12px; color: #eab308;"></div>
   </div>
 </div>
 
