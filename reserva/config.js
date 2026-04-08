@@ -50,3 +50,65 @@ const CPF = {
     return resto==parseInt(cpf.substring(10,11));
   }
 };
+
+
+// Validação de Boleto
+const BOLETO = {
+  // Remove tudo que não é número
+  limpar(valor) {
+    return valor.replace(/\D/g, '');
+  },
+  
+  // Aplica máscara conforme o tipo
+  formatar(valor) {
+    let v = this.limpar(valor);
+    
+    if (v.length === 0) return '';
+    
+    // Boleto de 10 dígitos (começa com 4)
+    if (v.length <= 10 && (v[0] === '4')) {
+      v = v.slice(0, 10);
+      // Formato: 1234 5678 90
+      v = v.replace(/(\d{4})(\d)/, '$1 $2');
+      v = v.replace(/(\d{4}) (\d{4})(\d)/, '$1 $2 $3');
+      return v;
+    }
+    
+    // Boleto de 16 dígitos (começa com 8)
+    if (v.length <= 16 && (v[0] === '8')) {
+      v = v.slice(0, 16);
+      // Formato: 1234 5678 9012 3456
+      v = v.replace(/(\d{4})(\d)/, '$1 $2');
+      v = v.replace(/(\d{4}) (\d{4})(\d)/, '$1 $2 $3');
+      v = v.replace(/(\d{4}) (\d{4}) (\d{4})(\d)/, '$1 $2 $3 $4');
+      return v;
+    }
+    
+    // Se não começar com 4 ou 8, só limita a 16
+    v = v.slice(0, 16);
+    return v;
+  },
+  
+  // Valida o tamanho e primeiro dígito
+  validar(valor) {
+    const v = this.limpar(valor);
+    if (v.length === 0) return false;
+    
+    // Tipo 1: 10 dígitos começando com 4
+    if (v[0] === '4' && v.length === 10) return true;
+    
+    // Tipo 2: 16 dígitos começando com 8
+    if (v[0] === '8' && v.length === 16) return true;
+    
+    return false;
+  },
+  
+  // Retorna o tipo do boleto
+  getTipo(valor) {
+    const v = this.limpar(valor);
+    if (v.length === 0) return null;
+    if (v[0] === '4' && v.length === 10) return '10_DIGITOS';
+    if (v[0] === '8' && v.length === 16) return '16_DIGITOS';
+    return 'INVALIDO';
+  }
+};
