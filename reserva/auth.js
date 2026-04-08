@@ -83,3 +83,38 @@ function mostrarMenu() {
   
   abrirTela('menuBox');
 }
+
+// ============================================
+// FUNÇÃO ABRIR TELA
+// ============================================
+
+function abrirTela(id) {
+  const telas = ["loginBox","menuBox","cadastrarBox","pesquisarBox","entregarBox","listasBox", "logBox", "recebimentoLoteBox"];
+  
+  telas.forEach(t => { 
+    const el = document.getElementById(t);
+    if(el) el.style.display = "none"; 
+  });
+
+  const telaDestino = document.getElementById(id);
+  if(telaDestino) {
+    telaDestino.style.display = "flex";
+  }
+
+  if(id === 'entregarBox') {
+    const ctr = document.getElementById("codigoCtr");
+    if(ctr) ctr.value = "";
+    const infoAluno = document.getElementById("infoAlunoEntrega");
+    if(infoAluno) infoAluno.style.display = "none";
+    alunoEncontradoGlobal = null;
+  }
+  if(id === 'listasBox' && typeof carregarLista === 'function') carregarLista();
+  if(id === 'logBox' && typeof carregarDadosLog === 'function') carregarDadosLog();
+  
+  if(id !== 'cadastrarBox') {
+    modoEdicao = false;
+    idSendoEditado = null;
+    const btn = document.getElementById("btnSalvar");
+    if(btn) btn.innerText = "Salvar e Gerar Protocolo";
+  }
+}
