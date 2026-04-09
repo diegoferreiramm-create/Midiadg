@@ -442,3 +442,80 @@ async function executarConserto() {
     if(btn) btn.disabled = false;
   }
 }
+
+// ============================================
+// FUNÇÃO DE IMPRESSÃO TÉRMICA PARA CADASTRO
+// ============================================
+
+function imprimirProtocoloTermica(id, cpf, nome, nascimento, municipio, via, atendente, parceiro, data, boleto) {
+  const telaPrint = window.open('', '_blank');
+  if (!telaPrint || telaPrint.closed || typeof telaPrint.document === 'undefined') {
+    alert("⚠️ O cadastro foi salvo, mas o seu navegador BLOQUEOU a janela de impressão.\n\nVerifique a barra de endereços e clique em 'Sempre permitir pop-ups' para este site.");
+    return; 
+  }
+  
+  telaPrint.document.write(`
+    <html>
+    <head>
+      <title>Protocolo CTR - ${id}</title>
+      <style>
+        @page { size: 80mm 297mm; margin: 2mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { width: 76mm; font-family: Arial, sans-serif; font-size: 12px; margin: 0 auto; padding: 2mm; }
+        .ticket { width: 100%; border: 1px solid #000; padding: 3mm; }
+        .header { text-align: center; border-bottom: 1px solid #000; margin-bottom: 3mm; padding-bottom: 2mm; }
+        .header h2 { font-size: 12px; margin: 0; }
+        .id-destaque { font-size: 11px; font-weight: bold; margin-bottom: 3mm; }
+        .info-grid { margin-bottom: 3mm; }
+        .info-item { width: 100%; margin-bottom: 2mm; font-size: 11px; }
+        .lgpd { font-size: 9px; font-style: italic; margin: 2mm 0; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 1.5mm 0; text-align: justify; }
+        .rules { font-size: 9px; background: #f2f2f2; padding: 2mm; border: 1px solid #000; margin: 2mm 0; line-height: 1.3; }
+        .declaracao { font-size: 10px; background: #f2f2f2; padding: 2mm; border: 1px solid #000; margin: 2mm 0; line-height: 1.3; text-align: justify; }
+        .final-section { margin-top: 5mm; }
+        .assinatura-linha { border-top: 1px solid #000; width: 100%; margin: 3mm 0 1mm 0; }
+        .assinatura-container { display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: bold; }
+        b { text-transform: uppercase; }
+      </style>
+    </head>
+    <body>
+      <div class="ticket">
+        <div class="header">
+          <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
+          <div class="id-destaque">Nº BOLETO: ${boleto}</div>
+        </div>
+        <div class="info-grid">
+          <div class="info-item"><b>NOME:</b> ${nome ? nome.toUpperCase() : ''}</div>
+          <div class="info-item"><b>DATA:</b> ${data ? data.split(' ')[0] : ''}</div>
+          <div class="info-item"><b>CPF:</b> ${cpf}</div>
+          <div class="info-item"><b>VIA:</b> ${via}</div>
+          <div class="info-item"><b>MUNICÍPIO:</b> ${municipio ? municipio.toUpperCase() : ''}</div>
+          <div class="info-item"><b>ATENDENTE:</b> ${atendente}</div>
+        </div>
+        <div class="lgpd">
+          Não nos responsabilizamos por informações no formulário entregue que divergirem dos documentos anexos, conforme Art. 9º da Lei 13.709/2018 (LGPD). A veracidade é de responsabilidade do declarante.
+        </div>
+        <div class="rules">
+          <strong>Procedimento para Entrega da Carteira Estudantil:</strong><br>
+          • Aluno, mãe, pai, irmãos ou filhos: Apresentar o comprovante de solicitação original e um documento oficial com foto.<br>
+          • (Em caso de perda ou extravio do comprovante, apresentar uma cópia do documento oficial com foto de quem for receber.)<br>
+          • Tios, primos, demais parentes ou terceiros: Apresentar o comprovante de solicitação original e um documento oficial com foto de quem estiver recebendo, juntamente com uma cópia do documento oficial do aluno.<br><br>
+          <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
+        </div>
+        <div class="declaracao">
+          <strong>DECLARAÇÃO DO REQUERENTE:</strong><br><br>
+          Declaro que o pagamento destina-se à solicitação da Carteira de Identidade Estudantil, para identificação como estudante, usufruto da meia cultural e conforme critérios da ARCE os benefício do transporte. Estou ciente de que NÃO HAVERÁ DEVOLUÇÃO do valor em caso de não atendimento aos critérios da ARCE. Havendo indeferimento, terei 90 (noventa) dias corridos para regularizar a documentação. Não havendo regularização, a carteira será emitida apenas para a meia cultural. A solicitação somente será INICIADA APÓS A ENTREGA INTEGRAL DA DOCUMENTAÇÃO em posto de atendimento. A apresentação de documento falso é crime, conforme o Código Penal.
+        </div>
+        <div class="final-section">
+          <div class="assinatura-linha"></div>
+          <div class="assinatura-container">
+            <span class="assinatura-texto">Assinatura do Requerente</span>
+            <span class="via-info">Via do Aluno / ${parceiro} / ID: ${id}</span>
+          </div>
+        </div>
+      </div>
+      <script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };<\/script>
+    </body>
+    </html>
+  `);
+  telaPrint.document.close();
+}
