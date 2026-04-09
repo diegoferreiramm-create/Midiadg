@@ -116,56 +116,63 @@ async function salvarCadastro() {
       alert(idFinal ? `✅ ${via} ATUALIZADA com sucesso!` : "✅ Cadastro SALVO com sucesso!");
       try {
           // Verifica qual impressora está configurada
-const tipoImpressora = localStorage.getItem('tipoImpressora') || 'A4';
+          const tipoImpressora = localStorage.getItem('tipoImpressora') || 'A4';
+          console.log("🔍 Impressora selecionada:", tipoImpressora);  // ← ADICIONADO
 
-if (tipoImpressora === 'TERMICA') {
-    // Usa impressão térmica
-    if (typeof imprimirProtocoloTermica === "function") {
-        imprimirProtocoloTermica(
-            res.id || idFinal,
-            res.cpf || cpf,
-            res.nome || nome,
-            res.nasc || nascRaw,
-            mun,
-            via,
-            user.nome,
-            user.parceiro,
-            res.data,
-            res.boleto || boleto
-        );
-    } else {
-        // Se não existir a função térmica, usa a normal
-        imprimirProtocolo(
-            res.id || idFinal,
-            res.cpf || cpf,
-            res.nome || nome,
-            res.nasc || nascRaw,
-            mun,
-            via,
-            user.nome,
-            user.parceiro,
-            res.data,
-            res.boleto || boleto,
-            email
-        );
-    }
-} else {
-    // Usa impressão A4 normal
-    imprimirProtocolo(
-        res.id || idFinal,
-        res.cpf || cpf,
-        res.nome || nome,
-        res.nasc || nascRaw,
-        mun,
-        via,
-        user.nome,
-        user.parceiro,
-        res.data,
-        res.boleto || boleto,
-        email
-    );
-}
+          if (tipoImpressora === 'TERMICA') {
+              console.log("✅ Entrou no IF da térmica");  // ← ADICIONADO
+              // Usa impressão térmica
+              if (typeof imprimirProtocoloTermica === "function") {
+                  console.log("🎯 Chamando função térmica");  // ← ADICIONADO
+                  imprimirProtocoloTermica(
+                      res.id || idFinal,
+                      res.cpf || cpf,
+                      res.nome || nome,
+                      res.nasc || nascRaw,
+                      mun,
+                      via,
+                      user.nome,
+                      user.parceiro,
+                      res.data,
+                      res.boleto || boleto
+                  );
+              } else {
+                  console.log("❌ Função térmica NÃO encontrada");  // ← ADICIONADO
+                  // Se não existir a função térmica, usa a normal
+                  imprimirProtocolo(
+                      res.id || idFinal,
+                      res.cpf || cpf,
+                      res.nome || nome,
+                      res.nasc || nascRaw,
+                      mun,
+                      via,
+                      user.nome,
+                      user.parceiro,
+                      res.data,
+                      res.boleto || boleto,
+                      email
+                  );
+              }
+          } else {
+              console.log("📄 Usando impressão A4 normal");  // ← ADICIONADO
+              // Usa impressão A4 normal
+              imprimirProtocolo(
+                  res.id || idFinal,
+                  res.cpf || cpf,
+                  res.nome || nome,
+                  res.nasc || nascRaw,
+                  mun,
+                  via,
+                  user.nome,
+                  user.parceiro,
+                  res.data,
+                  res.boleto || boleto,
+                  email
+              );
+          }
       } catch (errPrint) { console.error("Erro na impressão:", errPrint); }
+      
+      // Limpar campos...
       
       // Limpar campos incluindo o email
       document.getElementById("cpf").value = "";
