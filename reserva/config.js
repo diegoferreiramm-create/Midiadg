@@ -66,39 +66,35 @@ const BOLETO = {
     if (v.length === 0) return '';
     
     // Boleto de 10 dígitos (começa com 4)
-    if (v.length <= 10 && (v[0] === '4')) {
+    if (v.length <= 10 && v[0] === '4') {
       v = v.slice(0, 10);
-      // Formato: 1234 5678 90
-      v = v.replace(/(\d{4})(\d)/, '$1 $2');
-      v = v.replace(/(\d{4}) (\d{4})(\d)/, '$1 $2 $3');
+      if (v.length >= 5) v = v.substring(0, 4) + ' ' + v.substring(4);
+      if (v.length >= 9) v = v.substring(0, 9) + ' ' + v.substring(9);
       return v;
     }
     
-    // Boleto de 16 dígitos (começa com 8)
-    if (v.length <= 16 && (v[0] === '8')) {
+    // Boleto de 16 dígitos (qualquer número inicial)
+    if (v.length <= 16) {
       v = v.slice(0, 16);
-      // Formato: 1234 5678 9012 3456
-      v = v.replace(/(\d{4})(\d)/, '$1 $2');
-      v = v.replace(/(\d{4}) (\d{4})(\d)/, '$1 $2 $3');
-      v = v.replace(/(\d{4}) (\d{4}) (\d{4})(\d)/, '$1 $2 $3 $4');
+      if (v.length >= 5) v = v.substring(0, 4) + ' ' + v.substring(4);
+      if (v.length >= 9) v = v.substring(0, 9) + ' ' + v.substring(9);
+      if (v.length >= 13) v = v.substring(0, 13) + ' ' + v.substring(13);
       return v;
     }
     
-    // Se não começar com 4 ou 8, só limita a 16
-    v = v.slice(0, 16);
-    return v;
+    return v.slice(0, 16);
   },
   
-  // Valida o tamanho e primeiro dígito
+  // Valida o boleto
   validar(valor) {
     const v = this.limpar(valor);
     if (v.length === 0) return false;
     
-    // Tipo 1: 10 dígitos começando com 4
-    if (v[0] === '4' && v.length === 10) return true;
+    // 10 dígitos começando com 4
+    if (v.length === 10 && v[0] === '4') return true;
     
-    // Tipo 2: 16 dígitos começando com 8
-    if (v[0] === '8' && v.length === 16) return true;
+    // 16 dígitos (qualquer número inicial)
+    if (v.length === 16) return true;
     
     return false;
   },
@@ -107,8 +103,8 @@ const BOLETO = {
   getTipo(valor) {
     const v = this.limpar(valor);
     if (v.length === 0) return null;
-    if (v[0] === '4' && v.length === 10) return '10_DIGITOS';
-    if (v[0] === '8' && v.length === 16) return '16_DIGITOS';
+    if (v.length === 10 && v[0] === '4') return '10_DIGITOS';
+    if (v.length === 16) return '16_DIGITOS';
     return 'INVALIDO';
   }
 };
