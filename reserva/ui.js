@@ -162,23 +162,86 @@ async function reimprimirProtocolo() {
                 <head>
                     <title>REIMPRESSÃO - Protocolo ${dados.id}</title>
                     <style>
-                        @page { size: 80mm 297mm; margin: 2mm; }
-                        * { margin: 0; padding: 0; box-sizing: border-box; }
-                        body { width: 76mm; font-family: Arial, sans-serif; font-size: 9px; margin: 0 auto; padding: 2mm; }
-                        .ticket { width: 100%; border: 1px solid #000; padding: 3mm; }
-                        .header { text-align: center; border-bottom: 1px solid #000; margin-bottom: 3mm; padding-bottom: 2mm; }
-                        .header h2 { font-size: 12px; margin: 0; }
-                        .id-destaque { font-size: 10px; font-weight: bold; margin-bottom: 3mm; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-                        .info-grid { margin-bottom: 3mm; }
-                        .info-item { width: 100%; margin-bottom: 2mm; font-size: 8px; }
-                        .lgpd { font-size: 7px; font-style: italic; margin: 2mm 0; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 1.5mm 0; text-align: justify; }
-                        .rules { font-size: 7px; background: #f2f2f2; padding: 2mm; border: 1px solid #000; margin: 2mm 0; line-height: 1.3; }
-                        .declaracao { font-size: 8px; background: #f2f2f2; padding: 2mm; border: 1px solid #000; margin: 2mm 0; line-height: 1.3; text-align: justify; }
-                        .final-section { margin-top: 5mm; }
-                        .assinatura-linha { border-top: 1px solid #000; width: 100%; margin: 3mm 0 1mm 0; }
-                        .assinatura-container { display: flex; justify-content: space-between; align-items: center; font-size: 8px; font-weight: bold; }
-                        b { text-transform: uppercase; }
-                    </style>
+                      @page { size: 80mm 297mm; margin: 1mm; }
+                      * { margin: 0; padding: 0; box-sizing: border-box; }
+                      body { 
+                          width: 78mm; 
+                          font-family: Arial, sans-serif; 
+                          font-size: 14px;      /* ← AUMENTADO de 12px para 14px */
+                          margin: 0 auto; 
+                          padding: 1mm; 
+                      }
+                      .ticket { 
+                          width: 100%; 
+                          border: 1px solid #000; 
+                          padding: 2mm; 
+                      }
+                      .header { 
+                          text-align: center; 
+                          border-bottom: 1px solid #000; 
+                          margin-bottom: 2mm; 
+                          padding-bottom: 1mm; 
+                      }
+                      .header h2 { 
+                          font-size: 16px;      /* ← AUMENTADO de 12px para 16px */
+                          margin: 0; 
+                      }
+                      .id-destaque { 
+                          font-size: 14px;      /* ← AUMENTADO de 11px para 14px */
+                          font-weight: bold; 
+                          margin-bottom: 2mm; 
+                      }
+                      .info-grid { 
+                          margin-bottom: 2mm; 
+                      }
+                      .info-item { 
+                          width: 100%; 
+                          margin-bottom: 1.5mm; 
+                          font-size: 13px;      /* ← AUMENTADO de 11px para 13px */
+                      }
+                      .lgpd { 
+                          font-size: 11px;      /* ← AUMENTADO de 9px para 11px */
+                          font-style: italic; 
+                          margin: 1.5mm 0; 
+                          border-top: 1px solid #ccc; 
+                          border-bottom: 1px solid #ccc; 
+                          padding: 1mm 0; 
+                          text-align: justify; 
+                      }
+                      .rules { 
+                          font-size: 11px;      /* ← AUMENTADO de 9px para 11px */
+                          background: #f2f2f2; 
+                          padding: 1.5mm; 
+                          border: 1px solid #000; 
+                          margin: 1.5mm 0; 
+                          line-height: 1.3; 
+                      }
+                      .declaracao { 
+                          font-size: 11px;      /* ← AUMENTADO de 10px para 11px */
+                          background: #f2f2f2; 
+                          padding: 1.5mm; 
+                          border: 1px solid #000; 
+                          margin: 1.5mm 0; 
+                          line-height: 1.3; 
+                          text-align: justify; 
+                      }
+                      .final-section { 
+                          margin-top: 3mm; 
+                      }
+                      .assinatura-linha { 
+                          border-top: 1px solid #000; 
+                          width: 100%; 
+                          margin: 2mm 0 1mm 0; 
+                      }
+                      .assinatura-container { 
+                          display: flex; 
+                          justify-content: space-between; 
+                          align-items: center; 
+                          font-size: 12px;      /* ← AUMENTADO de 10px para 12px */
+                          font-weight: bold; 
+                      }
+                      b { text-transform: uppercase; }
+                  </style>
                 </head>
                 <body>
                     <div class="ticket">
