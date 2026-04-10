@@ -239,7 +239,6 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
           <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
           <div class="id-destaque">Nº BOLETO: ${boleto}</div>
         </div>
-        </div>
         <div class="info-grid">
           <div class="info-item"><b>NOME:</b> ${nome ? nome.toUpperCase() : ''}</div>
           <div class="info-item"><b>DATA:</b> ${data ? data.split(' ')[0] : ''}</div>
