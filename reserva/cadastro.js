@@ -554,12 +554,12 @@ function imprimirProtocoloTermica(id, cpf, nome, nascimento, municipio, via, ate
             <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
             <div class="id-destaque" style="display: flex; justify-content: space-between;">
                 <span>Nº BOLETO: ${boleto}</span>
-                <span>DATA: ${data ? data.split(' ')[0] : ''}</span>
+                <span>DATA: ${data ? data.split(' ')[0] + ' ' + (data.split(' ')[1] || '') : ''}</span>
             </div>
         </div>
         <div class="info-grid">
           <div class="info-item"><b>NOME:</b> ${nome ? nome.toUpperCase() : ''}</div>
-          <div class="info-item"><b>DATA:</b> ${data ? data.split(' ')[0] : ''}</div>
+          <div class="info-item"><b>NASCIMENTO:</b> ${dados.nasc ? dados.nasc : ''}</div>
           <div class="info-item"><b>CPF:</b> ${cpf}</div>
           <div class="info-item"><b>VIA:</b> ${via}</div>
           <div class="info-item"><b>MUNICÍPIO:</b> ${municipio ? municipio.toUpperCase() : ''}</div>
