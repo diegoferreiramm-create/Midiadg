@@ -254,7 +254,7 @@ async function reimprimirProtocolo() {
                         </div>
                         <div class="info-grid">
                             <div class="info-item"><b>NOME:</b> ${dados.nome ? dados.nome.toUpperCase() : ''}</div>
-                            <div class="info-item"><b>DATA:</b> ${dados.dataSolicitacao ? dados.dataSolicitacao.split(' ')[0] : new Date().toLocaleDateString()}</div>
+                            <div class="info-item"><b>NASCIMENTO:</b> ${dados.nasc ? dados.nasc : ''}</div>
                             <div class="info-item"><b>CPF:</b> ${dados.cpf}</div>
                             <div class="info-item"><b>VIA:</b> ${dados.via || '1ª'}</div>
                             <div class="info-item"><b>MUNICÍPIO:</b> ${dados.municipio ? dados.municipio.toUpperCase() : ''}</div>
