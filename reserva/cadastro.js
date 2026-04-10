@@ -236,11 +236,9 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
     <body>
       <div class="ticket">
         <div class="header">
-            <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
-            <div class="id-destaque" style="display: flex; justify-content: space-between;">
-                <span>Nº BOLETO: ${boleto}</span>
-                <span>DATA: ${data ? data.split(' ')[0] : ''}</span>
-            </div>
+          <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
+          <div class="id-destaque">Nº BOLETO: ${boleto}</div>
+        </div>
         </div>
         <div class="info-grid">
           <div class="info-item"><b>NOME:</b> ${nome ? nome.toUpperCase() : ''}</div>
@@ -553,8 +551,11 @@ function imprimirProtocoloTermica(id, cpf, nome, nascimento, municipio, via, ate
     <body>
       <div class="ticket">
         <div class="header">
-          <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
-          <div class="id-destaque">Nº BOLETO: ${boleto}</div>
+            <h2>PROTOCOLO DE SOLICITAÇÃO</h2>
+            <div class="id-destaque" style="display: flex; justify-content: space-between;">
+                <span>Nº BOLETO: ${boleto}</span>
+                <span>DATA: ${data ? data.split(' ')[0] : ''}</span>
+            </div>
         </div>
         <div class="info-grid">
           <div class="info-item"><b>NOME:</b> ${nome ? nome.toUpperCase() : ''}</div>
