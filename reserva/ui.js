@@ -165,7 +165,7 @@ async function reimprimirProtocolo() {
                       @page { size: 80mm 297mm; margin: 1mm; }
                       * { margin: 0; padding: 0; box-sizing: border-box; }
                       body { 
-                          width: 78mm; 
+                          width: 74mm; 
                           font-family: Arial, sans-serif; 
                           font-size: 14px;      /* ← AUMENTADO de 12px para 14px */
                           margin: 0 auto; 
