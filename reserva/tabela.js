@@ -21,7 +21,7 @@ function filtrarTabelaAvancado(valorForcado) {
   }
  
   const fParc = isAdmin ? document.getElementById("fParceiro").value.toUpperCase() : "";
-  const fAtend = isAdmin ? document.getElementById("fAtend").value.toUpperCase() : "";
+  const fAtend = document.getElementById("fAtend") ? document.getElementById("fAtend").value.toUpperCase() : "";
   const fVia = (isAdmin && document.getElementById("fVia")) ? document.getElementById("fVia").value.toUpperCase() : "";
 
   const tabela = document.getElementById("tabelaListas");
@@ -62,12 +62,16 @@ function filtrarTabelaAvancado(valorForcado) {
         let txtLote = td[15] ? td[15].innerText.trim().toUpperCase() : "";
         if (txtLote !== fLote) mostrar = false;
     }
-    // ADMIN
+  
+    // ADMIN (filtros exclusivos de admin)
     if (isAdmin) {
       if (fVia !== "" && td[6] && td[6].innerText.toUpperCase().indexOf(fVia) === -1) mostrar = false;
       if (fParc !== "" && td[7] && td[7].innerText.toUpperCase().indexOf(fParc) === -1) mostrar = false;
-      if (fAtend !== "" && td[9] && td[9].innerText.toUpperCase().indexOf(fAtend) === -1) mostrar = false;
     }
+    
+    // FILTRO ATENDENTE (funciona para todos)
+    if (fAtend !== "" && td[9] && td[9].innerText.toUpperCase().indexOf(fAtend) === -1) mostrar = false;
+    
     tr[i].style.display = mostrar ? "" : "none";
     if (mostrar) contadorVisiveis++;
   }
@@ -201,6 +205,8 @@ function carregarLista() {
       const tbody = document.getElementById("corpoTabelaListas");
       tbody.innerHTML = "";
       
+      document.getElementById("totalRegistros").innerText = dados.length;
+
       dados.forEach(item => {
         console.log('=== ITEM COMPLETO ===');
         console.log(item);
