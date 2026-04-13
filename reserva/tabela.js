@@ -96,9 +96,16 @@ function carregarLista() {
   const user = JSON.parse(sessionStorage.getItem("usuario"));
   const isAdmin = (user.parceiro.toString() === "97");
   
-  const campoAtendente = document.getElementById("fAtend");
-  if (campoAtendente && !campoAtendente.value) {
-    campoAtendente.value = user.nome;
+  // GARANTE QUE O CAMPO EXISTE (cria se não existir)
+  let campoAtendente = document.getElementById("fAtend");
+  if (!campoAtendente) {
+    campoAtendente = document.createElement("input");
+    campoAtendente.id = "fAtend";
+    campoAtendente.type = "text";
+    campoAtendente.placeholder = "ATENDENTE";
+    campoAtendente.onkeyup = () => filtrarTabelaAvancado();
+    campoAtendente.style.cssText = "width:130px; height:36px; padding:6px 10px; border-radius:4px; border:1px solid #334155; background:#1e293b; color:white; font-size:12px;";
+    document.getElementById("filtrosAdmin").appendChild(campoAtendente);
   }
 
   const fAdmin = document.getElementById("filtrosAdmin");
