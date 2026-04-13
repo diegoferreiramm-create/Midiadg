@@ -107,7 +107,8 @@ function carregarLista() {
     campoAtendente.style.cssText = "width:130px; height:36px; padding:6px 10px; border-radius:4px; border:1px solid #334155; background:#1e293b; color:white; font-size:12px;";
     document.getElementById("filtrosAdmin").appendChild(campoAtendente);
   }
-
+  campoAtendente.value = user.nome;
+  
   const fAdmin = document.getElementById("filtrosAdmin");
   if(fAdmin) {
     fAdmin.style.display = "flex";
