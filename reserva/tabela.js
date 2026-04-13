@@ -95,12 +95,12 @@ function filtrarTabelaAvancado(valorForcado) {
 function carregarLista() {
   const user = JSON.parse(sessionStorage.getItem("usuario"));
   const isAdmin = (user.parceiro.toString() === "97");
-
+  
   const campoAtendente = document.getElementById("fAtend");
   if (campoAtendente && !campoAtendente.value) {
     campoAtendente.value = user.nome;
   }
-  
+
   const fAdmin = document.getElementById("filtrosAdmin");
   if(fAdmin) {
     fAdmin.style.display = "flex";
