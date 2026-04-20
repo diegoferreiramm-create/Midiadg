@@ -1,5 +1,5 @@
 // URL do Google Apps Script (Verifique se é a versão mais atualizada)
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxO3a3KbHj8naVTrrTRlKQcfHrElbQ54HloepIT2Cvd1kxWJXjsJyV225-3pPVBEB0/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec';
 
 // ==================== FUNÇÕES DE INTERFACE ====================
 
@@ -274,7 +274,7 @@ function escreverNaNovaAba(novaAba, result) {
 // ==================== FORMULÁRIO DE ENVIO DE DOCUMENTOS (SELFIE OPCIONAL) ====================
 
 function abrirFormularioDocumentos(dadosUsuario) {
-    const url = 'https://script.google.com/macros/s/AKfycbxO3a3KbHj8naVTrrTRlKQcfHrElbQ54HloepIT2Cvd1kxWJXjsJyV225-3pPVBEB0/exec?form=true&cpf=' + encodeURIComponent(dadosUsuario.cpf) + '&nome=' + encodeURIComponent(dadosUsuario.nome) + '&status=' + encodeURIComponent(dadosUsuario.status) + '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento);
+    const url = 'envio.html?cpf=' + encodeURIComponent(dadosUsuario.cpf) + '&nome=' + encodeURIComponent(dadosUsuario.nome) + '&status=' + encodeURIComponent(dadosUsuario.status) + '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento);
     window.open(url, '_blank');
 }
 
