@@ -330,60 +330,62 @@
         });
         
         // ==================== ENVIO DOS DOCUMENTOS ====================
-        document.getElementById('formDocs').addEventListener('submit', async (e) => {
+        document.getElementById('formDocs').addEventListener('submit', function(e) {
             e.preventDefault();
             const resultDiv = document.getElementById('resultMsg');
             resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
             
-            const lerArquivo = (file) => {
-                return new Promise((resolve) => {
+            function lerArquivo(file) {
+                return new Promise(function(resolve) {
                     if (!file || !file.name) { resolve(null); return; }
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve({ base64: e.target.result, nome: file.name });
+                    var reader = new FileReader();
+                    reader.onload = function(e) { resolve({ base64: e.target.result, nome: file.name }); };
                     reader.readAsDataURL(file);
                 });
-            };
+            }
             
-            const doc1 = await lerArquivo(document.getElementById('doc1').files[0]);
-            const doc2 = await lerArquivo(document.getElementById('doc2').files[0]);
-            const doc3 = await lerArquivo(document.getElementById('doc3').files[0]);
-            const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
-            const selfie = selfieInput.value || '';
-            const emailUsuario = document.getElementById('emailUsuario').value;
-            
-            const arquivos = [];
-            if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
-            if (doc2) arquivos.push({ ...doc2, tipo: 'comprovante_residencia' });
-            if (doc3) arquivos.push({ ...doc3, tipo: 'cpf_documento' });
-            if (doc4) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
-            
-            const dadosEnvio = {
-                acao: 'enviar_documentos',
-                cpf: dadosUsuario.cpf,
-                nome: dadosUsuario.nome,
-                status: dadosUsuario.status,
-                selfie: selfie,
-                email: emailUsuario,
-                arquivos: arquivos
-            };
-            
-            try {
-                const resp = await fetch('', {
+            Promise.all([
+                lerArquivo(document.getElementById('doc1').files[0]),
+                lerArquivo(document.getElementById('doc2').files[0]),
+                lerArquivo(document.getElementById('doc3').files[0]),
+                lerArquivo(document.getElementById('doc4').files[0])
+            ]).then(function(docs) {
+                var doc1 = docs[0], doc2 = docs[1], doc3 = docs[2], doc4 = docs[3];
+                var selfie = selfieInput.value || '';
+                var emailUsuario = document.getElementById('emailUsuario').value;
+                
+                var arquivos = [];
+                if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
+                if (doc2) arquivos.push({ ...doc2, tipo: 'comprovante_residencia' });
+                if (doc3) arquivos.push({ ...doc3, tipo: 'cpf_documento' });
+                if (doc4) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
+                
+                var dadosEnvio = {
+                    acao: 'enviar_documentos',
+                    cpf: dadosUsuario.cpf,
+                    nome: dadosUsuario.nome,
+                    status: dadosUsuario.status,
+                    selfie: selfie,
+                    email: emailUsuario,
+                    arquivos: arquivos
+                };
+                
+                return fetch('', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosEnvio)
                 });
-                
-                const res = await resp.json();
-                
+            }).then(function(resp) {
+                return resp.json();
+            }).then(function(res) {
                 if (res.success) {
                     resultDiv.innerHTML = '<div class="success-msg">✅ Documentos enviados com sucesso!<br><button onclick="window.close()" style="margin-top:15px; padding:10px 20px; background:#27ae60; color:white; border:none; border-radius:8px;">Fechar</button></div>';
                 } else {
                     resultDiv.innerHTML = '<div class="error-msg">❌ Erro: ' + (res.message || 'Erro desconhecido') + '</div>';
                 }
-            } catch(err) {
+            }).catch(function(err) {
                 resultDiv.innerHTML = '<div class="error-msg">❌ Erro de conexão: ' + err.message + '</div>';
-            }
+            });
         });
     </script>
 </body>
