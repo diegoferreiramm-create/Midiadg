@@ -222,6 +222,13 @@
                         💡 Opcional: Tire uma selfie para agilizar a análise | Fundo claro | Rosto na moldura
                     </div>
                 </div>
+                <div class="form-group">
+                    <label>📧 Seu E-mail</label>
+                    <input type="email" id="emailUsuario" placeholder="voce@email.com" required>
+                    <div class="info-text">
+                        💡 Enviaremos uma cópia dos documentos para seu email
+                    </div>
+                </div>
                 <button type="submit" id="submitBtn" class="btn-submit">📤 Enviar Documentos</button>
             </form>
             <div id="resultMsg"></div>
@@ -342,6 +349,7 @@
             const doc3 = await lerArquivo(document.getElementById('doc3').files[0]);
             const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
             const selfie = selfieInput.value || '';  // 👈 PEGA O VALOR DO CAMPO selfieInput
+            const emailUsuario = document.getElementById('emailUsuario').value;
             
             const arquivos = [];
             if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
