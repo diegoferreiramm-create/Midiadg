@@ -1,5 +1,5 @@
 // URL do Google Apps Script (Verifique se é a versão mais atualizada)
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec';
+const SCRIPT_URL = 'https://meuprojetoBUSCA.42web.io/consulta.php';
 
 // ==================== FUNÇÕES DE INTERFACE ====================
 
