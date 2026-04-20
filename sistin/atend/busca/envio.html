@@ -370,8 +370,9 @@
                     arquivos: arquivos
                 };
                 
-                return fetch('https://meuprojetoBUSCA.42web.io/upload.php', {
+                return fetch('https://proxy-cors.diegoferreira-mm.workers.dev', {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosEnvio)
                 });
             }).then(function(resp) {
