@@ -348,7 +348,7 @@
             const doc2 = await lerArquivo(document.getElementById('doc2').files[0]);
             const doc3 = await lerArquivo(document.getElementById('doc3').files[0]);
             const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
-            const selfie = selfieInput.value || '';  // 👈 PEGA O VALOR DO CAMPO selfieInput
+            const selfie = selfieInput.value || '';
             const emailUsuario = document.getElementById('emailUsuario').value;
             
             const arquivos = [];
@@ -363,16 +363,13 @@
                 nome: dadosUsuario.nome,
                 status: dadosUsuario.status,
                 selfie: selfie,
-                email: emailUsuario,  // ← ADICIONE ESTA LINHA
+                email: emailUsuario,
                 arquivos: arquivos
             };
             
             try {
-                const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec';
-                
-                const resp = await fetch(SCRIPT_URL, {
+                const resp = await fetch('', {
                     method: 'POST',
-                    mode: 'cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosEnvio)
                 });
