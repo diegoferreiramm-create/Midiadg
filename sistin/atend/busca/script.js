@@ -274,9 +274,7 @@ function escreverNaNovaAba(novaAba, result) {
 // ==================== FORMULÁRIO DE ENVIO DE DOCUMENTOS (SELFIE OPCIONAL) ====================
 
 function abrirFormularioDocumentos(dadosUsuario) {
-    console.log("Dados recebidos:", dadosUsuario);
-    const url = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec?form=true&cpf=' + encodeURIComponent(dadosUsuario.cpf) + '&nome=' + encodeURIComponent(dadosUsuario.nome) + '&status=' + encodeURIComponent(dadosUsuario.status) + '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento);
-    console.log("URL gerada:", url);
+    const url = 'https://www.midiadg.com.br/sistin/atend/busca/envio.html?cpf=' + encodeURIComponent(dadosUsuario.cpf) + '&nome=' + encodeURIComponent(dadosUsuario.nome) + '&status=' + encodeURIComponent(dadosUsuario.status) + '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento);
     window.open(url, '_blank');
 }
 
