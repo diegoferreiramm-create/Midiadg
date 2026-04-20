@@ -370,9 +370,8 @@
                     arquivos: arquivos
                 };
                 
-                return fetch('', {
+                return fetch('https://meuprojetoBUSCA.42web.io/upload.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosEnvio)
                 });
             }).then(function(resp) {
