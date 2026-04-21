@@ -212,7 +212,7 @@ function carregarLista() {
 
   document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='20'>Carregando dados...</td></tr>";
 
- fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}&atendente=${encodeURIComponent(user.nome)}`)
+  fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
     .then(res => res.json())
     .then(dados => {
       const tbody = document.getElementById("corpoTabelaListas");
