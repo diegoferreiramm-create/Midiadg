@@ -1,7 +1,7 @@
 let dadosOriginais = [];
 let dadosFiltrados = [];
 let paginaAtual = 1;
-const itensPorPagina = 50;
+let itensPorPagina = 50;
 
 // Tabela e Filtros
 function filtrarTabelaAvancado(valorForcado) {
@@ -173,82 +173,110 @@ function carregarLista() {
   document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='20'>Carregando dados...</td></tr>";
 
   fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
-  .then(res => res.json())
-  .then(dados => {
-
-    // 🔥 guarda os dados
-    dadosOriginais = dados;
-    dadosFiltrados = dados;
-
-    paginaAtual = 1;
-
-    // 🔥 renderiza primeira página
-    renderizarTabela();
-
-  })
+    .then(res => res.json())
+    .then(dados => {
+      dadosOriginais = dados;
+      
+      // 🔥 PREENCHE O CAMPO ATENDENTE COM O NOME DO USUÁRIO (mas não filtra)
+      const campoAtendente = document.getElementById("fAtend");
+      if (campoAtendente) {
+        campoAtendente.value = user.nome;
+      }
+      
+      // Mostra todos os dados inicialmente (sem filtro)
+      dadosFiltrados = dados;
+      
+      paginaAtual = 1;
+      renderizarTabela();
+    })
   .catch(err => {
     console.error("Erro:", err);
     document.getElementById("corpoTabelaListas").innerHTML =
       "<tr><td colspan='20' style='color:red;'>Erro ao carregar lista do servidor.</td></tr>";
   });
+
+  // Configurar seletor de itens por página
+  const selectItens = document.getElementById("selectItensPorPagina");
+  if (selectItens) {
+    selectItens.value = itensPorPagina.toString();
+    selectItens.onchange = function() {
+      itensPorPagina = parseInt(this.value);
+      paginaAtual = 1;
+      renderizarTabela();
+    };
+  }
 }
 
 function renderizarTabela() {
   const tbody = document.getElementById("corpoTabelaListas");
-
-  const inicio = (paginaAtual - 1) * itensPorPagina;
-  const fim = inicio + itensPorPagina;
-
-  const pagina = dadosFiltrados.slice(inicio, fim);
-
+  
+  let pagina = [];
+  
+  if (itensPorPagina === -1) {
+    // Mostra todos os registros
+    pagina = dadosFiltrados;
+  } else {
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    pagina = dadosFiltrados.slice(inicio, fim);
+  }
+  
   let html = "";
-
+  
   pagina.forEach(item => {
     const telefone = item.tel || '';
-
-    html += `
-      <tr>
-        <td class="col-0">${item.id || ''}</td>
-        <td class="col-1">${item.cpf || ''}</td>
-        <td class="col-2">${item.nome || ''}</td>
-        <td class="col-3">${item.nasc || ''}</td>
-        <td class="col-4">${item.municipio || ''}</td>
-        <td class="col-5">${telefone}</td>
-        <td class="col-6">${item.via || ''}</td>
-        <td class="col-7">${item.parceiro || ''}</td>
-        <td class="col-8">${item.data || ''}</td>
-        <td class="col-9">${item.atendente || ''}</td>
-        <td class="col-10">${item.boleto || ''}</td>
-        <td class="col-11"><b>${item.status || ''}</b></td>
-        <td class="col-12">${item.motivo || ''}</td>
-        <td class="col-13">${item.dataStatus || ''}</td>
-        <td class="col-14">${item.carteira || ''}</td>
-        <td class="col-15">${item.lote || ''}</td>
-        <td class="col-16">${item.situacao || ''}</td>
-        <td class="col-17">${item.prazoPendencia || ''}</td>
-        <td class="col-18">${item.numeroArce || ''}</td>
-        <td class="col-19">
-          <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "\\'")})'
-            style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">
-            Editar
-          </button>
-        </td>
-      </tr>
-    `;
+    
+    html += `<tr>
+      <td class="col-0">${item.id || ''}</td>
+      <td class="col-1">${item.cpf || ''}</td>
+      <td class="col-2">${item.nome || ''}</td>
+      <td class="col-3">${item.nasc || ''}</td>
+      <td class="col-4">${item.municipio || ''}</td>
+      <td class="col-5">${telefone}</td>
+      <td class="col-6">${item.via || ''}</td>
+      <td class="col-7">${item.parceiro || ''}</td>
+      <td class="col-8">${item.data || ''}</td>
+      <td class="col-9">${item.atendente || ''}</td>
+      <td class="col-10">${item.boleto || ''}</td>
+      <td class="col-11"><b>${item.status || ''}</b></td>
+      <td class="col-12">${item.motivo || ''}</td>
+      <td class="col-13">${item.dataStatus || ''}</td>
+      <td class="col-14">${item.carteira || ''}</td>
+      <td class="col-15">${item.lote || ''}</td>
+      <td class="col-16">${item.situacao || ''}</td>
+      <td class="col-17">${item.prazoPendencia || ''}</td>
+      <td class="col-18">${item.numeroArce || ''}</td>
+      <td class="col-19">
+        <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "\\'")})'
+          style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">
+          Editar
+        </button>
+      </td>
+    </tr>`;
   });
-
+  
   tbody.innerHTML = html;
-
-  // 🔥 aplica colunas ocultas
+  
+  // Aplica colunas ocultas
   const checks = document.getElementById("containerChecks").querySelectorAll("input");
   checks.forEach((chk, i) => { 
     if(!chk.checked) aplicarOcultacao(i, false); 
   });
-
-  // 🔥 total filtrado
+  
+  // Atualiza contadores
   const elNumLinhas = document.getElementById("numLinhas");
   if (elNumLinhas) elNumLinhas.innerText = dadosFiltrados.length;
+  
   atualizarInfoPagina();
+  
+  // Atualiza o texto da opção "TODOS" com o total
+  const select = document.getElementById("selectItensPorPagina");
+  if (select) {
+    const optionTodos = select.querySelector('option[value="-1"]');
+    if (optionTodos) {
+      optionTodos.text = `TODOS (${dadosFiltrados.length})`;
+    }
+  }
 }
 
 function proximaPagina() {
@@ -270,6 +298,12 @@ function paginaAnterior() {
 }
 
 function atualizarInfoPagina() {
+  if (itensPorPagina === -1) {
+    const el = document.getElementById("infoPagina");
+    if (el) el.innerText = `Mostrando todos os ${dadosFiltrados.length} registros`;
+    return;
+  }
+  
   const totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina);
   const el = document.getElementById("infoPagina");
   if (el) {
@@ -366,4 +400,11 @@ function aplicarOcultacao(idx, exibir) {
   document.querySelectorAll(`.col-${idx}`).forEach(c => {
     c.style.display = exibir ? "" : "none";
   });
+}
+
+function mudarItensPorPagina() {
+  const select = document.getElementById("selectItensPorPagina");
+  itensPorPagina = parseInt(select.value);
+  paginaAtual = 1;
+  renderizarTabela();
 }
