@@ -214,64 +214,69 @@ function carregarLista() {
 
   fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
   
-  fetch(url)
+  fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
     .then(res => res.json())
     .then(dados => {
       const tbody = document.getElementById("corpoTabelaListas");
       tbody.innerHTML = "";
-      
-      document.getElementById("totalRegistros").innerText = dados.length;
+
+      let html = "";
 
       dados.forEach(item => {
-        console.log('=== ITEM COMPLETO ===');
-        console.log(item);
-        console.log('dataStatus:', item.dataStatus);
-        console.log('carteira:', item.carteira);
-        console.log('lote:', item.lote);
-        console.log('situacao:', item.situacao);
-        console.log('prazoPendencia:', item.prazoPendencia);
-        console.log('numeroArce:', item.numeroArce);
-        
         const telefone = item.tel || '';
-        
-        tbody.innerHTML += `<tr>
-          <td class="col-0">${item.id || ''}</td>
-          <td class="col-1">${item.cpf || ''}</td>
-          <td class="col-2">${item.nome || ''}</td>
-          <td class="col-3">${item.nasc || ''}</td>
-          <td class="col-4">${item.municipio || ''}</td>
-          <td class="col-5">${telefone}</td>
-          <td class="col-6">${item.via || ''}</td>
-          <td class="col-7">${item.parceiro || ''}</td>
-          <td class="col-8">${item.data || ''}</td>
-          <td class="col-9">${item.atendente || ''}</td>
-          <td class="col-10">${item.boleto || ''}</td>
-          <td class="col-11"><b>${item.status || ''}</b></td>
-          <td class="col-12">${item.motivo || ''}</td>
-          <td class="col-13">${item.dataStatus || ''}</td>
-          <td class="col-14">${item.carteira || ''}</td>
-          <td class="col-15">${item.lote || ''}</td>
-          <td class="col-16">${item.situacao || ''}</td>
-          <td class="col-17">${item.prazoPendencia || ''}</td>
-          <td class="col-18">${item.numeroArce || ''}</td>
-          <td class="col-19">
-            <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "\\'")})' style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">Editar</button>
-          </td>
-        </tr>`;
+
+        html += `
+          <tr>
+            <td class="col-0">${item.id || ''}</td>
+            <td class="col-1">${item.cpf || ''}</td>
+            <td class="col-2">${item.nome || ''}</td>
+            <td class="col-3">${item.nasc || ''}</td>
+            <td class="col-4">${item.municipio || ''}</td>
+            <td class="col-5">${telefone}</td>
+            <td class="col-6">${item.via || ''}</td>
+            <td class="col-7">${item.parceiro || ''}</td>
+            <td class="col-8">${item.data || ''}</td>
+            <td class="col-9">${item.atendente || ''}</td>
+            <td class="col-10">${item.boleto || ''}</td>
+            <td class="col-11"><b>${item.status || ''}</b></td>
+            <td class="col-12">${item.motivo || ''}</td>
+            <td class="col-13">${item.dataStatus || ''}</td>
+            <td class="col-14">${item.carteira || ''}</td>
+            <td class="col-15">${item.lote || ''}</td>
+            <td class="col-16">${item.situacao || ''}</td>
+            <td class="col-17">${item.prazoPendencia || ''}</td>
+            <td class="col-18">${item.numeroArce || ''}</td>
+            <td class="col-19">
+              <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "\\'")})'
+                style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">
+                Editar
+              </button>
+            </td>
+          </tr>
+        `;
       });
-      
+
+      // render único (rápido)
+      tbody.innerHTML = html;
+
+      // colunas
       const checks = document.getElementById("containerChecks").querySelectorAll("input");
-      checks.forEach((chk, i) => { if(!chk.checked) aplicarOcultacao(i, false); });
-      
-      if(typeof filtrarTabelaAvancado === 'function') {
+      checks.forEach((chk, i) => { 
+        if(!chk.checked) aplicarOcultacao(i, false); 
+      });
+
+      // filtro
+      if (typeof filtrarTabelaAvancado === 'function') {
         filtrarTabelaAvancado();
       }
+
     })
     .catch(err => {
       console.error("Erro:", err);
-      document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='20' style='color:red;'>Erro ao carregar lista do servidor.</td></tr>";
+      document.getElementById("corpoTabelaListas").innerHTML =
+        "<tr><td colspan='20' style='color:red;'>Erro ao carregar lista do servidor.</td></tr>";
     });
-}
+  }
 
 function alternarColuna(idx) { 
   aplicarOcultacao(idx, event.target.checked); 
