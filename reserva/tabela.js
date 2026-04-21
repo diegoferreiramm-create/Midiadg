@@ -212,7 +212,12 @@ function carregarLista() {
 
   document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='20'>Carregando dados...</td></tr>";
 
-  fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
+  let url = `${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`;
+  if (isAdmin) {
+    url += `&atendenteFiltro=${encodeURIComponent(user.nome)}`;
+  }
+  
+  fetch(url)
     .then(res => res.json())
     .then(dados => {
       const tbody = document.getElementById("corpoTabelaListas");
