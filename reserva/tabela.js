@@ -1,113 +1,73 @@
+let dadosOriginais = [];
+let dadosFiltrados = [];
+let paginaAtual = 1;
+const itensPorPagina = 50;
+
 // Tabela e Filtros
 function filtrarTabelaAvancado(valorForcado) {
   const sessao = sessionStorage.getItem("usuario");
   if (!sessao) return;
+
   const user = JSON.parse(sessao);
   const isAdmin = (user.parceiro.toString() === "97");
 
-  const fCpf = document.getElementById("fCpf") ? document.getElementById("fCpf").value.trim() : "";
-  const fNome = document.getElementById("fNome").value.toUpperCase();
-  const fStatus = document.getElementById("fStatus").value.trim();
-  
-  const fSituacao = document.getElementById("fSituacao") ? document.getElementById("fSituacao").value.trim().toUpperCase() : "";
-  const fPrazo = document.getElementById("fPrazo") ? document.getElementById("fPrazo").value.trim().toUpperCase() : "";
-  const fProcessoArce = document.getElementById("fProcessoArce") ? document.getElementById("fProcessoArce").value.trim().toUpperCase() : "";
-  
-  let fLote = "";
-  if (valorForcado) {
-    fLote = valorForcado;
-  } else {
-    fLote = document.getElementById("fLote") ? document.getElementById("fLote").value.trim().toUpperCase() : "";
-  }
- 
-  const fParc = isAdmin ? document.getElementById("fParceiro").value.toUpperCase() : "";
-  const fAtend = document.getElementById("fAtend") ? document.getElementById("fAtend").value.toUpperCase() : "";
-  const fVia = (isAdmin && document.getElementById("fVia")) ? document.getElementById("fVia").value.toUpperCase() : "";
+  const fCpf = document.getElementById("fCpf")?.value.trim() || "";
+  const fNome = document.getElementById("fNome")?.value.toUpperCase() || "";
+  const fStatus = document.getElementById("fStatus")?.value.trim() || "";
+  const fSituacao = document.getElementById("fSituacao")?.value.toUpperCase() || "";
+  const fPrazo = document.getElementById("fPrazo")?.value.toUpperCase() || "";
+  const fProcessoArce = document.getElementById("fProcessoArce")?.value.toUpperCase() || "";
 
-  const tabela = document.getElementById("tabelaListas");
-  const tr = tabela.getElementsByTagName("tr");
-  let contadorVisiveis = 0;
+  let fLote = valorForcado || document.getElementById("fLote")?.value.toUpperCase() || "";
 
-  for (let i = 1; i < tr.length; i++) {
-    const td = tr[i].getElementsByTagName("td");
-    if (!td[0]) continue;
-    let mostrar = true;
+  const fParc = isAdmin ? (document.getElementById("fParceiro")?.value.toUpperCase() || "") : "";
+  const fAtend = isAdmin ? (document.getElementById("fAtend")?.value.toUpperCase() || "") : "";
+  const fVia = isAdmin ? (document.getElementById("fVia")?.value.toUpperCase() || "") : "";
+
+  // 🔥 FILTRO GLOBAL (não mais no HTML)
+  dadosFiltrados = dadosOriginais.filter(item => {
 
     // CPF
-    if (fCpf !== "" && td[1]) {
-      const cpfLimpoTabela = td[1].innerText.replace(/\D/g, "");
-      if (cpfLimpoTabela.indexOf(fCpf) === -1) mostrar = false;
-    }
+    if (fCpf && !(item.cpf || "").replace(/\D/g, "").includes(fCpf)) return false;
+
     // NOME
-    if (fNome !== "" && td[2] && td[2].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
+    if (fNome && !(item.nome || "").toUpperCase().includes(fNome)) return false;
+
     // STATUS
-    if (fStatus !== "" && td[11] && td[11].innerText.trim() !== fStatus) mostrar = false;
+    if (fStatus && (item.status || "") !== fStatus) return false;
+
     // SITUAÇÃO
-    if (fSituacao !== "" && td[16]) {
-      const valorTabela = td[16].innerText.trim().toUpperCase();
-      if (valorTabela.indexOf(fSituacao) === -1) mostrar = false;
-    }
+    if (fSituacao && !(item.situacao || "").toUpperCase().includes(fSituacao)) return false;
+
     // PRAZO
-    if (fPrazo !== "" && td[17]) {
-      const valorTabela = td[17].innerText.trim().toUpperCase();
-      if (valorTabela.indexOf(fPrazo) === -1) mostrar = false;
-    }
-    // Nº ARCE
-    if (fProcessoArce !== "" && td[18]) {
-      const valorTabela = td[18].innerText.trim().toUpperCase();
-      if (valorTabela.indexOf(fProcessoArce) === -1) mostrar = false;
-    }
+    if (fPrazo && !(item.prazoPendencia || "").toUpperCase().includes(fPrazo)) return false;
+
+    // ARCE
+    if (fProcessoArce && !(item.numeroArce || "").toUpperCase().includes(fProcessoArce)) return false;
+
     // LOTE
-    if (fLote !== "") {
-        let txtLote = td[15] ? td[15].innerText.trim().toUpperCase() : "";
-        if (txtLote !== fLote) mostrar = false;
-    }
-  
-    // ADMIN (filtros exclusivos de admin)
+    if (fLote && (item.lote || "").toUpperCase() !== fLote) return false;
+
+    // 🔥 REGRA ADMIN (97)
     if (isAdmin) {
-      if (fVia !== "" && td[6] && td[6].innerText.toUpperCase().indexOf(fVia) === -1) mostrar = false;
-      if (fParc !== "" && td[7] && td[7].innerText.toUpperCase().indexOf(fParc) === -1) mostrar = false;
+      if (fVia && !(item.via || "").toUpperCase().includes(fVia)) return false;
+      if (fParc && !(item.parceiro || "").toUpperCase().includes(fParc)) return false;
+      if (fAtend && !(item.atendente || "").toUpperCase().includes(fAtend)) return false;
     }
-    
-    // FILTRO ATENDENTE (funciona para todos)
-    if (fAtend !== "" && td[9] && td[9].innerText.toUpperCase().indexOf(fAtend) === -1) mostrar = false;
-    
-    tr[i].style.display = mostrar ? "" : "none";
-    if (mostrar) contadorVisiveis++;
-  }
 
-  const elNumLinhas = document.getElementById("numLinhas");
-  if (elNumLinhas) elNumLinhas.innerText = contadorVisiveis;
-
-  const checks = document.querySelectorAll('#containerChecks input[type="checkbox"]');
-  checks.forEach((input) => {
-    const idx = input.getAttribute('data-idx');
-    if (idx && idx !== "null") {
-        try {
-            const visivel = input.checked;
-            const colunas = tabela.querySelectorAll(`tr > *:nth-child(${idx})`);
-            colunas.forEach(cel => { cel.style.display = visivel ? "" : "none"; });
-        } catch(e) {}
-    }
+    return true;
   });
+
+  // 🔥 reset pagina
+  paginaAtual = 1;
+
+  // 🔥 renderiza
+  renderizarTabela();
 }
 
 function carregarLista() {
   const user = JSON.parse(sessionStorage.getItem("usuario"));
   const isAdmin = (user.parceiro.toString() === "97");
-  
-  // GARANTE QUE O CAMPO EXISTE (cria se não existir)
-  let campoAtendente = document.getElementById("fAtend");
-  if (!campoAtendente) {
-    campoAtendente = document.createElement("input");
-    campoAtendente.id = "fAtend";
-    campoAtendente.type = "text";
-    campoAtendente.placeholder = "ATENDENTE";
-    campoAtendente.onkeyup = () => filtrarTabelaAvancado();
-    campoAtendente.style.cssText = "width:130px; height:36px; padding:6px 10px; border-radius:4px; border:1px solid #334155; background:#1e293b; color:white; font-size:12px;";
-    document.getElementById("filtrosAdmin").appendChild(campoAtendente);
-  }
-  campoAtendente.value = user.nome;
   
   const fAdmin = document.getElementById("filtrosAdmin");
   if(fAdmin) {
@@ -213,77 +173,108 @@ function carregarLista() {
   document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='20'>Carregando dados...</td></tr>";
 
   fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
-  
-  fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
-    .then(res => res.json())
-    .then(dados => {
-      const tbody = document.getElementById("corpoTabelaListas");
-      tbody.innerHTML = "";
+  .then(res => res.json())
+  .then(dados => {
 
-      let html = "";
+    // 🔥 guarda os dados
+    dadosOriginais = dados;
+    dadosFiltrados = dados;
 
-      dados.forEach(item => {
-        const telefone = item.tel || '';
+    paginaAtual = 1;
 
-        html += `
-          <tr>
-            <td class="col-0">${item.id || ''}</td>
-            <td class="col-1">${item.cpf || ''}</td>
-            <td class="col-2">${item.nome || ''}</td>
-            <td class="col-3">${item.nasc || ''}</td>
-            <td class="col-4">${item.municipio || ''}</td>
-            <td class="col-5">${telefone}</td>
-            <td class="col-6">${item.via || ''}</td>
-            <td class="col-7">${item.parceiro || ''}</td>
-            <td class="col-8">${item.data || ''}</td>
-            <td class="col-9">${item.atendente || ''}</td>
-            <td class="col-10">${item.boleto || ''}</td>
-            <td class="col-11"><b>${item.status || ''}</b></td>
-            <td class="col-12">${item.motivo || ''}</td>
-            <td class="col-13">${item.dataStatus || ''}</td>
-            <td class="col-14">${item.carteira || ''}</td>
-            <td class="col-15">${item.lote || ''}</td>
-            <td class="col-16">${item.situacao || ''}</td>
-            <td class="col-17">${item.prazoPendencia || ''}</td>
-            <td class="col-18">${item.numeroArce || ''}</td>
-            <td class="col-19">
-              <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "\\'")})'
-                style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">
-                Editar
-              </button>
-            </td>
-          </tr>
-        `;
-      });
+    // 🔥 renderiza primeira página
+    renderizarTabela();
 
-      // render único (rápido)
-      tbody.innerHTML = html;
-
-      // colunas
-      const checks = document.getElementById("containerChecks").querySelectorAll("input");
-      checks.forEach((chk, i) => { 
-        if(!chk.checked) aplicarOcultacao(i, false); 
-      });
-
-      // filtro
-      if (typeof filtrarTabelaAvancado === 'function') {
-        filtrarTabelaAvancado();
-      }
-
-    })
-    .catch(err => {
-      console.error("Erro:", err);
-      document.getElementById("corpoTabelaListas").innerHTML =
-        "<tr><td colspan='20' style='color:red;'>Erro ao carregar lista do servidor.</td></tr>";
-    });
-  }
-
-function alternarColuna(idx) { 
-  aplicarOcultacao(idx, event.target.checked); 
+  })
+  .catch(err => {
+    console.error("Erro:", err);
+    document.getElementById("corpoTabelaListas").innerHTML =
+      "<tr><td colspan='20' style='color:red;'>Erro ao carregar lista do servidor.</td></tr>";
+  });
 }
 
-function aplicarOcultacao(idx, exibir) {
-  document.querySelectorAll(`.col-${idx}`).forEach(c => c.style.display = exibir ? "" : "none");
+function renderizarTabela() {
+  const tbody = document.getElementById("corpoTabelaListas");
+
+  const inicio = (paginaAtual - 1) * itensPorPagina;
+  const fim = inicio + itensPorPagina;
+
+  const pagina = dadosFiltrados.slice(inicio, fim);
+
+  let html = "";
+
+  pagina.forEach(item => {
+    const telefone = item.tel || '';
+
+    html += `
+      <tr>
+        <td class="col-0">${item.id || ''}</td>
+        <td class="col-1">${item.cpf || ''}</td>
+        <td class="col-2">${item.nome || ''}</td>
+        <td class="col-3">${item.nasc || ''}</td>
+        <td class="col-4">${item.municipio || ''}</td>
+        <td class="col-5">${telefone}</td>
+        <td class="col-6">${item.via || ''}</td>
+        <td class="col-7">${item.parceiro || ''}</td>
+        <td class="col-8">${item.data || ''}</td>
+        <td class="col-9">${item.atendente || ''}</td>
+        <td class="col-10">${item.boleto || ''}</td>
+        <td class="col-11"><b>${item.status || ''}</b></td>
+        <td class="col-12">${item.motivo || ''}</td>
+        <td class="col-13">${item.dataStatus || ''}</td>
+        <td class="col-14">${item.carteira || ''}</td>
+        <td class="col-15">${item.lote || ''}</td>
+        <td class="col-16">${item.situacao || ''}</td>
+        <td class="col-17">${item.prazoPendencia || ''}</td>
+        <td class="col-18">${item.numeroArce || ''}</td>
+        <td class="col-19">
+          <button onclick='prepararEdicao(${JSON.stringify(item).replace(/'/g, "\\'")})'
+            style="background:#f59e0b; color:white; border:none; padding:3px 8px; border-radius:4px; cursor:pointer;">
+            Editar
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+
+  // 🔥 aplica colunas ocultas
+  const checks = document.getElementById("containerChecks").querySelectorAll("input");
+  checks.forEach((chk, i) => { 
+    if(!chk.checked) aplicarOcultacao(i, false); 
+  });
+
+  // 🔥 total filtrado
+  const elNumLinhas = document.getElementById("numLinhas");
+  if (elNumLinhas) elNumLinhas.innerText = dadosFiltrados.length;
+  atualizarInfoPagina();
+}
+
+function proximaPagina() {
+  const totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina);
+  if (paginaAtual < totalPaginas) {
+    paginaAtual++;
+    renderizarTabela();
+    atualizarInfoPagina();
+  }
+
+}
+
+function paginaAnterior() {
+  if (paginaAtual > 1) {
+    paginaAtual--;
+    renderizarTabela();
+    atualizarInfoPagina();
+  }
+}
+
+function atualizarInfoPagina() {
+  const totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina);
+  const el = document.getElementById("infoPagina");
+  if (el) {
+    el.innerText = `Página ${paginaAtual} de ${totalPaginas || 1}`;
+  }
 }
 
 function imprimirLista() {
@@ -337,4 +328,42 @@ function carregarDadosLog() {
       console.error("Erro ao carregar logs:", err);
       tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:red;'>Erro ao conectar com o servidor.</td></tr>";
     });
+}
+
+
+function gerarChecksColunas() {
+  // evita duplicar
+  if (document.getElementById("containerChecks")) return;
+
+  const colNames = ["ID", "CPF", "NOME", "NASC", "MUNICIPIO", "TEL", "VIA", "PARCEIRO", "DATA", "ATENDENTE", "BOLETO", "STATUS", "MOTIVO", "DATA STATUS", "NUM CARTEIRA", "LOTE", "SITUAÇÃO", "PRAZO", "Nº ARCE", "AÇÕES"];
+
+  const colunasDesmarcadas = [11,12,13,14,16,18,19];
+
+  const divChecks = document.createElement("div");
+  divChecks.id = "containerChecks";
+  divChecks.style = "display:flex; flex-wrap:wrap; gap:10px; padding:10px; background:#1e293b; border-radius:8px; margin-bottom:10px; font-size:11px; color:#22c55e; border:1px solid #334155;";
+
+  divChecks.innerHTML = "<div style='width:100%; color:white; font-weight:bold;'>Exibir/Ocultar Colunas:</div>";
+
+  colNames.forEach((name, idx) => {
+    const checked = !colunasDesmarcadas.includes(idx) ? "checked" : "";
+    divChecks.innerHTML += `
+      <label>
+        <input type="checkbox" ${checked} onclick="alternarColuna(${idx})">
+        ${name}
+      </label>
+    `;
+  });
+
+  document.getElementById("listasBox").prepend(divChecks);
+}
+
+function alternarColuna(idx) { 
+  aplicarOcultacao(idx, event.target.checked); 
+}
+
+function aplicarOcultacao(idx, exibir) {
+  document.querySelectorAll(`.col-${idx}`).forEach(c => {
+    c.style.display = exibir ? "" : "none";
+  });
 }
