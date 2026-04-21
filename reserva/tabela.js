@@ -212,10 +212,7 @@ function carregarLista() {
 
   document.getElementById("corpoTabelaListas").innerHTML = "<tr><td colspan='20'>Carregando dados...</td></tr>";
 
-  let url = `${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`;
-  if (isAdmin) {
-    url += `&atendenteFiltro=${encodeURIComponent(user.nome)}`;
-  }
+  fetch(`${urlSistema}?action=obterListaCadastros&parceiro=${user.parceiro}`)
   
   fetch(url)
     .then(res => res.json())
