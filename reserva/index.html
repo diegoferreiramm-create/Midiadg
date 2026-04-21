@@ -64,7 +64,7 @@
       </label>
     </div>
 
-    <input id="codigoBoleto" placeholder="Código do boleto" maxlength="19" oninput="formatarBoleto(this)">
+    <input id="codigoBoleto" placeholder="Código do boleto" maxlength="19" oninput="this.value = this.value.replace(/[^0-9]/g, '')" type="text" style="background:#1e293b; color:white; border:1px solid #334155; padding:10px; border-radius:4px;">
     <div id="msgBoleto" style="font-size: 12px; margin-top: 5px; min-height: 20px;"></div>
     <button id="btnSalvar" onclick="salvarCadastro()">Salvar e Gerar Protocolo</button>
     <button class="cancel" onclick="abrirTela('menuBox')">Voltar</button>
