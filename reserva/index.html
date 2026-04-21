@@ -227,6 +227,24 @@
         Registros: <span id="numLinhas">0</span>
       </div>
 
+      <div style="display: flex; gap: 15px; align-items: center; justify-content: center; margin-top: 10px; flex-wrap: wrap;">
+      <div>
+        <label style="color:white;">Mostrar:</label>
+        <select id="selectItensPorPagina" onchange="mudarItensPorPagina()" style="background:#1e293b; color:white; border:1px solid #334155; padding:6px 10px; border-radius:4px;">
+          <option value="50">50 linhas</option>
+          <option value="100">100 linhas</option>
+          <option value="500">500 linhas</option>
+          <option value="1000">1000 linhas</option>
+          <option value="-1">TODOS ({{total}})</option>
+        </select>
+      </div>
+      <div id="infoPagina" style="color:#22c55e;">Página 1 de 1</div>
+      <div>
+        <button onclick="paginaAnterior()" style="background:#3b82f6; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">◀ Anterior</button>
+        <button onclick="proximaPagina()" style="background:#3b82f6; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Próxima ▶</button>
+      </div>
+    </div>
+
       <div style="display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap;">
 
       <button onclick="paginaAnterior()" 
