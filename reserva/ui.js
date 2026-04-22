@@ -136,6 +136,7 @@ async function reimprimirProtocolo() {
         
         const response = await fetch(`${urlSistema}?action=buscarCadastroPorId&id=${encodeURIComponent(id)}&parceiro=${user.parceiro}&atendente=${user.nome}`);
         const resultado = await response.json();
+        console.log("Resultado da busca:", resultado); // ADICIONE ISSO
         
         if(!resultado.encontrado) {
             if(msgDiv) msgDiv.innerHTML = `❌ ${resultado.erro || 'ID não encontrado!'}`;
