@@ -786,6 +786,14 @@ document.addEventListener('DOMContentLoaded', function() {
         dataInput.addEventListener('input', function(e) {
             e.target.value = formatarDataInput(e.target.value);
         });
+        
+        // Corrige ao sair do campo (blur)
+        dataInput.addEventListener('blur', function(e) {
+            let val = e.target.value.replace(/\D/g, '');
+            if (val.length === 8) {
+                e.target.value = val.substring(0, 2) + '/' + val.substring(2, 4) + '/' + val.substring(4, 8);
+            }
+        });
     }
 
     if (searchForm) {
