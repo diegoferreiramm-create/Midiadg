@@ -9,21 +9,22 @@ function formatarCPF(cpf) {
 }
 
 function formatarDataInput(data) {
-    if (!data) return '';
     // Remove tudo que não é número
-    let v = data.toString().replace(/\D/g, '');
-    if (v.length > 8) v = v.slice(0, 8);
+    let numeros = data.replace(/\D/g, '');
+    
+    // Limita a 8 dígitos
+    if (numeros.length > 8) numeros = numeros.slice(0, 8);
     
     // Aplica as barras automaticamente
-    if (v.length >= 5) {
-        v = v.substring(0, 2) + '/' + v.substring(2, 4) + '/' + v.substring(4, 8);
-    } else if (v.length >= 3) {
-        v = v.substring(0, 2) + '/' + v.substring(2, 4);
-    } else if (v.length >= 2) {
-        v = v.substring(0, 2);
+    if (numeros.length >= 5) {
+        return numeros.slice(0, 2) + '/' + numeros.slice(2, 4) + '/' + numeros.slice(4, 8);
+    } else if (numeros.length >= 3) {
+        return numeros.slice(0, 2) + '/' + numeros.slice(2, 4);
+    } else if (numeros.length >= 2) {
+        return numeros.slice(0, 2);
     }
     
-    return v;
+    return numeros;
 }
 
 function limparCPF(cpf) {
