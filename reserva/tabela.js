@@ -418,10 +418,6 @@ function mudarItensPorPagina() {
 function compararPrazo(valorTabela, filtro) {
   const numTabela = parseInt(valorTabela.replace(/\D/g, '')) || 0;
   const numFiltro = parseInt(filtro.replace(/\D/g, '')) || 0;
-  
-  // Se não tem prazo (0), rejeita
-  if (numTabela === 0) return false;
-  
   console.log(`Comparando: ${numTabela} <= ${numFiltro} = ${numTabela <= numFiltro}`);
   return numTabela <= numFiltro;
 }
