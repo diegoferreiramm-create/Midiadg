@@ -39,8 +39,8 @@ function filtrarTabelaAvancado(valorForcado) {
     // SITUAÇÃO
     if (fSituacao && !(item.situacao || "").toUpperCase().includes(fSituacao)) return false;
 
-    // PRAZO - COMPARAÇÃO NUMÉRICA (MENOR OU IGUAL)
-    if (fPrazo && !compararPrazo(item.prazoPendencia || "", fPrazo)) return false;
+    // PRAZO
+    if (fPrazo && !(item.prazoPendencia || "").toUpperCase().includes(fPrazo)) return false;
 
     // ARCE
     if (fProcessoArce && !(item.numeroArce || "").toUpperCase().includes(fProcessoArce)) return false;
