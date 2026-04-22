@@ -144,6 +144,18 @@ async function reimprimirProtocolo() {
         
         const dados = resultado.dados;
         
+        // ============================================
+        // HIERARQUIA - VERIFICA PERMISSÃO NO INÍCIO
+        // ============================================
+        const isAdmin = (user.nivel === "97" || user.parceiro === "97");
+        
+        if (!isAdmin && user.nome !== dados.atendente) {
+            msgDiv.innerHTML = '❌ VOCÊ NÃO TEM PERMISSÃO PARA REIMPRIMIR ESTE PROTOCOLO!';
+            msgDiv.style.color = '#ff4444';
+            return;
+        }
+        // ============================================
+        
         const telaPrint = window.open('', '_blank');
         if (!telaPrint || telaPrint.closed || typeof telaPrint.document === 'undefined') {
             alert("⚠️ O navegador BLOQUEOU a janela de impressão.\n\nVerifique a barra de endereços e clique em 'Sempre permitir pop-ups' para este site.");
@@ -167,7 +179,7 @@ async function reimprimirProtocolo() {
                       body { 
                           width: 74mm; 
                           font-family: Arial, sans-serif; 
-                          font-size: 14px;      /* ← AUMENTADO de 12px para 14px */
+                          font-size: 14px;
                           margin: 0 auto; 
                           padding: 1mm; 
                       }
@@ -183,11 +195,11 @@ async function reimprimirProtocolo() {
                           padding-bottom: 1mm; 
                       }
                       .header h2 { 
-                          font-size: 16px;      /* ← AUMENTADO de 12px para 16px */
+                          font-size: 16px;
                           margin: 0; 
                       }
                       .id-destaque { 
-                          font-size: 14px;      /* ← AUMENTADO de 11px para 14px */
+                          font-size: 14px;
                           font-weight: bold; 
                           margin-bottom: 2mm; 
                       }
@@ -197,10 +209,10 @@ async function reimprimirProtocolo() {
                       .info-item { 
                           width: 100%; 
                           margin-bottom: 1.5mm; 
-                          font-size: 13px;      /* ← AUMENTADO de 11px para 13px */
+                          font-size: 13px;
                       }
                       .lgpd { 
-                          font-size: 11px;      /* ← AUMENTADO de 9px para 11px */
+                          font-size: 11px;
                           font-style: italic; 
                           margin: 1.5mm 0; 
                           border-top: 1px solid #ccc; 
@@ -209,7 +221,7 @@ async function reimprimirProtocolo() {
                           text-align: justify; 
                       }
                       .rules { 
-                          font-size: 11px;      /* ← AUMENTADO de 9px para 11px */
+                          font-size: 11px;
                           background: #f2f2f2; 
                           padding: 1.5mm; 
                           border: 1px solid #000; 
@@ -217,7 +229,7 @@ async function reimprimirProtocolo() {
                           line-height: 1.3; 
                       }
                       .declaracao { 
-                          font-size: 11px;      /* ← AUMENTADO de 10px para 11px */
+                          font-size: 11px;
                           background: #f2f2f2; 
                           padding: 1.5mm; 
                           border: 1px solid #000; 
@@ -237,7 +249,7 @@ async function reimprimirProtocolo() {
                           display: flex; 
                           justify-content: space-between; 
                           align-items: center; 
-                          font-size: 12px;      /* ← AUMENTADO de 10px para 12px */
+                          font-size: 12px;
                           font-weight: bold; 
                       }
                       b { text-transform: uppercase; }
