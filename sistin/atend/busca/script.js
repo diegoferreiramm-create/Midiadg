@@ -1,3 +1,16 @@
+// COLOQUE ISSO NA LINHA 1 DO SEU SCRIPT.JS
+function formatarCPF(cpf) {
+    if (!cpf) return '---';
+    const cpfLimpo = cpf.toString().replace(/[^\d]/g, '');
+    if (cpfLimpo.length === 11) {
+        return cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    }
+    return cpf;
+}
+
+// ... o restante do seu código (eventos de clique, fetch, etc) vem abaixo ...
+
+
 // URL do Google Apps Script (Verifique se é a versão mais atualizada)
 const SCRIPT_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev';
 
@@ -799,13 +812,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
-// Função para colocar pontos e traços no CPF na hora de mostrar na tela
-function formatarCPF(cpf) {
-    if (!cpf) return '---';
-    const cpfLimpo = cpf.toString().replace(/[^\d]/g, '');
-    if (cpfLimpo.length === 11) {
-        return cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    }
-    return cpf;
-}
