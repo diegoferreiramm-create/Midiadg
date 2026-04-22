@@ -9,13 +9,20 @@ function formatarCPF(cpf) {
 }
 
 function formatarDataInput(data) {
-    let v = data.replace(/\D/g, '');
+    if (!data) return '';
+    // Remove tudo que não é número
+    let v = data.toString().replace(/\D/g, '');
     if (v.length > 8) v = v.slice(0, 8);
+    
+    // Aplica as barras automaticamente
     if (v.length >= 5) {
-        v = v.replace(/(\d{2})(\d{2})(\d{0,4})/, '$1/$2/$3');
+        v = v.substring(0, 2) + '/' + v.substring(2, 4) + '/' + v.substring(4, 8);
     } else if (v.length >= 3) {
-        v = v.replace(/(\d{2})(\d{0,2})/, '$1/$2');
+        v = v.substring(0, 2) + '/' + v.substring(2, 4);
+    } else if (v.length >= 2) {
+        v = v.substring(0, 2);
     }
+    
     return v;
 }
 
