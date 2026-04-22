@@ -144,18 +144,6 @@ async function reimprimirProtocolo() {
         
         const dados = resultado.dados;
         
-        // ============================================
-        // HIERARQUIA - VERIFICA PERMISSÃO NO INÍCIO
-        // ============================================
-        const isAdmin = (user.nivel === "97" || user.parceiro === "97");
-        
-        if (!isAdmin && user.nome !== dados.atendente) {
-            msgDiv.innerHTML = '❌ VOCÊ NÃO TEM PERMISSÃO PARA REIMPRIMIR ESTE PROTOCOLO!';
-            msgDiv.style.color = '#ff4444';
-            return;
-        }
-        // ============================================
-        
         const telaPrint = window.open('', '_blank');
         if (!telaPrint || telaPrint.closed || typeof telaPrint.document === 'undefined') {
             alert("⚠️ O navegador BLOQUEOU a janela de impressão.\n\nVerifique a barra de endereços e clique em 'Sempre permitir pop-ups' para este site.");
