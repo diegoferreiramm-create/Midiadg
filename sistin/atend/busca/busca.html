@@ -42,15 +42,14 @@
                     <label for="dataNascimento">
                         <span class="label-icon">📅</span> Data de Nascimento
                     </label>
-                <input type="tel" 
-                       id="dataNascimento" 
-                       name="dataNascimento" 
-                       placeholder="DD/MM/AAAA"
-                       maxlength="10"
-                       autocomplete="off"
-                       inputmode="numeric"
-                       pattern="\d*"
-                       required>
+                    <input type="text" 
+                           id="dataNascimento" 
+                           name="dataNascimento" 
+                           placeholder="DD/MM/AAAA"
+                           maxlength="10"
+                           autocomplete="off"
+                           required>
+                    <small class="input-hint">Digite apenas números - as barras serão inseridas automaticamente</small>
                 </div>
 
                 <button type="submit" id="btnBuscar">
@@ -81,6 +80,33 @@
         <div id="toastMessage" class="toast-message"></div>
     </div>
 
+
+        <script>
+        // Função de formatação da data
+        function formatarDataInput(data) {
+            let numeros = data.replace(/\D/g, '');
+            if (numeros.length > 8) numeros = numeros.slice(0, 8);
+            
+            if (numeros.length >= 5) {
+                return numeros.slice(0, 2) + '/' + numeros.slice(2, 4) + '/' + numeros.slice(4, 8);
+            } else if (numeros.length >= 3) {
+                return numeros.slice(0, 2) + '/' + numeros.slice(2, 4);
+            } else if (numeros.length >= 2) {
+                return numeros.slice(0, 2);
+            }
+            return numeros;
+        }
+    
+        // Aguarda o DOM carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            const dataInput = document.getElementById('dataNascimento');
+            if (dataInput) {
+                dataInput.addEventListener('input', function(e) {
+                    e.target.value = formatarDataInput(e.target.value);
+                });
+            }
+        });
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
