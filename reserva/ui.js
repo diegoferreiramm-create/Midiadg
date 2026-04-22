@@ -134,7 +134,7 @@ async function reimprimirProtocolo() {
         
         const user = JSON.parse(userStr);
         
-        const response = await fetch(`${urlSistema}?action=buscarCadastroPorId&id=${encodeURIComponent(id)}&parceiro=${user.parceiro}`);
+        const response = await fetch(`${urlSistema}?action=buscarCadastroPorId&id=${encodeURIComponent(id)}&parceiro=${user.parceiro}&atendente=${user.nome}`);
         const resultado = await response.json();
         
         if(!resultado.encontrado) {
