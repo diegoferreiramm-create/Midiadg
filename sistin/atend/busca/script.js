@@ -9,13 +9,12 @@ function formatarCPF(cpf) {
 }
 
 function formatarDataInput(data) {
+    if (!data) return '';
     // Remove tudo que não é número
-    let numeros = data.replace(/\D/g, '');
-    
-    // Limita a 8 dígitos
+    let numeros = data.toString().replace(/\D/g, '');
     if (numeros.length > 8) numeros = numeros.slice(0, 8);
     
-    // Aplica as barras automaticamente
+    // Aplica as barras
     if (numeros.length >= 5) {
         return numeros.slice(0, 2) + '/' + numeros.slice(2, 4) + '/' + numeros.slice(4, 8);
     } else if (numeros.length >= 3) {
@@ -23,7 +22,6 @@ function formatarDataInput(data) {
     } else if (numeros.length >= 2) {
         return numeros.slice(0, 2);
     }
-    
     return numeros;
 }
 
@@ -784,15 +782,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnFechar = document.getElementById('btnFechar');
     const dataInput = document.getElementById('dataNascimento');
     if (dataInput) {
+        // Para PC e celular
         dataInput.addEventListener('input', function(e) {
-            e.target.value = formatarDataInput(e.target.value);
+            let valor = e.target.value;
+            let apenasNumeros = valor.replace(/\D/g, '');
+            if (apenasNumeros.length <= 8) {
+                e.target.value = formatarDataInput(apenasNumeros);
+            }
         });
         
-        // Corrige ao sair do campo (blur)
-        dataInput.addEventListener('blur', function(e) {
-            let val = e.target.value.replace(/\D/g, '');
-            if (val.length === 8) {
-                e.target.value = val.substring(0, 2) + '/' + val.substring(2, 4) + '/' + val.substring(4, 8);
+        // Especificamente para celular
+        dataInput.addEventListener('keyup', function(e) {
+            let valor = e.target.value;
+            let apenasNumeros = valor.replace(/\D/g, '');
+            if (apenasNumeros.length <= 8) {
+                e.target.value = formatarDataInput(apenasNumeros);
             }
         });
     }
