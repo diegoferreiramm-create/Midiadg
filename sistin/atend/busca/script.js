@@ -800,6 +800,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Função para colocar pontos e traços no CPF na hora de mostrar na tela
 function formatarCPF(cpf) {
     if (!cpf) return '---';
     const cpfLimpo = cpf.toString().replace(/[^\d]/g, '');
