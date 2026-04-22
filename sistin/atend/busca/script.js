@@ -111,7 +111,7 @@ function exibirResultado(result) {
         <div class="dados-usuario">
             <div style="background: #f0f7ff; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                 <h3 style="margin: 0 0 10px 0; color: #0056b3;">👤 Dados Pessoais</h3>
-                <div class="info-row"><div class="info-label">CPF:</div><div class="info-value"><strong>${formatValue(d.cpf)}</strong></div></div>
+                <div class="info-row"><div class="info-label">CPF:</div><div class="info-value"><strong>${formatarCPF(d.cpf)}</strong></div></div>
                 <div class="info-row"><div class="info-label">Nome:</div><div class="info-value">${formatValue(d.nome)}</div></div>
                 <div class="info-row"><div class="info-label">Nascimento:</div><div class="info-value">${formatValue(d.nascimento)}</div></div>
                 <div class="info-row"><div class="info-label">Município:</div><div class="info-value">${formatValue(d.municipio)}</div></div>
@@ -210,7 +210,7 @@ function escreverNaNovaAba(novaAba, result) {
                     <div class="dados-usuario">
                         <div style="background: #f0f7ff; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                             <h3 style="margin: 0 0 10px 0; color: #0056b3;">👤 Dados Pessoais</h3>
-                            <div class="info-row"><div class="info-label">CPF:</div><div class="info-value"><strong>${formatValue(d.cpf)}</strong></div></div>
+                            <div class="info-row"><div class="info-label">CPF:</div><div class="info-value"><strong>${formatarCPF(d.cpf)}</strong></div></div>
                             <div class="info-row"><div class="info-label">Nome:</div><div class="info-value">${formatValue(d.nome)}</div></div>
                             <div class="info-row"><div class="info-label">Nascimento:</div><div class="info-value">${formatValue(d.nascimento)}</div></div>
                             <div class="info-row"><div class="info-label">Município:</div><div class="info-value">${formatValue(d.municipio)}</div></div>
