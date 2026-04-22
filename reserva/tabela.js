@@ -416,23 +416,22 @@ function mudarItensPorPagina() {
 }
 
 function compararPrazo(valorTabela, filtro) {
-  console.log("DEBUG - valorTabela:", JSON.stringify(valorTabela), "tipo:", typeof valorTabela);
+  console.log("🔥 NOVA FUNÇÃO - valorTabela:", JSON.stringify(valorTabela));
   
   // Rejeita vazio ou marcador
   if (valorTabela === "#" || valorTabela === "" || !valorTabela) {
-    console.log("REJEITADO - vazio/marca");
+    console.log("🔥 REJEITADO - vazio");
     return false;
   }
   
   const numTabela = parseInt(valorTabela.replace(/\D/g, '')) || 0;
   const numFiltro = parseInt(filtro.replace(/\D/g, '')) || 0;
   
-  // Se depois de limpar fica 0, rejeita
   if (numTabela === 0) {
-    console.log("REJEITADO - virou 0");
+    console.log("🔥 REJEITADO - é 0");
     return false;
   }
   
-  console.log(`Comparando: ${numTabela} <= ${numFiltro} = ${numTabela <= numFiltro}`);
+  console.log(`🔥 Comparando: ${numTabela} <= ${numFiltro} = ${numTabela <= numFiltro}`);
   return numTabela <= numFiltro;
 }
