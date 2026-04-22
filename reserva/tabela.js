@@ -416,6 +416,7 @@ function mudarItensPorPagina() {
 }
 
 function compararPrazo(valorTabela, filtro) {
+  if (valorTabela === "#" || valorTabela === "") return false; // Rejeita vazio/marca
   const numTabela = parseInt(valorTabela.replace(/\D/g, '')) || 0;
   const numFiltro = parseInt(filtro.replace(/\D/g, '')) || 0;
   console.log(`Comparando: ${numTabela} <= ${numFiltro} = ${numTabela <= numFiltro}`);
