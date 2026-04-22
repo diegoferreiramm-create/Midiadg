@@ -287,7 +287,7 @@
         btnCamera.addEventListener('click', async () => {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } 
+                    video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } } 
                 });
                 video.srcObject = stream;
                 video.style.display = 'block';
@@ -307,8 +307,8 @@
         
         btnFoto.addEventListener('click', () => {
             const ctx = canvas.getContext('2d');
-            const targetWidth = 1024;
-            const targetHeight = 768;
+            const targetWidth = 600;
+            const targetHeight = 800;
             canvas.width = targetWidth;
             canvas.height = targetHeight;
             ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
