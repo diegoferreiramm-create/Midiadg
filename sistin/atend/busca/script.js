@@ -1,4 +1,4 @@
-// LINHA 1 - GARANTA QUE ESTÁ ASSIM:
+// ==================== FUNÇÕES GLOBAIS DE FORMATAÇÃO ====================
 function formatarCPF(cpf) {
     if (!cpf) return '---';
     const cpfLimpo = cpf.toString().replace(/[^\d]/g, '');
@@ -6,6 +6,19 @@ function formatarCPF(cpf) {
         return cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     }
     return cpf;
+}
+
+function limparCPF(cpf) {
+    return cpf.replace(/[^\d]/g, '');
+}
+
+function formatarData(data) {
+    if (!data || data === 'Não informado') return data;
+    if (typeof data === 'string' && data.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano}`;
+    }
+    return data;
 }
 
 // ... o restante do seu código (eventos de clique, fetch, etc) vem abaixo ...
