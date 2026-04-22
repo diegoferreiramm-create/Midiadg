@@ -416,9 +416,15 @@ function mudarItensPorPagina() {
 }
 
 function compararPrazo(valorTabela, filtro) {
-  if (valorTabela === "#" || valorTabela === "") return false; // Rejeita vazio/marca
+  // Rejeita vazio ou marcador
+  if (valorTabela === "#" || valorTabela === "" || !valorTabela) return false;
+  
   const numTabela = parseInt(valorTabela.replace(/\D/g, '')) || 0;
   const numFiltro = parseInt(filtro.replace(/\D/g, '')) || 0;
+  
+  // Se depois de limpar fica 0, rejeita
+  if (numTabela === 0) return false;
+  
   console.log(`Comparando: ${numTabela} <= ${numFiltro} = ${numTabela <= numFiltro}`);
   return numTabela <= numFiltro;
 }
