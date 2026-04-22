@@ -15,7 +15,7 @@ function filtrarTabelaAvancado(valorForcado) {
   const fNome = document.getElementById("fNome")?.value.toUpperCase() || "";
   const fStatus = document.getElementById("fStatus")?.value.trim() || "";
   const fSituacao = document.getElementById("fSituacao")?.value.toUpperCase() || "";
-  const fPrazo = document.getElementById("fPrazo")?.value.toUpperCase() || "";
+  const fPrazo = document.getElementById("fPrazo")?.value.trim() || "";
   const fProcessoArce = document.getElementById("fProcessoArce")?.value.toUpperCase() || "";
 
   let fLote = valorForcado || document.getElementById("fLote")?.value.toUpperCase() || "";
@@ -39,8 +39,8 @@ function filtrarTabelaAvancado(valorForcado) {
     // SITUAÇÃO
     if (fSituacao && !(item.situacao || "").toUpperCase().includes(fSituacao)) return false;
 
-    // PRAZO
-    if (fPrazo && !(item.prazoPendencia || "").toUpperCase().includes(fPrazo)) return false;
+    // PRAZO - COMPARAÇÃO NUMÉRICA (MENOR OU IGUAL)
+    if (fPrazo && !compararPrazo(item.prazoPendencia || "", fPrazo)) return false;
 
     // ARCE
     if (fProcessoArce && !(item.numeroArce || "").toUpperCase().includes(fProcessoArce)) return false;
