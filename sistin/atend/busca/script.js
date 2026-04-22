@@ -96,13 +96,8 @@ function exibirResultado(result) {
     }
     
     const d = result.data;
+    const formatValue = (value) => (!value || value === '' || value === 'Não informado') ? '---' : value;
     
-    const formatValue = (value) => {
-        if (!value || value === '' || value === 'Não informado') return '---';
-        return value;
-    };
-    
-    // Verifica se o status é indeferido
     const statusIndeferido = d.status === 'Solicitação Indeferida pela ARCE' || 
                               d.status === 'Solicitação Indeferida na Entidade Estudantil';
     
@@ -114,7 +109,6 @@ function exibirResultado(result) {
     
     container.innerHTML = `
         <div class="dados-usuario">
-            <!-- Dados Pessoais -->
             <div style="background: #f0f7ff; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                 <h3 style="margin: 0 0 10px 0; color: #0056b3;">👤 Dados Pessoais</h3>
                 <div class="info-row"><div class="info-label">CPF:</div><div class="info-value"><strong>${formatValue(d.cpf)}</strong></div></div>
@@ -126,18 +120,16 @@ function exibirResultado(result) {
                 <div class="info-row"><div class="info-label">Data Solicitação:</div><div class="info-value">${formatValue(d.data)}</div></div>
             </div>
             
-            <!-- Status -->
             <div style="background: #fff8f0; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
                 <h3 style="margin: 0 0 10px 0; color: #e67e22;">📊 Status do Processo</h3>
                 <div class="info-row"><div class="info-label">Status:</div><div class="info-value"><span class="status-badge ${d.status === 'Aprovado' ? 'status-ok' : 'status-error'}">${formatValue(d.status)}</span></div></div>
                 <div class="info-row"><div class="info-label">Data Status:</div><div class="info-value">${formatValue(d.dataStatus)}</div></div>
                 <div class="info-row"><div class="info-label">Motivo:</div><div class="info-value">${formatValue(d.motivo)}</div></div>
-                <div class="info-row"><div class="info-label">Prazo quando Indeferido para Conserto:</div><div class="info-value">${formatValue(d.prazo)}</div></div>
+                <div class="info-row"><div class="info-label">Prazo para Conserto:</div><div class="info-value">${formatValue(d.prazo)}</div></div>
                 <div class="info-row"><div class="info-label">Pagamento:</div><div class="info-value">${formatValue(d.pagamento)}</div></div>
                 <div class="info-row"><div class="info-label">Nº Carteira:</div><div class="info-value">${formatValue(d.numeroCarteira)}</div></div>
             </div>
             
-            <!-- Botões -->
             <div style="margin-top: 25px;">
                 ${botaoEnviarDocs}
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -146,16 +138,10 @@ function exibirResultado(result) {
                 </div>
             </div>
         </div>
-`;
+    `;
     
-    // Adicionar event listener para o botão de enviar documentos
     if (statusIndeferido) {
-        const btnEnviarDocs = document.getElementById('btnEnviarDocs');
-        if (btnEnviarDocs) {
-            btnEnviarDocs.addEventListener('click', function() {
-                abrirFormularioDocumentos(d);
-            });
-        }
+        document.getElementById('btnEnviarDocs')?.addEventListener('click', () => abrirFormularioDocumentos(d));
     }
 }
 
@@ -271,10 +257,14 @@ function escreverNaNovaAba(novaAba, result) {
     novaAba.document.close();
 }
 
-// ==================== FORMULÁRIO DE ENVIO DE DOCUMENTOS (SELFIE OPCIONAL) ====================
+// ==================== ABRE O FORMULÁRIO EXTERNO ====================
 
 function abrirFormularioDocumentos(dadosUsuario) {
-    const url = 'https://www.midiadg.com.br/sistin/atend/busca/envio.html?cpf=' + encodeURIComponent(dadosUsuario.cpf) + '&nome=' + encodeURIComponent(dadosUsuario.nome) + '&status=' + encodeURIComponent(dadosUsuario.status) + '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento);
+    const url = 'https://www.midiadg.com.br/sistin/atend/busca/envio.html?' + 
+                'cpf=' + encodeURIComponent(dadosUsuario.cpf) + 
+                '&nome=' + encodeURIComponent(dadosUsuario.nome) + 
+                '&status=' + encodeURIComponent(dadosUsuario.status) + 
+                '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento);
     window.open(url, '_blank');
 }
 
