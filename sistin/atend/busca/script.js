@@ -1,4 +1,4 @@
-// COLOQUE ISSO NA LINHA 1 DO SEU SCRIPT.JS
+// LINHA 1 - GARANTA QUE ESTÁ ASSIM:
 function formatarCPF(cpf) {
     if (!cpf) return '---';
     const cpfLimpo = cpf.toString().replace(/[^\d]/g, '');
