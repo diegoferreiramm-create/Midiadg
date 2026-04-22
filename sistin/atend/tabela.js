@@ -47,10 +47,17 @@ function filtrarTabelaAvancado(valorForcado) {
       const valorTabela = td[16].innerText.trim().toUpperCase();
       if (valorTabela.indexOf(fSituacao) === -1) mostrar = false;
     }
-    // PRAZO
+    // PRAZO - MODIFICADO COM COMPARAÇÃO NUMÉRICA
     if (fPrazo !== "" && td[17]) {
-      const valorTabela = td[17].innerText.trim().toUpperCase();
-      if (valorTabela.indexOf(fPrazo) === -1) mostrar = false;
+      const valorTabela = td[17].innerText.trim();
+      if (!compararPrazo(valorTabela, fPrazo)) mostrar = false;
+    }
+    
+    // Adicione esta função em qualquer lugar do arquivo tabela.js:
+    function compararPrazo(valorTabela, filtro) {
+      const numTabela = parseInt(valorTabela.replace(/\D/g, '')) || 0;
+      const numFiltro = parseInt(filtro.replace(/\D/g, '')) || 0;
+      return numTabela <= numFiltro;
     }
     // Nº ARCE
     if (fProcessoArce !== "" && td[18]) {
