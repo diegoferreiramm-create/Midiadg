@@ -42,8 +42,10 @@ function filtrarTabelaAvancado(valorForcado) {
     // PRAZO - COMPARAÇÃO NUMÉRICA (MENOR OU IGUAL)
     if (fPrazo) {
       console.log('Filtrando por prazo:', fPrazo);
-      console.log('Primeiro item prazo:', item.prazoPendencia);
-      if (!compararPrazo(item.prazoPendencia || "", fPrazo)) return false;
+      if (!compararPrazo(item.prazoPendencia || "", fPrazo)) {
+        console.log('Item rejeitado - prazo:', item.prazoPendencia);
+        return false;
+      }
     }
 
     // ARCE
