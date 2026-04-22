@@ -8,6 +8,17 @@ function formatarCPF(cpf) {
     return cpf;
 }
 
+function formatarDataInput(data) {
+    let v = data.replace(/\D/g, '');
+    if (v.length > 8) v = v.slice(0, 8);
+    if (v.length >= 5) {
+        v = v.replace(/(\d{2})(\d{2})(\d{0,4})/, '$1/$2/$3');
+    } else if (v.length >= 3) {
+        v = v.replace(/(\d{2})(\d{0,2})/, '$1/$2');
+    }
+    return v;
+}
+
 function limparCPF(cpf) {
     return cpf.replace(/[^\d]/g, '');
 }
@@ -20,9 +31,6 @@ function formatarData(data) {
     }
     return data;
 }
-
-// ... o restante do seu código (eventos de clique, fetch, etc) vem abaixo ...
-
 
 // URL do Google Apps Script (Verifique se é a versão mais atualizada)
 const SCRIPT_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev';
@@ -766,6 +774,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchForm = document.getElementById('searchForm');
     const cpfInput = document.getElementById('cpf');
     const btnFechar = document.getElementById('btnFechar');
+    const dataInput = document.getElementById('dataNascimento');
+    if (dataInput) {
+        dataInput.addEventListener('input', function(e) {
+            e.target.value = formatarDataInput(e.target.value);
+        });
+    }
 
     if (searchForm) {
         searchForm.addEventListener('submit', async function(e) {
