@@ -40,7 +40,11 @@ function filtrarTabelaAvancado(valorForcado) {
     if (fSituacao && !(item.situacao || "").toUpperCase().includes(fSituacao)) return false;
 
     // PRAZO - COMPARAÇÃO NUMÉRICA (MENOR OU IGUAL)
-    if (fPrazo && !compararPrazo(item.prazoPendencia || "", fPrazo)) return false;
+    if (fPrazo) {
+      console.log('Filtrando por prazo:', fPrazo);
+      console.log('Primeiro item prazo:', item.prazoPendencia);
+      if (!compararPrazo(item.prazoPendencia || "", fPrazo)) return false;
+    }
 
     // ARCE
     if (fProcessoArce && !(item.numeroArce || "").toUpperCase().includes(fProcessoArce)) return false;
@@ -412,5 +416,6 @@ function mudarItensPorPagina() {
 function compararPrazo(valorTabela, filtro) {
   const numTabela = parseInt(valorTabela.replace(/\D/g, '')) || 0;
   const numFiltro = parseInt(filtro.replace(/\D/g, '')) || 0;
+  console.log(`Comparando: ${numTabela} <= ${numFiltro} = ${numTabela <= numFiltro}`);
   return numTabela <= numFiltro;
 }
