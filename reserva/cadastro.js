@@ -66,14 +66,6 @@ async function salvarCadastro() {
     return;
   }
 
-  // ============================================
-  // VALIDAÇÃO DO BOLETO (NOVO)
-  // ============================================
-  if (!BOLETO.validar(boleto)) {
-    alert("❌ Boleto inválido! Deve ter:\n\n• 10 dígitos começando com 4 (ex: 4123 4567 89)\n• OU 16 dígitos começando com 8 (ex: 8123 4567 8901 2345)\n\nVerifique o número digitado.");
-    return;
-  }
-
   if (!idSendoEditado) {
     const btn = document.querySelector("button[onclick='salvarCadastro()']");
     if(btn) { btn.disabled = true; btn.innerText = "Verificando..."; }
