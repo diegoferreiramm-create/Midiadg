@@ -53,7 +53,11 @@ async function salvarCadastro() {
   const viaEl = document.querySelector('input[name="via"]:checked');
   const via = viaEl ? viaEl.value : "1ª VIA";
   const boleto = document.getElementById("codigoBoleto").value.trim();
-
+    // ✅ ADICIONE ESTA LINHA - Força o boleto como texto puro
+  const boletoTexto = boleto.replace(/^0+/, ''); // Remove zeros à esquerda? NÃO!
+  // Na verdade, preserve os zeros:
+  const boletoPreservado = "'" + boleto; // Adiciona apóstrofo
+  
   // VALIDAÇÃO COM EMAIL OBRIGATÓRIO
   if(!cpf || !nome || !nascRaw || !boleto || !email) { 
     alert("ERRO: CPF, Nome, Nascimento, E-mail e Número do Boleto são obrigatórios!"); 
@@ -99,7 +103,7 @@ async function salvarCadastro() {
     "&via=" + encodeURIComponent(via) +        // 7º
     "&atendente=" + encodeURIComponent(user.nome) +     // 8º
     "&parceiro=" + encodeURIComponent(user.parceiro) + // 9º
-    "&boleto=" + encodeURIComponent(boleto);   // 10º
+    "&boleto=" + encodeURIComponent("'" + boleto);   // 10º
   
   try {
     const response = await fetch(urlFinal);
