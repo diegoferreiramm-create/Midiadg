@@ -97,10 +97,11 @@ function formatarData(data) {
 // ==================== COMUNICAÇÃO COM O SERVIDOR ====================
 
 async function buscarDados(cpf, dataNasc) {
+    const cpfLimpo = limparCPF(cpf);  // <-- TEM QUE TER ESTA LINHA
     console.log('Buscando via Worker:', SCRIPT_URL);
     
     try {
-        const urlGet = `${SCRIPT_URL}?cpf=${cpf}&dataNascimento=${dataNasc}`;
+        const urlGet = `${SCRIPT_URL}?cpf=${cpfLimpo}&dataNascimento=${dataNasc}`;
         const responseGet = await fetch(urlGet, { method: 'GET' });
         const text = await responseGet.text();
         
@@ -115,7 +116,6 @@ async function buscarDados(cpf, dataNasc) {
         throw error;
     }
 }
-
 // ==================== EXIBIR RESULTADO (CORRIGIDA) ====================
 
 function exibirResultado(result) {
