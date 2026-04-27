@@ -385,19 +385,59 @@
                 }
             });
         }).then(function(res) {
+            // Remove o loading
+            const loadingDiv = document.querySelector('.loading');
+            if (loadingDiv) loadingDiv.remove();
+            
             if (res.success) {
-                resultDiv.innerHTML = '<div class="success-msg">✅ Documentos enviados com sucesso!<br><p style="margin-top:10px;">Fechando em 3 segundos...</p></div>';
-                setTimeout(function() {
-                    if (window.opener && !window.opener.closed) {
-                        window.close();
-                    } else {
-                        window.location.href = 'about:blank';
-                    }
-                }, 3000);
+                // Cria modal de sucesso
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:1001;';
+                modal.innerHTML = `
+                    <div style="background:white;border-radius:20px;padding:30px;text-align:center;max-width:300px;">
+                        <span style="font-size:50px;">✅</span>
+                        <h2 style="color:#27ae60;margin:15px 0;">Sucesso!</h2>
+                        <p>Documentos enviados com sucesso!</p>
+                        <button id="fecharModal" style="margin-top:20px;padding:10px 20px;background:#27ae60;color:white;border:none;border-radius:10px;">OK</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                document.getElementById('fecharModal').onclick = () => {
+                    modal.remove();
+                    window.close();
+                };
             } else if (res.jaEnviado) {
-                resultDiv.innerHTML = '<div class="error-msg">⚠️ ' + res.message + '<br><button onclick="window.close()" style="margin-top:15px; padding:10px 20px; background:#e67e22; color:white; border:none; border-radius:8px;">Fechar</button></div>';
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:1001;';
+                modal.innerHTML = `
+                    <div style="background:white;border-radius:20px;padding:30px;text-align:center;max-width:300px;">
+                        <span style="font-size:50px;">⚠️</span>
+                        <h2 style="color:#e67e22;margin:15px 0;">Atenção!</h2>
+                        <p>${res.message}</p>
+                        <button id="fecharModal" style="margin-top:20px;padding:10px 20px;background:#e67e22;color:white;border:none;border-radius:10px;">OK</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                document.getElementById('fecharModal').onclick = () => {
+                    modal.remove();
+                    window.close();
+                };
             } else {
-                resultDiv.innerHTML = '<div class="error-msg">❌ Erro: ' + (res.message || 'Erro desconhecido') + '<br><button onclick="location.reload()" style="margin-top:15px; padding:10px 20px; background:#e67e22; color:white; border:none; border-radius:8px;">Tentar novamente</button></div>';
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:1001;';
+                modal.innerHTML = `
+                    <div style="background:white;border-radius:20px;padding:30px;text-align:center;max-width:300px;">
+                        <span style="font-size:50px;">❌</span>
+                        <h2 style="color:#ef476f;margin:15px 0;">Erro!</h2>
+                        <p>${res.message || 'Erro desconhecido'}</p>
+                        <button id="fecharModal" style="margin-top:20px;padding:10px 20px;background:#ef476f;color:white;border:none;border-radius:10px;">Tentar novamente</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                document.getElementById('fecharModal').onclick = () => {
+                    modal.remove();
+                    location.reload();
+                };
             }
         });
         });
