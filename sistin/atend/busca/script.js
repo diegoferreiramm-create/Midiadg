@@ -38,8 +38,11 @@ function formatarData(data) {
     return data;
 }
 
-// URL do Google Apps Script (Verifique se é a versão mais atualizada)
-const SCRIPT_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev';
+// URL para BUSCA (GET) - vai direto para Conta 1
+const URL_BUSCA = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec';
+
+// URL para ENVIO (POST) - passa pelo Worker para resolver CORS e salvar
+const URL_ENVIO = 'https://proxy-cors.diegoferreira-mm.workers.dev';
 
 // ==================== FUNÇÕES DE INTERFACE ====================
 
@@ -97,12 +100,10 @@ function formatarData(data) {
 // ==================== COMUNICAÇÃO COM O SERVIDOR ====================
 
 async function buscarDados(cpf, dataNasc) {
-    const dados = { cpf: cpf, dataNascimento: dataNasc };
-    
-    console.log('Enviando requisição para:', SCRIPT_URL);
+    console.log('Buscando via URL:', URL_BUSCA);
     
     try {
-        const urlGet = `${SCRIPT_URL}?cpf=${cpf}&dataNascimento=${dataNasc}`;
+        const urlGet = `${URL_BUSCA}?cpf=${cpf}&dataNascimento=${dataNasc}`;
         const responseGet = await fetch(urlGet, { method: 'GET' });
         const text = await responseGet.text();
         
