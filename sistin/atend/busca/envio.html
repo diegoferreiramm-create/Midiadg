@@ -369,7 +369,7 @@
                     arquivos: arquivos
                 };
                 
-                return fetch('https://proxy-cors.diegoferreira-mm.workers.dev', {
+                return fetch(`https://proxy-cors.diegoferreira-mm.workers.dev?conta=${Math.floor(Math.random() * 3) + 1}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosEnvio)
