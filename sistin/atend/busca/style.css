@@ -400,6 +400,8 @@ input#cpf {
 #emailUsuario {
     font-size: 16px;
     padding: 14px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Grupo do email com botão */
@@ -407,10 +409,13 @@ input#cpf {
     display: flex;
     gap: 10px;
     align-items: center;
+    width: 100%;
 }
 
 .email-group input {
     flex: 1;
+    font-size: 16px;
+    padding: 14px;
 }
 
 .btn-verificar {
