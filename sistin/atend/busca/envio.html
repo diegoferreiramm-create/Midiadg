@@ -468,16 +468,22 @@
         
         // ==================== ENVIO DOS DOCUMENTOS ====================
         document.getElementById('formDocs').addEventListener('submit', function(e) {
-            e.preventDefault();
-
+            e.preventDefault();  // ✅ PRIMEIRO: impede o envio padrão
+        
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Processando... Não feche esta página';
+        
             // VERIFICA SE O EMAIL FOI VERIFICADO
             if (!emailVerificado) {
                 emailStatus.textContent = '⚠️ Você precisa clicar em "Verificar" antes de enviar!';
                 emailStatus.className = 'email-status warning';
                 emailStatus.scrollIntoView({ behavior: 'smooth' });
+                submitBtn.disabled = false;  // ✅ Reativa o botão
+                submitBtn.innerHTML = '📤 Enviar Documentos';
                 return;
             }
-    
+        
             const resultDiv = document.getElementById('resultMsg');
             resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
                     
@@ -537,6 +543,8 @@
             if (loadingDiv) loadingDiv.remove();
             
             if (res.success) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '📤 Enviar Documentos';
                 // Cria modal de sucesso
                 const modal = document.createElement('div');
                 modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:1001;';
@@ -554,6 +562,8 @@
                     window.close();
                 };
             } else if (res.jaEnviado) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '📤 Enviar Documentos';
                 const modal = document.createElement('div');
                 modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:1001;';
                 modal.innerHTML = `
@@ -570,6 +580,8 @@
                     window.close();
                 };
             } else {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '📤 Enviar Documentos';
                 const modal = document.createElement('div');
                 modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:1001;';
                 modal.innerHTML = `
