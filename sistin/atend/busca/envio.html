@@ -275,7 +275,7 @@
                     <label>📧 Seu E-mail</label>
                     <div class="email-group">
                         <input type="email" id="emailUsuario" placeholder="voce@email.com" required>
-                        <button type="button" id="btnVerificarEmail" class="btn-verificar" style="padding: 18px 28px; height: 65px; font-size: 18px;">✓ Verificar</button>
+                        <button type="button" id="btnVerificarEmail" class="btn-verificar" style="padding: 18px 28px; height: 65px; font-size: 18px;">✓ Verificar SE ESTA CORRETO</button>
                 </div>
                 <div id="emailStatus" class="email-status"></div>
                 <div class="info-text">
@@ -328,8 +328,8 @@
             const dica = document.createElement('div');
             dica.className = 'info-text';
             dica.style.backgroundColor = '#d4edda';
-            dica.style.marginTop = '5px';
-            dica.innerHTML = '✅ Email carregado da planilha. Se estiver incorreto, edite e será salvo automaticamente.';
+            dica.style.marginTop = '10px';
+            dica.innerHTML = 'Email carregado da planilha. Se estiver incorreto, edite e será salvo automaticamente.';
             emailInput.parentNode.appendChild(dica);
         }
 
