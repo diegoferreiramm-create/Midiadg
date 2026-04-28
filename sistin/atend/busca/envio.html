@@ -425,7 +425,7 @@
                     video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 } } 
                 });
                 video.srcObject = stream;
-                //video.style.transform = 'scaleX(1)';  // ← ADICIONAR ESTA LINHA
+                video.style.transform = 'scaleX(1)';  // ← ADICIONAR ESTA LINHA
                 video.style.display = 'block';
                 faceOval.classList.add('show');
                 btnCamera.classList.add('hidden');
@@ -447,7 +447,10 @@
             const targetHeight = 800;
             canvas.width = targetWidth;
             canvas.height = targetHeight;
-            ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
+            ctx.save();
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, -targetWidth, 0, targetWidth, targetHeight);
+            ctx.restore();
             melhorarQualidadeImagem(ctx, targetWidth, targetHeight);
             const fotoData = canvas.toDataURL('image/jpeg', 0.85);
             selfieInput.value = fotoData;
