@@ -182,36 +182,28 @@
             border-radius: 10px !important;
         }
         
-        /* Grupo do email com botão */
-        .email-group {
-            display: flex !important;
-            gap: 12px !important;
-            align-items: center !important;
+        /* Campo de email maior AINDA */
+        #emailUsuario {
+            font-size: 20px !important;
+            padding: 18px !important;
+            height: 65px !important;
             width: 100% !important;
+            box-sizing: border-box !important;
+            border: 2px solid #ddd !important;
+            border-radius: 10px !important;
         }
         
         .email-group input {
             flex: 1 !important;
-            font-size: 18px !important;
-            padding: 16px !important;
-            height: 55px !important;
+            font-size: 20px !important;
+            padding: 18px !important;
+            height: 65px !important;
         }
         
         .btn-verificar {
-            padding: 16px 24px !important;
-            background: #4361ee !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 12px !important;
-            cursor: pointer !important;
-            font-weight: 600 !important;
-            font-size: 16px !important;
-            white-space: nowrap !important;
-            height: 55px !important;
-        }
-        
-        .btn-verificar:hover {
-            background: #3a56d4 !important;
+            padding: 18px 28px !important;
+            height: 65px !important;
+            font-size: 18px !important;
         }
         
         .email-status {
@@ -292,8 +284,8 @@
                 <div class="form-group">
                     <label>📧 Seu E-mail</label>
                     <div class="email-group">
-                        <input type="email" id="emailUsuario" placeholder="voce@email.com" required>
-                        <button type="button" id="btnVerificarEmail" class="btn-verificar">✓ Verificar</button>
+                        <input type="email" id="emailUsuario" placeholder="voce@email.com" required style="font-size: 20px; padding: 18px; height: 65px; width: 100%; border: 2px solid #ddd; border-radius: 10px;">
+                        <button type="button" id="btnVerificarEmail" class="btn-verificar" style="padding: 18px 28px; height: 65px; font-size: 18px;">✓ Verificar</button>
                 </div>
                 <div id="emailStatus" class="email-status"></div>
                 <div class="info-text">
