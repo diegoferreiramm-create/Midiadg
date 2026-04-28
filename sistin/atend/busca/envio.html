@@ -315,6 +315,37 @@
         emailInput.addEventListener('blur', () => salvarEmailCorrigido(emailInput.value));
         emailInput.addEventListener('change', () => salvarEmailCorrigido(emailInput.value));
 
+        // ==================== VERIFICAÇÃO DE EMAIL OBRIGATÓRIA ====================
+        const btnVerificarEmail = document.getElementById('btnVerificarEmail');
+        const emailStatus = document.getElementById('emailStatus');
+        let emailVerificado = false;
+
+        function validarEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        btnVerificarEmail.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            
+            if (!email) {
+                emailStatus.textContent = '❌ Digite um email antes de verificar';
+                emailStatus.className = 'email-status error';
+                emailVerificado = false;
+                return;
+            }
+            
+            if (!validarEmail(email)) {
+                emailStatus.textContent = '❌ Email inválido! Exemplo: nome@dominio.com';
+                emailStatus.className = 'email-status error';
+                emailVerificado = false;
+                return;
+            }
+            
+            emailStatus.textContent = '✅ Email verificado! Agora você pode enviar os documentos.';
+            emailStatus.className = 'email-status success';
+            emailVerificado = true;
+        });
 
         // ==================== CÂMERA E SELFIE ====================
         const video = document.getElementById('video');
@@ -386,9 +417,18 @@
         // ==================== ENVIO DOS DOCUMENTOS ====================
         document.getElementById('formDocs').addEventListener('submit', function(e) {
             e.preventDefault();
+
+            // VERIFICA SE O EMAIL FOI VERIFICADO
+            if (!emailVerificado) {
+                emailStatus.textContent = '⚠️ Você precisa clicar em "Verificar" antes de enviar!';
+                emailStatus.className = 'email-status warning';
+                emailStatus.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+    
             const resultDiv = document.getElementById('resultMsg');
             resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
-            
+                    
             function lerArquivo(file) {
                 return new Promise(function(resolve) {
                     if (!file || !file.name) { resolve(null); return; }
