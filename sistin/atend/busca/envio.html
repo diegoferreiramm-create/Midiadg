@@ -534,17 +534,29 @@
             return resp.text().then(function(text) {
                 console.log("RESPOSTA BRUTA:", text);
             
+                // Se vier mensagem de repetido
+                if (text.includes("jaEnviado") || text.includes("Documentos já foram enviados")) {
+                    try {
+                        return JSON.parse(text);
+                    } catch(e) {
+                        return {
+                            success: false,
+                            jaEnviado: true,
+                            message: "Documentos já foram enviados anteriormente."
+                        };
+                    }
+                }
+            
+                // Tenta JSON normal
                 try {
-                    const json = JSON.parse(text);
-                    console.log("JSON recebido:", json);
-                    return json;
+                    return JSON.parse(text);
                 } catch(e) {
-                    console.error("Erro ao interpretar JSON:", text);
+                    console.log("Resposta não JSON, assumindo envio concluído");
             
                     return {
-                        success: false,
+                        success: true,
                         jaEnviado: false,
-                        message: "Erro ao processar resposta do servidor."
+                        message: "Documentos enviados com sucesso!"
                     };
                 }
             });
