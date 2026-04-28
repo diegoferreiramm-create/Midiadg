@@ -528,9 +528,17 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosEnvio)
-                });
-                }).then(function(resp) {
-                    return resp.json();
+                })
+                .then(function(resp) {
+                    return resp.text().then(function(text) {
+                        console.log("RESPOSTA BRUTA:", text);
+                
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            throw new Error("Servidor retornou HTML em vez de JSON: " + text.substring(0, 200));
+                        }
+                    });
                 })
                 .then(function(res) {
                     console.log("RESPOSTA RECEBIDA:", res);
