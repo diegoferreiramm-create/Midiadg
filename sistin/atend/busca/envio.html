@@ -55,11 +55,14 @@
             position: relative;
             width: 100%;
             background: #000;
+            max-height: 400px;  /* Limita a altura */
+            overflow: hidden;
         }
         video {
             width: 100%;
             height: auto;
             display: block;
+            transform: scaleX(1); /* Força sem espelhamento */
         }
         .face-oval {
             position: absolute;
