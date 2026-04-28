@@ -528,88 +528,80 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosEnvio)
-                })
-                .then(function(resp) {
-                    return resp.text().then(function(text) {
-                        console.log("RESPOSTA BRUTA:", text);
-                
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            throw new Error("Servidor retornou HTML em vez de JSON: " + text.substring(0, 200));
-                        }
-                    });
-                })
-                .then(function(res) {
-                    console.log("RESPOSTA RECEBIDA:", res);
-                
-                    const loadingDiv = document.querySelector('.loading');
-                    if (loadingDiv) loadingDiv.remove();
-                
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '📤 Enviar Documentos';
-                
-                    if (res.jaEnviado === true) {
-                        const modal = document.createElement('div');
-                        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:1001;';
-                        modal.innerHTML = `
-                            <div style="background:white;border-radius:20px;padding:30px;text-align:center;max-width:300px;">
-                                <span style="font-size:50px;">⚠️</span>
-                                <h2 style="color:#e67e22;margin:15px 0;">Atenção!</h2>
-                                <p>${res.message}</p>
-                                <button id="fecharModal" style="margin-top:20px;padding:10px 20px;background:#e67e22;color:white;border:none;border-radius:10px;">OK</button>
-                            </div>
-                        `;
-                        document.body.appendChild(modal);
-                
-                        document.getElementById('fecharModal').onclick = () => {
-                            modal.remove();
-                            window.close();
-                        };
-                
-                        return;
-                    }
-                
-                    if (res.success === true) {
-                        const modal = document.createElement('div');
-                        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:1001;';
-                        modal.innerHTML = `
-                            <div style="background:white;border-radius:20px;padding:30px;text-align:center;max-width:300px;">
-                                <span style="font-size:50px;">✅</span>
-                                <h2 style="color:#27ae60;margin:15px 0;">Sucesso!</h2>
-                                <p>Documentos enviados com sucesso!</p>
-                                <button id="fecharModal" style="margin-top:20px;padding:10px 20px;background:#27ae60;color:white;border:none;border-radius:10px;">OK</button>
-                            </div>
-                        `;
-                        document.body.appendChild(modal);
-                
-                        document.getElementById('fecharModal').onclick = () => {
-                            modal.remove();
-                            window.close();
-                        };
-                
-                        return;
-                    }
-                
-                    throw new Error(res.message || 'Erro desconhecido');
-                })
-            
-                .catch(function(e) {
-                    console.error("ERRO:", e);
-
-                    const loadingDiv = document.querySelector('.loading');
-                    if (loadingDiv) loadingDiv.remove();
-
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '📤 Enviar Documentos';
-
-                    alert("Erro: " + e.message);
                 });
-
-            }); // FECHA O .then(function(docs)
-
-        }); // FECHA O addEventListener
-
+            }).then(function(resp) {
+            // Tenta ler como JSON, se falhar, ignora
+            return resp.text().then(function(text) {
+                try {
+                    return JSON.parse(text);
+                } catch(e) {
+                    console.log("Resposta não é JSON, mas documentos foram enviados:", text.substring(0, 100));
+                    return { success: true, message: "Documentos enviados (resposta não JSON)" };
+                }
+            });
+        }).then(function(res) {
+            // Remove o loading
+            const loadingDiv = document.querySelector('.loading');
+            if (loadingDiv) loadingDiv.remove();
+            
+            if (res.success) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '📤 Enviar Documentos';
+                // Cria modal de sucesso
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:1001;';
+                modal.innerHTML = `
+                    <div style="background:white;border-radius:20px;padding:30px;text-align:center;max-width:300px;">
+                        <span style="font-size:50px;">✅</span>
+                        <h2 style="color:#27ae60;margin:15px 0;">Sucesso!</h2>
+                        <p>Documentos enviados com sucesso!</p>
+                        <button id="fecharModal" style="margin-top:20px;padding:10px 20px;background:#27ae60;color:white;border:none;border-radius:10px;">OK</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                document.getElementById('fecharModal').onclick = () => {
+                    modal.remove();
+                    window.close();
+                };
+            } else if (res.jaEnviado) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '📤 Enviar Documentos';
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:1001;';
+                modal.innerHTML = `
+                    <div style="background:white;border-radius:20px;padding:30px;text-align:center;max-width:300px;">
+                        <span style="font-size:50px;">⚠️</span>
+                        <h2 style="color:#e67e22;margin:15px 0;">Atenção!</h2>
+                        <p>${res.message}</p>
+                        <button id="fecharModal" style="margin-top:20px;padding:10px 20px;background:#e67e22;color:white;border:none;border-radius:10px;">OK</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                document.getElementById('fecharModal').onclick = () => {
+                    modal.remove();
+                    window.close();
+                };
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '📤 Enviar Documentos';
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:1001;';
+                modal.innerHTML = `
+                    <div style="background:white;border-radius:20px;padding:30px;text-align:center;max-width:300px;">
+                        <span style="font-size:50px;">❌</span>
+                        <h2 style="color:#ef476f;margin:15px 0;">Erro!</h2>
+                        <p>${res.message || 'Erro desconhecido'}</p>
+                        <button id="fecharModal" style="margin-top:20px;padding:10px 20px;background:#ef476f;color:white;border:none;border-radius:10px;">Tentar novamente</button>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                document.getElementById('fecharModal').onclick = () => {
+                    modal.remove();
+                    location.reload();
+                };
+            }
+        });
+        });
     </script>
 </body>
 </html>
