@@ -606,12 +606,9 @@
                     alert("Erro: " + e.message);
                 });
 
-            // Remove o loading
-            const loadingDiv = document.querySelector('.loading');
-            if (loadingDiv) loadingDiv.remove();
-            
-        
-        });
+            }); // FECHA O .then(function(docs)
+
+        }); // FECHA O addEventListener
 
     </script>
 </body>
