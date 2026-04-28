@@ -532,11 +532,20 @@
             }).then(function(resp) {
             // Tenta ler como JSON, se falhar, ignora
             return resp.text().then(function(text) {
+                console.log("RESPOSTA BRUTA:", text);
+            
                 try {
-                    return JSON.parse(text);
+                    const json = JSON.parse(text);
+                    console.log("JSON recebido:", json);
+                    return json;
                 } catch(e) {
-                    console.log("Resposta não é JSON, mas documentos foram enviados:", text.substring(0, 100));
-                    return { success: true, message: "Documentos enviados (resposta não JSON)" };
+                    console.error("Erro ao interpretar JSON:", text);
+            
+                    return {
+                        success: false,
+                        jaEnviado: false,
+                        message: "Erro ao processar resposta do servidor."
+                    };
                 }
             });
         }).then(function(res) {
