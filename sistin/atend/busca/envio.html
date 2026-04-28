@@ -171,6 +171,74 @@
             margin-left: 8px;
             vertical-align: middle;
         }
+        /* Campo de email maior */
+        #emailUsuario {
+            font-size: 18px !important;
+            padding: 16px !important;
+            height: 55px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            border: 2px solid #ddd !important;
+            border-radius: 10px !important;
+        }
+        
+        /* Grupo do email com botão */
+        .email-group {
+            display: flex !important;
+            gap: 12px !important;
+            align-items: center !important;
+            width: 100% !important;
+        }
+        
+        .email-group input {
+            flex: 1 !important;
+            font-size: 18px !important;
+            padding: 16px !important;
+            height: 55px !important;
+        }
+        
+        .btn-verificar {
+            padding: 16px 24px !important;
+            background: #4361ee !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 12px !important;
+            cursor: pointer !important;
+            font-weight: 600 !important;
+            font-size: 16px !important;
+            white-space: nowrap !important;
+            height: 55px !important;
+        }
+        
+        .btn-verificar:hover {
+            background: #3a56d4 !important;
+        }
+        
+        .email-status {
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            display: none;
+        }
+        
+        .email-status.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        
+        .email-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        
+        .email-status.warning {
+            background: #fff3cd;
+            color: #856404;
+            display: block;
+        }
         .success-msg { color: #27ae60; text-align: center; padding: 20px; }
         .error-msg { color: #ef476f; text-align: center; padding: 20px; }
     </style>
