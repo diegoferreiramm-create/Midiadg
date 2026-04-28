@@ -223,8 +223,15 @@
                 </div>
                 <div class="form-group">
                     <label>📧 Seu E-mail</label>
-                    <input type="email" id="emailUsuario" placeholder="voce@email.com" required>
+                    <div class="email-group">
+                        <input type="email" id="emailUsuario" placeholder="voce@email.com" required>
+                        <button type="button" id="btnVerificarEmail" class="btn-verificar">✓ Verificar</button>
                 </div>
+                <div id="emailStatus" class="email-status"></div>
+                <div class="info-text">
+                        💡 Clique em "Verificar" antes de enviar os documentos
+    </div>
+</div>
                 <button type="submit" id="submitBtn" class="btn-submit">📤 Enviar Documentos</button>
             </form>
             <div id="resultMsg"></div>
