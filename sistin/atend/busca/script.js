@@ -302,7 +302,8 @@ function abrirFormularioDocumentos(dadosUsuario) {
                 'cpf=' + encodeURIComponent(dadosUsuario.cpf) + 
                 '&nome=' + encodeURIComponent(dadosUsuario.nome) + 
                 '&status=' + encodeURIComponent(dadosUsuario.status) + 
-                '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento);
+                '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento) +
+                '&email=' + encodeURIComponent(dadosUsuario.email || '');  // ✅ SÓ ISSO
     window.open(url, '_blank');
 }
 
@@ -858,27 +859,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function salvarEmailCorrigido(cpf, emailNovo) {
-    try {
-        const aba = ss.getSheetByName('BUSCA');
-        const cpfLimpo = cpf.toString().replace(/[^\d]/g, '');
-        const ultimaLinha = aba.getLastRow();
-        
-        // Procura a linha do CPF
-        for (let i = 2; i <= ultimaLinha; i++) {
-            const cpfPlanilha = aba.getRange(i, COLUNAS.CPF).getValue();
-            const cpfPlanilhaLimpo = cpfPlanilha ? cpfPlanilha.toString().replace(/[^\d]/g, '') : '';
-            
-            if (cpfPlanilhaLimpo === cpfLimpo) {
-                // Coluna P = 16
-                aba.getRange(i, 16).setValue(emailNovo);
-                console.log(`✅ Email corrigido salvo para ${cpf}: ${emailNovo}`);
-                return true;
-            }
-        }
-        return false;
-    } catch (error) {
-        console.error('Erro ao salvar email corrigido:', error);
-        return false;
-    }
-}
