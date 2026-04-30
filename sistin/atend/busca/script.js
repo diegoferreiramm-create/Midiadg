@@ -262,7 +262,6 @@ function escreverNaNovaAba(novaAba, result) {
                             <div class="info-row"><div class="info-label">Motivo:</div><div class="info-value">${formatValue(d.motivo)}</div></div>
                             <div class="info-row"><div class="info-label">Data Status:</div><div class="info-value">${formatValue(d.dataStatus)}</div></div>
                             <div class="info-row"><div class="info-label">Prazo para Conserto:</div><div class="info-value">${formatValue(d.prazo)}</div></div>
-                            <div class="info-row"><div class="info-label">Pagamento:</div><div class="info-value">${formatValue(d.pagamento)}</div></div>
                             <div class="info-row"><div class="info-label">Nº Carteira:</div><div class="info-value">${formatValue(d.numeroCarteira)}</div></div>
                         </div>
                         
