@@ -34,7 +34,7 @@ function filtrarTabelaAvancado(valorForcado) {
     if (fNome && !(item.nome || "").toUpperCase().includes(fNome)) return false;
 
     // STATUS
-    if (fStatus && (item.status || "") !== fStatus) return false;
+    if (fStatus && (item.status || "").trim() !== fStatus) return false;
 
     // SITUAÇÃO
     if (fSituacao && !(item.situacao || "").toUpperCase().includes(fSituacao)) return false;
