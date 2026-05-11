@@ -305,8 +305,7 @@ function abrirFormularioDocumentos(dadosUsuario) {
                 'cpf=' + encodeURIComponent(dadosUsuario.cpf) + 
                 '&nome=' + encodeURIComponent(dadosUsuario.nome) + 
                 '&status=' + encodeURIComponent(dadosUsuario.status) + 
-                '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento) +
-                '&email=' + encodeURIComponent(dadosUsuario.email || '');  // ✅ SÓ ISSO
+                '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento || '');
     window.open(url, '_blank');
 }
 
