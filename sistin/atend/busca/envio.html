@@ -455,6 +455,29 @@
                 alert('Erro de conexão: ' + err.message);
             });
         });
-    </script>
+    </script
+    <script>
+    // Aguarda o DOM carregar completamente
+    window.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const dadosUsuario = {
+            cpf: urlParams.get('cpf') || '---',
+            nome: urlParams.get('nome') || '---',
+            status: urlParams.get('status') || '---',
+            nascimento: urlParams.get('nascimento') || ''
+        };
+        
+        const infoBox = document.getElementById('infoUsuario');
+        if (infoBox) {
+            infoBox.innerHTML = `
+                <p><strong>👤 Nome:</strong> ${dadosUsuario.nome}</p>
+                <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf}</p>
+                <p><strong>📊 Status:</strong> ${dadosUsuario.status}</p>
+            `;
+        }
+        
+        // O resto do seu código (câmera, envio) continua aqui...
+    });
+</script>
 </body>
 </html>
