@@ -97,19 +97,24 @@ function formatarData(data) {
 // ==================== COMUNICAÇÃO COM O SERVIDOR ====================
 
 async function buscarDados(cpf, dataNasc) {
-    const cpfLimpo = limparCPF(cpf);  // <-- TEM QUE TER ESTA LINHA
+    const cpfLimpo = limparCPF(cpf);
     console.log('Buscando via Worker:', SCRIPT_URL);
     
     try {
-        const urlGet = `${SCRIPT_URL}?cpf=${cpfLimpo}&dataNascimento=${dataNasc}`;
+        // ✅ ADICIONA O action=buscarCarteiraPorCPFeData
+        const urlGet = `${SCRIPT_URL}?action=buscarCarteiraPorCPFeData&cpf=${cpfLimpo}&dataNascimento=${encodeURIComponent(dataNasc)}`;
+        console.log('URL:', urlGet);
+        
         const responseGet = await fetch(urlGet, { method: 'GET' });
         const text = await responseGet.text();
+        
+        console.log('Resposta bruta:', text);
         
         try {
             return JSON.parse(text);
         } catch(e) {
             console.log('Resposta não é JSON:', text);
-            return { success: false, message: 'Erro no servidor' };
+            return { success: false, message: 'Erro no servidor: resposta inválida' };
         }
     } catch (error) {
         console.error('Erro:', error);
