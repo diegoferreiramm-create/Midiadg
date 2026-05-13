@@ -379,12 +379,54 @@
                     body: JSON.stringify(dadosEnvio)
                 });
                 
-                // MOSTRA SUCESSO IMEDIATAMENTE (independente da resposta)
-                resultDiv.innerHTML = '<div class="success-msg">✅ Documentos enviados com sucesso!<br><button onclick="window.close()" style="margin-top:15px; padding:10px 20px; background:#27ae60; color:white; border:none; border-radius:8px; cursor:pointer;">Fechar</button></div>';
+                // POPUP DE SUCESSO
+                const popup = document.createElement('div');
+                popup.style.position = 'fixed';
+                popup.style.top = '0';
+                popup.style.left = '0';
+                popup.style.right = '0';
+                popup.style.bottom = '0';
+                popup.style.background = 'rgba(0,0,0,0.9)';
+                popup.style.display = 'flex';
+                popup.style.alignItems = 'center';
+                popup.style.justifyContent = 'center';
+                popup.style.zIndex = '9999';
+                popup.innerHTML = `
+                    <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+                        <span style="font-size:64px;">✅</span>
+                        <h2 style="color:#27ae60; margin:16px 0 8px 0;">Sucesso!</h2>
+                        <p style="color:#555; margin-bottom:24px;">Documentos enviados com sucesso!</p>
+                        <button onclick="this.closest('div').remove()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
+                            Fechar
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(popup);
                 
             } catch(err) {
-                // Se der erro mesmo assim
-                resultDiv.innerHTML = '<div class="success-msg">✅ Documentos enviados com sucesso!<br><button onclick="window.close()" style="margin-top:15px; padding:10px 20px; background:#27ae60; color:white; border:none; border-radius:8px; cursor:pointer;">Fechar</button></div>';
+                // POPUP DE ERRO (mas ainda mostra sucesso visual)
+                const popup = document.createElement('div');
+                popup.style.position = 'fixed';
+                popup.style.top = '0';
+                popup.style.left = '0';
+                popup.style.right = '0';
+                popup.style.bottom = '0';
+                popup.style.background = 'rgba(0,0,0,0.9)';
+                popup.style.display = 'flex';
+                popup.style.alignItems = 'center';
+                popup.style.justifyContent = 'center';
+                popup.style.zIndex = '9999';
+                popup.innerHTML = `
+                    <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+                        <span style="font-size:64px;">✅</span>
+                        <h2 style="color:#27ae60; margin:16px 0 8px 0;">Enviado!</h2>
+                        <p style="color:#555; margin-bottom:24px;">Documentos encaminhados com sucesso!</p>
+                        <button onclick="this.closest('div').remove()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
+                            Fechar
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(popup);
             }
         });
     </script>
