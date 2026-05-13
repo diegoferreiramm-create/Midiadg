@@ -67,10 +67,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 280px;
-            height: 336px;
+            width: 300px;
+            height: 360px;
             border: 3px solid #27ae60;
-            border-radius: 8px;
+            border-radius: 50%;
             pointer-events: none;
             box-shadow: 0 0 0 999px rgba(0,0,0,0.5);
             display: none;
@@ -305,35 +305,15 @@
             canvas.width = targetWidth;
             canvas.height = targetHeight;
             
-            // Recortar centralizado no formato 400x480 (proporção 5:6)
-            const videoRatio = video.videoWidth / video.videoHeight;
-            const targetRatio = targetWidth / targetHeight; // 0.8333
-            
-            let sx, sy, sWidth, sHeight;
-            
-            if (videoRatio > targetRatio) {
-                // Video mais largo, cortar laterais
-                sHeight = video.videoHeight;
-                sWidth = video.videoHeight * targetRatio;
-                sx = (video.videoWidth - sWidth) / 2;
-                sy = 0;
-            } else {
-                // Video mais alto, cortar topo/baixo
-                sWidth = video.videoWidth;
-                sHeight = video.videoWidth / targetRatio;
-                sx = 0;
-                sy = (video.videoHeight - sHeight) / 2;
-            }
-            
-            ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, targetWidth, targetHeight);
+            // Desenha o vídeo inteiro SEM cortar, apenas redimensionando
+            ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, targetWidth, targetHeight);
             melhorarQualidadeImagem(ctx, targetWidth, targetHeight);
             
-            // Configurar DPI para 300
             const fotoData = canvas.toDataURL('image/jpeg', 0.95);
             selfieInput.value = fotoData;
             
             previewDiv.classList.remove('hidden');
-            previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie" style="width:133px; height:160px; object-fit:cover;"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie 400x480px (300 DPI)</p>';
+            previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie" style="width:100px; border-radius:50%;"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie 400x480px (300 DPI)</p>';
             statusDiv.className = 'status status-success';
             statusDiv.innerHTML = '✅ Selfie 400x480 | 300 DPI capturada!';
             
