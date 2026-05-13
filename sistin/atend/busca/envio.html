@@ -305,17 +305,18 @@
             canvas.width = targetWidth;
             canvas.height = targetHeight;
             
-            // Desenha o vídeo inteiro SEM cortar, apenas redimensionando
+            // Desenha o vídeo inteiro SEM cortar, apenas redimensionando (SALVA QUADRADO/RETANGULAR)
             ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, targetWidth, targetHeight);
             melhorarQualidadeImagem(ctx, targetWidth, targetHeight);
             
             const fotoData = canvas.toDataURL('image/jpeg', 0.95);
             selfieInput.value = fotoData;
             
+            // Preview retangular (sem borda redonda)
             previewDiv.classList.remove('hidden');
-            previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie" style="width:100px; border-radius:50%;"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie 400x480px (300 DPI)</p>';
+            previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie" style="width:100px; height:120px; object-fit:cover; border:2px solid #27ae60; border-radius:4px;"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie 400x480px salva (formato retangular)</p>';
             statusDiv.className = 'status status-success';
-            statusDiv.innerHTML = '✅ Selfie 400x480 | 300 DPI capturada!';
+            statusDiv.innerHTML = '✅ Selfie 400x480 | 300 DPI capturada (formato retangular)';
             
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
