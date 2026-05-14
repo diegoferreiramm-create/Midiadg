@@ -245,7 +245,7 @@ function imprimirProtocolo(id, cpf, nome, nascimento, municipio, via, atendente,
         </div>
         <div class="lgpd">
           Não nos responsabilizamos por informações no formulário entregue que divergirem dos documentos anexos, conforme Art. 9º da Lei 13.709/2018 (LGPD). A veracidade é de responsabilidade do declarante.
-          CONSULTAR O ANDAMENTO NO SITE WWW.ASESC.ORG.BR
+          <strong>CONSULTAR O ANDAMENTO NO SITE WWW.ASESC.ORG.BR</strong>
         </div>
         <div class="rules">
           <strong>Procedimento para Entrega da Carteira Estudantil:</strong><br>
@@ -563,7 +563,7 @@ function imprimirProtocoloTermica(id, cpf, nome, nascimento, municipio, via, ate
         </div>
         <div class="lgpd">
           Não nos responsabilizamos por informações no formulário entregue que divergirem dos documentos anexos, conforme Art. 9º da Lei 13.709/2018 (LGPD). A veracidade é de responsabilidade do declarante.
-          CONSULTAR O ANDAMENTO NO SITE WWW.ASESC.ORG.BR
+          <strong>CONSULTAR O ANDAMENTO NO SITE WWW.ASESC.ORG.BR</strong>
         </div>
         <div class="rules">
           <strong>Procedimento para Entrega da Carteira Estudantil:</strong><br>
