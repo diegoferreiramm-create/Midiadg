@@ -58,9 +58,9 @@ async function salvarCadastro() {
   // Na verdade, preserve os zeros:
   const boletoPreservado = "'" + boleto; // Adiciona apóstrofo
   
-  // VALIDAÇÃO COM EMAIL OBRIGATÓRIO
-  if(!cpf || !nome || !nascRaw || !boleto || !email) { 
-    alert("ERRO: CPF, Nome, Nascimento, E-mail e Número do Boleto são obrigatórios!"); 
+    // VALIDAÇÃO DE TODOS OS CAMPOS OBRIGATÓRIOS
+  if(!cpf || !nome || !nascRaw || !mun || !tel || !email || !boleto) { 
+    alert("ERRO: Todos os campos (CPF, Nome, Nascimento, Município, Telefone, E-mail e Boleto) são de preenchimento obrigatório!"); 
     return; 
   }
   
