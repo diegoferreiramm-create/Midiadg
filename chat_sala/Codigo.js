@@ -1,1457 +1,365 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Corporativo - Área de Trabalho</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: hsl(230, 25%, 8%);
-            --sidebar-bg: rgba(18, 22, 35, 0.6);
-            --chat-bg: rgba(10, 12, 22, 0.4);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --primary-color: hsl(245, 80%, 65%);
-            --primary-hover: hsl(245, 80%, 60%);
-            --primary-glow: rgba(99, 102, 241, 0.25);
-            --accent-color: hsl(280, 85%, 65%);
-            --text-primary: hsl(0, 0%, 96%);
-            --text-secondary: hsl(230, 15%, 72%);
-            --text-muted: hsl(230, 12%, 50%);
-            --bubble-sent: linear-gradient(135deg, hsl(245, 80%, 65%), hsl(265, 80%, 60%));
-            --bubble-received: rgba(255, 255, 255, 0.07);
-            --input-bg: rgba(15, 18, 30, 0.7);
-            --input-border: rgba(255, 255, 255, 0.08);
-            --success-color: hsl(145, 80%, 45%);
-            --error-color: hsl(355, 80%, 55%);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(245, 80%, 60%, 0.08) 0px, transparent 40%),
-                radial-gradient(at 100% 100%, hsla(280, 85%, 60%, 0.06) 0px, transparent 40%);
-            color: var(--text-primary);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            padding: 20px;
-        }
-
-        .workspace {
-            width: 100%;
-            max-width: 1200px;
-            height: 90vh;
-            background: rgba(20, 24, 38, 0.45);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--card-border);
-            border-radius: 28px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            overflow: hidden;
-            animation: workscale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        @keyframes workscale {
-            0% {
-                opacity: 0;
-                transform: scale(0.96) translateY(20px);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-
-        .sidebar {
-            background: var(--sidebar-bg);
-            border-right: 1px solid var(--card-border);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .sidebar-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--card-border);
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .user-avatar {
-            width: 46px;
-            height: 46px;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: white;
-            font-weight: 700;
-            box-shadow: 0 4px 14px var(--primary-glow);
-        }
-
-        .user-info {
-            flex-grow: 1;
-            overflow: hidden;
-        }
-
-        .user-info h3 {
-            font-size: 15px;
-            font-weight: 600;
-            color: white;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .user-info span {
-            font-size: 12px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .user-info span::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: var(--success-color);
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .logout-btn {
-            background: transparent;
-            border: 0;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 8px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logout-btn:hover {
-            color: var(--error-color);
-            background: rgba(239, 68, 68, 0.08);
-            transform: scale(1.05);
-        }
-
-        .search-box {
-            padding: 16px 20px;
-            position: relative;
-        }
-
-        .search-box input {
-            width: 100%;
-            background: rgba(10, 12, 22, 0.4);
-            border: 1px solid var(--input-border);
-            border-radius: 12px;
-            padding: 10px 12px 10px 38px;
-            color: white;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .search-box input:focus {
-            border-color: var(--primary-color);
-            background: rgba(10, 12, 22, 0.6);
-        }
-
-        .search-box svg {
-            position: absolute;
-            left: 32px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 16px;
-            height: 16px;
-            color: var(--text-muted);
-            pointer-events: none;
-        }
-
-        .contacts-list-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 0 12px 20px 12px;
-        }
-
-        .contacts-list-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        .contacts-list-container::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.06);
-            border-radius: 10px;
-        }
-
-        .contacts-title {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin: 12px 8px 8px 8px;
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-bottom: 4px;
-            border: 1px solid transparent;
-            position: relative;
-        }
-
-        .contact-item:hover {
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        .contact-item.active {
-            background: rgba(99, 102, 241, 0.12);
-            border-color: rgba(99, 102, 241, 0.18);
-        }
-
-        .contact-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.06);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 600;
-            border: 1px solid var(--card-border);
-        }
-
-        .contact-item.active .contact-avatar {
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            color: white;
-            border: none;
-            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
-        }
-
-        .contact-details {
-            flex-grow: 1;
-            overflow: hidden;
-        }
-
-        .contact-name-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-
-        .contact-name {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .contact-item.active .contact-name {
-            color: white;
-            font-weight: 600;
-        }
-
-        .contact-dept {
-            font-size: 11px;
-            color: var(--text-muted);
-            background: rgba(255, 255, 255, 0.05);
-            padding: 2px 6px;
-            border-radius: 6px;
-            border: 1px solid var(--card-border);
-        }
-
-        .badge-nao-lida {
-            background: linear-gradient(135deg, hsl(355, 80%, 55%), hsl(355, 80%, 45%));
-            color: white;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 12px;
-            animation: pulse-badge 0.5s ease;
-        }
-
-        @keyframes pulse-badge {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-
-        .contact-item.active .badge-nao-lida {
-            background: white !important;
-            color: hsl(355, 80%, 55%) !important;
-        }
-
-        .skeleton {
-            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 75%);
-            background-size: 200% 100%;
-            animation: loadingSkeleton 1.5s infinite;
-        }
-
-        @keyframes loadingSkeleton {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .contact-skeleton {
-            height: 60px;
-            border-radius: 14px;
-            margin-bottom: 6px;
-        }
-
-        .chat-area {
-            background: var(--chat-bg);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .chat-empty {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 40px;
-            gap: 16px;
-        }
-
-        .chat-empty-icon {
-            font-size: 54px;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--card-border);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            color: var(--primary-color);
-            animation: pulse-icon 3s ease-in-out infinite;
-        }
-
-        @keyframes pulse-icon {
-            0%, 100% { transform: translateY(0); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
-            50% { transform: translateY(-8px); box-shadow: 0 20px 40px var(--primary-glow); }
-        }
-
-        .chat-empty h3 {
-            font-size: 20px;
-            font-weight: 500;
-            color: white;
-        }
-
-        .chat-empty p {
-            font-size: 14px;
-            color: var(--text-secondary);
-            max-width: 320px;
-        }
-
-        .chat-active {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            width: 100%;
-        }
-
-        .chat-header {
-            padding: 20px 24px;
-            background: rgba(14, 17, 30, 0.4);
-            border-bottom: 1px solid var(--card-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chat-header-info {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .chat-recipient-avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            color: white;
-            font-weight: 600;
-            font-size: 15px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .chat-recipient-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: white;
-        }
-
-        .chat-recipient-status {
-            font-size: 12px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .chat-recipient-status::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: var(--success-color);
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .chat-messages-board {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .chat-messages-board::-webkit-scrollbar {
-            width: 6px;
-        }
-        .chat-messages-board::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-
-        .msg-row {
-            display: flex;
-            width: 100%;
-        }
-
-        .msg-row-sent {
-            justify-content: flex-end;
-        }
-
-        .msg-row-received {
-            justify-content: flex-start;
-        }
-
-        .msg-bubble {
-            max-width: 65%;
-            padding: 12px 18px;
-            border-radius: 18px;
-            font-size: 14.5px;
-            line-height: 1.5;
-            position: relative;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .msg-bubble-sent {
-            background: var(--bubble-sent);
-            color: white;
-            border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
-        }
-
-        .msg-bubble-received {
-            background: var(--bubble-received);
-            color: var(--text-primary);
-            border-bottom-left-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-        }
-
-        .msg-timestamp {
-            font-size: 10px;
-            margin-top: 6px;
-            display: block;
-            text-align: right;
-            opacity: 0.6;
-        }
-
-        .msg-bubble-received .msg-timestamp {
-            color: var(--text-muted);
-        }
-
-        .msg-bubble-sent .msg-timestamp {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .attach-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .attach-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--primary-color);
-        }
-
-        .preview-area {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-            width: 100%;
-        }
-
-        .preview-item {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 6px 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            border: 1px solid var(--card-border);
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .remove-file-btn {
-            background: transparent;
-            border: none;
-            color: var(--error-color);
-            cursor: pointer;
-            font-size: 14px;
-            padding: 0 4px;
-        }
-
-        .chat-input-controls {
-            padding: 20px 24px;
-            background: rgba(14, 17, 30, 0.3);
-            border-top: 1px solid var(--card-border);
-        }
-
-        .input-bar-wrapper {
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            border-radius: 18px;
-            padding: 6px 6px 6px 18px;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: all 0.2s;
-        }
-
-        .input-bar-wrapper:focus-within {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px var(--primary-glow),
-                        inset 0 2px 4px rgba(0, 0, 0, 0.2);
-            background: rgba(15, 18, 30, 0.85);
-        }
-
-        .input-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .input-bar-wrapper input {
-            flex-grow: 1;
-            background: transparent;
-            border: 0;
-            outline: none;
-            color: white;
-            font-size: 15px;
-            padding: 10px 0;
-        }
-
-        .input-bar-wrapper input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .send-btn {
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            color: white;
-            border: 0;
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px var(--primary-glow);
-            transition: all 0.2s;
-        }
-
-        .send-btn:hover {
-            transform: scale(1.05) translateY(-1px);
-            filter: brightness(1.1);
-        }
-
-        .send-btn:active {
-            transform: scale(0.95);
-        }
-
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .spinner {
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .toast-container {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            pointer-events: none;
-        }
-
-        .toast {
-            min-width: 300px;
-            background: rgba(18, 20, 32, 0.9);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            padding: 14px 18px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            pointer-events: auto;
-            transform: translateX(120%);
-            animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        @keyframes toastIn { 100% { transform: translateX(0); } }
-
-        .toast.fadeOut {
-            animation: toastOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        @keyframes toastOut {
-            0% { transform: translateX(0); opacity: 1; }
-            100% { transform: translateX(120%); opacity: 0; }
-        }
-
-        .toast-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-        }
-
-        .toast-success .toast-icon { background: rgba(16, 185, 129, 0.15); color: var(--success-color); }
-        .toast-error .toast-icon { background: rgba(239, 68, 68, 0.15); color: var(--error-color); }
-        .toast-content { flex-grow: 1; }
-        .toast-title { font-size: 13px; font-weight: 600; color: white; }
-        .toast-msg { font-size: 12px; color: var(--text-secondary); }
-
-        /* Estilos adicionais para Cartão de Anexos e Downloads */
-        .attachment-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 10px 14px;
-            margin-top: 8px;
-            min-width: 220px;
-            max-width: 100%;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-        }
-        .msg-bubble-sent .attachment-card {
-            background: rgba(0, 0, 0, 0.15);
-            border-color: rgba(255, 255, 255, 0.15);
-        }
-        .attachment-icon {
-            font-size: 20px;
-        }
-        .attachment-info {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            overflow: hidden;
-        }
-        .attachment-name {
-            font-size: 13px;
-            font-weight: 500;
-            color: white;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .attachment-download-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 0;
-            border-radius: 8px;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        .attachment-download-btn:hover {
-            background: var(--primary-color);
-            transform: translateY(-1px);
-        }
-    </style>
-</head>
-<body>
-
-    <div class="toast-container" id="toastContainer"></div>
-
-    <div class="workspace">
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="user-avatar" id="myAvatar">U</div>
-                <div class="user-info">
-                    <h3 id="myUsername">Carregando...</h3>
-                    <span id="mySector">Geral</span>
-                </div>
-                <button class="logout-btn" onclick="logout()" title="Sair do Chat">
-                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="search-box">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input type="text" id="contactSearch" placeholder="Pesquisar contatos..." oninput="filterContacts()">
-            </div>
-
-            <div class="contacts-title">Contatos Disponíveis</div>
-            <div class="contacts-list-container" id="contactsContainer">
-                <div class="contact-skeleton skeleton"></div>
-                <div class="contact-skeleton skeleton"></div>
-                <div class="contact-skeleton skeleton"></div>
-            </div>
-        </div>
-
-        <div class="chat-area" id="chatArea">
-            <div class="chat-empty">
-                <div class="chat-empty-icon">💬</div>
-                <h3>Selecione um contato</h3>
-                <p>Escolha um canal de conversa no painel esquerdo para iniciar a comunicação em tempo real.</p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbwehZdzJfw5V6tXZwpipmd8bCJWm8yYWBZt32hefUk0SweiRqGegkT8iEJ5JcBhYcoE/exec";
-
-        let currentUser = null;
-        let activeContact = null;
-        let allContacts = [];
-        let globalPollingInterval = null;
-        let chatPollingInterval = null;
+// ======================================================
+// ===============  CHAT CORPORATIVO - BACKEND  ==========
+// ======================================================
+
+// ===============  CONFIGURAÇÕES DE PLANILHA  ==========
+const ss = SpreadsheetApp.getActive();
+const abaLogin = ss.getSheetByName("LOGIN");
+const abaContatos = ss.getSheetByName("CONTATOS");
+const abaChat = ss.getSheetByName("CHAT");
+
+// ===============  TRATAMENTO CENTRAL ===================
+function doGet(e) {
+  return tratarRequisicao(e);
+}
+
+function doPost(e) {
+  return tratarRequisicao(e);
+}
+
+function doOptions(e) {
+  return ContentService
+    .createTextOutput("")
+    .setMimeType(ContentService.MimeType.TEXT);
+}
+
+function tratarRequisicao(e) {
+  let data = {};
+
+  if (e.postData && e.postData.contents) {
+    try {
+      data = JSON.parse(e.postData.contents);
+    } catch (err) {
+      data = {};
+    }
+  }
+
+  const params = e.parameter || {};
+  const acao = data.acao || params.acao || "";
+
+  let resultado = { erro: "Ação desconhecida: " + acao };
+
+  switch (acao) {
+
+    case "login":
+      resultado = fazerLogin(
+        data.usuario || params.usuario,
+        data.senha || params.senha
+      );
+      break;
+
+    case "criarConta":
+      resultado = criarConta(
+        data.nome || params.nome,
+        data.usuario || params.usuario,
+        data.senha || params.senha
+      );
+      break;
+
+    case "listarContatos":
+      resultado = listarContatos();
+      break;
+
+    case "enviarMensagem":
+      resultado = enviarMensagem(
+        data.remetente || params.remetente,
+        data.destinatario || params.destinatario,
+        data.mensagem || params.mensagem,
+        data.arquivos || []
+      );
+      break;
+
+    case "buscarMensagens":
+      resultado = buscarMensagens(
+        data.usuario || params.usuario,
+        data.destinatario || params.destinatario
+      );
+      break;
+
+    default:
+      resultado = { erro: "Ação não encontrada: " + acao };
+      break;
+  }
+
+  return resposta(resultado);
+}
+
+// ==================== LOGIN ============================
+function fazerLogin(usuario, senha) {
+
+  if (!abaLogin) {
+    return { erro: "Aba LOGIN não encontrada." };
+  }
+
+  const dados = abaLogin.getDataRange().getValues();
+
+  const usuarioDigitado = (usuario || "")
+    .toString()
+    .trim()
+    .toLowerCase();
+
+  const senhaDigitada = (senha || "")
+    .toString()
+    .trim();
+
+  for (let i = 1; i < dados.length; i++) {
+
+    const usuarioPlanilha = (dados[i][0] || "")
+      .toString()
+      .trim()
+      .toLowerCase();
+
+    const senhaPlanilha = (dados[i][1] || "")
+      .toString()
+      .trim();
+
+    if (
+      usuarioPlanilha === usuarioDigitado &&
+      senhaPlanilha === senhaDigitada
+    ) {
+
+      const ativo = dados[i][3];
+
+      if (
+        ativo !== true &&
+        ativo !== "TRUE" &&
+        ativo !== "true" &&
+        ativo !== "1" &&
+        ativo !== 1
+      ) {
+        return { erro: "Usuário bloqueado." };
+      }
+
+      return {
+        sucesso: true,
+        setor: dados[i][2] || "Geral"
+      };
+    }
+  }
+
+  return { erro: "Usuário ou senha inválidos." };
+}
+
+// ================= CRIAR CONTA =========================
+function criarConta(nome, usuario, senha) {
+
+  if (!abaLogin) {
+    return { erro: "Aba LOGIN não encontrada." };
+  }
+
+  if (!abaContatos) {
+    return { erro: "Aba CONTATOS não encontrada." };
+  }
+
+  const dadosLogin = abaLogin.getDataRange().getValues();
+
+  const novoUsuario = (usuario || "")
+    .toString()
+    .trim()
+    .toLowerCase();
+
+  for (let i = 1; i < dadosLogin.length; i++) {
+
+    const usuarioPlanilha = (dadosLogin[i][0] || "")
+      .toString()
+      .trim()
+      .toLowerCase();
+
+    if (usuarioPlanilha === novoUsuario) {
+      return { erro: "Este usuário já existe." };
+    }
+  }
+
+  abaLogin.appendRow([
+    usuario.toString().trim(),
+    senha.toString().trim(),
+    "Geral",
+    "TRUE"
+  ]);
+
+  abaContatos.appendRow([
+    nome.toString().trim(),
+    "Geral",
+    usuario.toString().trim()
+  ]);
+
+  return {
+    sucesso: true,
+    msg: "Conta criada com sucesso."
+  };
+}
+
+// ================= LISTAR CONTATOS =====================
+function listarContatos() {
+
+  if (!abaContatos) {
+    return { erro: "Aba CONTATOS não encontrada." };
+  }
+
+  const dados = abaContatos.getDataRange().getValues();
+
+  const lista = [];
+
+  for (let i = 1; i < dados.length; i++) {
+
+    if (
+      dados[i][0] &&
+      dados[i][0].toString().trim() !== ""
+    ) {
+
+      const nome = dados[i][0]
+        .toString()
+        .trim();
+
+      const setor = (dados[i][1] || "Geral")
+        .toString()
+        .trim();
+
+      let usuario = (dados[i][2] || "")
+        .toString()
+        .trim();
+
+      if (!usuario && abaLogin) {
+
+        const dadosLogin = abaLogin
+          .getDataRange()
+          .getValues();
+
+        if (dadosLogin[i]) {
+          usuario = (dadosLogin[i][0] || "")
+            .toString()
+            .trim();
+        }
+      }
+
+      if (!usuario) {
+        usuario = nome
+          .toLowerCase()
+          .replace(/\s+/g, "");
+      }
+
+      lista.push({
+        nome: nome,
+        setor: setor,
+        usuario: usuario
+      });
+    }
+  }
+
+  return {
+    contatos: lista
+  };
+}
+
+// ================ ENVIAR MENSAGEM (CORRIGIDO PARA RECEBER ARQUIVOS) ==================
+function enviarMensagem(remetente, destinatario, mensagem, arquivos) {
+  if (!abaChat) return { erro: "Aba CHAT não encontrada." };
+  
+  if (!remetente || !destinatario) {
+    return { erro: "Dados incompletos: remetente e destinatario são obrigatórios." };
+  }
+
+  let mensagemFinal = (mensagem || "").toString();
+
+  // Processa os arquivos enviados
+  if (arquivos && Array.isArray(arquivos) && arquivos.length > 0) {
+    for (let i = 0; i < arquivos.length; i++) {
+      const arq = arquivos[i];
+      if (arq.nome && arq.base64) {
+        // O base64 já vem completo com "data:...;base64," então usa direto
+        let base64Completo = arq.base64;
         
-        let mensagensNaoLidas = {};
-        let ultimoTimestampPorContato = {};
-        
-        let arquivosAnexados = [];
-
-        // ========== NOTIFICAÇÕES ==========
-        async function solicitarPermissaoNotificacao() {
-            if (!("Notification" in window)) return false;
-            if (Notification.permission === "default") {
-                const permissao = await Notification.requestPermission();
-                return permissao === "granted";
-            }
-            return Notification.permission === "granted";
+        if (mensagemFinal.trim()) {
+          mensagemFinal += "\n\n";
         }
+        // Salva o arquivo como BASE64 na mensagem
+        mensagemFinal += `[ARQUIVO:${arq.nome}|${base64Completo}|${arq.tipo || 'application/octet-stream'}]`;
+      }
+    }
+  }
+  
+  const dataHora = new Date();
+  const linha = [
+    dataHora,
+    remetente.toString().trim(),
+    destinatario.toString().trim(),
+    mensagemFinal,
+    ""
+  ];
+  
+  abaChat.appendRow(linha);
+  return { sucesso: true, timestamp: dataHora.toISOString() };
+}
 
-        function enviarNotificacao(remetente, mensagem) {
-            if (Notification.permission === "granted" && document.hidden) {
-                // Remove marcações de arquivos da pré-visualização da notificação
-                let textoNotificacao = mensagem.replace(/\[ARQUIVO:([^\|]+)\|([^\]]+)\]/g, '📎 $1');
-                new Notification(`📩 Nova mensagem de ${remetente}`, {
-                    body: textoNotificacao.length > 50 ? textoNotificacao.substring(0, 50) + "..." : textoNotificacao,
-                    icon: "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
-                    silent: false
-                });
-            }
-            atualizarTituloAba();
-        }
+// ================= BUSCAR MENSAGENS ====================
+function buscarMensagens(user, contato) {
 
-        let tituloOriginal = document.title;
-        let contadorNotificacoes = 0;
-        let intervaloPiscar = null;
+  if (!abaChat) {
+    return { erro: "Aba CHAT não encontrada." };
+  }
 
-        function atualizarTituloAba() {
-            if (!document.hidden) {
-                pararPiscarTitulo();
-                return;
-            }
-            contadorNotificacoes++;
-            if (!intervaloPiscar) {
-                intervaloPiscar = setInterval(() => {
-                    if (document.hidden) {
-                        document.title = contadorNotificacoes > 0 
-                            ? `💬 ${contadorNotificacoes} nova${contadorNotificacoes > 1 ? 's' : ''} mensagen${contadorNotificacoes > 1 ? 's' : 'em'}`
-                            : tituloOriginal;
-                    }
-                }, 1000);
-            }
-        }
+  const dados = abaChat.getDataRange().getValues();
 
-        function pararPiscarTitulo() {
-            if (intervaloPiscar) {
-                clearInterval(intervaloPiscar);
-                intervaloPiscar = null;
-            }
-            document.title = tituloOriginal;
-            contadorNotificacoes = 0;
-        }
+  const msgs = [];
 
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                pararPiscarTitulo();
-                if (activeContact) {
-                    let ultimoTimestampLido = JSON.parse(localStorage.getItem("ultimoTimestampLido") || "{}");
-                    const timestampUltimo = ultimoTimestampPorContato[activeContact.usuario] || new Date().getTime();
-                    ultimoTimestampLido[activeContact.usuario] = timestampUltimo;
-                    localStorage.setItem("ultimoTimestampLido", JSON.stringify(ultimoTimestampLido));
-                    
-                    mensagensNaoLidas[activeContact.usuario] = 0;
-                    renderContacts(allContacts);
-                }
-            }
-        });
+  const usuarioBuscado = (user || "")
+    .toString()
+    .trim()
+    .toLowerCase();
 
-        function showToast(title, message, type = "success") {
-            const container = document.getElementById("toastContainer");
-            const toast = document.createElement("div");
-            toast.className = `toast toast-${type}`;
-            const iconSvg = type === "success" 
-                ? `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`
-                : `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>`;
-            toast.innerHTML = `<div class="toast-icon">${iconSvg}</div><div class="toast-content"><div class="toast-title">${title}</div><div class="toast-msg">${message}</div></div>`;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.classList.add("fadeOut");
-                toast.addEventListener("animationend", () => toast.remove());
-            }, 3500);
-        }
+  const contatoBuscado = (contato || "")
+    .toString()
+    .trim()
+    .toLowerCase();
 
-        // ========== ARQUIVOS ==========
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
+  for (let i = 1; i < dados.length; i++) {
 
-        function anexarDocumentos(input) {
-            const files = Array.from(input.files);
-            const previewDiv = document.getElementById('previewAnexos');
-            if (!previewDiv) return;
-            
-            files.forEach(file => {
-                if (file.size > 10 * 1024 * 1024) {
-                    showToast("Arquivo muito grande", `${file.name} excede 10MB`, "error");
-                    return;
-                }
-                arquivosAnexados.push(file);
-                const previewItem = document.createElement('div');
-                previewItem.className = 'preview-item';
-                const fileIcon = file.type.startsWith('image/') ? '🖼️' : file.type === 'application/pdf' ? '📄' : '📎';
-                previewItem.innerHTML = `<span>${fileIcon}</span><span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${file.name}</span><span style="font-size:10px;">${(file.size / 1024).toFixed(0)}KB</span><button class="remove-file-btn" onclick="removerAnexo('${file.name}')">✕</button>`;
-                previewDiv.appendChild(previewItem);
-            });
-            previewDiv.style.display = 'flex';
-            input.value = '';
-        }
+    const r = dados[i];
 
-        function removerAnexo(nomeArquivo) {
-            arquivosAnexados = arquivosAnexados.filter(f => f.name !== nomeArquivo);
-            const previewDiv = document.getElementById('previewAnexos');
-            if (previewDiv) {
-                previewDiv.innerHTML = '';
-                arquivosAnexados.forEach(file => {
-                    const previewItem = document.createElement('div');
-                    previewItem.className = 'preview-item';
-                    const fileIcon = file.type.startsWith('image/') ? '🖼️' : file.type === 'application/pdf' ? '📄' : '📎';
-                    previewItem.innerHTML = `<span>${fileIcon}</span><span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${file.name}</span><span style="font-size:10px;">${(file.size / 1024).toFixed(0)}KB</span><button class="remove-file-btn" onclick="removerAnexo('${file.name}')">✕</button>`;
-                    previewDiv.appendChild(previewItem);
-                });
-                if (arquivosAnexados.length === 0) previewDiv.style.display = 'none';
-            }
-        }
+    if (!r[1] || !r[2]) continue;
 
-        // ========== CONTATOS ==========
-        async function loadContacts() {
-            try {
-                const req = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ acao: "listarContatos" })
-                });
-                const res = await req.json();
-                if (res.erro) {
-                    showToast("Erro no Servidor", res.erro, "error");
-                    return;
-                }
-                allContacts = res.contatos || [];
-                allContacts = allContacts.filter(c => c.usuario.toLowerCase() !== currentUser.toLowerCase());
-                renderContacts(allContacts);
-                
-                // Inicializa os timestamps conhecidos/lidos
-                await inicializarTimestamps();
-            } catch (err) {
-                console.error("Fetch contacts error:", err);
-                showToast("Erro de Diretório", "Falha ao carregar a lista de contatos corporativos.", "error");
-                document.getElementById("contactsContainer").innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding-top: 20px;">Nenhum contato disponível</div>`;
-            }
-        }
+    const remetente = (r[1] || "")
+      .toString()
+      .trim()
+      .toLowerCase();
 
-        async function inicializarTimestamps() {
-            let ultimoTimestampLido = JSON.parse(localStorage.getItem("ultimoTimestampLido") || "{}");
-            let alterouLido = false;
-            
-            for (const contato of allContacts) {
-                try {
-                    const req = await fetch(API_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify({
-                            acao: "buscarMensagens",
-                            usuario: currentUser,
-                            destinatario: contato.usuario
-                        })
-                    });
-                    const res = await req.json();
-                    if (!res.erro && res.mensagens && res.mensagens.length > 0) {
-                        const messages = res.mensagens;
-                        const timestampUltima = new Date(messages[messages.length - 1].data).getTime();
-                        
-                        ultimoTimestampPorContato[contato.usuario] = timestampUltima;
-                        
-                        if (ultimoTimestampLido[contato.usuario] === undefined) {
-                            ultimoTimestampLido[contato.usuario] = timestampUltima;
-                            alterouLido = true;
-                        }
-                    } else {
-                        ultimoTimestampPorContato[contato.usuario] = 0;
-                        if (ultimoTimestampLido[contato.usuario] === undefined) {
-                            ultimoTimestampLido[contato.usuario] = 0;
-                            alterouLido = true;
-                        }
-                    }
-                } catch (e) {
-                    console.error("Erro ao inicializar timestamp para " + contato.usuario, e);
-                }
-            }
-            if (alterouLido) {
-                localStorage.setItem("ultimoTimestampLido", JSON.stringify(ultimoTimestampLido));
-            }
-        }
+    const destinatario = (r[2] || "")
+      .toString()
+      .trim()
+      .toLowerCase();
 
-        function renderContacts(contacts) {
-            const container = document.getElementById("contactsContainer");
-            container.innerHTML = "";
-            if (contacts.length === 0) {
-                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px 10px;">Nenhum contato encontrado.</div>`;
-                return;
-            }
-            contacts.forEach(contact => {
-                const initials = contact.nome ? contact.nome.charAt(0).toUpperCase() : "?";
-                const activeClass = (activeContact && activeContact.usuario.toLowerCase() === contact.usuario.toLowerCase()) ? "active" : "";
-                const qtdNaoLidas = mensagensNaoLidas[contact.usuario] || 0;
-                const contactDiv = document.createElement("div");
-                contactDiv.className = `contact-item ${activeClass}`;
-                contactDiv.onclick = () => selectContact(contact);
-                contactDiv.innerHTML = `
-                    <div class="contact-avatar">${initials}</div>
-                    <div class="contact-details">
-                        <div class="contact-name-wrapper">
-                            <span class="contact-name">${escapeHtml(contact.nome)}</span>
-                            ${qtdNaoLidas > 0 ? `<span class="badge-nao-lida">${qtdNaoLidas > 99 ? '99+' : qtdNaoLidas}</span>` : ''}
-                            <span class="contact-dept">${escapeHtml(contact.setor || "Setor")}</span>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(contactDiv);
-            });
-        }
+    const enviada =
+      remetente === usuarioBuscado &&
+      destinatario === contatoBuscado;
 
-        function filterContacts() {
-            const query = document.getElementById("contactSearch").value.toLowerCase().trim();
-            if (!query) {
-                renderContacts(allContacts);
-                return;
-            }
-            const filtered = allContacts.filter(c => 
-                c.nome.toLowerCase().includes(query) || 
-                (c.setor && c.setor.toLowerCase().includes(query)) ||
-                c.usuario.toLowerCase().includes(query)
-            );
-            renderContacts(filtered);
-        }
+    const recebida =
+      remetente === contatoBuscado &&
+      destinatario === usuarioBuscado;
 
-        // ========== POLLING GLOBAL ==========
-        async function verificarMensagensGlobais() {
-            if (!currentUser) return;
-            
-            try {
-                let ultimoTimestampLido = JSON.parse(localStorage.getItem("ultimoTimestampLido") || "{}");
-                let atualizouLista = false;
-                
-                for (const contato of allContacts) {
-                    const req = await fetch(API_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify({
-                            acao: "buscarMensagens",
-                            usuario: currentUser,
-                            destinatario: contato.usuario
-                        })
-                    });
-                    const res = await req.json();
-                    if (res.erro) continue;
-                    
-                    const messages = res.mensagens || [];
-                    if (messages.length > 0) {
-                        const ultimaMsg = messages[messages.length - 1];
-                        const timestampUltima = new Date(ultimaMsg.data).getTime();
-                        
-                        const ultimoLido = ultimoTimestampLido[contato.usuario] || 0;
-                        
-                        let naoLidas = 0;
-                        messages.forEach(msg => {
-                            if (msg.remetente.toLowerCase() !== currentUser.toLowerCase() && new Date(msg.data).getTime() > ultimoLido) {
-                                naoLidas++;
-                            }
-                        });
-                        
-                        const anteriorNaoLidas = mensagensNaoLidas[contato.usuario] || 0;
-                        mensagensNaoLidas[contato.usuario] = naoLidas;
-                        
-                        if (naoLidas !== anteriorNaoLidas) {
-                            atualizouLista = true;
-                        }
-                        
-                        const ultimoTimestampConhecido = ultimoTimestampPorContato[contato.usuario] || 0;
-                        if (timestampUltima > ultimoTimestampConhecido && ultimaMsg.remetente.toLowerCase() !== currentUser.toLowerCase()) {
-                            ultimoTimestampPorContato[contato.usuario] = timestampUltima;
-                            
-                            if (!activeContact || activeContact.usuario !== contato.usuario || document.hidden) {
-                                enviarNotificacao(contato.nome, ultimaMsg.mensagem);
-                            }
-                        }
-                        
-                        if (activeContact && activeContact.usuario === contato.usuario) {
-                            if (!document.hidden) {
-                                ultimoTimestampLido[contato.usuario] = timestampUltima;
-                                localStorage.setItem("ultimoTimestampLido", JSON.stringify(ultimoTimestampLido));
-                                if (naoLidas > 0) {
-                                    mensagensNaoLidas[contato.usuario] = 0;
-                                    atualizouLista = true;
-                                }
-                            }
-                            if (timestampUltima > ultimoTimestampConhecido) {
-                                carregarMensagensChat(activeContact.usuario);
-                            }
-                        }
-                    }
-                }
-                
-                if (atualizouLista) {
-                    renderContacts(allContacts);
-                }
-            } catch (err) {
-                console.error("Global polling error:", err);
-            }
-        }
+    if (enviada || recebida) {
 
-        // ========== CHAT ==========
-        function selectContact(contact) {
-            if (chatPollingInterval) clearInterval(chatPollingInterval);
-            
-            activeContact = contact;
-            
-            let ultimoTimestampLido = JSON.parse(localStorage.getItem("ultimoTimestampLido") || "{}");
-            ultimoTimestampLido[contact.usuario] = new Date().getTime();
-            localStorage.setItem("ultimoTimestampLido", JSON.stringify(ultimoTimestampLido));
-            
-            mensagensNaoLidas[contact.usuario] = 0;
-            renderContacts(allContacts);
+      msgs.push({
+        data: r[0],
+        remetente: r[1],
+        destinatario: r[2],
+        mensagem: r[3]
+      });
+    }
+  }
 
-            const chatArea = document.getElementById("chatArea");
-            chatArea.innerHTML = `
-                <div class="chat-active">
-                    <div class="chat-header">
-                        <div class="chat-header-info">
-                            <div class="chat-recipient-avatar">${contact.nome.charAt(0).toUpperCase()}</div>
-                            <div>
-                                <div class="chat-recipient-name">${escapeHtml(contact.nome)}</div>
-                                <div class="chat-recipient-status">${escapeHtml(contact.setor || 'Corporativo')}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="chat-messages-board" id="msgBoard">
-                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                            <div class="skeleton" style="width: 50px; height: 50px; border-radius: 50%;"></div>
-                        </div>
-                    </div>
-                    <div class="chat-input-controls">
-                        <div class="input-bar-wrapper">
-                            <div style="flex: 1;">
-                                <div class="input-row">
-                                    <button type="button" class="attach-btn" onclick="document.getElementById('fileInput').click()" title="Anexar arquivo">
-                                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                                        </svg>
-                                    </button>
-                                    <input type="file" id="fileInput" style="display: none;" multiple onchange="anexarDocumentos(this)">
-                                    <input type="text" id="msgInput" placeholder="Digite uma mensagem..." autocomplete="off">
-                                    <button type="submit" class="send-btn" onclick="handleSend(event)" title="Enviar Mensagem">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div id="previewAnexos" class="preview-area" style="display: none;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            carregarMensagensChat(contact.usuario);
-            chatPollingInterval = setInterval(() => carregarMensagensChat(contact.usuario), 3000);
-        }
+  return {
+    mensagens: msgs
+  };
+}
 
-        async function carregarMensagensChat(contatoUsuario) {
-            if (!currentUser || !contatoUsuario) return;
-            
-            try {
-                const req = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({
-                        acao: "buscarMensagens",
-                        usuario: currentUser,
-                        destinatario: contatoUsuario
-                    })
-                });
-                const res = await req.json();
-                if (res.erro) return;
-                
-                const messages = res.mensagens || [];
-                renderMessages(messages);
-                
-                if (messages.length > 0) {
-                    const timestampUltimo = new Date(messages[messages.length - 1].data).getTime();
-                    ultimoTimestampPorContato[contatoUsuario] = timestampUltimo;
-                    
-                    if (!document.hidden && activeContact && activeContact.usuario === contatoUsuario) {
-                        let ultimoTimestampLido = JSON.parse(localStorage.getItem("ultimoTimestampLido") || "{}");
-                        ultimoTimestampLido[contatoUsuario] = timestampUltimo;
-                        localStorage.setItem("ultimoTimestampLido", JSON.stringify(ultimoTimestampLido));
-                        
-                        if (mensagensNaoLidas[contatoUsuario] > 0) {
-                            mensagensNaoLidas[contatoUsuario] = 0;
-                            renderContacts(allContacts);
-                        }
-                    }
-                }
-            } catch (err) {
-                console.error("Load messages error:", err);
-            }
-        }
+// ================= RESPOSTA PADRÃO =====================
+function resposta(obj) {
 
-        function renderMessages(messages) {
-            const board = document.getElementById("msgBoard");
-            if (!board) return;
-            
-            if (!messages || messages.length === 0) {
-                board.innerHTML = `<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: var(--text-muted); font-size: 13.5px; gap: 8px;">
-                    <div>💬 Nenhuma mensagem ainda</div>
-                    <div style="font-size: 12px; opacity: 0.8;">Escreva uma mensagem abaixo para iniciar.</div>
-                </div>`;
-                return;
-            }
-            
-            let contents = "";
-            for (let i = 0; i < messages.length; i++) {
-                const msg = messages[i];
-                const isSentByMe = msg.remetente && msg.remetente.toLowerCase() === currentUser.toLowerCase();
-                const rowClass = isSentByMe ? "msg-row-sent" : "msg-row-received";
-                const bubbleClass = isSentByMe ? "msg-bubble-sent" : "msg-bubble-received";
-                const time = formatMessageDate(msg.data);
-                
-                let mensagemTexto = msg.mensagem ? msg.mensagem.toString() : "";
-                
-                // Extrai arquivos do formato [ARQUIVO:nome|base64|tipo]
-                const attachments = [];
-                const fileRegex = /\[ARQUIVO:([^|\]]+)\|([^|\]]+)\|([^\]]+)\]/g;
-                let tempTexto = mensagemTexto;
-                mensagemTexto = "";
-                let lastIndex = 0;
-                let match;
-                
-                while ((match = fileRegex.exec(tempTexto)) !== null) {
-                    mensagemTexto += tempTexto.substring(lastIndex, match.index);
-                    attachments.push({
-                        nome: match[1],
-                        base64: match[2],
-                        tipo: match[3]
-                    });
-                    lastIndex = match.index + match[0].length;
-                }
-                mensagemTexto += tempTexto.substring(lastIndex);
-                
-                let mensagemFormatada = mensagemTexto.trim() ? escapeHtml(mensagemTexto).replace(/\n/g, '<br>') : "";
-                
-                let attachmentsHtml = "";
-                for (let a = 0; a < attachments.length; a++) {
-                    const att = attachments[a];
-                    const fileIcon = att.tipo && att.tipo.startsWith('image/') ? '🖼️' : 
-                                    att.tipo === 'application/pdf' ? '📄' : '📎';
-                    
-                    // CORREÇÃO: função de download via JavaScript
-                    const fileId = `file_${Date.now()}_${a}`;
-                    
-                    attachmentsHtml += `
-                        <div class="attachment-card">
-                            <span class="attachment-icon">${fileIcon}</span>
-                            <div class="attachment-info">
-                                <span class="attachment-name" title="${escapeHtml(att.nome)}">${escapeHtml(att.nome)}</span>
-                            </div>
-                            <button class="attachment-download-btn" onclick="downloadArquivo('${escapeHtml(att.nome)}', \`${att.base64}\`, '${att.tipo}')" title="Baixar arquivo">
-                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                </svg>
-                            </button>
-                        </div>
-                    `;
-                }
-                
-                contents += `
-                    <div class="msg-row ${rowClass}">
-                        <div class="msg-bubble ${bubbleClass}">
-                            ${mensagemFormatada ? `<div class="msg-text">${mensagemFormatada}</div>` : ''}
-                            ${attachmentsHtml}
-                            <span class="msg-timestamp">${time}</span>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            board.innerHTML = contents;
-            board.scrollTop = board.scrollHeight;
-        }
-
-        // FUNÇÃO DE DOWNLOAD - coloque fora do renderMessages
-        function downloadArquivo(nome, base64Data, tipo) {
-            try {
-                // Remove o prefixo "data:...;base64," se existir
-                let pureBase64 = base64Data;
-                if (base64Data.includes(',')) {
-                    pureBase64 = base64Data.split(',')[1];
-                }
-                
-                // Decodifica base64 para binário
-                const byteCharacters = atob(pureBase64);
-                const byteNumbers = new Array(byteCharacters.length);
-                for (let i = 0; i < byteCharacters.length; i++) {
-                    byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-                const byteArray = new Uint8Array(byteNumbers);
-                const blob = new Blob([byteArray], { type: tipo || 'application/octet-stream' });
-                
-                // Cria link de download
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = nome;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            } catch (err) {
-                console.error("Erro no download:", err);
-                showToast("Erro", "Não foi possível baixar o arquivo", "error");
-            }
-        }
-        async function handleSend(e) {
-            e.preventDefault();
-            if (!activeContact) return;
-            
-            const input = document.getElementById("msgInput");
-            const text = input.value.trim();
-            if (!text && arquivosAnexados.length === 0) return;
-            
-            const sendBtn = document.querySelector('.send-btn');
-            const originalHTML = sendBtn.innerHTML;
-            sendBtn.innerHTML = '<div class="spinner"></div>';
-            sendBtn.disabled = true;
-            
-            try {
-                // Serializa os arquivos em Base64
-                const arquivosData = [];
-                for (const file of arquivosAnexados) {
-                    try {
-                        const base64 = await fileToBase64(file);
-                        arquivosData.push({
-                            nome: file.name,
-                            tipo: file.type,
-                            base64: base64
-                        });
-                    } catch (fileErr) {
-                        console.error("Erro ao converter arquivo para base64:", file.name, fileErr);
-                        showToast("Erro no Arquivo", `Não foi possível preparar o arquivo ${file.name}.`, "error");
-                    }
-                }
-                
-                const req = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({
-                        acao: "enviarMensagem",
-                        remetente: currentUser,
-                        destinatario: activeContact.usuario,
-                        mensagem: text,
-                        arquivos: arquivosData
-                    })
-                });
-                const res = await req.json();
-                
-                if (res.sucesso) {
-                    input.value = "";
-                    arquivosAnexados = [];
-                    const previewDiv = document.getElementById('previewAnexos');
-                    if (previewDiv) {
-                        previewDiv.innerHTML = '';
-                        previewDiv.style.display = 'none';
-                    }
-                    
-                    if (res.timestamp) {
-                        let ultimoTimestampLido = JSON.parse(localStorage.getItem("ultimoTimestampLido") || "{}");
-                        ultimoTimestampLido[activeContact.usuario] = new Date(res.timestamp).getTime();
-                        localStorage.setItem("ultimoTimestampLido", JSON.stringify(ultimoTimestampLido));
-                    }
-                    
-                    carregarMensagensChat(activeContact.usuario);
-                } else {
-                    showToast("Erro de envio", res.erro || "Falha desconhecida", "error");
-                }
-            } catch (err) {
-                console.error("Sending message error:", err);
-                showToast("Erro de Rede", "Sua mensagem não pôde ser enviada.", "error");
-            } finally {
-                sendBtn.innerHTML = originalHTML;
-                sendBtn.disabled = false;
-            }
-        }
-
-        function formatMessageDate(dateStr) {
-            if (!dateStr) return "";
-            try {
-                const date = new Date(dateStr);
-                return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            } catch (e) {
-                return dateStr;
-            }
-        }
-
-        function escapeHtml(str) {
-            if (!str) return "";
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-
-        function logout() {
-            if (globalPollingInterval) clearInterval(globalPollingInterval);
-            if (chatPollingInterval) clearInterval(chatPollingInterval);
-            localStorage.clear();
-            showToast("Sessão Encerrada", "Você saiu com sucesso.", "success");
-            setTimeout(() => { window.location.href = "login.html"; }, 800);
-        }
-
-        // ========== INICIALIZAÇÃO ==========
-        window.addEventListener("DOMContentLoaded", () => {
-            currentUser = localStorage.getItem("usuario");
-            const sector = localStorage.getItem("setor") || "Geral";
-            if (!currentUser) {
-                window.location.href = "login.html";
-                return;
-            }
-            document.getElementById("myUsername").textContent = currentUser;
-            document.getElementById("mySector").textContent = sector;
-            document.getElementById("myAvatar").textContent = currentUser.charAt(0).toUpperCase();
-            
-            // Carrega os contatos e inicializa
-            loadContacts();
-            solicitarPermissaoNotificacao();
-            
-            // Inicia o polling global de mensagens a cada 4 segundos
-            setTimeout(() => {
-                globalPollingInterval = setInterval(verificarMensagensGlobais, 4000);
-            }, 2000);
-        });
-    </script>
-</body>
-</html>
+  return ContentService
+    .createTextOutput(
+      JSON.stringify(obj)
+    )
+    .setMimeType(
+      ContentService.MimeType.JSON
+    );
+}
