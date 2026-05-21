@@ -822,37 +822,43 @@
         }
 
         function enviarNotificacao(remetente, mensagem) {
-            if (Notification.permission === "granted" && document.hidden) {
-                // Remove marcações de arquivos da pré-visualização da notificação
-                let textoNotificacao = mensagem.replace(/\[ARQUIVO:([^\|]+)\|([^\]]+)\]/g, '📎 $1');
-                new Notification(`📩 Nova mensagem de ${remetente}`, {
-                    body: textoNotificacao.length > 50 ? textoNotificacao.substring(0, 50) + "..." : textoNotificacao,
-                    icon: "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
-                    silent: false
-                });
-            }
+            // Verifica se a notificação é permitida
+            if (Notification.permission !== "granted") return;
+            
+            // Só notifica se a aba NÃO estiver em foco
+            if (!document.hidden) return;
+            
+            // Limpa a mensagem para notificação (remove códigos de arquivo)
+            let textoLimpo = mensagem || "";
+            textoLimpo = textoLimpo.replace(/\[ARQUIVO:[^\]]+\]/g, '📎 Arquivo anexado');
+            textoLimpo = textoLimpo.substring(0, 100);
+            
+            // Tenta tocar um som (opcional - muitos navegadores bloqueiam)
+            try {
+                const audio = new Audio('data:audio/wav;base64,U3RlYWx0aCBzb3VuZCBub3RpZmljYXRpb24=');
+                audio.volume = 0.3;
+                audio.play().catch(() => {});
+            } catch(e) {}
+            
+            // Cria a notificação
+            const notification = new Notification(`💬 Nova mensagem de ${remetente}`, {
+                body: textoLimpo,
+                icon: "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
+                silent: false,
+                vibrate: [200, 100, 200]
+            });
+            
+            // Ao clicar na notificação, foca na janela do chat
+            notification.onclick = function() {
+                window.focus();
+                notification.close();
+            };
+            
+            // Fecha a notificação após 5 segundos
+            setTimeout(() => notification.close(), 5000);
+            
+            // Atualiza o título da aba
             atualizarTituloAba();
-        }
-
-        let tituloOriginal = document.title;
-        let contadorNotificacoes = 0;
-        let intervaloPiscar = null;
-
-        function atualizarTituloAba() {
-            if (!document.hidden) {
-                pararPiscarTitulo();
-                return;
-            }
-            contadorNotificacoes++;
-            if (!intervaloPiscar) {
-                intervaloPiscar = setInterval(() => {
-                    if (document.hidden) {
-                        document.title = contadorNotificacoes > 0 
-                            ? `💬 ${contadorNotificacoes} nova${contadorNotificacoes > 1 ? 's' : ''} mensagen${contadorNotificacoes > 1 ? 's' : 'em'}`
-                            : tituloOriginal;
-                    }
-                }, 1000);
-            }
         }
 
         function pararPiscarTitulo() {
