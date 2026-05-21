@@ -752,6 +752,61 @@
             background: var(--primary-color);
             transform: translateY(-1px);
         }
+        /* ========== EMOJI PICKER ESTILO ========== */
+        .emoji-picker {
+            position: absolute;
+            bottom: 70px;
+            left: 20px;
+            width: 250px;
+            max-height: 280px;
+            background: #1a1e2e;
+            border-radius: 16px;
+            padding: 10px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: none;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            z-index: 1000;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+                }
+
+        .emoji-picker button {
+            background: rgba(255,255,255,0.05);
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 6px 4px;
+            border-radius: 8px;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .emoji-picker button:hover {
+            background: rgba(255,255,255,0.15);
+            transform: scale(1.05);
+        }
+
+        /* Scrollbar personalizada */
+        .emoji-picker::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .emoji-picker::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+        }
+
+        .emoji-picker::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+
+        .emoji-picker::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
     </style>
 </head>
 <body>
@@ -1132,7 +1187,6 @@
             }
         }
 
-        // ========== CHAT ==========
         function selectContact(contact) {
             if (chatPollingInterval) clearInterval(chatPollingInterval);
             
@@ -1166,6 +1220,9 @@
                         <div class="input-bar-wrapper">
                             <div style="flex: 1;">
                                 <div class="input-row">
+                                    <button type="button" class="emoji-btn" onclick="abrirEmojiPicker()" title="Inserir emoji" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:8px; border-radius:8px; font-size:20px;">
+                                        😊
+                                    </button>
                                     <button type="button" class="attach-btn" onclick="document.getElementById('fileInput').click()" title="Anexar arquivo">
                                         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
@@ -1251,7 +1308,7 @@
                 
                 let mensagemTexto = msg.mensagem ? msg.mensagem.toString() : "";
                 
-                // Extrai arquivos do formato [ARQUIVO:nome|base64|tipo]
+                // Extrai arquivos
                 const attachments = [];
                 const fileRegex = /\[ARQUIVO:([^|\]]+)\|([^|\]]+)\|([^\]]+)\]/g;
                 let tempTexto = mensagemTexto;
@@ -1270,16 +1327,23 @@
                 }
                 mensagemTexto += tempTexto.substring(lastIndex);
                 
-                let mensagemFormatada = mensagemTexto.trim() ? escapeHtml(mensagemTexto).replace(/\n/g, '<br>') : "";
+                // PERMITE EMOJIS - NÃO escapa HTML, só caracteres perigosos
+                let mensagemFormatada = mensagemTexto.trim();
+                if (mensagemFormatada) {
+                    mensagemFormatada = mensagemFormatada
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;")
+                        .replace(/\n/g, '<br>');
+                }
                 
                 let attachmentsHtml = "";
                 for (let a = 0; a < attachments.length; a++) {
                     const att = attachments[a];
                     const fileIcon = att.tipo && att.tipo.startsWith('image/') ? '🖼️' : 
                                     att.tipo === 'application/pdf' ? '📄' : '📎';
-                    
-                    // CORREÇÃO: função de download via JavaScript
-                    const fileId = `file_${Date.now()}_${a}`;
                     
                     attachmentsHtml += `
                         <div class="attachment-card">
@@ -1309,6 +1373,101 @@
             
             board.innerHTML = contents;
             board.scrollTop = board.scrollHeight;
+        }
+
+        function abrirEmojiPicker() {
+            // Busca o input de forma mais robusta
+            let input = document.getElementById("msgInput");
+            
+            // Se não encontrar, tenta buscar dentro do chat ativo
+            if (!input) {
+                const chatActive = document.querySelector(".chat-active");
+                if (chatActive) {
+                    input = chatActive.querySelector("#msgInput");
+                }
+            }
+            
+            if (!input) {
+                console.error("Campo de mensagem não encontrado");
+                showToast("Erro", "Campo de mensagem não encontrado", "error");
+                return;
+            }
+            
+            const emojis = [
+                "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍","🥰",
+                "😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🤩","🥳","😏",
+                "😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭","😤","😠",
+                "😡","🤬","🤯","😳","🥵","🥶","😱","😨","😰","😥","😓","🤗","🤔","🤭","🤫","🤥",
+                "😶","😐","😑","😬","🙄","😯","😦","😧","😮","😲","🥱","😴","🤤","😪","😵","🤐",
+                "🥴","🤢","🤮","🤧","😷","🤒","🤕","🤑","🤠","😈","👿","👹","👺","🤡","💩","👻",
+                "💀","☠️","👽","👾","🤖","🎃","👍","👎","👊","✊","🤛","🤜","🤞","✌️","🤟","🤘",
+                "👌","👈","👉","👆","👇","☝️","✋","🤚","🖐️","🖖","👋","🤙","💪","🖕","✍️","🙏",
+                "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","💕","💞","💓","💗","💖","💘",
+                "💝","⭐","🌟","🔥","✨","💫","💥","💢","💯","💨","💦","💤","💭","🌈","☀️","☁️",
+                "⛄","🎄","🎉","🎊","🎈","🎂","🍰","🍕","🍔","🍟","🌭","🍺","🍻","🥂","🥃","⚽",
+                "🏀","🏈","⚾","🎾","🏐","🎱","🏓","🏸","🎮","🎲","🎯","🎳","🎤","🎧","🎵","🎶",
+                "🎹","🎸","🎺","🎻","🥁","📱","💻","⌨️","🖥️","🖨️","📷","📸","📹","🎥","📽️","🎬",
+                "📀","💿","📚","📖","📕","📗","📘","📙","📔","📓","📒","📰","🔖","📍","📌","✂️",
+                "📎","✏️","✒️","🖌️","🖍️","📏","📐","🔬","🔭","⚗️","💊","💉","🚗","🚕","🚙","🚌",
+                "🚎","🏎️","🚓","🚑","🚒","🚐","🚚","🚛","🚜","🏍️","🛵","🚲","🚨","✈️","🚀","🛸",
+                "🚁","⛵","🚤","🚢","⚓","🏠","🏡","🏢","🏣","🏤","🏥","🏦","🏨","🏩","🏪","🏫",
+                "🏬","🏭","🏯","🏰","💒","🗼","🗽","⛪","🕌","🕍","⛩️","🕋","⛲","⛺","🌋","🗻",
+                "🏔️","⛰️","🌄","🌅","🌆","🌇","🌉","🌁","🌃","🌌","🌊","🌲","🌳","🌴","🌵","🌾",
+                "🌿","🍀","🍁","🍂","🍃","🌸","🌼","🌻","🌺","🌹","🥀","🌷","💐","🐶","🐱","🐭",
+                "🐹","🐰","🦊","🐻","🐼","🐨","🐸","🐒","🐔","🐧","🐦","🐤","🐣","🐥","🐺","🐗",
+                "🐴","🦄","🐝","🐛","🦋","🐌","🐞","🐜","🐟","🐠","🐡","🦈","🐙","🦑","🐬","🐳",
+                "🐋","🦀","🦞","🐚","🐢","🐍","🦎","🐊","🐅","🐆","🦓","🦍","🦧","🐘","🦛","🦏",
+                "🐪","🐫","🦒","🦘","🐃","🐂","🐄","🐎","🐖","🐏","🐑","🦙","🐐","🦌","🐕","🐩",
+                "🦮","🐕‍🦺","🐈","🐈⬛","🐓","🦃","🦚","🦜","🦢","🕊️","🐇","🦝","🦨","🦡","🦦",
+                "🦥","🐁","🐀","🐿️","🦔","🐉","🐲","🌎","🌍","🌏","🌕","🌖","🌗","🌘","🌑","🌒",
+                "🌓","🌔","🌙","🌚","🌛","🌜","🇧🇷","🇺🇸","🇵🇹","🇪🇸","🇫🇷","🇩🇪","🇮🇹","🇬🇧","🇯🇵","🇨🇳","🇰🇷"
+            ];
+            
+            let picker = document.getElementById("emojiPicker");
+            
+            if (!picker) {
+                picker = document.createElement("div");
+                picker.id = "emojiPicker";
+                picker.className = "emoji-picker";
+                document.body.appendChild(picker);
+                
+                emojis.forEach(emoji => {
+                    const btn = document.createElement("button");
+                    btn.textContent = emoji;
+                    btn.onclick = () => {
+                        // Garante que o input ainda existe e foca nele
+                        let currentInput = document.getElementById("msgInput");
+                        if (!currentInput) {
+                            const chatActive = document.querySelector(".chat-active");
+                            if (chatActive) {
+                                currentInput = chatActive.querySelector("#msgInput");
+                            }
+                        }
+                        if (currentInput) {
+                            currentInput.value += emoji;
+                            currentInput.focus();
+                        }
+                        picker.style.display = "none";
+                    };
+                    picker.appendChild(btn);
+                });
+            }
+            
+            // Alterna a visibilidade
+            if (picker.style.display === "none" || !picker.style.display) {
+                picker.style.display = "grid";
+                
+                setTimeout(() => {
+                    document.addEventListener("click", function fechar(e) {
+                        if (!picker.contains(e.target) && !e.target.classList.contains("emoji-btn")) {
+                            picker.style.display = "none";
+                            document.removeEventListener("click", fechar);
+                        }
+                    });
+                }, 100);
+            } else {
+                picker.style.display = "none";
+            }
         }
 
         // FUNÇÃO DE DOWNLOAD - coloque fora do renderMessages
