@@ -118,6 +118,7 @@ function toggleTerceiro() {
 function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, atendente, via) {
   const telaPrint = window.open('', '_blank');
   const dataHora = new Date().toLocaleString('pt-BR');
+  
   if (!telaPrint) {
     alert("Pop-up bloqueado! Por favor, permita pop-ups para imprimir o comprovante.");
     return;
@@ -126,136 +127,100 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
   telaPrint.document.write(`
     <html>
     <head>
-      <title>ENTREGA - Protocolo ${ctr}</title>
+      <title>ENTREGA - CTR ${ctr}</title>
       <style>
-        @page { size: 80mm 297mm; margin: 1mm; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @page { 
+          size: 80mm auto; 
+          margin: 2mm; 
+        }
+        * { 
+          margin: 0; 
+          padding: 0; 
+          box-sizing: border-box; 
+        }
         body { 
-          width: 74mm; 
-          font-family: Arial, sans-serif; 
-          font-size: 14px;
+          width: 76mm; 
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 11px;
           margin: 0 auto; 
-          padding: 1mm; 
+          padding: 0; 
         }
         .ticket { 
           width: 100%; 
-          border: 1px solid #000; 
-          padding: 2mm; 
+          padding: 0;
         }
-        .header { 
-          text-align: center; 
-          border-bottom: 1px solid #000; 
-          margin-bottom: 2mm; 
-          padding-bottom: 1mm; 
-        }
-        .header h2 { 
-          font-size: 16px;
-          margin: 0; 
-        }
-        .id-destaque { 
+        .titulo {
+          text-align: center;
           font-size: 14px;
-          font-weight: bold; 
-          margin-bottom: 2mm; 
+          font-weight: bold;
+          margin: 2mm 0;
         }
-        .info-grid { 
-          margin-bottom: 2mm; 
+        .linha {
+          margin: 1.5mm 0;
         }
-        .info-item { 
-          width: 100%; 
-          margin-bottom: 1.5mm; 
-          font-size: 13px;
+        .destaque {
+          font-weight: bold;
         }
-        .lgpd { 
-          font-size: 11px;
-          font-style: italic; 
-          margin: 1.5mm 0; 
-          border-top: 1px solid #ccc; 
-          border-bottom: 1px solid #ccc; 
-          padding: 1mm 0; 
-          text-align: justify; 
+        .divider {
+          margin: 2mm 0;
+          border-top: 1px solid #000;
         }
-        .rules { 
-          font-size: 11px;
-          background: #f2f2f2; 
-          padding: 1.5mm; 
-          border: 1px solid #000; 
-          margin: 1.5mm 0; 
-          line-height: 1.3; 
+        .assinatura {
+          margin-top: 4mm;
         }
-        .declaracao { 
-          font-size: 11px;
-          background: #f2f2f2; 
-          padding: 1.5mm; 
-          border: 1px solid #000; 
-          margin: 1.5mm 0; 
-          line-height: 1.3; 
-          text-align: justify; 
+        .assinatura-linha {
+          border-top: 1px solid #000;
+          width: 100%;
+          margin: 2mm 0 1mm 0;
         }
-        .final-section { 
-          margin-top: 3mm; 
+        .footer {
+          font-size: 9px;
+          margin-top: 2mm;
+          text-align: right;
         }
-        .assinatura-linha { 
-          border-top: 1px solid #000; 
-          width: 100%; 
-          margin: 2mm 0 1mm 0; 
-        }
-        .assinatura-container { 
-          display: flex; 
-          justify-content: space-between; 
-          align-items: center; 
-          font-size: 12px;
-          font-weight: bold; 
-        }
-        b { text-transform: uppercase; }
       </style>
     </head>
     <body>
       <div class="ticket">
-        <div class="header">
-          <h2>COMPROVANTE DE ENTREGA</h2>
-          <div class="id-destaque">
-            <span>CTR: ${ctr}</span>
-            <span style="background:#ffeb3b; padding:2px 6px; border-radius:4px;">✅ ENTREGUE - ${new Date().toLocaleString('pt-BR').split(' ')[0]}</span>
-          </div>
+        <div class="titulo">COMPROVANTE DE ENTREGA</div>
+        
+        <div class="linha"><span class="destaque">DADOS DO ALUNO</span></div>
+        <div class="linha"><span class="destaque">CTR:</span> ${ctr}</div>
+        <div class="linha"><span class="destaque">ALUNO:</span> ${aluno ? aluno.toUpperCase() : ''}</div>
+        <div class="linha"><span class="destaque">VIA:</span> ${via}ª VIA</div>
+        <div class="linha"><span class="destaque">CPF:</span> ${cpfA}</div>
+        
+        <div class="divider"></div>
+        
+        <div class="linha">
+          Declaro que recebi, nesta data, a Carteira de Estudante Macrorregião 2026, emitida conforme os dados informados e conferidos no ato da entrega. Estou ciente de que o documento é pessoal e intransferível, comprometendo-me a zelar por sua conservação, ciente de que, em caso de perda, extravio ou dano, será necessária nova solicitação conforme as normas vigentes.
         </div>
-        <div class="info-grid">
-          <div class="info-item"><b>ALUNO:</b> ${aluno ? aluno.toUpperCase() : ''}</div>
-          <div class="info-item"><b>CPF:</b> ${cpfA}</div>
-          <div class="info-item"><b>VIA:</b> ${via}ª VIA</div>
-          <div class="info-item"><b>ATENDENTE:</b> ${atendente}</div>
-        </div>
-        <div class="info-grid" style="margin-top:2mm; border-top:1px solid #ccc; padding-top:2mm;">
-          <div class="info-item"><b>RECEBEDOR:</b> ${recebedor ? recebedor.toUpperCase() : ''}</div>
-          <div class="info-item"><b>CPF REC:</b> ${cpfR}</div>
-          <div class="info-item"><b>VÍNCULO:</b> ${vinculo}</div>
-        </div>
-        <div class="lgpd">
-          Não nos responsabilizamos por informações no formulário entregue que divergirem dos documentos anexos, conforme Art. 9º da Lei 13.709/2018 (LGPD). A veracidade é de responsabilidade do declarante.
-          <strong>CONSULTAR O ANDAMENTO NO SITE WWW.ASESC.ORG.BR</strong>
-        </div>
-        <div class="rules">
-          <strong>Procedimento para Entrega da Carteira Estudantil:</strong><br>
-          • Aluno, mãe, pai, irmãos ou filhos: Apresentar o comprovante de solicitação original e um documento oficial com foto.<br>
-          • (Em caso de perda ou extravio do comprovante, apresentar uma cópia do documento oficial com foto de quem for receber.)<br>
-          • Tios, primos, demais parentes ou terceiros: Apresentar o comprovante de solicitação original e um documento oficial com foto de quem estiver recebendo, juntamente com uma cópia do documento oficial do aluno.<br><br>
-          <strong>EM HIPÓTESE ALGUMA ENTREGAREMOS A TERCEIROS SEM O COMPROVANTE DE SOLICITAÇÃO ORIGINAL EM MÃOS.</strong>
-        </div>
-        <div class="declaracao">
-          <strong>DECLARAÇÃO DO RECEBEDOR:</strong><br><br>
-          Declaro que recebi, nesta data, a Carteira de Identidade Estudantil, para identificação como estudante, usufruto da meia cultural e conforme critérios da ARCE os benefício do transporte. Estou ciente de que a carteira é pessoal e intransferível, comprometendo-me a zelar por sua conservação, ciente de que, em caso de perda, extravio ou dano, será necessária nova solicitação conforme as normas vigentes.
-        </div>
-        <div class="final-section">
+        
+        <div class="divider"></div>
+        
+        <div class="linha"><span class="destaque">DADOS DO RECEBEDOR</span></div>
+        <div class="linha"><span class="destaque">NOME:</span> ${recebedor ? recebedor.toUpperCase() : ''}</div>
+        <div class="linha"><span class="destaque">VÍNCULO:</span> ${vinculo}</div>
+        <div class="linha"><span class="destaque">CPF:</span> ${cpfR}</div>
+        
+        <div class="divider"></div>
+        
+        <div class="linha"><span class="destaque">CTR:</span> ${ctr} / ${via}ª VIA</div>
+        
+        <div class="assinatura">
           <div class="assinatura-linha"></div>
-          <div class="assinatura-container">
-            <span class="assinatura-texto">Assinatura do Recebedor</span>
-            <span class="via-info">CTR: ${ctr} / ${via}ª VIA</span>
-          </div>
-          <div class="data-atendente" style="text-align:right; font-size:9px; margin-top:1mm; color:#555;">
-            ${atendente} - ${dataHora}
-          </div>
+          <div class="linha">Assinatura do Recebedor</div>
+          <div class="footer">${atendente} - ${dataHora}</div>
         </div>
       </div>
-      <script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };<\/script>
+      <script>
+        window.onload = function() { 
+          window.print(); 
+          window.onafterprint = function() { 
+            window.close(); 
+          }; 
+        };
+      <\/script>
     </body>
     </html>
   `);
