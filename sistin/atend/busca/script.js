@@ -270,7 +270,7 @@ function escreverNaNovaAba(novaAba, result) {
                                 <div class="info-label">Prazo para Conserto:</div>
                                 <div class="info-value">
                                     <strong>${formatValue(d.prazo)}</strong>
-                                    <span style="cursor: help; border-bottom: 1px dashed #e67e22; margin-left: 5px;" title="Prazo conta em dias corridos (inclui finais de semana e feriados)">ⓘ</span>
+                                    <span style="font-size: 0.7rem; color: #e67e22; margin-left: 8px;">(dias corridos)</span>
                                 </div>
                             </div>
                             <div class="info-row"><div class="info-label">Nº Carteira:</div><div class="info-value">${formatValue(d.numeroCarteira)}</div></div>
