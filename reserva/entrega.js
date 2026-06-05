@@ -141,7 +141,7 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
         body { 
           width: 76mm; 
           font-family: 'Courier New', Courier, monospace;
-          font-size: 11px;
+          font-size: 16px;
           margin: 0 auto; 
           padding: 0; 
         }
@@ -151,31 +151,31 @@ function imprimirProtocoloEntrega(ctr, aluno, cpfA, recebedor, cpfR, vinculo, at
         }
         .titulo {
           text-align: center;
-          font-size: 14px;
+          font-size: 20px;
           font-weight: bold;
-          margin: 2mm 0;
+          margin: 3mm 0;
         }
         .linha {
-          margin: 1.5mm 0;
+          margin: 2mm 0;
         }
         .destaque {
           font-weight: bold;
         }
         .divider {
-          margin: 2mm 0;
+          margin: 3mm 0;
           border-top: 1px solid #000;
         }
         .assinatura {
-          margin-top: 4mm;
+          margin-top: 6mm;
         }
         .assinatura-linha {
           border-top: 1px solid #000;
           width: 100%;
-          margin: 2mm 0 1mm 0;
+          margin: 3mm 0 1mm 0;
         }
         .footer {
-          font-size: 9px;
-          margin-top: 2mm;
+          font-size: 12px;
+          margin-top: 3mm;
           text-align: right;
         }
       </style>
