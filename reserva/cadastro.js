@@ -293,10 +293,21 @@ function prepararEdicao(item) {
   const hiddenVia = document.getElementById("edit_via_hidden");
   if(hiddenVia) hiddenVia.value = viaValor;
   if(item.nasc && document.getElementById("edit_nascimento")) {
-    const p = item.nasc.split('/');
-    if(p.length === 3) {
-      document.getElementById("edit_nascimento").value = `${p[2]}-${p[1]}-${p[0]}`;
+    let dataNasc = item.nasc;
+    
+    // Se estiver no formato YYYY-MM-DD, converte para DD/MM/AAAA
+    if (dataNasc && dataNasc.includes('-')) {
+      const partes = dataNasc.split('-');
+      if (partes.length === 3) {
+        dataNasc = `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
     }
+    // Se já estiver no formato DD/MM/AAAA, mantém
+    else if (dataNasc && dataNasc.includes('/')) {
+      dataNasc = dataNasc;
+    }
+    
+    document.getElementById("edit_nascimento").value = dataNasc;
   }
 }
 
