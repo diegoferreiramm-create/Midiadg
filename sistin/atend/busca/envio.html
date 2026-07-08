@@ -359,45 +359,55 @@
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '⏳ Enviando...';
                 
-                // ✅ MÉTODO 1: Envia como JSON puro (mais confiável)
+                // ✅ Usando FormData (mais compatível)
+                const formData = new FormData();
+                formData.append('dados', JSON.stringify(dadosEnvio));
+                
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',  // 👈 IMPORTANTE: evita CORB
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(dadosEnvio)
+                    mode: 'cors',
+                    // Não defina Content-Type - o FormData faz isso
+                    body: formData
                 });
                 
-                // ⚠️ Com mode: 'no-cors', a resposta é opaca
-                // Não podemos ler o conteúdo, mas o App Script vai processar
+                // Tenta ler a resposta
+                let resultado;
+                try {
+                    const text = await response.text();
+                    console.log('📨 Resposta bruta:', text);
+                    resultado = JSON.parse(text);
+                } catch (e) {
+                    console.log('❌ Erro ao parsear resposta:', e);
+                    resultado = { success: false, message: 'Resposta inválida' };
+                }
                 
-                console.log('📨 Requisição enviada com mode: no-cors');
+                console.log('📨 Resultado:', resultado);
                 
-                // Como não podemos ler a resposta, assumimos sucesso
-                resultDiv.innerHTML = '';
-                
-                // POPUP DE SUCESSO
-                const popup = document.createElement('div');
-                popup.style.position = 'fixed';
-                popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
-                popup.style.background = 'rgba(0,0,0,0.9)';
-                popup.style.display = 'flex';
-                popup.style.alignItems = 'center';
-                popup.style.justifyContent = 'center';
-                popup.style.zIndex = '9999';
-                popup.innerHTML = `
-                    <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-                        <span style="font-size:64px;">✅</span>
-                        <h2 style="color:#27ae60; margin:16px 0 8px 0;">Documentos Enviados!</h2>
-                        <p style="color:#555; margin-bottom:8px;">Seus documentos foram enviados com sucesso.</p>
-                        <p style="font-size:12px; color:#888; margin-bottom:16px;">Aguarde a análise</p>
-                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
-                            Fechar
-                        </button>
-                    </div>
-                `;
-                document.body.appendChild(popup);
+                if (resultado.success) {
+                    // POPUP DE SUCESSO
+                    const popup = document.createElement('div');
+                    popup.style.position = 'fixed';
+                    popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
+                    popup.style.background = 'rgba(0,0,0,0.9)';
+                    popup.style.display = 'flex';
+                    popup.style.alignItems = 'center';
+                    popup.style.justifyContent = 'center';
+                    popup.style.zIndex = '9999';
+                    popup.innerHTML = `
+                        <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+                            <span style="font-size:64px;">✅</span>
+                            <h2 style="color:#27ae60; margin:16px 0 8px 0;">Documentos Enviados!</h2>
+                            <p style="color:#555; margin-bottom:8px;">Seus documentos foram enviados com sucesso.</p>
+                            <p style="font-size:12px; color:#888; margin-bottom:16px;">Pasta: ${resultado.pasta || 'Criada'}</p>
+                            <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
+                                Fechar
+                            </button>
+                        </div>
+                    `;
+                    document.body.appendChild(popup);
+                } else {
+                    throw new Error(resultado.message || 'Erro no processamento');
+                }
                 
             } catch(err) {
                 console.error('❌ Erro detalhado:', err);
