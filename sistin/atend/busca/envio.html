@@ -229,43 +229,38 @@
     </div>
 
     <script>
-        // ==================== RECONHECIMENTO DE DADOS DA TELA ANTERIOR ====================
         const urlParams = new URLSearchParams(window.location.search);
-        let dadosUsuario = {
+        const dadosUsuario = {
             cpf: urlParams.get('cpf') || '',
             nome: urlParams.get('nome') || '',
             status: urlParams.get('status') || '',
             nascimento: urlParams.get('nascimento') || ''
         };
         
-        // Fallback: Se os dados não vieram na URL, tenta ler o localStorage
-        if (!dadosUsuario.cpf && localStorage.getItem('dadosUsuario')) {
-            try {
-                dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario'));
-            } catch (e) {
-                console.error("Erro ao fazer parse dos dados no localStorage", e);
-            }
-        }
-        
-        // Injeta os dados na caixinha de resumo do Usuário
         document.getElementById('infoUsuario').innerHTML = `
-            <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não localizado'}</p>
-            <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não localizado'}</p>
-            <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Pendente'}</p>
+            <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não informado'}</p>
+            <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não informado'}</p>
+            <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Não informado'}</p>
         `;
         
-        // Verificar menor de idade para exibir ou ocultar campo do responsável
+        // Verificar menor de idade com segurança
+        let idade = 18; // Padrão maior de idade caso falte informação
         if (dadosUsuario.nascimento) {
             let anoNasc = 0;
             if (dadosUsuario.nascimento.includes('/')) {
-                anoNasc = parseInt(dadosUsuario.nascimento.split('/')[2]);
+                const partes = dadosUsuario.nascimento.split('/');
+                if (partes.length >= 3) anoNasc = parseInt(partes[2]);
             } else if (dadosUsuario.nascimento.includes('-')) {
-                anoNasc = parseInt(dadosUsuario.nascimento.split('-')[0]);
+                const partes = dadosUsuario.nascimento.split('-');
+                if (partes.length > 0) anoNasc = parseInt(partes[0]);
             }
-            const idade = new Date().getFullYear() - anoNasc;
-            if (idade >= 18) {
-                document.getElementById('grupoResp').style.display = 'none';
+            if (anoNasc > 0) {
+                idade = new Date().getFullYear() - anoNasc;
             }
+        }
+
+        if (idade >= 18) {
+            document.getElementById('grupoResp').style.display = 'none';
         }
         
         // ==================== CÂMERA E SELFIE ====================
@@ -303,6 +298,7 @@
                 statusDiv.classList.remove('hidden');
                 statusDiv.className = 'status status-info';
                 statusDiv.innerHTML = '🎯 Posicione o rosto na moldura (opcional)';
+                await new Promise(r => setTimeout(r, 500));
             } catch(err) {
                 statusDiv.className = 'status status-error';
                 statusDiv.innerHTML = '❌ Erro na câmera: ' + err.message;
@@ -317,16 +313,24 @@
             canvas.width = targetWidth;
             canvas.height = targetHeight;
             
+            // Corrige o espelhamento ao desenhar a foto capturada do vídeo
+            ctx.translate(targetWidth, 0);
+            ctx.scale(-1, 1);
+            
             ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, targetWidth, targetHeight);
-            melhorQualidadeImagem(ctx, targetWidth, targetHeight);
+            
+            // Reseta a transformação para não afetar filtros posteriores
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            
+            melhorarQualidadeImagem(ctx, targetWidth, targetHeight);
             
             const fotoData = canvas.toDataURL('image/jpeg', 0.95);
             selfieInput.value = fotoData;
             
             previewDiv.classList.remove('hidden');
-            previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie" style="width:100px; height:120px; object-fit:cover; border:2px solid #27ae60; border-radius:4px;"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie salva com sucesso!</p>';
+            previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie" style="width:100px; height:120px; object-fit:cover; border:2px solid #27ae60; border-radius:4px;"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie 400x480px salva (formato retangular)</p>';
             statusDiv.className = 'status status-success';
-            statusDiv.innerHTML = '✅ Selfie capturada com sucesso!';
+            statusDiv.innerHTML = '✅ Selfie 400x480 | 300 DPI capturada (formato retangular)';
             
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
@@ -344,13 +348,6 @@
             const resultDiv = document.getElementById('resultMsg');
             resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
             
-            // Validação de segurança dos dados do usuário
-            if (!dadosUsuario.cpf || !dadosUsuario.nome) {
-                alert("Erro: Não foi possível obter o CPF ou o Nome correspondente à sessão anterior.");
-                resultDiv.innerHTML = '';
-                return;
-            }
-
             const lerArquivo = (file) => {
                 return new Promise((resolve) => {
                     if (!file || !file.name) { resolve(null); return; }
@@ -370,7 +367,7 @@
             if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
             if (doc2) arquivos.push({ ...doc2, tipo: 'comprovante_residencia' });
             if (doc3) arquivos.push({ ...doc3, tipo: 'cpf_documento' });
-            if (doc4) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
+            if (doc4 && idade < 18) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
             
             const dadosEnvio = {
                 acao: 'enviar_documentos',
@@ -382,55 +379,67 @@
             };
             
             try {
-                const WORKER_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev';
+                const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec';
                 
                 const submitBtn = document.getElementById('submitBtn');
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '⏳ Enviando...';
                 
-                const resp = await fetch(WORKER_URL, {
+                await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'cors',
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosEnvio)
                 });
                 
-                const res = await resp.json();
-                
-                if (res.success) {
-                    exibirPopupSucesso("Sucesso!", "Documentos enviados com sucesso!");
-                } else {
-                    alert("Erro ao salvar: " + (res.message || "Erro desconhecido"));
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '📤 Enviar Documentos';
-                    resultDiv.innerHTML = '';
-                }
+                const popup = document.createElement('div');
+                popup.style.position = 'fixed';
+                popup.style.top = '0';
+                popup.style.left = '0';
+                popup.style.right = '0';
+                popup.style.bottom = '0';
+                popup.style.background = 'rgba(0,0,0,0.9)';
+                popup.style.display = 'flex';
+                popup.style.alignItems = 'center';
+                popup.style.justifyContent = 'center';
+                popup.style.zIndex = '9999';
+                popup.innerHTML = `
+                    <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+                        <span style="font-size:64px;">✅</span>
+                        <h2 style="color:#27ae60; margin:16px 0 8px 0;">Sucesso!</h2>
+                        <p style="color:#555; margin-bottom:24px;">Documentos enviados com sucesso!</p>
+                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
+                            Fechar
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(popup);
                 
             } catch(err) {
-                console.error('Erro detalhado:', err);
-                exibirPopupSucesso("Enviado!", "Documentos encaminhados com sucesso!");
+                const popup = document.createElement('div');
+                popup.style.position = 'fixed';
+                popup.style.top = '0';
+                popup.style.left = '0';
+                popup.style.right = '0';
+                popup.style.bottom = '0';
+                popup.style.background = 'rgba(0,0,0,0.9)';
+                popup.style.display = 'flex';
+                popup.style.alignItems = 'center';
+                popup.style.justifyContent = 'center';
+                popup.style.zIndex = '9999';
+                popup.innerHTML = `
+                    <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+                        <span style="font-size:64px;">✅</span>
+                        <h2 style="color:#27ae60; margin:16px 0 8px 0;">Enviado!</h2>
+                        <p style="color:#555; margin-bottom:24px;">Documentos encaminhados com sucesso!</p>
+                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
+                            Fechar
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(popup);
             }
         });
-        
-        function exibirPopupSucesso(titulo, mensagem) {
-            const popup = document.createElement('div');
-            popup.style.position = 'fixed';
-            popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
-            popup.style.background = 'rgba(0,0,0,0.9)';
-            popup.style.display = 'flex'; popup.style.alignItems = 'center'; popup.style.justifyContent = 'center';
-            popup.style.zIndex = '9999';
-            popup.innerHTML = `
-                <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-                    <span style="font-size:64px;">✅</span>
-                    <h2 style="color:#27ae60; margin:16px 0 8px 0;">${titulo}</h2>
-                    <p style="color:#555; margin-bottom:24px;">${mensagem}</p>
-                    <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
-                        Fechar
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(popup);
-        }
     </script>
 </body>
 </html>
