@@ -224,209 +224,223 @@
     </div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const dadosUsuario = {
-            cpf: urlParams.get('cpf') || '',
-            nome: urlParams.get('nome') || '',
-            status: urlParams.get('status') || '',
-            nascimento: urlParams.get('nascimento') || ''
+    const urlParams = new URLSearchParams(window.location.search);
+    const dadosUsuario = {
+        cpf: urlParams.get('cpf') || '',
+        nome: urlParams.get('nome') || '',
+        status: urlParams.get('status') || '',
+        nascimento: urlParams.get('nascimento') || ''
+    };
+    
+    document.getElementById('infoUsuario').innerHTML = `
+        <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não encontrado'}</p>
+        <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não encontrado'}</p>
+        <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Não encontrado'}</p>
+    `;
+    
+    let anoNasc = 0;
+    try {
+        if (dadosUsuario.nascimento && dadosUsuario.nascimento.includes('/')) {
+            anoNasc = parseInt(dadosUsuario.nascimento.split('/')[2]);
+        } else if (dadosUsuario.nascimento && dadosUsuario.nascimento.includes('-')) {
+            anoNasc = parseInt(dadosUsuario.nascimento.split('-')[0]);
+        }
+    } catch (e) { console.log(e); }
+
+    const idade = anoNasc > 0 ? (new Date().getFullYear() - anoNasc) : 18;
+    if (idade >= 18) {
+        document.getElementById('grupoResp').style.display = 'none';
+    }
+    
+    // ==================== CÂMERA ====================
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const btnCamera = document.getElementById('btnCamera');
+    const btnFoto = document.getElementById('btnFoto');
+    const faceOval = document.getElementById('faceOval');
+    const statusDiv = document.getElementById('statusMsg');
+    const previewDiv = document.getElementById('preview');
+    const selfieInput = document.getElementById('selfieData');
+    let stream = null;
+    
+    btnCamera.addEventListener('click', async () => {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } 
+            });
+            video.srcObject = stream;
+            video.style.display = 'block';
+            faceOval.classList.add('show');
+            btnCamera.classList.add('hidden');
+            btnFoto.classList.remove('hidden');
+            statusDiv.classList.remove('hidden');
+            statusDiv.className = 'status status-info';
+            statusDiv.innerText = 'Enquadre o rosto na moldura verde';
+        } catch (err) {
+            console.error(err);
+            statusDiv.classList.remove('hidden');
+            statusDiv.className = 'status status-error';
+            statusDiv.innerText = 'Erro ao acessar a câmera. Forneça a permissão.';
+        }
+    });
+    
+    btnFoto.addEventListener('click', () => {
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        context.translate(canvas.width, 0);
+        context.scale(-1, 1);
+        
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        const data = canvas.toDataURL('image/jpeg', 0.8);
+        selfieInput.value = data;
+        
+        previewDiv.innerHTML = `<h5>Preview da Selfie:</h5><img src="${data}" />`;
+        previewDiv.classList.remove('hidden');
+        
+        statusDiv.className = 'status status-success';
+        statusDiv.innerText = 'Selfie capturada com sucesso!';
+        
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        video.style.display = 'none';
+        faceOval.classList.remove('show');
+        btnFoto.classList.add('hidden');
+        btnCamera.classList.remove('hidden');
+        btnCamera.innerText = '📷 Tirar Outra Foto';
+    });
+
+    // ==================== ENVIO DOS DOCUMENTOS - VERSÃO CORRIGIDA ====================
+    document.getElementById('formDocs').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const resultDiv = document.getElementById('resultMsg');
+        resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
+        
+        const lerArquivo = (file) => {
+            return new Promise((resolve) => {
+                if (!file || !file.name) { resolve(null); return; }
+                const reader = new FileReader();
+                reader.onload = (e) => resolve({ base64: e.target.result, nome: file.name });
+                reader.readAsDataURL(file);
+            });
         };
         
-        document.getElementById('infoUsuario').innerHTML = `
-            <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não encontrado'}</p>
-            <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não encontrado'}</p>
-            <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Não encontrado'}</p>
-        `;
+        const doc1 = await lerArquivo(document.getElementById('doc1').files[0]);
+        const doc2 = await lerArquivo(document.getElementById('doc2').files[0]);
+        const doc3 = await lerArquivo(document.getElementById('doc3').files[0]);
+        const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
+        const selfie = selfieInput.value || '';
         
-        let anoNasc = 0;
-        try {
-            if (dadosUsuario.nascimento && dadosUsuario.nascimento.includes('/')) {
-                anoNasc = parseInt(dadosUsuario.nascimento.split('/')[2]);
-            } else if (dadosUsuario.nascimento && dadosUsuario.nascimento.includes('-')) {
-                anoNasc = parseInt(dadosUsuario.nascimento.split('-')[0]);
-            }
-        } catch (e) { console.log(e); }
-
-        const idade = anoNasc > 0 ? (new Date().getFullYear() - anoNasc) : 18;
-        if (idade >= 18) {
-            document.getElementById('grupoResp').style.display = 'none';
+        const arquivos = [];
+        if (doc1) arquivos.push(doc1);
+        if (doc2) arquivos.push(doc2);
+        if (doc3) arquivos.push(doc3);
+        if (doc4) arquivos.push(doc4);
+        
+        // Verifica se pelo menos um arquivo foi selecionado
+        if (arquivos.length === 0 && !selfie) {
+            resultDiv.innerHTML = `
+                <div style="background:#fff3cd; border:1px solid #ffc107; border-radius:12px; padding:16px; margin-top:10px; text-align:center;">
+                    <span style="font-size:24px;">⚠️</span>
+                    <p style="color:#856404; font-weight:600; margin-top:8px;">Anexe pelo menos um documento</p>
+                    <button onclick="location.reload()" style="margin-top:12px; padding:8px 24px; background:#ffc107; color:white; border:none; border-radius:8px; cursor:pointer;">
+                        Voltar
+                    </button>
+                </div>
+            `;
+            return;
         }
         
-        // CÂMERA
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const btnCamera = document.getElementById('btnCamera');
-        const btnFoto = document.getElementById('btnFoto');
-        const faceOval = document.getElementById('faceOval');
-        const statusDiv = document.getElementById('statusMsg');
-        const previewDiv = document.getElementById('preview');
-        const selfieInput = document.getElementById('selfieData');
-        let stream = null;
+        const dadosEnvio = {
+            cpf: dadosUsuario.cpf,
+            nome: dadosUsuario.nome,
+            status: dadosUsuario.status || 'Pendente',
+            selfie: selfie,
+            arquivos: arquivos
+        };
         
-        btnCamera.addEventListener('click', async () => {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } 
-                });
-                video.srcObject = stream;
-                video.style.display = 'block';
-                faceOval.classList.add('show');
-                btnCamera.classList.add('hidden');
-                btnFoto.classList.remove('hidden');
-                statusDiv.classList.remove('hidden');
-                statusDiv.className = 'status status-info';
-                statusDiv.innerText = 'Enquadre o rosto na moldura verde';
-            } catch (err) {
-                console.error(err);
-                statusDiv.classList.remove('hidden');
-                statusDiv.className = 'status status-error';
-                statusDiv.innerText = 'Erro ao acessar a câmera. Forneça a permissão.';
-            }
-        });
+        console.log('📤 Enviando dados:', dadosEnvio);
+        console.log('📎 Arquivos:', arquivos.length);
         
-        btnFoto.addEventListener('click', () => {
-            const context = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+        try {
+            // URL DO APP SCRIPT (use a URL do seu deploy)
+            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec';
             
-            context.translate(canvas.width, 0);
-            context.scale(-1, 1);
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '⏳ Enviando...';
             
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            // ✅ USANDO FormData com o campo 'dados'
+            const formData = new FormData();
+            formData.append('dados', JSON.stringify(dadosEnvio));
             
-            const data = canvas.toDataURL('image/jpeg', 0.8);
-            selfieInput.value = data;
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                // Não defina Content-Type - o FormData faz isso automaticamente
+                body: formData
+            });
             
-            previewDiv.innerHTML = `<h5>Preview da Selfie:</h5><img src="${data}" />`;
-            previewDiv.classList.remove('hidden');
+            // Tenta ler a resposta
+            const respostaTexto = await response.text();
+            console.log('📨 Resposta bruta:', respostaTexto);
             
-            statusDiv.className = 'status status-success';
-            statusDiv.innerText = 'Selfie capturada com sucesso!';
-            
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-            video.style.display = 'none';
-            faceOval.classList.remove('show');
-            btnFoto.classList.add('hidden');
-            btnCamera.classList.remove('hidden');
-            btnCamera.innerText = '📷 Tirar Outra Foto';
-        });
-
-        // ==================== ENVIO DOS DOCUMENTOS ====================
-        document.getElementById('formDocs').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const resultDiv = document.getElementById('resultMsg');
-            resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
-            
-            const lerArquivo = (file) => {
-                return new Promise((resolve) => {
-                    if (!file || !file.name) { resolve(null); return; }
-                    const reader = new FileReader();
-                    reader.onload = (e) => resolve({ base64: e.target.result, nome: file.name });
-                    reader.readAsDataURL(file);
-                });
-            };
-            
-            const doc1 = await lerArquivo(document.getElementById('doc1').files[0]);
-            const doc2 = await lerArquivo(document.getElementById('doc2').files[0]);
-            const doc3 = await lerArquivo(document.getElementById('doc3').files[0]);
-            const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
-            const selfie = selfieInput.value || '';
-            
-            const arquivos = [];
-            if (doc1) arquivos.push(doc1);
-            if (doc2) arquivos.push(doc2);
-            if (doc3) arquivos.push(doc3);
-            if (doc4) arquivos.push(doc4);
-            
-            const dadosEnvio = {
-                cpf: dadosUsuario.cpf,
-                nome: dadosUsuario.nome,
-                status: dadosUsuario.status || 'Pendente',
-                selfie: selfie,
-                arquivos: arquivos
-            };
-            
-            console.log('📤 Dados a enviar:', dadosEnvio);
-            console.log('📎 Arquivos:', arquivos.length);
-            console.log('🤳 Selfie:', selfie ? 'Sim (' + selfie.length + ' bytes)' : 'Não');
-            
+            let resultado;
             try {
-                const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec';
-                
-                const submitBtn = document.getElementById('submitBtn');
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '⏳ Enviando...';
-                
-                // ✅ Usando FormData (mais compatível)
-                const formData = new FormData();
-                formData.append('dados', JSON.stringify(dadosEnvio));
-                
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    // Não defina Content-Type - o FormData faz isso
-                    body: formData
-                });
-                
-                // Tenta ler a resposta
-                let resultado;
-                try {
-                    const text = await response.text();
-                    console.log('📨 Resposta bruta:', text);
-                    resultado = JSON.parse(text);
-                } catch (e) {
-                    console.log('❌ Erro ao parsear resposta:', e);
-                    resultado = { success: false, message: 'Resposta inválida' };
-                }
-                
-                console.log('📨 Resultado:', resultado);
-                
-                if (resultado.success) {
-                    // POPUP DE SUCESSO
-                    const popup = document.createElement('div');
-                    popup.style.position = 'fixed';
-                    popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
-                    popup.style.background = 'rgba(0,0,0,0.9)';
-                    popup.style.display = 'flex';
-                    popup.style.alignItems = 'center';
-                    popup.style.justifyContent = 'center';
-                    popup.style.zIndex = '9999';
-                    popup.innerHTML = `
-                        <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-                            <span style="font-size:64px;">✅</span>
-                            <h2 style="color:#27ae60; margin:16px 0 8px 0;">Documentos Enviados!</h2>
-                            <p style="color:#555; margin-bottom:8px;">Seus documentos foram enviados com sucesso.</p>
-                            <p style="font-size:12px; color:#888; margin-bottom:16px;">Pasta: ${resultado.pasta || 'Criada'}</p>
-                            <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
-                                Fechar
-                            </button>
-                        </div>
-                    `;
-                    document.body.appendChild(popup);
-                } else {
-                    throw new Error(resultado.message || 'Erro no processamento');
-                }
-                
-            } catch(err) {
-                console.error('❌ Erro detalhado:', err);
-                resultDiv.innerHTML = `
-                    <div style="background:#fee2e2; border:1px solid #ef4444; border-radius:12px; padding:16px; margin-top:10px; text-align:center;">
-                        <span style="font-size:24px;">❌</span>
-                        <p style="color:#991b1b; font-weight:600; margin-top:8px;">Erro ao enviar documentos</p>
-                        <p style="color:#6b7280; font-size:14px;">${err.message || 'Tente novamente'}</p>
-                        <button onclick="location.reload()" style="margin-top:12px; padding:8px 24px; background:#ef4444; color:white; border:none; border-radius:8px; cursor:pointer;">
-                            Tentar novamente
+                resultado = JSON.parse(respostaTexto);
+            } catch (e) {
+                console.error('❌ Erro ao parsear JSON:', e);
+                resultado = { success: false, message: 'Resposta inválida do servidor: ' + respostaTexto.substring(0, 100) };
+            }
+            
+            resultDiv.innerHTML = '';
+            
+            if (resultado.success) {
+                // POPUP DE SUCESSO
+                const popup = document.createElement('div');
+                popup.style.position = 'fixed';
+                popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
+                popup.style.background = 'rgba(0,0,0,0.9)';
+                popup.style.display = 'flex';
+                popup.style.alignItems = 'center';
+                popup.style.justifyContent = 'center';
+                popup.style.zIndex = '9999';
+                popup.innerHTML = `
+                    <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:350px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+                        <span style="font-size:64px;">✅</span>
+                        <h2 style="color:#27ae60; margin:16px 0 8px 0;">Documentos Enviados!</h2>
+                        <p style="color:#555; margin-bottom:8px;">Seus documentos foram enviados com sucesso.</p>
+                        <p style="font-size:12px; color:#888; margin-bottom:16px;">Pasta: ${resultado.pasta || 'Criada'}</p>
+                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
+                            Fechar
                         </button>
                     </div>
                 `;
-            } finally {
-                const submitBtn = document.getElementById('submitBtn');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '📤 Enviar Documentos';
+                document.body.appendChild(popup);
+            } else {
+                throw new Error(resultado.message || 'Erro no processamento');
             }
-        });
-    </script>
+            
+        } catch(err) {
+            console.error('❌ Erro detalhado:', err);
+            resultDiv.innerHTML = `
+                <div style="background:#fee2e2; border:1px solid #ef4444; border-radius:12px; padding:16px; margin-top:10px; text-align:center;">
+                    <span style="font-size:24px;">❌</span>
+                    <p style="color:#991b1b; font-weight:600; margin-top:8px;">Erro ao enviar documentos</p>
+                    <p style="color:#6b7280; font-size:14px;">${err.message || 'Tente novamente'}</p>
+                    <button onclick="location.reload()" style="margin-top:12px; padding:8px 24px; background:#ef4444; color:white; border:none; border-radius:8px; cursor:pointer;">
+                        Tentar novamente
+                    </button>
+                </div>
+            `;
+        } finally {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '📤 Enviar Documentos';
+        }
+    });
+</script>
 </body>
 </html>
