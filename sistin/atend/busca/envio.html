@@ -129,10 +129,7 @@
         canvas { display: none; }
         .loading {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.9);
             display: flex;
             justify-content: center;
@@ -257,7 +254,7 @@
             document.getElementById('grupoResp').style.display = 'none';
         }
         
-        // ==================== CÂMERA ====================
+        // CÂMERA
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const btnCamera = document.getElementById('btnCamera');
@@ -312,7 +309,7 @@
             btnCamera.innerHTML = '📷 Reabrir Câmera';
         });
         
-        // ==================== ENVIO DOS DOCUMENTOS ====================
+        // ENVIO DOS DOCUMENTOS
         document.getElementById('formDocs').addEventListener('submit', async (e) => {
             e.preventDefault();
             const resultDiv = document.getElementById('resultMsg');
@@ -333,7 +330,6 @@
             const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
             const selfie = selfieInput.value || '';
             
-            // Junta todos os arquivos válidos no array esperado pela função processarDocumentosV2
             const arquivos = [];
             if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
             if (doc2) arquivos.push({ ...doc2, tipo: 'comprovante_residencia' });
@@ -363,7 +359,10 @@
                     body: JSON.stringify(dadosEnvio)
                 });
                 
-                // Exibe o popup de sucesso direto
+                // Remove tela de carregamento antiga
+                resultDiv.innerHTML = '';
+                
+                // Exibe Pop-up de Sucesso
                 const popup = document.createElement('div');
                 popup.style.position = 'fixed';
                 popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
@@ -380,7 +379,7 @@
                 document.body.appendChild(popup);
                 
             } catch(err) {
-                console.log(err);
+                resultDiv.innerHTML = '<p style="color:red; text-align:center; margin-top:10px;">Erro ao ligar ao servidor.</p>';
             }
         });
     </script>
