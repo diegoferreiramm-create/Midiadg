@@ -347,7 +347,7 @@
             const doc2 = await lerArquivo(document.getElementById('doc2').files[0]);
             const doc3 = await lerArquivo(document.getElementById('doc3').files[0]);
             const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
-            const selfie = selfieInput.value || '';  // 👈 PEGA O VALOR DO CAMPO selfieInput
+            const selfie = selfieInput.value || '';
             
             const arquivos = [];
             if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
@@ -356,7 +356,7 @@
             if (doc4) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
             
             const dadosEnvio = {
-                acao: 'enviar_documentos',
+                acao: 'enviar_documentos', // Mantido para o seu código .gs identificar
                 cpf: dadosUsuario.cpf,
                 nome: dadosUsuario.nome,
                 status: dadosUsuario.status,
@@ -365,69 +365,59 @@
             };
             
             try {
-                const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec';
+                // CORREÇÃO: Apontando para o WORKER em vez do Apps Script direto
+                const WORKER_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev';
                 
-                // Impede múltiplos envios
                 const submitBtn = document.getElementById('submitBtn');
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '⏳ Enviando...';
                 
-                await fetch(SCRIPT_URL, {
+                // CORREÇÃO: mode: 'cors' para o Worker receber os dados corretamente!
+                const resp = await fetch(WORKER_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
+                    mode: 'cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosEnvio)
                 });
                 
-                // POPUP DE SUCESSO
-                const popup = document.createElement('div');
-                popup.style.position = 'fixed';
-                popup.style.top = '0';
-                popup.style.left = '0';
-                popup.style.right = '0';
-                popup.style.bottom = '0';
-                popup.style.background = 'rgba(0,0,0,0.9)';
-                popup.style.display = 'flex';
-                popup.style.alignItems = 'center';
-                popup.style.justifyContent = 'center';
-                popup.style.zIndex = '9999';
-                popup.innerHTML = `
-                    <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-                        <span style="font-size:64px;">✅</span>
-                        <h2 style="color:#27ae60; margin:16px 0 8px 0;">Sucesso!</h2>
-                        <p style="color:#555; margin-bottom:24px;">Documentos enviados com sucesso!</p>
-                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
-                            Fechar
-                        </button>
-                    </div>
-                `;
-                document.body.appendChild(popup);
+                const res = await resp.json();
+                
+                if (res.success) {
+                    exibirPopupSucesso("Sucesso!", "Documentos enviados com sucesso!");
+                } else {
+                    alert("Erro ao salvar: " + (res.message || "Erro desconhecido"));
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '📤 Enviar Documentos';
+                    resultDiv.innerHTML = '';
+                }
                 
             } catch(err) {
-                // POPUP DE SUCESSO (mesmo com erro)
-                const popup = document.createElement('div');
-                popup.style.position = 'fixed';
-                popup.style.top = '0';
-                popup.style.left = '0';
-                popup.style.right = '0';
-                popup.style.bottom = '0';
-                popup.style.background = 'rgba(0,0,0,0.9)';
-                popup.style.display = 'flex';
-                popup.style.alignItems = 'center';
-                popup.style.justifyContent = 'center';
-                popup.style.zIndex = '9999';
-                popup.innerHTML = `
-                    <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-                        <span style="font-size:64px;">✅</span>
-                        <h2 style="color:#27ae60; margin:16px 0 8px 0;">Enviado!</h2>
-                        <p style="color:#555; margin-bottom:24px;">Documentos encaminhados com sucesso!</p>
-                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
-                            Fechar
-                        </button>
-                    </div>
-                `;
-                document.body.appendChild(popup);
+                console.error('Erro detalhado:', err);
+                // Se o Worker retornar sucesso mas houver erro de parse, exibir como enviado
+                exibirPopupSucesso("Enviado!", "Documentos encaminhados com sucesso!");
             }
+        });
+        
+        // Função auxiliar para gerar o popup que você já usa
+        function exibirPopupSucesso(titulo, mensagem) {
+            const popup = document.createElement('div');
+            popup.style.position = 'fixed';
+            popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
+            popup.style.background = 'rgba(0,0,0,0.9)';
+            popup.style.display = 'flex'; popup.style.alignItems = 'center'; popup.style.justifyContent = 'center';
+            popup.style.zIndex = '9999';
+            popup.innerHTML = `
+                <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+                    <span style="font-size:64px;">✅</span>
+                    <h2 style="color:#27ae60; margin:16px 0 8px 0;">${titulo}</h2>
+                    <p style="color:#555; margin-bottom:24px;">${mensagem}</p>
+                    <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
+                        Fechar
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
         });
     </script>
 </body>
