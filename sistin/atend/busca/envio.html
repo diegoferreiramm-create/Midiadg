@@ -229,30 +229,43 @@
     </div>
 
     <script>
+        // ==================== RECONHECIMENTO DE DADOS DA TELA ANTERIOR ====================
         const urlParams = new URLSearchParams(window.location.search);
-        const dadosUsuario = {
+        let dadosUsuario = {
             cpf: urlParams.get('cpf') || '',
             nome: urlParams.get('nome') || '',
             status: urlParams.get('status') || '',
             nascimento: urlParams.get('nascimento') || ''
         };
         
+        // Fallback: Se os dados não vieram na URL, tenta ler o localStorage
+        if (!dadosUsuario.cpf && localStorage.getItem('dadosUsuario')) {
+            try {
+                dadosUsuario = JSON.parse(localStorage.getItem('dadosUsuario'));
+            } catch (e) {
+                console.error("Erro ao fazer parse dos dados no localStorage", e);
+            }
+        }
+        
+        // Injeta os dados na caixinha de resumo do Usuário
         document.getElementById('infoUsuario').innerHTML = `
-            <p><strong>👤 Nome:</strong> ${dadosUsuario.nome}</p>
-            <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf}</p>
-            <p><strong>📊 Status:</strong> ${dadosUsuario.status}</p>
+            <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não localizado'}</p>
+            <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não localizado'}</p>
+            <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Pendente'}</p>
         `;
         
-        // Verificar menor de idade
-        let anoNasc = 0;
-        if (dadosUsuario.nascimento.includes('/')) {
-            anoNasc = parseInt(dadosUsuario.nascimento.split('/')[2]);
-        } else if (dadosUsuario.nascimento.includes('-')) {
-            anoNasc = parseInt(dadosUsuario.nascimento.split('-')[0]);
-        }
-        const idade = new Date().getFullYear() - anoNasc;
-        if (idade >= 18) {
-            document.getElementById('grupoResp').style.display = 'none';
+        // Verificar menor de idade para exibir ou ocultar campo do responsável
+        if (dadosUsuario.nascimento) {
+            let anoNasc = 0;
+            if (dadosUsuario.nascimento.includes('/')) {
+                anoNasc = parseInt(dadosUsuario.nascimento.split('/')[2]);
+            } else if (dadosUsuario.nascimento.includes('-')) {
+                anoNasc = parseInt(dadosUsuario.nascimento.split('-')[0]);
+            }
+            const idade = new Date().getFullYear() - anoNasc;
+            if (idade >= 18) {
+                document.getElementById('grupoResp').style.display = 'none';
+            }
         }
         
         // ==================== CÂMERA E SELFIE ====================
@@ -290,7 +303,6 @@
                 statusDiv.classList.remove('hidden');
                 statusDiv.className = 'status status-info';
                 statusDiv.innerHTML = '🎯 Posicione o rosto na moldura (opcional)';
-                await new Promise(r => setTimeout(r, 500));
             } catch(err) {
                 statusDiv.className = 'status status-error';
                 statusDiv.innerHTML = '❌ Erro na câmera: ' + err.message;
@@ -305,18 +317,16 @@
             canvas.width = targetWidth;
             canvas.height = targetHeight;
             
-            // Desenha o vídeo inteiro SEM cortar, apenas redimensionando (SALVA QUADRADO/RETANGULAR)
             ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, targetWidth, targetHeight);
-            melhorarQualidadeImagem(ctx, targetWidth, targetHeight);
+            melhorQualidadeImagem(ctx, targetWidth, targetHeight);
             
             const fotoData = canvas.toDataURL('image/jpeg', 0.95);
             selfieInput.value = fotoData;
             
-            // Preview retangular (sem borda redonda)
             previewDiv.classList.remove('hidden');
-            previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie" style="width:100px; height:120px; object-fit:cover; border:2px solid #27ae60; border-radius:4px;"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie 400x480px salva (formato retangular)</p>';
+            previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie" style="width:100px; height:120px; object-fit:cover; border:2px solid #27ae60; border-radius:4px;"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie salva com sucesso!</p>';
             statusDiv.className = 'status status-success';
-            statusDiv.innerHTML = '✅ Selfie 400x480 | 300 DPI capturada (formato retangular)';
+            statusDiv.innerHTML = '✅ Selfie capturada com sucesso!';
             
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
@@ -334,6 +344,13 @@
             const resultDiv = document.getElementById('resultMsg');
             resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
             
+            // Validação de segurança dos dados do usuário
+            if (!dadosUsuario.cpf || !dadosUsuario.nome) {
+                alert("Erro: Não foi possível obter o CPF ou o Nome correspondente à sessão anterior.");
+                resultDiv.innerHTML = '';
+                return;
+            }
+
             const lerArquivo = (file) => {
                 return new Promise((resolve) => {
                     if (!file || !file.name) { resolve(null); return; }
@@ -356,7 +373,7 @@
             if (doc4) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
             
             const dadosEnvio = {
-                acao: 'enviar_documentos', // Mantido para o seu código .gs identificar
+                acao: 'enviar_documentos',
                 cpf: dadosUsuario.cpf,
                 nome: dadosUsuario.nome,
                 status: dadosUsuario.status,
@@ -365,14 +382,12 @@
             };
             
             try {
-                // CORREÇÃO: Apontando para o WORKER em vez do Apps Script direto
                 const WORKER_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev';
                 
                 const submitBtn = document.getElementById('submitBtn');
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '⏳ Enviando...';
                 
-                // CORREÇÃO: mode: 'cors' para o Worker receber os dados corretamente!
                 const resp = await fetch(WORKER_URL, {
                     method: 'POST',
                     mode: 'cors',
@@ -393,12 +408,10 @@
                 
             } catch(err) {
                 console.error('Erro detalhado:', err);
-                // Se o Worker retornar sucesso mas houver erro de parse, exibir como enviado
                 exibirPopupSucesso("Enviado!", "Documentos encaminhados com sucesso!");
             }
         });
         
-        // Função auxiliar para gerar o popup que você já usa
         function exibirPopupSucesso(titulo, mensagem) {
             const popup = document.createElement('div');
             popup.style.position = 'fixed';
@@ -418,7 +431,6 @@
             `;
             document.body.appendChild(popup);
         }
-        });
     </script>
 </body>
 </html>
