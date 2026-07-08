@@ -313,7 +313,7 @@
         btnCamera.innerText = '📷 Tirar Outra Foto';
     });
 
-    // ==================== ENVIO DOS DOCUMENTOS - VERSÃO DEFINITIVA ====================
+    // ==================== ENVIO DOS DOCUMENTOS - VIA WORKER ====================
     document.getElementById('formDocs').addEventListener('submit', async (e) => {
         e.preventDefault();
         const resultDiv = document.getElementById('resultMsg');
@@ -353,7 +353,6 @@
             return;
         }
         
-        // ✅ LIMPA O CPF (remove pontos e traços)
         const cpfLimpo = dadosUsuario.cpf.replace(/[^\d]/g, '');
         
         const dadosEnvio = {
@@ -366,17 +365,16 @@
         
         console.log('📤 Enviando dados:', dadosEnvio);
         console.log('📎 Arquivos:', arquivos.length);
-        console.log('📎 Tamanho do arquivo:', arquivos[0]?.base64?.length || 0);
         
         try {
-            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec';
+            // ✅ USA O WORKER (NÃO DIRETO AO APP SCRIPT)
+            const WORKER_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev';
             
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '⏳ Enviando...';
             
-            // ✅ ENVIA COMO JSON (NÃO FormData)
-            const response = await fetch(SCRIPT_URL, {
+            const response = await fetch(WORKER_URL, {
                 method: 'POST',
                 mode: 'cors',
                 headers: {
@@ -399,7 +397,6 @@
             console.log('📨 Resultado:', resultado);
             
             if (resultado.success) {
-                // POPUP DE SUCESSO
                 const popup = document.createElement('div');
                 popup.style.position = 'fixed';
                 popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
@@ -431,7 +428,6 @@
                     <span style="font-size:24px;">❌</span>
                     <p style="color:#991b1b; font-weight:600; margin-top:8px;">Erro ao enviar documentos</p>
                     <p style="color:#6b7280; font-size:14px;">${err.message || 'Tente novamente'}</p>
-                    <p style="color:#6b7280; font-size:12px; margin-top:4px;">CPF: ${dadosUsuario.cpf}</p>
                     <button onclick="location.reload()" style="margin-top:12px; padding:8px 24px; background:#ef4444; color:white; border:none; border-radius:8px; cursor:pointer;">
                         Tentar novamente
                     </button>
