@@ -313,7 +313,7 @@
         btnCamera.innerText = '📷 Tirar Outra Foto';
     });
 
-    // ==================== ENVIO DOS DOCUMENTOS - VIA WORKER ====================
+    // ==================== ENVIO DOS DOCUMENTOS - VIA FORMDATA DIRETO ====================
     document.getElementById('formDocs').addEventListener('submit', async (e) => {
         e.preventDefault();
         const resultDiv = document.getElementById('resultMsg');
@@ -367,20 +367,21 @@
         console.log('📎 Arquivos:', arquivos.length);
         
         try {
-            // ✅ USA O WORKER (NÃO DIRETO AO APP SCRIPT)
-            const WORKER_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev';
+            // ✅ URL DIRETA DO APP SCRIPT
+            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec';
             
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '⏳ Enviando...';
             
-            const response = await fetch(WORKER_URL, {
+            // ✅ USANDO FORMDATA - BURLA O CORS
+            const formData = new FormData();
+            formData.append('dados', JSON.stringify(dadosEnvio));
+            
+            const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'cors',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dadosEnvio)
+                // NÃO DEFINA Content-Type - o FormData faz isso automaticamente
+                body: formData
             });
             
             const respostaTexto = await response.text();
@@ -391,7 +392,11 @@
                 resultado = JSON.parse(respostaTexto);
             } catch (e) {
                 console.error('❌ Erro ao parsear JSON:', e);
-                resultado = { success: false, message: 'Resposta inválida: ' + respostaTexto.substring(0, 100) };
+                // Se retornou HTML, tenta extrair a mensagem
+                if (respostaTexto.includes('Página não encontrada')) {
+                    throw new Error('URL do App Script inválida. Verifique o deploy.');
+                }
+                throw new Error('Resposta inválida do servidor');
             }
             
             console.log('📨 Resultado:', resultado);
@@ -418,7 +423,7 @@
                 `;
                 document.body.appendChild(popup);
             } else {
-                throw new Error(resultado.message || resultado.error || 'Erro no processamento');
+                throw new Error(resultado.error || resultado.message || 'Erro no processamento');
             }
             
         } catch(err) {
