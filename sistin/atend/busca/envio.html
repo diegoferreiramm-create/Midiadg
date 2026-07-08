@@ -313,7 +313,7 @@
         btnCamera.innerText = '📷 Tirar Outra Foto';
     });
 
-    // ==================== ENVIO DOS DOCUMENTOS - VERSÃO CORRIGIDA ====================
+    // ==================== ENVIO DOS DOCUMENTOS - VERSÃO DEFINITIVA ====================
     document.getElementById('formDocs').addEventListener('submit', async (e) => {
         e.preventDefault();
         const resultDiv = document.getElementById('resultMsg');
@@ -340,7 +340,6 @@
         if (doc3) arquivos.push(doc3);
         if (doc4) arquivos.push(doc4);
         
-        // Verifica se pelo menos um arquivo foi selecionado
         if (arquivos.length === 0 && !selfie) {
             resultDiv.innerHTML = `
                 <div style="background:#fff3cd; border:1px solid #ffc107; border-radius:12px; padding:16px; margin-top:10px; text-align:center;">
@@ -354,8 +353,11 @@
             return;
         }
         
+        // ✅ LIMPA O CPF (remove pontos e traços)
+        const cpfLimpo = dadosUsuario.cpf.replace(/[^\d]/g, '');
+        
         const dadosEnvio = {
-            cpf: dadosUsuario.cpf,
+            cpf: cpfLimpo,
             nome: dadosUsuario.nome,
             status: dadosUsuario.status || 'Pendente',
             selfie: selfie,
@@ -364,26 +366,25 @@
         
         console.log('📤 Enviando dados:', dadosEnvio);
         console.log('📎 Arquivos:', arquivos.length);
+        console.log('📎 Tamanho do arquivo:', arquivos[0]?.base64?.length || 0);
         
         try {
-            // URL DO APP SCRIPT (use a URL do seu deploy)
             const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec';
             
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '⏳ Enviando...';
             
-            // ✅ USANDO FormData com o campo 'dados'
-            const formData = new FormData();
-            formData.append('dados', JSON.stringify(dadosEnvio));
-            
+            // ✅ ENVIA COMO JSON (NÃO FormData)
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                // Não defina Content-Type - o FormData faz isso automaticamente
-                body: formData
+                mode: 'cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dadosEnvio)
             });
             
-            // Tenta ler a resposta
             const respostaTexto = await response.text();
             console.log('📨 Resposta bruta:', respostaTexto);
             
@@ -392,10 +393,10 @@
                 resultado = JSON.parse(respostaTexto);
             } catch (e) {
                 console.error('❌ Erro ao parsear JSON:', e);
-                resultado = { success: false, message: 'Resposta inválida do servidor: ' + respostaTexto.substring(0, 100) };
+                resultado = { success: false, message: 'Resposta inválida: ' + respostaTexto.substring(0, 100) };
             }
             
-            resultDiv.innerHTML = '';
+            console.log('📨 Resultado:', resultado);
             
             if (resultado.success) {
                 // POPUP DE SUCESSO
@@ -420,7 +421,7 @@
                 `;
                 document.body.appendChild(popup);
             } else {
-                throw new Error(resultado.message || 'Erro no processamento');
+                throw new Error(resultado.message || resultado.error || 'Erro no processamento');
             }
             
         } catch(err) {
@@ -430,6 +431,7 @@
                     <span style="font-size:24px;">❌</span>
                     <p style="color:#991b1b; font-weight:600; margin-top:8px;">Erro ao enviar documentos</p>
                     <p style="color:#6b7280; font-size:14px;">${err.message || 'Tente novamente'}</p>
+                    <p style="color:#6b7280; font-size:12px; margin-top:4px;">CPF: ${dadosUsuario.cpf}</p>
                     <button onclick="location.reload()" style="margin-top:12px; padding:8px 24px; background:#ef4444; color:white; border:none; border-radius:8px; cursor:pointer;">
                         Tentar novamente
                     </button>
