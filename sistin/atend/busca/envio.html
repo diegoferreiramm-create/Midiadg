@@ -245,9 +245,7 @@
             } else if (dadosUsuario.nascimento && dadosUsuario.nascimento.includes('-')) {
                 anoNasc = parseInt(dadosUsuario.nascimento.split('-')[0]);
             }
-        } catch (e) {
-            console.log(e);
-        }
+        } catch (e) { console.log(e); }
 
         const idade = anoNasc > 0 ? (new Date().getFullYear() - anoNasc) : 18;
         if (idade >= 18) {
@@ -277,43 +275,49 @@
                 btnFoto.classList.remove('hidden');
                 statusDiv.classList.remove('hidden');
                 statusDiv.className = 'status status-info';
-                statusDiv.innerHTML = '🎯 Posicione o rosto na moldura (opcional)';
-            } catch(err) {
-                statusDiv.className = 'status status-error';
-                statusDiv.innerHTML = '❌ Erro na câmera: ' + err.message;
+                statusDiv.innerText = 'Enquadre o rosto na moldura verde';
+            } catch (err) {
+                console.error(err);
                 statusDiv.classList.remove('hidden');
+                statusDiv.className = 'status status-error';
+                statusDiv.innerText = 'Erro ao acessar a câmera. Forneça a permissão.';
             }
         });
         
         btnFoto.addEventListener('click', () => {
-            const ctx = canvas.getContext('2d');
-            canvas.width = 400;
-            canvas.height = 480;
-            ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, 400, 480);
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
             
-            const fotoData = canvas.toDataURL('image/jpeg', 0.95);
-            selfieInput.value = fotoData;
+            context.translate(canvas.width, 0);
+            context.scale(-1, 1);
             
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const data = canvas.toDataURL('image/jpeg', 0.8);
+            selfieInput.value = data;
+            
+            previewDiv.innerHTML = `<h5>Preview da Selfie:</h5><img src="${data}" />`;
             previewDiv.classList.remove('hidden');
-            previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie" style="width:100px; height:120px; object-fit:cover; border:2px solid #27ae60; border-radius:4px;"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie salva</p>';
+            
             statusDiv.className = 'status status-success';
-            statusDiv.innerHTML = '✅ Selfie capturada!';
+            statusDiv.innerText = 'Selfie capturada com sucesso!';
             
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
-                video.style.display = 'none';
             }
-            btnFoto.classList.add('hidden');
+            video.style.display = 'none';
             faceOval.classList.remove('show');
+            btnFoto.classList.add('hidden');
             btnCamera.classList.remove('hidden');
-            btnCamera.innerHTML = '📷 Reabrir Câmera';
+            btnCamera.innerText = '📷 Tirar Outra Foto';
         });
-        
-        // ENVIO DOS DOCUMENTOS
+
+        // ENVIO DOS DOCUMENTOS SEM USAR NO-CORS CRU (Evita CORB do Navegador)
         document.getElementById('formDocs').addEventListener('submit', async (e) => {
             e.preventDefault();
             const resultDiv = document.getElementById('resultMsg');
-            resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
+            resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos de segurança...</p></div>';
             
             const lerArquivo = (file) => {
                 return new Promise((resolve) => {
@@ -331,16 +335,14 @@
             const selfie = selfieInput.value || '';
             
             const arquivos = [];
-            if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
-            if (doc2) arquivos.push({ ...doc2, tipo: 'comprovante_residencia' });
-            if (doc3) arquivos.push({ ...doc3, tipo: 'cpf_documento' });
-            if (doc4) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
+            if (doc1) arquivos.push(doc1);
+            if (doc2) arquivos.push(doc2);
+            if (doc3) arquivos.push(doc3);
+            if (doc4) arquivos.push(doc4);
             
             const dadosEnvio = {
-                acao: 'enviar_documentos',
                 cpf: dadosUsuario.cpf,
                 nome: dadosUsuario.nome,
-                status: dadosUsuario.status,
                 selfie: selfie,
                 arquivos: arquivos
             };
@@ -352,17 +354,19 @@
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '⏳ Enviando...';
                 
+                // USANDO FORMDATA: Transforma a requisição num envio de formulário padrão. 
+                // O Navegador aceita nativamente e ignora o CORB.
+                const formData = new FormData();
+                formData.append('dados', JSON.stringify(dadosEnvio));
+
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dadosEnvio)
+                    body: formData
                 });
                 
-                // Remove tela de carregamento antiga
                 resultDiv.innerHTML = '';
                 
-                // Exibe Pop-up de Sucesso
+                // POPUP DE SUCESSO NATIVO
                 const popup = document.createElement('div');
                 popup.style.position = 'fixed';
                 popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
@@ -372,13 +376,14 @@
                     <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
                         <span style="font-size:64px;">✅</span>
                         <h2 style="color:#27ae60; margin:16px 0 8px 0;">Sucesso!</h2>
-                        <p style="color:#555; margin-bottom:24px;">Documentos enviados com sucesso!</p>
-                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">Fechar</button>
+                        <p style="color:#555; margin-bottom:24px;">Os seus ficheiros foram processados e guardados.</p>
+                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">Fechar Aba</button>
                     </div>
                 `;
                 document.body.appendChild(popup);
                 
             } catch(err) {
+                console.error(err);
                 resultDiv.innerHTML = '<p style="color:red; text-align:center; margin-top:10px;">Erro ao ligar ao servidor.</p>';
             }
         });
