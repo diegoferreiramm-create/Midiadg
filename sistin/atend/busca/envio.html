@@ -172,8 +172,6 @@
             margin-left: 8px;
             vertical-align: middle;
         }
-        .success-msg { color: #27ae60; text-align: center; padding: 20px; }
-        .error-msg { color: #ef476f; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
@@ -237,14 +235,12 @@
             nascimento: urlParams.get('nascimento') || ''
         };
         
-        // Exibe com segurança na tela
         document.getElementById('infoUsuario').innerHTML = `
-            <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não informado'}</p>
-            <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não informado'}</p>
-            <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Não informado'}</p>
+            <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não encontrado'}</p>
+            <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não encontrado'}</p>
+            <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Não encontrado'}</p>
         `;
         
-        // Verificar menor de idade com proteção para não travar o script
         let anoNasc = 0;
         try {
             if (dadosUsuario.nascimento && dadosUsuario.nascimento.includes('/')) {
@@ -261,7 +257,7 @@
             document.getElementById('grupoResp').style.display = 'none';
         }
         
-        // ==================== CÂMERA E SELFIE ====================
+        // ==================== CÂMERA ====================
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const btnCamera = document.getElementById('btnCamera');
@@ -271,17 +267,6 @@
         const previewDiv = document.getElementById('preview');
         const selfieInput = document.getElementById('selfieData');
         let stream = null;
-        
-        function melhorarQualidadeImagem(ctx, width, height) {
-            const imageData = ctx.getImageData(0, 0, width, height);
-            const data = imageData.data;
-            for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.min(255, data[i] * 1.1);
-                data[i+1] = Math.min(255, data[i+1] * 1.1);
-                data[i+2] = Math.min(255, data[i+2] * 1.1);
-            }
-            ctx.putImageData(imageData, 0, 0);
-        }
         
         btnCamera.addEventListener('click', async () => {
             try {
@@ -296,7 +281,6 @@
                 statusDiv.classList.remove('hidden');
                 statusDiv.className = 'status status-info';
                 statusDiv.innerHTML = '🎯 Posicione o rosto na moldura (opcional)';
-                await new Promise(r => setTimeout(r, 500));
             } catch(err) {
                 statusDiv.className = 'status status-error';
                 statusDiv.innerHTML = '❌ Erro na câmera: ' + err.message;
@@ -306,13 +290,9 @@
         
         btnFoto.addEventListener('click', () => {
             const ctx = canvas.getContext('2d');
-            const targetWidth = 400;
-            const targetHeight = 480;
-            canvas.width = targetWidth;
-            canvas.height = targetHeight;
-            
-            ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, targetWidth, targetHeight);
-            melhorarQualidadeImagem(ctx, targetWidth, targetHeight);
+            canvas.width = 400;
+            canvas.height = 480;
+            ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, 400, 480);
             
             const fotoData = canvas.toDataURL('image/jpeg', 0.95);
             selfieInput.value = fotoData;
@@ -332,7 +312,7 @@
             btnCamera.innerHTML = '📷 Reabrir Câmera';
         });
         
-        // ==================== ENVIO DOS DOCUMENTOS CORRIGIDO ====================
+        // ==================== ENVIO DOS DOCUMENTOS ====================
         document.getElementById('formDocs').addEventListener('submit', async (e) => {
             e.preventDefault();
             const resultDiv = document.getElementById('resultMsg');
@@ -353,17 +333,20 @@
             const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
             const selfie = selfieInput.value || '';
             
-            // CORREÇÃO AQUI: Montando exatamente a estrutura que o Codigo.gs espera receber
+            // Junta todos os arquivos válidos no array esperado pela função processarDocumentosV2
+            const arquivos = [];
+            if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
+            if (doc2) arquivos.push({ ...doc2, tipo: 'comprovante_residencia' });
+            if (doc3) arquivos.push({ ...doc3, tipo: 'cpf_documento' });
+            if (doc4) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
+            
             const dadosEnvio = {
                 acao: 'enviar_documentos',
                 cpf: dadosUsuario.cpf,
                 nome: dadosUsuario.nome,
                 status: dadosUsuario.status,
-                declaracao_ensino: doc1,
-                comprovante_residencia: doc2,
-                cpf_documento: doc3,
-                documento_responsavel: doc4,
-                selfie: selfie
+                selfie: selfie,
+                arquivos: arquivos
             };
             
             try {
@@ -380,52 +363,24 @@
                     body: JSON.stringify(dadosEnvio)
                 });
                 
+                // Exibe o popup de sucesso direto
                 const popup = document.createElement('div');
                 popup.style.position = 'fixed';
-                popup.style.top = '0';
-                popup.style.left = '0';
-                popup.style.right = '0';
-                popup.style.bottom = '0';
-                popup.style.background = 'rgba(0,0,0,0.9)';
-                popup.style.display = 'flex';
-                popup.style.alignItems = 'center';
-                popup.style.justifyContent = 'center';
-                popup.style.zIndex = '9999';
+                popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
+                popup.style.background = 'rgba(0,0,0,0.9)'; popup.style.display = 'flex';
+                popup.style.alignItems = 'center'; popup.style.justifyContent = 'center'; popup.style.zIndex = '9999';
                 popup.innerHTML = `
                     <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
                         <span style="font-size:64px;">✅</span>
                         <h2 style="color:#27ae60; margin:16px 0 8px 0;">Sucesso!</h2>
                         <p style="color:#555; margin-bottom:24px;">Documentos enviados com sucesso!</p>
-                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
-                            Fechar
-                        </button>
+                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">Fechar</button>
                     </div>
                 `;
                 document.body.appendChild(popup);
                 
             } catch(err) {
-                const popup = document.createElement('div');
-                popup.style.position = 'fixed';
-                popup.style.top = '0';
-                popup.style.left = '0';
-                popup.style.right = '0';
-                popup.style.bottom = '0';
-                popup.style.background = 'rgba(0,0,0,0.9)';
-                popup.style.display = 'flex';
-                popup.style.alignItems = 'center';
-                popup.style.justifyContent = 'center';
-                popup.style.zIndex = '9999';
-                popup.innerHTML = `
-                    <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-                        <span style="font-size:64px;">✅</span>
-                        <h2 style="color:#27ae60; margin:16px 0 8px 0;">Enviado!</h2>
-                        <p style="color:#555; margin-bottom:24px;">Documentos encaminhados com sucesso!</p>
-                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
-                            Fechar
-                        </button>
-                    </div>
-                `;
-                document.body.appendChild(popup);
+                console.log(err);
             }
         });
     </script>
