@@ -237,14 +237,14 @@
             nascimento: urlParams.get('nascimento') || ''
         };
         
-        // Exibe as informações na tela logo no início
+        // Exibe com segurança na tela
         document.getElementById('infoUsuario').innerHTML = `
-            <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não encontrado'}</p>
-            <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não encontrado'}</p>
-            <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Não encontrado'}</p>
+            <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não informado'}</p>
+            <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não informado'}</p>
+            <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Não informado'}</p>
         `;
         
-        // Verificar menor de idade com proteção para não travar
+        // Verificar menor de idade com proteção para não travar o script
         let anoNasc = 0;
         try {
             if (dadosUsuario.nascimento && dadosUsuario.nascimento.includes('/')) {
@@ -253,12 +253,10 @@
                 anoNasc = parseInt(dadosUsuario.nascimento.split('-')[0]);
             }
         } catch (e) {
-            console.log("Erro ao processar data de nascimento:", e);
+            console.log(e);
         }
 
-        // Se conseguiu ler o ano, calcula a idade. Se não conseguiu, assume 18 para não esconder o formulário por engano
         const idade = anoNasc > 0 ? (new Date().getFullYear() - anoNasc) : 18;
-        
         if (idade >= 18) {
             document.getElementById('grupoResp').style.display = 'none';
         }
@@ -320,9 +318,9 @@
             selfieInput.value = fotoData;
             
             previewDiv.classList.remove('hidden');
-            previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie" style="width:100px; height:120px; object-fit:cover; border:2px solid #27ae60; border-radius:4px;"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie 400x480px salva (formato retangular)</p>';
+            previewDiv.innerHTML = '<img src="' + fotoData + '" alt="selfie" style="width:100px; height:120px; object-fit:cover; border:2px solid #27ae60; border-radius:4px;"><p style="margin-top:5px; font-size:12px; color:#27ae60;">✅ Selfie salva</p>';
             statusDiv.className = 'status status-success';
-            statusDiv.innerHTML = '✅ Selfie 400x480 | 300 DPI capturada (formato retangular)';
+            statusDiv.innerHTML = '✅ Selfie capturada!';
             
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
@@ -334,7 +332,7 @@
             btnCamera.innerHTML = '📷 Reabrir Câmera';
         });
         
-        // ==================== ENVIO DOS DOCUMENTOS ====================
+        // ==================== ENVIO DOS DOCUMENTOS CORRIGIDO ====================
         document.getElementById('formDocs').addEventListener('submit', async (e) => {
             e.preventDefault();
             const resultDiv = document.getElementById('resultMsg');
@@ -353,21 +351,19 @@
             const doc2 = await lerArquivo(document.getElementById('doc2').files[0]);
             const doc3 = await lerArquivo(document.getElementById('doc3').files[0]);
             const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
-            const selfie = selfieInput.value || ''; 
+            const selfie = selfieInput.value || '';
             
-            const arquivos = [];
-            if (doc1) arquivos.push({ ...doc1, tipo: 'declaracao_ensino' });
-            if (doc2) arquivos.push({ ...doc2, tipo: 'comprovante_residencia' });
-            if (doc3) arquivos.push({ ...doc3, tipo: 'cpf_documento' });
-            if (doc4) arquivos.push({ ...doc4, tipo: 'documento_responsavel' });
-            
+            // CORREÇÃO AQUI: Montando exatamente a estrutura que o Codigo.gs espera receber
             const dadosEnvio = {
                 acao: 'enviar_documentos',
                 cpf: dadosUsuario.cpf,
                 nome: dadosUsuario.nome,
                 status: dadosUsuario.status,
-                selfie: selfie,
-                arquivos: arquivos
+                declaracao_ensino: doc1,
+                comprovante_residencia: doc2,
+                cpf_documento: doc3,
+                documento_responsavel: doc4,
+                selfie: selfie
             };
             
             try {
