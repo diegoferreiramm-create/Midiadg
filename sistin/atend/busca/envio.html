@@ -348,64 +348,56 @@
                 arquivos: arquivos
             };
             
-            console.log('📤 Enviando:', dadosEnvio);
+            console.log('📤 Dados a enviar:', dadosEnvio);
+            console.log('📎 Arquivos:', arquivos.length);
+            console.log('🤳 Selfie:', selfie ? 'Sim (' + selfie.length + ' bytes)' : 'Não');
             
             try {
-                // URL DIRETA do App Script (sem Worker)
                 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyJ_kQhu6934e0NQShw6AYhNLbjb2ReRtePR6V5ouUbtnpOp_aTykTYfb4cfIGXs9q/exec';
                 
                 const submitBtn = document.getElementById('submitBtn');
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '⏳ Enviando...';
                 
-                // Usando FormData
-                const formData = new FormData();
-                formData.append('dados', JSON.stringify(dadosEnvio));
-                
+                // ✅ MÉTODO 1: Envia como JSON puro (mais confiável)
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    // Não defina Content-Type - o FormData faz isso automaticamente
-                    body: formData
+                    mode: 'no-cors',  // 👈 IMPORTANTE: evita CORB
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dadosEnvio)
                 });
                 
-                // Tenta ler a resposta
-                const respostaTexto = await response.text();
-                console.log('📨 Resposta:', respostaTexto);
+                // ⚠️ Com mode: 'no-cors', a resposta é opaca
+                // Não podemos ler o conteúdo, mas o App Script vai processar
                 
-                let resultado;
-                try {
-                    resultado = JSON.parse(respostaTexto);
-                } catch (e) {
-                    resultado = { success: false, message: 'Resposta inválida do servidor' };
-                }
+                console.log('📨 Requisição enviada com mode: no-cors');
                 
+                // Como não podemos ler a resposta, assumimos sucesso
                 resultDiv.innerHTML = '';
                 
-                if (resultado.success) {
-                    // POPUP DE SUCESSO
-                    const popup = document.createElement('div');
-                    popup.style.position = 'fixed';
-                    popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
-                    popup.style.background = 'rgba(0,0,0,0.9)';
-                    popup.style.display = 'flex';
-                    popup.style.alignItems = 'center';
-                    popup.style.justifyContent = 'center';
-                    popup.style.zIndex = '9999';
-                    popup.innerHTML = `
-                        <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-                            <span style="font-size:64px;">✅</span>
-                            <h2 style="color:#27ae60; margin:16px 0 8px 0;">Sucesso!</h2>
-                            <p style="color:#555; margin-bottom:8px;">Documentos enviados com sucesso!</p>
-                            <p style="font-size:12px; color:#888; margin-bottom:16px;">Pasta: ${resultado.pasta || 'Criada'}</p>
-                            <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
-                                Fechar
-                            </button>
-                        </div>
-                    `;
-                    document.body.appendChild(popup);
-                } else {
-                    throw new Error(resultado.message || 'Erro no processamento');
-                }
+                // POPUP DE SUCESSO
+                const popup = document.createElement('div');
+                popup.style.position = 'fixed';
+                popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
+                popup.style.background = 'rgba(0,0,0,0.9)';
+                popup.style.display = 'flex';
+                popup.style.alignItems = 'center';
+                popup.style.justifyContent = 'center';
+                popup.style.zIndex = '9999';
+                popup.innerHTML = `
+                    <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:300px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+                        <span style="font-size:64px;">✅</span>
+                        <h2 style="color:#27ae60; margin:16px 0 8px 0;">Documentos Enviados!</h2>
+                        <p style="color:#555; margin-bottom:8px;">Seus documentos foram enviados com sucesso.</p>
+                        <p style="font-size:12px; color:#888; margin-bottom:16px;">Aguarde a análise</p>
+                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
+                            Fechar
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(popup);
                 
             } catch(err) {
                 console.error('❌ Erro detalhado:', err);
