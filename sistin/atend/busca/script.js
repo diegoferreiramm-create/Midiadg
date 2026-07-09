@@ -745,20 +745,20 @@ function gerarHTMLFormularioOriginal(dadosUsuario) {
                         };
                         
                         try {
+                            // ✅ REMOVA O "acao" DAQUI TAMBÉM
                             const dadosEnvio = {
-                                acao: 'enviar_documentos',
                                 cpf: '${dadosUsuario.cpf}',
                                 nome: '${dadosUsuario.nome}',
                                 status: '${dadosUsuario.status}',
                                 selfie: selfieInput.value || '',
                                 arquivos: arquivos
                             };
-
+                        
                             const resp = await fetch('${SCRIPT_URL}', {
                                 method: 'POST',
-                                mode: 'cors',  // 👈 ADICIONE ESTA LINHA
+                                mode: 'cors',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(dadosEnvio)
+                                body: JSON.stringify(dadosEnvio)  // ← SEM o campo acao
                             });
                             const res = await resp.json();
                             console.log('Resposta:', res);
