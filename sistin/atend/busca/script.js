@@ -5,7 +5,7 @@ function formatarCPF(cpf) {
     if (cpfLimpo.length === 11) {
         return cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     }
-    return cpf; 
+    return cpf;
 }
 
 function formatarDataInput(data) {
@@ -39,7 +39,7 @@ function formatarData(data) {
 }
 
 // URL para BUSCA (GET) e ENVIO (POST) - TUDO pelo Worker
-const SCRIPT_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev/';
+const SCRIPT_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev';
 
 // ==================== FUNÇÕES DE INTERFACE ====================
 
