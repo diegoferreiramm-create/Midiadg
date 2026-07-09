@@ -313,7 +313,7 @@
         btnCamera.innerText = '📷 Tirar Outra Foto';
     });
 
-    // ==================== ENVIO DOS DOCUMENTOS - VIA FORMDATA DIRETO ====================
+    // ==================== ENVIO DOS DOCUMENTOS ====================
     document.getElementById('formDocs').addEventListener('submit', async (e) => {
         e.preventDefault();
         const resultDiv = document.getElementById('resultMsg');
@@ -367,21 +367,18 @@
         console.log('📎 Arquivos:', arquivos.length);
         
         try {
-            // ✅ URL DIRETA DO APP SCRIPT
+            // ✅ USA O WORKER
             const WORKER_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev';
             
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '⏳ Enviando...';
             
-            // ✅ USANDO FORMDATA - BURLA O CORS
-            const formData = new FormData();
-            formData.append('dados', JSON.stringify(dadosEnvio));
-            
-            const response = await fetch(SCRIPT_URL, {
+            // ✅ ENVIA COMO JSON (não FormData)
+            const response = await fetch(WORKER_URL, {
                 method: 'POST',
-                // NÃO DEFINA Content-Type - o FormData faz isso automaticamente
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosEnvio)
             });
             
             const respostaTexto = await response.text();
@@ -392,11 +389,7 @@
                 resultado = JSON.parse(respostaTexto);
             } catch (e) {
                 console.error('❌ Erro ao parsear JSON:', e);
-                // Se retornou HTML, tenta extrair a mensagem
-                if (respostaTexto.includes('Página não encontrada')) {
-                    throw new Error('URL do App Script inválida. Verifique o deploy.');
-                }
-                throw new Error('Resposta inválida do servidor');
+                resultado = { success: false, error: 'Resposta inválida' };
             }
             
             console.log('📨 Resultado:', resultado);
