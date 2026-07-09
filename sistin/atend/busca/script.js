@@ -7,7 +7,7 @@ function formatarCPF(cpf) {
     }
     return cpf;
 }
-
+ 
 function formatarDataInput(data) {
     if (!data) return '';
     // Remove tudo que não é número
