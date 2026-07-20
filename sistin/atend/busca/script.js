@@ -183,7 +183,17 @@ function exibirResultado(result) {
     `;
     
     if (statusIndeferido) {
-        document.getElementById('btnEnviarDocs')?.addEventListener('click', () => abrirFormularioDocumentos(d));
+        document.getElementById('btnEnviarDocs')?.addEventListener('click', () => {
+            // GARANTE QUE O MOTIVO VAI JUNTO
+            const dadosCompletos = {
+                cpf: d.cpf || '',
+                nome: d.nome || '',
+                status: d.status || '',
+                nascimento: d.nascimento || '',
+                motivo: d.motivo || '' // <--- GARANTE O MOTIVO
+            };
+            abrirFormularioDocumentos(dadosCompletos);
+        });
     }
 }
 
@@ -307,11 +317,11 @@ function escreverNaNovaAba(novaAba, result) {
 
 function abrirFormularioDocumentos(dadosUsuario) {
     const url = 'https://www.midiadg.com.br/sistin/atend/busca/envio.html?' + 
-                'cpf=' + encodeURIComponent(dadosUsuario.cpf) + 
-                '&nome=' + encodeURIComponent(dadosUsuario.nome) + 
-                '&status=' + encodeURIComponent(dadosUsuario.status) + 
+                'cpf=' + encodeURIComponent(dadosUsuario.cpf || '') + 
+                '&nome=' + encodeURIComponent(dadosUsuario.nome || '') + 
+                '&status=' + encodeURIComponent(dadosUsuario.status || '') + 
                 '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento || '') +
-                '&motivo=' + encodeURIComponent(dadosUsuario.motivo || '');
+                '&motivo=' + encodeURIComponent(dadosUsuario.motivo || ''); // <--- ADICIONADO
     window.open(url, '_blank');
 }
 
