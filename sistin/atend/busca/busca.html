@@ -1,477 +1,112 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Envio de Documentos</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 16px;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-        .header {
-            background: linear-gradient(135deg, #e67e22, #f39c12);
-            color: white;
-            padding: 16px;
-            text-align: center;
-        }
-        .header h1 { font-size: 1.3rem; margin-bottom: 4px; }
-        .content { padding: 16px; }
-        .info-box {
-            background: #f0f7ff;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
-        .info-box p { margin-bottom: 4px; }
-        .info-box strong { color: #e67e22; }
-        .motivo-box {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 10px 12px;
-            border-radius: 8px;
-            margin-top: 6px;
-        }
-        .motivo-box strong {
-            color: #856404;
-        }
-        .motivo-box .motivo-texto {
-            color: #856404;
-            font-size: 0.85rem;
-            margin-top: 4px;
-            line-height: 1.4;
-        }
-        .form-group { margin-bottom: 16px; }
-        label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; color: #333; }
-        input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            border: 2px dashed #ddd;
-            border-radius: 10px;
-            background: #fafafa;
-            font-size: 0.8rem;
-        }
-        .camera-area {
-            background: #000;
-            border-radius: 16px;
-            overflow: hidden;
-        }
-        .video-wrapper {
-            position: relative;
-            width: 100%;
-            background: #000;
-        }
-        video {
-            width: 100%;
-            height: auto;
-            display: block;
-            transform: scaleX(-1);
-        }
-        .face-oval {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            height: 360px;
-            border: 3px solid #27ae60;
-            border-radius: 50%;
-            pointer-events: none;
-            box-shadow: 0 0 0 999px rgba(0,0,0,0.5);
-            display: none;
-        }
-        .face-oval.show { display: block; }
-        .status {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            text-align: center;
-            font-weight: 500;
-        }
-        .status-success { background: #d4edda; color: #155724; }
-        .status-warning { background: #fff3cd; color: #856404; }
-        .status-error { background: #f8d7da; color: #721c24; }
-        .status-info { background: #cce5ff; color: #004085; }
-        button {
-            border: none;
-            border-radius: 12px;
-            padding: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .btn-camera {
-            background: #2c3e50;
-            color: white;
-            margin-top: 10px;
-            width: 100%;
-        }
-        .btn-capture {
-            background: #27ae60;
-            color: white;
-            margin-top: 10px;
-            width: 100%;
-        }
-        .btn-submit {
-            width: 100%;
-            background: linear-gradient(135deg, #e67e22, #f39c12);
-            color: white;
-            margin-top: 16px;
-        }
-        .preview {
-            margin-top: 12px;
-            text-align: center;
-            padding: 8px;
-            background: #f5f5f5;
-            border-radius: 10px;
-        }
-        .preview img {
-            max-width: 80px;
-            border-radius: 12px;
-            border: 3px solid #27ae60;
-        }
-        canvas { display: none; }
-        .loading {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 1000;
-        }
-        .spinner {
-            width: 45px;
-            height: 45px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #e67e22;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .hidden { display: none; }
-        .button-group { padding: 12px; background: #1a1a2e; }
-        .info-text {
-            background: #e9ecef;
-            padding: 8px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            text-align: center;
-            margin-top: 8px;
-        }
-        .opcional-badge {
-            display: inline-block;
-            background: #6c757d;
-            color: white;
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 20px;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Consulte sua Carteira - Sistema de Busca</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
+        <!-- Cabeçalho com Logo -->
         <div class="header">
-            <h1>📎 Envio de Documentos</h1>
-            <p>Regularize sua situação</p>
+            <div class="logo-container">
+                 <img src="https://www.midiadg.com.br/imag/logo_asesc.jpeg" alt="Logo Asesc" style="max-width: 100px; height: auto; border-radius: 8px;">
+            </div>
+            <h1>
+                <span class="icon">🔍</span> 
+                CONSULTE SUA CARTEIRA
+            </h1>
+            <p>Informe seus dados para verificação</p>
         </div>
-        <div class="content">
-            <div class="info-box" id="infoUsuario"></div>
-            
-            <form id="formDocs">
-                <div class="form-group">
-                    <label>📄 Declaração de Ensino</label>
-                    <input type="file" id="doc1" accept=".pdf,.jpg,.jpeg,.png">
+
+        <!-- Formulário de Busca -->
+        <div class="form-card">
+            <form id="searchForm">
+                <div class="input-group">
+                    <label for="cpf">
+                        <span class="label-icon">🆔</span> CPF
+                    </label>
+                    <input type="text" 
+                           id="cpf" 
+                           name="cpf" 
+                           placeholder="000.000.000-00" 
+                           maxlength="14"
+                           autocomplete="off"
+                           required>
+                    <small class="input-hint">Digite apenas números ou use formatação</small>
                 </div>
-                <div class="form-group">
-                    <label>🏠 Comprovante de Residência</label>
-                    <input type="file" id="doc2" accept=".pdf,.jpg,.jpeg,.png">
+
+                <div class="input-group">
+                    <label for="dataNascimento">
+                        <span class="label-icon">📅</span> Data de Nascimento
+                    </label>
+                    <input type="text" 
+                           id="dataNascimento" 
+                           name="dataNascimento" 
+                           placeholder="DD/MM/AAAA"
+                           maxlength="10"
+                           autocomplete="off"
+                           required>
+                    <small class="input-hint">Digite apenas números - as barras serão inseridas automaticamente (TENTE DIA/MES/ANO OU MES/DIA/ANO)</small>
                 </div>
-                <div class="form-group">
-                    <label>🆔 Foto do CPF</label>
-                    <input type="file" id="doc3" accept=".jpg,.jpeg,.png">
-                </div>
-                <div class="form-group" id="grupoResp">
-                    <label>👨‍👩‍👧 Documento do Responsável</label>
-                    <input type="file" id="doc4" accept=".pdf,.jpg,.jpeg,.png">
-                </div>
-                <div class="form-group">
-                    <label>🤳 Selfie <span class="opcional-badge">Opcional</span></label>
-                    <div class="camera-area">
-                        <div class="video-wrapper">
-                            <video id="video" autoplay playsinline></video>
-                            <div id="faceOval" class="face-oval"></div>
-                        </div>
-                        <canvas id="canvas"></canvas>
-                        <div class="button-group">
-                            <button type="button" id="btnCamera" class="btn-camera">📷 Abrir Câmera</button>
-                            <button type="button" id="btnFoto" class="btn-capture hidden">📸 Tirar Selfie</button>
-                        </div>
-                        <div id="statusMsg" class="status hidden"></div>
-                        <div id="preview" class="preview hidden"></div>
-                        <input type="hidden" id="selfieData">
-                    </div>
-                    <div class="info-text">
-                        💡 Opcional: Tire uma selfie para agilizar a análise | Fundo claro | Rosto na moldura
-                    </div>
-                </div>
-                <button type="submit" id="submitBtn" class="btn-submit">📤 Enviar Documentos</button>
+
+                <button type="submit" id="btnBuscar">
+                    <span class="btn-icon">🔎</span>
+                    Buscar Dados
+                </button>
             </form>
-            <div id="resultMsg"></div>
         </div>
+
+        <!-- Área de Resultado -->
+        <div id="resultArea" class="result-area" style="display: none;">
+            <div class="result-header">
+                <h2>📋 Resultado da Consulta</h2>
+                <button id="btnFechar" class="close-btn">✕</button>
+            </div>
+            <div id="resultContent" class="result-content">
+                <!-- Dados carregados via JavaScript -->
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>Consultando dados...</p>
+        </div>
+
+        <!-- Mensagens de erro/toast -->
+        <div id="toastMessage" class="toast-message"></div>
     </div>
 
-    <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const dadosUsuario = {
-        cpf: urlParams.get('cpf') || '',
-        nome: urlParams.get('nome') || '',
-        status: urlParams.get('status') || '',
-        nascimento: urlParams.get('nascimento') || '',
-        motivo: urlParams.get('motivo') || ''  // ADICIONADO
-    };
-    
-    // ADICIONADO: CONSTRÓI O HTML COM O MOTIVO
-    let infoHTML = `
-        <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não encontrado'}</p>
-        <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não encontrado'}</p>
-        <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Não encontrado'}</p>
-    `;
-    
-    // ADICIONADO: SE TIVER MOTIVO, EXIBE COM DESTAQUE
-    if (dadosUsuario.motivo && dadosUsuario.motivo.trim() !== '') {
-        infoHTML += `
-            <div class="motivo-box">
-                <strong>📝 Motivo:</strong>
-                <div class="motivo-texto">${dadosUsuario.motivo}</div>
-            </div>
-        `;
-    } else {
-        infoHTML += `
-            <p><strong>📝 Motivo:</strong> Não informado</p>
-        `;
-    }
-    
-    document.getElementById('infoUsuario').innerHTML = infoHTML;
-    
-    let anoNasc = 0;
-    try {
-        if (dadosUsuario.nascimento && dadosUsuario.nascimento.includes('/')) {
-            anoNasc = parseInt(dadosUsuario.nascimento.split('/')[2]);
-        } else if (dadosUsuario.nascimento && dadosUsuario.nascimento.includes('-')) {
-            anoNasc = parseInt(dadosUsuario.nascimento.split('-')[0]);
-        }
-    } catch (e) { console.log(e); }
 
-    const idade = anoNasc > 0 ? (new Date().getFullYear() - anoNasc) : 18;
-    if (idade >= 18) {
-        document.getElementById('grupoResp').style.display = 'none';
-    }
-    
-    // ==================== CÂMERA ====================
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const btnCamera = document.getElementById('btnCamera');
-    const btnFoto = document.getElementById('btnFoto');
-    const faceOval = document.getElementById('faceOval');
-    const statusDiv = document.getElementById('statusMsg');
-    const previewDiv = document.getElementById('preview');
-    const selfieInput = document.getElementById('selfieData');
-    let stream = null;
-    
-    btnCamera.addEventListener('click', async () => {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } 
-            });
-            video.srcObject = stream;
-            video.style.display = 'block';
-            faceOval.classList.add('show');
-            btnCamera.classList.add('hidden');
-            btnFoto.classList.remove('hidden');
-            statusDiv.classList.remove('hidden');
-            statusDiv.className = 'status status-info';
-            statusDiv.innerText = 'Enquadre o rosto na moldura verde';
-        } catch (err) {
-            console.error(err);
-            statusDiv.classList.remove('hidden');
-            statusDiv.className = 'status status-error';
-            statusDiv.innerText = 'Erro ao acessar a câmera. Forneça a permissão.';
-        }
-    });
-    
-    btnFoto.addEventListener('click', () => {
-        const context = canvas.getContext('2d');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        context.translate(canvas.width, 0);
-        context.scale(-1, 1);
-        
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        const data = canvas.toDataURL('image/jpeg', 0.8);
-        selfieInput.value = data;
-        
-        previewDiv.innerHTML = `<h5>Preview da Selfie:</h5><img src="${data}" />`;
-        previewDiv.classList.remove('hidden');
-        
-        statusDiv.className = 'status status-success';
-        statusDiv.innerText = 'Selfie capturada com sucesso!';
-        
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-        }
-        video.style.display = 'none';
-        faceOval.classList.remove('show');
-        btnFoto.classList.add('hidden');
-        btnCamera.classList.remove('hidden');
-        btnCamera.innerText = '📷 Tirar Outra Foto';
-    });
-
-    // ==================== ENVIO DOS DOCUMENTOS ====================
-    document.getElementById('formDocs').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const resultDiv = document.getElementById('resultMsg');
-        resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p style="color:white; margin-top:12px">Enviando documentos...</p></div>';
-        
-        const lerArquivo = (file) => {
-            return new Promise((resolve) => {
-                if (!file || !file.name) { resolve(null); return; }
-                const reader = new FileReader();
-                reader.onload = (e) => resolve({ base64: e.target.result, nome: file.name });
-                reader.readAsDataURL(file);
-            });
-        };
-        
-        const doc1 = await lerArquivo(document.getElementById('doc1').files[0]);
-        const doc2 = await lerArquivo(document.getElementById('doc2').files[0]);
-        const doc3 = await lerArquivo(document.getElementById('doc3').files[0]);
-        const doc4 = await lerArquivo(document.getElementById('doc4').files[0]);
-        const selfie = selfieInput.value || '';
-        
-        const arquivos = [];
-        if (doc1) arquivos.push(doc1);
-        if (doc2) arquivos.push(doc2);
-        if (doc3) arquivos.push(doc3);
-        if (doc4) arquivos.push(doc4);
-        
-        if (arquivos.length === 0 && !selfie) {
-            resultDiv.innerHTML = `
-                <div style="background:#fff3cd; border:1px solid #ffc107; border-radius:12px; padding:16px; margin-top:10px; text-align:center;">
-                    <span style="font-size:24px;">⚠️</span>
-                    <p style="color:#856404; font-weight:600; margin-top:8px;">Anexe pelo menos um documento</p>
-                    <button onclick="location.reload()" style="margin-top:12px; padding:8px 24px; background:#ffc107; color:white; border:none; border-radius:8px; cursor:pointer;">
-                        Voltar
-                    </button>
-                </div>
-            `;
-            return;
-        }
-        
-        const cpfLimpo = dadosUsuario.cpf.replace(/[^\d]/g, '');
-        
-        const dadosEnvio = {
-            cpf: cpfLimpo,
-            nome: dadosUsuario.nome,
-            status: dadosUsuario.status || 'Pendente',
-            motivo: dadosUsuario.motivo || '',  // ADICIONADO
-            selfie: selfie,
-            arquivos: arquivos
-        };
-        
-        console.log('📤 Enviando dados:', dadosEnvio);
-        console.log('📎 Arquivos:', arquivos.length);
-        
-        try {
-            // ✅ USA O WORKER
-            const WORKER_URL = 'https://proxy-cors.diegoferreira-mm.workers.dev';
+        <script>
+        // Função de formatação da data
+        function formatarDataInput(data) {
+            let numeros = data.replace(/\D/g, '');
+            if (numeros.length > 8) numeros = numeros.slice(0, 8);
             
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Enviando...';
-            
-            // ✅ ENVIA COMO JSON (não FormData)
-            const response = await fetch(WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dadosEnvio)
-            });
-            
-            const respostaTexto = await response.text();
-            console.log('📨 Resposta bruta:', respostaTexto);
-            
-            let resultado;
-            try {
-                resultado = JSON.parse(respostaTexto);
-            } catch (e) {
-                console.error('❌ Erro ao parsear JSON:', e);
-                resultado = { success: false, error: 'Resposta inválida' };
+            if (numeros.length >= 5) {
+                return numeros.slice(0, 2) + '/' + numeros.slice(2, 4) + '/' + numeros.slice(4, 8);
+            } else if (numeros.length >= 3) {
+                return numeros.slice(0, 2) + '/' + numeros.slice(2, 4);
+            } else if (numeros.length >= 2) {
+                return numeros.slice(0, 2);
             }
-            
-            console.log('📨 Resultado:', resultado);
-            
-            if (resultado.success) {
-                const popup = document.createElement('div');
-                popup.style.position = 'fixed';
-                popup.style.top = '0'; popup.style.left = '0'; popup.style.right = '0'; popup.style.bottom = '0';
-                popup.style.background = 'rgba(0,0,0,0.9)';
-                popup.style.display = 'flex';
-                popup.style.alignItems = 'center';
-                popup.style.justifyContent = 'center';
-                popup.style.zIndex = '9999';
-                popup.innerHTML = `
-                    <div style="background:white; border-radius:20px; padding:32px 24px; text-align:center; max-width:350px; margin:20px; box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-                        <span style="font-size:64px;">✅</span>
-                        <h2 style="color:#27ae60; margin:16px 0 8px 0;">Documentos Enviados!</h2>
-                        <p style="color:#555; margin-bottom:8px;">Seus documentos foram enviados com sucesso.</p>
-                        <p style="font-size:12px; color:#888; margin-bottom:16px;">Pasta: ${resultado.pasta || 'Criada'}</p>
-                        <button onclick="window.close()" style="padding:12px 32px; background:#27ae60; color:white; border:none; border-radius:12px; font-size:16px; cursor:pointer; font-weight:bold;">
-                            Fechar
-                        </button>
-                    </div>
-                `;
-                document.body.appendChild(popup);
-            } else {
-                throw new Error(resultado.error || resultado.message || 'Erro no processamento');
-            }
-            
-        } catch(err) {
-            console.error('❌ Erro detalhado:', err);
-            resultDiv.innerHTML = `
-                <div style="background:#fee2e2; border:1px solid #ef4444; border-radius:12px; padding:16px; margin-top:10px; text-align:center;">
-                    <span style="font-size:24px;">❌</span>
-                    <p style="color:#991b1b; font-weight:600; margin-top:8px;">Erro ao enviar documentos</p>
-                    <p style="color:#6b7280; font-size:14px;">${err.message || 'Tente novamente'}</p>
-                    <button onclick="location.reload()" style="margin-top:12px; padding:8px 24px; background:#ef4444; color:white; border:none; border-radius:8px; cursor:pointer;">
-                        Tentar novamente
-                    </button>
-                </div>
-            `;
-        } finally {
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '📤 Enviar Documentos';
+            return numeros;
         }
-    });
-</script>
+    
+        // Aguarda o DOM carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            const dataInput = document.getElementById('dataNascimento');
+            if (dataInput) {
+                dataInput.addEventListener('input', function(e) {
+                    e.target.value = formatarDataInput(e.target.value);
+                });
+            }
+        });
+    </script>
+    <script src="script.js"></script>
 </body>
 </html>
