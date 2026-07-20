@@ -229,13 +229,15 @@
         cpf: urlParams.get('cpf') || '',
         nome: urlParams.get('nome') || '',
         status: urlParams.get('status') || '',
-        nascimento: urlParams.get('nascimento') || ''
+        nascimento: urlParams.get('nascimento') || '',
+        motivo: urlParams.get('motivo') || ''  // Adicionado campo motivo
     };
     
     document.getElementById('infoUsuario').innerHTML = `
         <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não encontrado'}</p>
         <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não encontrado'}</p>
         <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Não encontrado'}</p>
+        <p><strong>📝 Motivo:</strong> ${dadosUsuario.motivo || 'Não informado'}</p>
     `;
     
     let anoNasc = 0;
@@ -359,6 +361,7 @@
             cpf: cpfLimpo,
             nome: dadosUsuario.nome,
             status: dadosUsuario.status || 'Pendente',
+            motivo: dadosUsuario.motivo || '',  // Adicionado motivo no envio
             selfie: selfie,
             arquivos: arquivos
         };
