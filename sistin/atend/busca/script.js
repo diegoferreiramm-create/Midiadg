@@ -310,7 +310,8 @@ function abrirFormularioDocumentos(dadosUsuario) {
                 'cpf=' + encodeURIComponent(dadosUsuario.cpf) + 
                 '&nome=' + encodeURIComponent(dadosUsuario.nome) + 
                 '&status=' + encodeURIComponent(dadosUsuario.status) + 
-                '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento || '');
+                '&nascimento=' + encodeURIComponent(dadosUsuario.nascimento || '') +
+                '&motivo=' + encodeURIComponent(dadosUsuario.motivo || '');
     window.open(url, '_blank');
 }
 
