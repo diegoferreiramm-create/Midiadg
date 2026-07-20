@@ -204,21 +204,6 @@
             background: #d4edda;
             color: #155724;
         }
-        .carregando-dados {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-        .carregando-dados .spinner-pequeno {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #e67e22;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 8px;
-        }
     </style>
 </head>
 <body>
@@ -228,13 +213,9 @@
             <p>Regularize sua situação</p>
         </div>
         <div class="content">
-            <div id="loadingDados" class="carregando-dados">
-                <div class="spinner-pequeno"></div>
-                <p>Carregando dados do usuário...</p>
-            </div>
-            <div id="infoUsuario" class="info-box" style="display:none;"></div>
+            <div class="info-box" id="infoUsuario"></div>
             
-            <form id="formDocs" style="display:none;">
+            <form id="formDocs">
                 <div class="form-group">
                     <label>📄 Declaração de Ensino</label>
                     <input type="file" id="doc1" accept=".pdf,.jpg,.jpeg,.png">
@@ -278,158 +259,69 @@
     </div>
 
     <script>
-    // =============================================
-    // CONFIGURAÇÃO - MESMA DA CONSULTA
-    // =============================================
-    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwsYpQxZ4wHQbRwRwoi5KxN4LXm7u6MB3n5d6b92V6n3UBK4uJ1T6-2z7y_2eQ/exec';
-    
-    // =============================================
-    // PEGA O CPF DA URL
-    // =============================================
     const urlParams = new URLSearchParams(window.location.search);
-    const cpfParam = urlParams.get('cpf') || '';
     
-    // =============================================
-    // BUSCA OS DADOS DO USUÁRIO NA PLANILHA
-    // =============================================
-    async function buscarDadosUsuario(cpf) {
-        if (!cpf) {
-            throw new Error('CPF não informado');
-        }
-        
-        const cpfLimpo = cpf.replace(/[^\d]/g, '');
-        
-        const response = await fetch(`${SHEET_URL}?cpf=${cpfLimpo}`);
-        if (!response.ok) {
-            throw new Error(`Erro na consulta: ${response.status}`);
-        }
-        
-        const dados = await response.json();
-        return dados;
-    }
+    // PEGA O MOTIVO DA URL (IGUAL VEM DA CONSULTA)
+    const motivo = urlParams.get('motivo') || '';
     
-    // =============================================
-    // FORMATA O STATUS COM BADGE
-    // =============================================
+    const dadosUsuario = {
+        cpf: urlParams.get('cpf') || '',
+        nome: urlParams.get('nome') || '',
+        status: urlParams.get('status') || '',
+        nascimento: urlParams.get('nascimento') || '',
+        motivo: motivo
+    };
+    
+    // Função para formatar status com badge
     function getStatusBadge(status) {
-        const statusLower = (status || '').toLowerCase();
+        const statusLower = status.toLowerCase();
         let classe = 'pendente';
         if (statusLower.includes('indeferido') || statusLower.includes('negado')) {
             classe = 'indeferido';
         } else if (statusLower.includes('deferido') || statusLower.includes('aprovado')) {
             classe = 'deferido';
         }
-        return `<span class="status-badge ${classe}">${status || 'Não informado'}</span>`;
+        return `<span class="status-badge ${classe}">${status}</span>`;
     }
     
-    // =============================================
-    // EXIBE OS DADOS NA TELA
-    // =============================================
-    function exibirDados(dados) {
-        const infoDiv = document.getElementById('infoUsuario');
-        const form = document.getElementById('formDocs');
-        const loading = document.getElementById('loadingDados');
-        
-        // Oculta loading, mostra info e form
-        loading.style.display = 'none';
-        infoDiv.style.display = 'block';
-        form.style.display = 'block';
-        
-        // Monta HTML
-        let infoHTML = `
-            <p><strong>👤 Nome:</strong> ${dados.nome || 'Não encontrado'}</p>
-            <p><strong>📄 CPF:</strong> ${dados.cpf || 'Não encontrado'}</p>
-            <p><strong>📊 Status:</strong> ${dados.status ? getStatusBadge(dados.status) : 'Não encontrado'}</p>
-        `;
-        
-        // Se tiver motivo, exibe com destaque (IGUAL À CONSULTA)
-        if (dados.motivo && dados.motivo.trim() !== '') {
-            infoHTML += `
-                <div class="motivo-box">
-                    <strong>📝 Motivo:</strong>
-                    <div class="motivo-texto">${dados.motivo}</div>
-                </div>
-            `;
-        } else {
-            infoHTML += `
-                <p><strong>📝 Motivo:</strong> <span style="color:#999;">Não informado</span></p>
-            `;
-        }
-        
-        infoDiv.innerHTML = infoHTML;
-        
-        // Salva os dados para uso no envio
-        window.dadosUsuario = dados;
-        
-        // Verifica idade para mostrar/ocultar documento do responsável
-        let anoNasc = 0;
-        try {
-            const nascimento = dados.nascimento || '';
-            if (nascimento.includes('/')) {
-                anoNasc = parseInt(nascimento.split('/')[2]);
-            } else if (nascimento.includes('-')) {
-                anoNasc = parseInt(nascimento.split('-')[0]);
-            }
-        } catch (e) { console.log(e); }
-        
-        const idade = anoNasc > 0 ? (new Date().getFullYear() - anoNasc) : 18;
-        if (idade >= 18) {
-            document.getElementById('grupoResp').style.display = 'none';
-        }
-    }
+    // Monta o HTML da info do usuário
+    let infoHTML = `
+        <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não encontrado'}</p>
+        <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não encontrado'}</p>
+        <p><strong>📊 Status:</strong> ${dadosUsuario.status ? getStatusBadge(dadosUsuario.status) : 'Não encontrado'}</p>
+    `;
     
-    // =============================================
-    // EXIBE ERRO
-    // =============================================
-    function exibirErro(mensagem) {
-        const infoDiv = document.getElementById('infoUsuario');
-        const loading = document.getElementById('loadingDados');
-        
-        loading.style.display = 'none';
-        infoDiv.style.display = 'block';
-        infoDiv.innerHTML = `
-            <div style="background:#fee2e2; padding:12px; border-radius:8px; border-left:4px solid #ef4444;">
-                <strong style="color:#991b1b;">❌ Erro ao carregar dados</strong>
-                <p style="color:#6b7280; font-size:0.85rem; margin-top:4px;">${mensagem}</p>
-                <button onclick="location.reload()" style="margin-top:8px; padding:6px 16px; background:#ef4444; color:white; border:none; border-radius:6px; cursor:pointer;">
-                    Tentar novamente
-                </button>
+    // Se tiver motivo, exibe com destaque
+    if (dadosUsuario.motivo && dadosUsuario.motivo.trim() !== '') {
+        infoHTML += `
+            <div class="motivo-box">
+                <strong>📝 Motivo:</strong>
+                <div class="motivo-texto">${dadosUsuario.motivo}</div>
             </div>
         `;
+    } else {
+        infoHTML += `
+            <p><strong>📝 Motivo:</strong> <span style="color:#999;">Não informado</span></p>
+        `;
     }
     
-    // =============================================
-    // INICIALIZA - BUSCA DADOS AO CARREGAR
-    // =============================================
-    document.addEventListener('DOMContentLoaded', async () => {
-        try {
-            // Se não tiver CPF na URL, mostra erro
-            if (!cpfParam) {
-                exibirErro('CPF não informado na URL. Volte e faça a consulta novamente.');
-                return;
-            }
-            
-            // Busca os dados da planilha
-            const dados = await buscarDadosUsuario(cpfParam);
-            
-            // Verifica se encontrou
-            if (!dados || !dados.nome) {
-                exibirErro('Usuário não encontrado na base de dados. Verifique o CPF.');
-                return;
-            }
-            
-            // Exibe os dados
-            exibirDados(dados);
-            
-        } catch (error) {
-            console.error('Erro:', error);
-            exibirErro(error.message || 'Erro ao consultar a base de dados. Tente novamente.');
-        }
-    });
+    document.getElementById('infoUsuario').innerHTML = infoHTML;
     
-    // =============================================
-    // CÂMERA
-    // =============================================
+    let anoNasc = 0;
+    try {
+        if (dadosUsuario.nascimento && dadosUsuario.nascimento.includes('/')) {
+            anoNasc = parseInt(dadosUsuario.nascimento.split('/')[2]);
+        } else if (dadosUsuario.nascimento && dadosUsuario.nascimento.includes('-')) {
+            anoNasc = parseInt(dadosUsuario.nascimento.split('-')[0]);
+        }
+    } catch (e) { console.log(e); }
+
+    const idade = anoNasc > 0 ? (new Date().getFullYear() - anoNasc) : 18;
+    if (idade >= 18) {
+        document.getElementById('grupoResp').style.display = 'none';
+    }
+    
+    // ==================== CÂMERA ====================
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const btnCamera = document.getElementById('btnCamera');
@@ -490,9 +382,7 @@
         btnCamera.innerText = '📷 Tirar Outra Foto';
     });
 
-    // =============================================
-    // ENVIO DOS DOCUMENTOS
-    // =============================================
+    // ==================== ENVIO DOS DOCUMENTOS ====================
     document.getElementById('formDocs').addEventListener('submit', async (e) => {
         e.preventDefault();
         const resultDiv = document.getElementById('resultMsg');
@@ -532,12 +422,11 @@
             return;
         }
         
-        const dadosUsuario = window.dadosUsuario || {};
-        const cpfLimpo = (dadosUsuario.cpf || cpfParam).replace(/[^\d]/g, '');
+        const cpfLimpo = dadosUsuario.cpf.replace(/[^\d]/g, '');
         
         const dadosEnvio = {
             cpf: cpfLimpo,
-            nome: dadosUsuario.nome || '',
+            nome: dadosUsuario.nome,
             status: dadosUsuario.status || 'Pendente',
             motivo: dadosUsuario.motivo || '',
             selfie: selfie,
@@ -616,6 +505,6 @@
             submitBtn.innerHTML = '📤 Enviar Documentos';
         }
     });
-    </script>
+</script>
 </body>
 </html>
