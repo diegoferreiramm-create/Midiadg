@@ -36,6 +36,22 @@
         }
         .info-box p { margin-bottom: 4px; }
         .info-box strong { color: #e67e22; }
+        .motivo-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-top: 6px;
+        }
+        .motivo-box strong {
+            color: #856404;
+        }
+        .motivo-box .motivo-texto {
+            color: #856404;
+            font-size: 0.85rem;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
         .form-group { margin-bottom: 16px; }
         label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.85rem; color: #333; }
         input[type="file"] {
@@ -169,22 +185,6 @@
             margin-left: 8px;
             vertical-align: middle;
         }
-        .motivo-box {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 10px 12px;
-            border-radius: 8px;
-            margin-top: 6px;
-        }
-        .motivo-box strong {
-            color: #856404;
-        }
-        .motivo-box .motivo-texto {
-            color: #856404;
-            font-size: 0.85rem;
-            margin-top: 4px;
-            line-height: 1.4;
-        }
     </style>
 </head>
 <body>
@@ -246,17 +246,17 @@
         nome: urlParams.get('nome') || '',
         status: urlParams.get('status') || '',
         nascimento: urlParams.get('nascimento') || '',
-        motivo: urlParams.get('motivo') || ''  // ADICIONADO: PEGA O MOTIVO DA URL
+        motivo: urlParams.get('motivo') || ''  // <--- ADICIONADO: PEGA O MOTIVO DA URL
     };
     
-    // ADICIONADO: EXIBE O MOTIVO
+    // <--- ADICIONADO: CONSTRÓI O HTML COM O MOTIVO
     let infoHTML = `
         <p><strong>👤 Nome:</strong> ${dadosUsuario.nome || 'Não encontrado'}</p>
         <p><strong>📄 CPF:</strong> ${dadosUsuario.cpf || 'Não encontrado'}</p>
         <p><strong>📊 Status:</strong> ${dadosUsuario.status || 'Não encontrado'}</p>
     `;
     
-    // ADICIONADO: SE TIVER MOTIVO, EXIBE COM DESTAQUE
+    // SE TIVER MOTIVO, EXIBE COM DESTAQUE
     if (dadosUsuario.motivo && dadosUsuario.motivo.trim() !== '') {
         infoHTML += `
             <div class="motivo-box">
@@ -271,6 +271,7 @@
     }
     
     document.getElementById('infoUsuario').innerHTML = infoHTML;
+    // <--- FIM DA ADIÇÃO
     
     let anoNasc = 0;
     try {
@@ -393,7 +394,7 @@
             cpf: cpfLimpo,
             nome: dadosUsuario.nome,
             status: dadosUsuario.status || 'Pendente',
-            motivo: dadosUsuario.motivo || '',  // ADICIONADO: ENVIA O MOTIVO
+            motivo: dadosUsuario.motivo || '',  // <--- ADICIONADO: ENVIA O MOTIVO
             selfie: selfie,
             arquivos: arquivos
         };
