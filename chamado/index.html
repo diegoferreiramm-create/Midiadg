@@ -10,7 +10,7 @@
 <body>
 
     <header>
-        <div class="logo-area"><h2>🎫 Central de Operações</h2></div>
+        <div class="logo-area"><h2 style="text-transform: uppercase;">🎫 CENTRAL DE OPERAÇÕES</h2></div>
         <div class="user-nav">
             <button id="btn-config" class="btn-config" onclick="abrirConfiguracoes()" style="display:none;">⚙️ Config</button>
             <button id="btn-novo-topo" class="btn-novo-chamado" onclick="abrirModalCriar()">+ Novo Chamado</button>
@@ -34,7 +34,7 @@
                     <div class="filtro-grupo">
                         <label for="filtro-usuario">👤 Filtrar por:</label>
                         <select id="filtro-usuario" onchange="aplicarFiltros()">
-                            <option value="todos" selected>Todos os chamados</option>  <!-- Mude para selected -->
+                            <option value="todos" selected>Todos os chamados</option>
                             <option value="meus">Meus chamados</option>
                         </select>
                     </div>
@@ -236,7 +236,6 @@
             
             <label>Adicionar Nova Observação / Apontamento:</label>
             <textarea id="novaObservacaoTexto" placeholder="Escreva sua observação aqui..."></textarea>
-            <button class="btn-confirmar" onclick="salvarObservacao()" style="width:100%; margin-bottom: 15px;">Adicionar Observação</button>
 
             <div class="modal-actions" id="container-botoes-acao">
                 <!-- Preenchido via Script dependendo do status -->
