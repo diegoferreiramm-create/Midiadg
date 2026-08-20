@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Corporativo de Chamados</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="logo-area"><h2>🎫 Central de Operações</h2></div>
+        <div class="user-nav">
+            <button id="btn-config" class="btn-config" onclick="abrirConfiguracoes()" style="display:none;">⚙️ Config</button>
+            <button id="btn-novo-topo" class="btn-novo-chamado" onclick="abrirModalCriar()">+ Novo Chamado</button>
+            <button id="btn-login-header" onclick="abrirModalLogin()">Entrar no Sistema</button>
+            <div id="user-info" class="user-info" style="display:none;">
+                <span>Logado como: <b id="nome-user"></b></span>
+                <span id="user-status-badge" style="font-size:11px;background:#0052cc;color:white;padding:2px 8px;border-radius:10px;margin-left:5px;"></span>
+                <a href="#" onclick="logout()">Sair</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="page-title">
+            <h1 id="titulo-pagina">Painel de Chamados</h1>
+            <p id="subtitulo-pagina">Acompanhe o andamento das solicitações em tempo real.</p>
+            
+            <!-- Barra de Filtros -->
+            <div class="filtros-container" id="filtros-container" style="display: none; margin-top: 15px;">
+                <div class="filtros-row">
+                    <div class="filtro-grupo">
+                        <label for="filtro-usuario">👤 Filtrar por:</label>
+                        <select id="filtro-usuario" onchange="aplicarFiltros()">
+                            <option value="todos" selected>Todos os chamados</option>  <!-- Mude para selected -->
+                            <option value="meus">Meus chamados</option>
+                        </select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label for="filtro-status">📊 Status:</label>
+                        <select id="filtro-status" onchange="aplicarFiltros()">
+                            <option value="todos">Todos</option>
+                            <option value="aberto">Abertos</option>
+                            <option value="percurso">Em Percurso</option>
+                            <option value="concluido">Concluídos</option>
+                        </select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label for="filtro-prioridade">⚡ Prioridade:</label>
+                        <select id="filtro-prioridade" onchange="aplicarFiltros()">
+                            <option value="todos">Todas</option>
+                            <option value="Crítica">Crítica</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Média">Média</option>
+                            <option value="Baixa">Baixa</option>
+                        </select>
+                    </div>
+                    <div class="filtro-grupo">
+                        <label for="filtro-busca">🔍 Buscar:</label>
+                        <input type="text" id="filtro-busca" placeholder="Título, ID ou descrição..." oninput="aplicarFiltros()">
+                    </div>
+                    <button class="btn-limpar-filtros" onclick="limparFiltros()">✕ Limpar</button>
+                </div>
+                <div class="filtros-stats" id="filtros-stats"></div>
+            </div>
+        </div>
+
+        <div class="kanban-board" id="kanban-board">
+            <div class="kanban-column">
+                <h3>Abertos</h3>
+                <div id="coluna-aberto" class="cards-wrapper"><div class="empty-state">Carregando...</div></div>
+            </div>
+            <div class="kanban-column" id="col-percurso">
+                <h3>Em Percurso</h3>
+                <div id="coluna-percurso" class="cards-wrapper"><div class="empty-state">Carregando...</div></div>
+            </div>
+            <div class="kanban-column" id="col-concluido">
+                <h3>Concluídos</h3>
+                <div id="coluna-concluido" class="cards-wrapper"><div class="empty-state">Carregando...</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Login -->
+    <div id="modal-login" class="modal-overlay">
+        <div class="modal-box" style="max-width: 400px;">
+            <h3>Autenticação</h3>
+            <label>Usuário</label>
+            <input type="text" id="user" placeholder="Digite seu usuário">
+            <label>Senha</label>
+            <input type="password" id="pass" placeholder="••••••••">
+            <div class="modal-actions">
+                <button class="btn-cancelar" onclick="fecharModalLogin()">Cancelar</button>
+                <button class="btn-confirmar" onclick="fazerLogin()">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Criar Chamado -->
+    <div id="modal-criar" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Novo Chamado Corporativo</h3>
+            
+            <label>1. Título do Cartão (Resumo + Cliente)</label>
+            <input type="text" id="modalInputTitulo" placeholder="Ex: [Erro 404] Falha ao emitir nota">
+            
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Tipo</label>
+                    <select id="modalInputTipo">
+                        <option value="Bug">Bug</option>
+                        <option value="Dúvida">Dúvida</option>
+                        <option value="Solicitação">Solicitação de Serviço</option>
+                        <option value="Melhoria">Melhoria</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label>Prioridade</label>
+                    <select id="modalInputPrioridade">
+                        <option value="Baixa">Baixa</option>
+                        <option value="Média" selected>Média</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Crítica">Crítica</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Solicitante</label>
+                    <input type="text" id="modalInputSolicitante" placeholder="Nome de quem relatou">
+                </div>
+                <div style="flex: 1;">
+                    <label>Contato (E-mail / Telefone)</label>
+                    <input type="text" id="modalInputContato" placeholder="contato@empresa.com">
+                </div>
+            </div>
+
+            <label>2. Descrição</label>
+            <textarea id="modalInputDescricao" placeholder="Impacto, passos executados..."></textarea>
+            
+            <label>3. Atendentes Responsáveis (Marque na ordem: 1º, 2º, 3º...)</label>
+            <div class="membros-container">
+                <div class="membros-header">
+                    <span>SELECIONE OS MEMBROS (NA ORDEM)</span>
+                    <label><input type="checkbox" id="check-todos" onclick="toggleMarcarTodos(this)"> Marcar Todos</label>
+                </div>
+                <div id="lista-membros-checkboxes">Carregando membros...</div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Modelo de Execução (Fluxo)</label>
+                    <select id="modalInputFluxo">
+                        <option value="livre">Livre (Qualquer responsável mexe)</option>
+                        <option value="sequencial">Sequencial (Ordem estrita do 1º ao último)</option>
+                    </select>
+                </div>
+                <div style="flex: 1; display: flex; align-items: center; padding-top: 15px;">
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main);">
+                        <input type="checkbox" id="modalInputRevisao" style="width: auto; margin: 0;"> Exigir Revisão do Solicitante para Concluir
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                <div style="flex: 1;">
+                    <label>Data de Entrega (SLA Due Date)</label>
+                    <input type="datetime-local" id="modalInputDataLimite">
+                </div>
+            </div>
+
+            <label>Anexos / Link de Evidências</label>
+            <input type="text" id="modalInputAnexos" placeholder="Cole o link do print ou log">
+
+            <div class="modal-actions">
+                <button class="btn-cancelar" onclick="fecharModalCriar()">Cancelar</button>
+                <button class="btn-confirmar-criar" onclick="criarChamado()">Cadastrar Chamado</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes / Pop-up do Cartão -->
+    <div id="modal-detalhes" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="detalhe-modal-titulo">Detalhes do Chamado</h3>
+            <input type="hidden" id="detalheIdCard">
+            
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Tipo</label>
+                    <input type="text" id="detalheTipo" class="detalhe-travado" readonly>
+                </div>
+                <div style="flex: 1;">
+                    <label>Prioridade</label>
+                    <input type="text" id="detalhePrioridade" class="detalhe-travado" readonly>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Solicitante</label>
+                    <input type="text" id="detalheSolicitante" class="detalhe-travado" readonly>
+                </div>
+                <div style="flex: 1;">
+                    <label>Contato</label>
+                    <input type="text" id="detalheContato" class="detalhe-travado" readonly>
+                </div>
+            </div>
+
+            <label>Descrição</label>
+            <textarea id="detalheDescricao" class="detalhe-travado" readonly></textarea>
+            
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Responsáveis / Fluxo</label>
+                    <input type="text" id="detalheMembros" class="detalhe-travado" readonly>
+                </div>
+                <div style="flex: 1;">
+                    <label>Prazo Limite</label>
+                    <input type="text" id="detalheDataLimite" class="detalhe-travado" readonly>
+                </div>
+            </div>
+
+            <label>Evidências / Anexos</label>
+            <input type="text" id="detalheAnexos" class="detalhe-travado" readonly>
+
+            <!-- Participantes Fixos - Histórico Completo -->
+            <label>👥 Participantes do Chamado (Histórico Completo)</label>
+            <div id="detalheParticipantesContainer" class="participantes-box">Carregando...</div>
+
+            <label>Histórico de Observações (Área de Notas)</label>
+            <div id="detalheHistorico" class="historico-box">Nenhuma observação registrada.</div>
+            
+            <label>Adicionar Nova Observação / Apontamento:</label>
+            <textarea id="novaObservacaoTexto" placeholder="Escreva sua observação aqui..."></textarea>
+            <button class="btn-confirmar" onclick="salvarObservacao()" style="width:100%; margin-bottom: 15px;">Adicionar Observação</button>
+
+            <div class="modal-actions" id="container-botoes-acao">
+                <!-- Preenchido via Script dependendo do status -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+    <!-- MODAL DE CONFIGURAÇÕES -->
+    <div id="modal-config" class="modal-overlay">
+        <div class="modal-box" style="max-width: 800px;">
+            <h3>⚙️ Configurações do Sistema</h3>
+            
+            <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                <!-- Aba Usuários -->
+                <div style="flex:1; min-width:300px;">
+                    <h4>👥 Gerenciar Usuários</h4>
+                    <button class="btn-confirmar" onclick="abrirModalUsuario()" style="margin-bottom:10px;">+ Novo Usuário</button>
+                    <div style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:4px;">
+                        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                            <thead style="background:#f4f5f7;">
+                                <tr>
+                                    <th style="padding:8px; text-align:left;">Usuário</th>
+                                    <th style="padding:8px; text-align:left;">Nome</th>
+                                    <th style="padding:8px; text-align:left;">Email</th>
+                                    <th style="padding:8px; text-align:left;">Status</th>
+                                    <th style="padding:8px; text-align:center;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-usuarios-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Aba Tipos -->
+                <div style="flex:1; min-width:250px;">
+                    <h4>📋 Gerenciar Tipos de Chamado</h4>
+                    <div style="display:flex; gap:8px; margin-bottom:10px;">
+                        <input type="text" id="novo-tipo-input" placeholder="Novo tipo..." style="flex:1;">
+                        <button class="btn-confirmar" onclick="adicionarTipo()">+ Adicionar</button>
+                    </div>
+                    <div id="lista-tipos" style="display:flex; flex-wrap:wrap; gap:8px; min-height:40px; padding:8px; background:#f8f9fa; border-radius:4px; border:1px dashed var(--border-color);">
+                        <!-- Tipos serão renderizados aqui -->
+                    </div>
+                    <div id="feedback-tipos" style="font-size:13px; margin-top:8px; min-height:20px;"></div>
+                    <button id="btn-salvar-tipos" class="btn-confirmar" onclick="salvarTipos()" style="margin-top:10px; width:100%;">💾 Salvar Tipos</button>
+                    <p style="font-size:11px; color:var(--text-muted); margin-top:6px;">⚠️ Clique em "Salvar Tipos" para salvar permanentemente.</p>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-cancelar" onclick="fecharConfiguracoes()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE USUÁRIO -->
+    <div id="modal-usuario" class="modal-overlay">
+        <div class="modal-box" style="max-width:450px;">
+            <h3 id="modal-usuario-title">Novo Usuário</h3>
+            <input type="hidden" id="usuario-antigo">
+            
+            <label>Usuário *</label>
+            <input type="text" id="usuario-input" placeholder="login">
+            
+            <label>Senha *</label>
+            <input type="password" id="senha-input" placeholder="********">
+            
+            <label>Nome *</label>
+            <input type="text" id="nome-input" placeholder="Nome completo">
+            
+            <label>Email</label>
+            <input type="email" id="email-input" placeholder="email@empresa.com">
+            
+            <label>Status</label>
+            <select id="status-select">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+            
+            <div class="modal-actions">
+                <button class="btn-cancelar" onclick="fecharModalUsuario()">Cancelar</button>
+                <button class="btn-confirmar" id="btn-salvar-usuario" onclick="salvarUsuario()">Cadastrar</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
