@@ -1,0 +1,569 @@
+:root {
+    --primary-color: #0052cc;
+    --primary-hover: #0747a6;
+    --bg-color: #f4f5f7;
+    --card-bg: #ffffff;
+    --text-main: #172b4d;
+    --text-muted: #5e6c84;
+    --border-color: #dfe1e6;
+    --danger-color: #de350b;
+    --success-color: #36b37e;
+    --warning-color: #ffab00;
+}
+
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    background-color: var(--bg-color); 
+    margin: 0; padding: 0; color: var(--text-main); 
+}
+
+header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    padding: 15px 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.logo-area h2 { margin: 0; font-size: 18px; color: var(--primary-color); display: flex; align-items: center; gap: 8px; }
+.user-nav { display: flex; align-items: center; gap: 15px; }
+.user-nav button { background-color: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+.user-nav button:hover { background-color: var(--primary-hover); }
+.btn-novo-chamado { background-color: var(--success-color) !important; display: none; }
+.btn-novo-chamado:hover { background-color: #2d9a6c !important; }
+
+.user-info { font-size: 14px; color: var(--text-muted); }
+.user-info b { color: var(--text-main); }
+.user-info a { color: var(--danger-color); text-decoration: none; margin-left: 10px; font-weight: 600; }
+.user-info a:hover { text-decoration: underline; }
+
+.main-container { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
+.page-title { margin-bottom: 25px; }
+.page-title h1 { font-size: 24px; margin: 0 0 5px 0; color: var(--text-main); }
+.page-title p { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+/* Filtros e ordenação */
+.filtros-container {
+    background: white;
+    border-radius: 8px;
+    padding: 15px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid var(--border-color);
+}
+
+.filtros-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.filtro-grupo {
+    flex: 1;
+    min-width: 150px;
+}
+
+.filtro-grupo label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.filtro-grupo select,
+.filtro-grupo input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 13px;
+    background: white;
+    transition: border-color 0.2s;
+}
+
+.filtro-grupo select:focus,
+.filtro-grupo input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.1);
+}
+
+.btn-limpar-filtros {
+    padding: 8px 16px;
+    background: #f4f5f7;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-main);
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-limpar-filtros:hover {
+    background: #e6e8ec;
+}
+
+.filtros-stats {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.filtros-stats strong {
+    color: var(--text-main);
+}
+
+/* Kanban Board */
+.kanban-board { display: flex; justify-content: flex-start; gap: 20px; overflow-x: auto; padding-bottom: 20px; }
+.kanban-column { background: #ebecf0; border-radius: 8px; width: 350px; min-width: 350px; padding: 15px; max-height: calc(100vh - 220px); display: flex; flex-direction: column; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+.kanban-column h3 { font-size: 14px; letter-spacing: 0.5px; color: var(--text-muted); text-transform: uppercase; border-bottom: 2px solid #d0d4dc; padding-bottom: 10px; margin: 0 0 15px 0; }
+.cards-wrapper { overflow-y: auto; flex-grow: 1; padding-right: 2px; }
+
+/* Cards com destaque para o usuário logado */
+.kanban-card { 
+    background: var(--card-bg); 
+    padding: 14px; 
+    margin-bottom: 12px; 
+    border-radius: 6px; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+    border-left: 4px solid var(--primary-color); 
+    cursor: pointer; 
+    transition: transform 0.1s, box-shadow 0.1s, opacity 0.3s; 
+}
+.kanban-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.12); }
+.kanban-card.atrasado { border-left-color: var(--danger-color); background-color: #fffbfa; }
+.kanban-card.meu-chamado {
+    border-left-color: #ffab00;
+    background: #fffdf5;
+    box-shadow: 0 1px 4px rgba(255, 171, 0, 0.15);
+}
+.kanban-card.meu-chamado:hover {
+    box-shadow: 0 4px 12px rgba(255, 171, 0, 0.25);
+}
+.kanban-card.meu-chamado .badge-eu {
+    background: #ffab00;
+    color: #172b4d;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+}
+.kanban-card.filtrado {
+    display: none;
+}
+
+.card-header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.badge-tipo { font-size: 10px; background: #091e420a; color: var(--text-muted); padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+.badge-prioridade { font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: bold; color: white; }
+.prio-baixa { background: #6554c0; }
+.prio-media { background: var(--primary-color); }
+.prio-alta { background: var(--warning-color); color: #172b4d; }
+.prio-critica { background: var(--danger-color); }
+.badge-atraso { background: var(--danger-color); color: white; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+
+/* Badge de envolvimento */
+.badge-envolvimento {
+    font-size: 9px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-left: 6px;
+}
+.badge-envolvimento.solicitante {
+    background: #00b4d8;
+    color: white;
+}
+.badge-envolvimento.responsavel {
+    background: #0077b6;
+    color: white;
+}
+
+.kanban-card h4 { margin: 0 0 6px 0; font-size: 15px; color: var(--text-main); }
+.card-section { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; border-top: 1px solid var(--border-color); padding-top: 6px; }
+.card-section b { color: var(--text-main); }
+
+/* Subcabeçalho do Cartão Kanban (Responsável + Prioridade) */
+.card-sub-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 8px;
+}
+
+.badge-responsavel {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--primary-color);
+    background: #deebff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.card-envolvidos-geral {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.card-envolvidos-geral b {
+    color: var(--text-main);
+}
+
+/* Modais */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 30, 66, 0.54); backdrop-filter: blur(2px); z-index: 1000; align-items: center; justify-content: center; }
+.modal-box { background: #fff; width: 100%; max-width: 600px; padding: 30px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
+.modal-box h3 { margin-top: 0; font-size: 20px; color: var(--text-main); margin-bottom: 20px; }
+.modal-box label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; text-align: left; }
+.modal-box input, .modal-box select, .modal-box textarea { width: 100%; padding: 10px 12px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 4px; box-sizing: border-box; font-size: 14px; font-family: inherit; background: #fff; }
+.modal-box textarea { resize: vertical; height: 70px; }
+
+/* Campos travados no pop-up de detalhes */
+.detalhe-travado { background-color: #f4f5f7 !important; color: var(--text-main); cursor: not-allowed; }
+
+/* Checkbox de Membros */
+.membros-container { border: 1px solid var(--border-color); border-radius: 4px; padding: 8px 12px; max-height: 120px; overflow-y: auto; margin-bottom: 12px; background: #fafbfc; }
+.membros-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 6px; font-size: 11px; font-weight: bold; color: var(--text-muted); }
+.membros-header label { cursor: pointer; color: var(--primary-color); display: flex; align-items: center; gap: 4px; margin: 0; }
+.checkbox-item { display: flex; align-items: center; justify-content: space-between; font-size: 13px; margin-bottom: 4px; cursor: pointer; font-weight: normal; color: var(--text-main); background: #fff; padding: 4px 8px; border-radius: 3px; border: 1px solid #eee; }
+.checkbox-item span.ordem-tag { font-size: 11px; font-weight: bold; color: var(--primary-color); background: #deebff; padding: 1px 6px; border-radius: 10px; display: none; }
+.checkbox-item input { width: auto; margin: 0; cursor: pointer; }
+
+.modal-actions { display: flex; gap: 10px; margin-top: 15px; }
+.modal-actions button { flex: 1; padding: 10px; cursor: pointer; border: none; border-radius: 4px; font-weight: 600; font-size: 14px; }
+.btn-confirmar { background: var(--primary-color); color: white; }
+.btn-confirmar-criar { background: var(--success-color); color: white; }
+.btn-cancelar { background: #f4f5f7; color: var(--text-main); }
+.btn-devolver { background: #ffab00; color: #172b4d; }
+
+.empty-state { text-align: center; color: var(--text-muted); font-style: italic; font-size: 13px; padding: 20px 0; }
+
+.historico-box { background: #f4f5f7; border: 1px solid var(--border-color); border-radius: 4px; padding: 10px; max-height: 120px; overflow-y: auto; font-size: 12px; white-space: pre-wrap; margin-bottom: 12px; color: var(--text-main); }
+
+/* Responsividade dos filtros */
+@media (max-width: 768px) {
+    .filtros-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .filtro-grupo {
+        min-width: 100%;
+    }
+    .btn-limpar-filtros {
+        width: 100%;
+    }
+}
+
+/* ============================================================
+   PARTICIPANTES FIXOS NO CARD
+   ============================================================ */
+.card-participantes {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-color);
+    background: #f8f9fa;
+    padding: 6px 10px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.card-participantes b {
+    color: var(--text-main);
+    margin-right: 4px;
+}
+
+.card-participantes .participante-tag {
+    display: inline-block;
+    background: #e9ecef;
+    padding: 1px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-main);
+    margin: 1px 2px;
+}
+
+.card-participantes .participante-tag.solicitante-tag {
+    background: #00b4d8;
+    color: white;
+}
+
+.card-participantes .participante-tag.eu-tag {
+    background: #ffab00;
+    color: #172b4d;
+    font-weight: 700;
+}
+
+.card-participantes .participante-tag.responsavel-tag {
+    background: #0077b6;
+    color: white;
+}
+
+/* ============================================================
+   PARTICIPANTES NO MODAL DE DETALHES
+   ============================================================ */
+#detalheParticipantes {
+    background-color: #f4f5f7 !important;
+    color: var(--text-main);
+    cursor: not-allowed;
+}
+
+.participantes-box {
+    background: #f4f5f7;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--text-main);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 40px;
+}
+
+.participantes-box .participante-tag {
+    display: inline-block;
+    background: #e9ecef;
+    padding: 3px 12px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.participantes-box .participante-tag.solicitante-tag {
+    background: #00b4d8;
+    color: white;
+}
+
+.participantes-box .participante-tag.eu-tag {
+    background: #ffab00;
+    color: #172b4d;
+    font-weight: 700;
+}
+
+.participantes-box .participante-tag.responsavel-tag {
+    background: #0077b6;
+    color: white;
+}
+
+/* ============================================================
+   MELHORIAS NO CARD
+   ============================================================ */
+/* Espaçamento entre seções do card */
+.kanban-card .card-section {
+    margin-bottom: 4px;
+}
+
+/* Ícones menores e mais elegantes */
+.kanban-card .card-section div,
+.kanban-card .card-envolvidos-geral,
+.kanban-card .card-participantes {
+    font-size: 11px;
+}
+
+/* Badge de "Eu" mais chamativo */
+.kanban-card .badge-eu {
+    background: #ffab00;
+    color: #172b4d;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ============================================================
+   RESPONSIVIDADE PARA CARDS EM TELAS MENORES
+   ============================================================ */
+@media (max-width: 768px) {
+    .kanban-card {
+        padding: 10px 12px;
+    }
+    
+    .kanban-card h4 {
+        font-size: 13px;
+    }
+    
+    .card-participantes {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+    
+    .card-participantes .participante-tag {
+        font-size: 9px;
+        padding: 1px 6px;
+    }
+    
+    .badge-responsavel {
+        font-size: 10px;
+        max-width: 120px;
+    }
+}
+
+/* Configurações */
+.btn-config {
+    background: #6554c0 !important;
+}
+.btn-config:hover {
+    background: #5243aa !important;
+}
+
+.badge-status {
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.badge-status.admin {
+    background: #ffab00;
+    color: #172b4d;
+}
+.badge-status.user {
+    background: #dfe1e6;
+    color: #172b4d;
+}
+
+.tipo-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f4f5f7;
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+.tipo-item button {
+    background: none;
+    border: none;
+    color: var(--danger-color);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-editar, .btn-excluir {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 14px;
+}
+.btn-editar:hover { color: var(--primary-color); }
+.btn-excluir:hover { color: var(--danger-color); }
+
+#tabela-usuarios-body tr:hover {
+    background: #f8f9fa;
+}
+#tabela-usuarios-body td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Botão Reabrir no modal de detalhes */
+.btn-reabrir {
+    background: #ffab00 !important;
+    color: #172b4d !important;
+}
+.btn-reabrir:hover {
+    background: #e09e00 !important;
+}
+
+/* ============================================================
+   CHAMADOS VENCIDOS - DESTAQUE ESPECIAL
+   ============================================================ */
+.kanban-card.card-vencido {
+    border-left: 6px solid #de350b !important;
+    background: #fff5f5 !important;
+    box-shadow: 0 2px 8px rgba(222, 53, 11, 0.25) !important;
+    animation: pulse-vencido 2s infinite;
+}
+
+.kanban-card.card-vencido:hover {
+    box-shadow: 0 4px 16px rgba(222, 53, 11, 0.4) !important;
+    transform: translateY(-2px);
+}
+
+@keyframes pulse-vencido {
+    0%, 100% { 
+        box-shadow: 0 2px 8px rgba(222, 53, 11, 0.2);
+        border-left-color: #de350b;
+    }
+    50% { 
+        box-shadow: 0 2px 16px rgba(222, 53, 11, 0.4);
+        border-left-color: #ff0000;
+    }
+}
+
+.kanban-card.card-vencido .badge-vencido {
+    background: #de350b;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    animation: pulse-badge-vencido 1.5s infinite;
+}
+
+@keyframes pulse-badge-vencido {
+    0%, 100% { 
+        background: #de350b;
+        transform: scale(1);
+    }
+    50% { 
+        background: #ff0000;
+        transform: scale(1.05);
+    }
+}
+
+.kanban-card.card-vencido .card-section .datalimite-vencido {
+    color: #de350b !important;
+    font-weight: 700;
+}
+
+.kanban-card.card-vencido .card-section b {
+    color: #de350b;
+}
+
+/* Badge de atraso (vence hoje) */
+.badge-atraso {
+    background: #ffab00;
+    color: #172b4d;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 700;
+}
+
+/* Para cards vencidos, o badge de atraso fica vermelho */
+.kanban-card.card-vencido .badge-atraso {
+    background: #de350b;
+    color: white;
+}
