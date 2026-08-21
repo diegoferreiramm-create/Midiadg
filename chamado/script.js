@@ -482,56 +482,91 @@ function abrirDetalhesCard(id) {
     const containerBotoes = document.getElementById("container-botoes-acao");
     let botoesHtml = `<button class="btn-cancelar" onclick="fecharModalDetalhes()">Fechar</button>`;
 
+    // ============================================================
+    // VERIFICA SE O USUÁRIO ESTÁ LOGADO
+    // ============================================================
     if (usuarioLogado) {
-        let membrosArr = chamado.membros ? chamado.membros.split(",").map(m => m.trim()) : [];
-        let usuarioAtualLimpo = usuarioLogado.trim().toLowerCase();
-        let tipoFluxo = (chamado.tipofluxo || "livre").toLowerCase();
+        const usuarioAtualLimpo = usuarioLogado.trim().toLowerCase();
+        const solicitanteLimpo = (chamado.solicitante || "").trim().toLowerCase();
+        const membrosStr = chamado.membros || "";
+        const membrosArr = membrosStr ? membrosStr.split(",").map(m => m.trim().toLowerCase()) : [];
+        const tipoFluxo = (chamado.tipofluxo || "livre").toLowerCase();
         
-        // Verifica se o solicitante está na lista de membros (último da fila)
-        let solicitanteNaFila = membrosArr.length > 0 && 
-                               membrosArr[membrosArr.length - 1].toLowerCase() === chamado.solicitante.toLowerCase();
+        // ============================================================
+        // VERIFICA SE O USUÁRIO É ENVOLVIDO
+        // ============================================================
+        const ehSolicitante = solicitanteLimpo === usuarioAtualLimpo;
+        const ehMembro = membrosArr.includes(usuarioAtualLimpo);
+        const ehEnvolvido = ehSolicitante || ehMembro;
         
-        // Verifica se o usuário logado é o solicitante
-        let ehSolicitante = chamado.solicitante.toLowerCase() === usuarioAtualLimpo;
+        console.log("=== DEBUG ===");
+        console.log("Usuario logado:", usuarioAtualLimpo);
+        console.log("Solicitante:", solicitanteLimpo);
+        console.log("Membros:", membrosArr);
+        console.log("ehSolicitante:", ehSolicitante);
+        console.log("ehMembro:", ehMembro);
+        console.log("ehEnvolvido:", ehEnvolvido);
+        console.log("tipoFluxo:", tipoFluxo);
+        console.log("status:", chamado.status);
+        console.log("=============");
         
-        // Verifica se o usuário logado é o primeiro da fila (responsável atual)
-        let ehResponsavelAtual = membrosArr.length > 0 && 
-                                membrosArr[0].toLowerCase() === usuarioAtualLimpo;
-
-        // Botão Continuar (apenas para responsável atual ou solicitante quando estiver na fila)
-        if ((chamado.status === "aberto" || chamado.status === "percurso") && 
-            (ehResponsavelAtual || (ehSolicitante && solicitanteNaFila))) {
-            botoesHtml += `<button class="btn-confirmar" onclick="tentarAcao('${chamado.id}', 'percurso')">➡️ Continuar</button>`;
+        // ============================================================
+        // SE FOR LIVRE E ENVOLVIDO - LIBERA TUDO!
+        // ============================================================
+        if (tipoFluxo === "livre" && ehEnvolvido) {
+            // LIVRE: qualquer envolvido pode fazer tudo!
             
-            // Botão Repassar (apenas para responsáveis, não para solicitante)
-            if (ehResponsavelAtual) {
+            if (chamado.status === "aberto" || chamado.status === "percurso") {
+                botoesHtml += `<button class="btn-confirmar" onclick="tentarAcao('${chamado.id}', 'percurso')">➡️ Continuar</button>`;
+            }
+            
+            if (chamado.status === "percurso") {
+                botoesHtml += `<button class="btn-confirmar" onclick="tentarAcao('${chamado.id}', 'concluido')" style="background:var(--success-color);">✅ Concluir Chamado</button>`;
+            }
+            
+            // Repassar (apenas para membros, não para solicitante)
+            if (ehMembro && !ehSolicitante && membrosArr.length > 1) {
+                botoesHtml += `<button class="btn-devolver" onclick="abrirModalRepassar('${chamado.id}', '${chamado.membros}')">🔄 Repassar</button>`;
+            }
+            
+        } else if (tipoFluxo === "sequencial") {
+            // ============================================================
+            // SEQUENCIAL: SEGUE A ORDEM DA FILA
+            // ============================================================
+            const ehPrimeiroDaFila = membrosArr.length > 0 && membrosArr[0] === usuarioAtualLimpo;
+            const solicitanteNaFila = membrosArr.length > 0 && membrosArr[membrosArr.length - 1] === solicitanteLimpo;
+            
+            if (chamado.status === "aberto" || chamado.status === "percurso") {
+                if (ehPrimeiroDaFila || (ehSolicitante && solicitanteNaFila)) {
+                    botoesHtml += `<button class="btn-confirmar" onclick="tentarAcao('${chamado.id}', 'percurso')">➡️ Continuar</button>`;
+                }
+            }
+            
+            if (chamado.status === "percurso") {
+                let podeConcluir = false;
+                
+                if (solicitanteNaFila && ehSolicitante) {
+                    podeConcluir = true;
+                } else if (membrosArr.length > 0) {
+                    const ultimoTecnico = membrosArr.filter(m => m !== solicitanteLimpo);
+                    if (ultimoTecnico.length > 0 && ultimoTecnico[ultimoTecnico.length - 1] === usuarioAtualLimpo) {
+                        podeConcluir = true;
+                    }
+                }
+                
+                if (podeConcluir) {
+                    botoesHtml += `<button class="btn-confirmar" onclick="tentarAcao('${chamado.id}', 'concluido')" style="background:var(--success-color);">✅ Concluir Chamado</button>`;
+                }
+            }
+            
+            // Repassar (apenas primeiro da fila)
+            if (ehPrimeiroDaFila && membrosArr.length > 1) {
                 botoesHtml += `<button class="btn-devolver" onclick="abrirModalRepassar('${chamado.id}', '${chamado.membros}')">🔄 Repassar</button>`;
             }
         }
-
-        // Botão Concluir
-        let podeConcluir = false;
         
-        if (tipoFluxo === "sequencial") {
-            if (solicitanteNaFila && ehSolicitante) {
-                podeConcluir = true;
-            } else if (membrosArr.length > 0 && membrosArr[membrosArr.length - 1].toLowerCase() === usuarioAtualLimpo) {
-                let ultimoTecnico = membrosArr.filter(m => m.toLowerCase() !== chamado.solicitante.toLowerCase());
-                if (ultimoTecnico.length > 0 && ultimoTecnico[ultimoTecnico.length - 1].toLowerCase() === usuarioAtualLimpo) {
-                    podeConcluir = true;
-                }
-            }
-        } else {
-            let ehEnvolvido = ehSolicitante || membrosArr.some(m => m.toLowerCase() === usuarioAtualLimpo);
-            if (ehEnvolvido) podeConcluir = true;
-        }
-
-        if (chamado.status === "percurso" && podeConcluir) {
-            botoesHtml += `<button class="btn-confirmar" onclick="tentarAcao('${chamado.id}', 'concluido')" style="background:var(--success-color);">✅ Concluir Chamado</button>`;
-        }
-
         // ============================================================
-        // BOTÃO REABRIR (APENAS ADMIN) - ADICIONADO
+        // BOTÃO REABRIR (APENAS ADMIN)
         // ============================================================
         if (usuarioStatus === "admin" && chamado.status === "concluido") {
             botoesHtml += `<button class="btn-reabrir" onclick="reabrirChamadoAdmin('${chamado.id}')">🔄 Reabrir Chamado</button>`;
