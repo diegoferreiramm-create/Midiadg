@@ -2,6 +2,17 @@
 // CONFIGURACOES.JS - COMPLETO E CORRIGIDO
 // ==========================================
 
+// ==========================================
+// FUNÇÃO GLOBAL PARA MOSTRAR ERROS
+// ==========================================
+function mostrarErroTela(mensagem) {
+    const msgErro = document.getElementById('msg-erro');
+    if (msgErro) {
+        msgErro.innerText = '❌ ' + mensagem;
+        msgErro.style.display = 'block';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
     const tipoUsuario = localStorage.getItem('pv43_tipo_usuario');
@@ -20,15 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (tipoUsuario !== 'admin') {
         document.getElementById('aviso-admin').style.display = 'block';
         document.getElementById('form-cadastro-user').style.display = 'none';
-    }
-
-    // ==========================================
-    // FUNÇÃO GLOBAL PARA MOSTRAR ERROS
-    // ==========================================
-    function mostrarErroTela(mensagem) {
-        const msgErro = document.getElementById('msg-erro');
-        msgErro.innerText = '❌ ' + mensagem;
-        msgErro.style.display = 'block';
     }
 
     // ==========================================
