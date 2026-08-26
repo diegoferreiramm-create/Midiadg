@@ -23,6 +23,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
+    // FUNÇÃO GLOBAL PARA MOSTRAR ERROS
+    // ==========================================
+    function mostrarErroTela(mensagem) {
+        const msgErro = document.getElementById('msg-erro');
+        msgErro.innerText = '❌ ' + mensagem;
+        msgErro.style.display = 'block';
+    }
+
+    // ==========================================
     // CARREGAR LISTA DE USUÁRIOS
     // ==========================================
     function carregarUsuarios() {
@@ -94,11 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         msgErro.style.display = 'none';
         msgSucesso.style.display = 'none';
-
-        function mostrarErroTela(mensagem) {
-            msgErro.innerText = '❌ ' + mensagem;
-            msgErro.style.display = 'block';
-        }
 
         if (!usuario) { mostrarErroTela('Digite o usuário.'); return; }
         if (!senha) { mostrarErroTela('Digite a senha.'); return; }
