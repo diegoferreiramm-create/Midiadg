@@ -400,124 +400,143 @@ function renderizarTabela() {
     document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
 }
 
-// ==========================================
-// FUNÇÃO DE FILTRAGEM AVANÇADA DA TABELA
-// ==========================================
-function filtrarTabela() {
-    // 1. Captura os valores atuais dos inputs e selects
-    const fNome = document.getElementById('fNome').value.toLowerCase().trim();
-    const fBairro = document.getElementById('fBairro').value.toLowerCase().trim();
-    const fCidade = document.getElementById('fCidade').value.toLowerCase().trim();
-    const fCandidato = document.getElementById('fCandidato').value.toLowerCase().trim();
-    const fZona = document.getElementById('fZona').value.toLowerCase().trim();
-    const fSecao = document.getElementById('fSecao').value.toLowerCase().trim();
-    const fLocalVot = document.getElementById('fLocalVot').value.toLowerCase().trim();
-    const fNivel = document.getElementById('fNivel').value.toLowerCase().trim();
-    const fResponsavel = document.getElementById('fResponsavel').value.toLowerCase().trim();
-    const fAdmin = document.getElementById('fAdmin').value.toLowerCase().trim();
-    const fDataInicio = document.getElementById('fDataInicio').value;
-    const fDataFim = document.getElementById('fDataFim').value;
+// Tabela e Filtros - Versão Corrigida e Funcional
+function filtrarTabelaAvancado(valorForcado) {
+  const sessao = sessionStorage.getItem("usuario");
+  if (!sessao) return;
+  const user = JSON.parse(sessao);
+  const isAdmin = (user.parceiro.toString() === "97");
 
-    // 2. Seleciona as linhas da tabela
-    const tbody = document.getElementById('corpo-tabela');
-    if (!tbody) return;
-    const linhas = tbody.getElementsByTagName('tr');
+  // Captura os valores dos filtros em letras minúsculas/maiúsculas de forma segura
+  const fCpf = document.getElementById("fCpf") ? document.getElementById("fCpf").value.replace(/\D/g, "") : "";
+  const fNome = document.getElementById("fNome") ? document.getElementById("fNome").value.toUpperCase().trim() : "";
+  const fStatus = document.getElementById("fStatus") ? document.getElementById("fStatus").value.trim() : "";
+  
+  const fSituacao = document.getElementById("fSituacao") ? document.getElementById("fSituacao").value.trim().toUpperCase() : "";
+  const fPrazo = document.getElementById("fPrazo") ? document.getElementById("fPrazo").value.trim().toUpperCase() : "";
+  const fProcessoArce = document.getElementById("fProcessoArce") ? document.getElementById("fProcessoArce").value.trim().toUpperCase() : "";
+  
+  let fLote = "";
+  if (valorForcado) {
+    fLote = valorForcado.toString().trim().toUpperCase();
+  } else {
+    fLote = document.getElementById("fLote") ? document.getElementById("fLote").value.trim().toUpperCase() : "";
+  }
+ 
+  const fParc = (isAdmin && document.getElementById("fParceiro")) ? document.getElementById("fParceiro").value.toUpperCase().trim() : "";
+  const fAtend = document.getElementById("fAtend") ? document.getElementById("fAtend").value.toUpperCase().trim() : "";
+  const fVia = (isAdmin && document.getElementById("fVia")) ? document.getElementById("fVia").value.toUpperCase().trim() : "";
 
-    let totalExibidos = 0;
+  const tabela = document.getElementById("tabelaListas");
+  if (!tabela) return;
+  const tr = tabela.getElementsByTagName("tr");
+  let contadorVisiveis = 0;
 
-    // 3. Itera sobre cada linha
-    for (let i = 0; i < linhas.length; i++) {
-        const linha = linhas[i];
-        
-        // Pula linhas de aviso/carregamento
-        if (linha.cells.length <= 1) continue;
+  for (let i = 1; i < tr.length; i++) {
+    const td = tr[i].getElementsByTagName("td");
+    if (!td[0] || td.length <= 1) continue;
+    let mostrar = true;
 
-        // Mapeamento das colunas (conforme ordem padrão do seu sistema)
-        const colunaAdmin = linha.cells[1] ? linha.cells[1].innerText.toLowerCase() : '';       // Coluna B
-        const colunaResp = linha.cells[2] ? linha.cells[2].innerText.toLowerCase() : '';        // Coluna C
-        const colunaNome = linha.cells[3] ? linha.cells[3].innerText.toLowerCase() : '';        // Coluna D
-        const colunaBairro = linha.cells[7] ? linha.cells[7].innerText.toLowerCase() : '';      // Coluna H
-        const colunaCidade = linha.cells[8] ? linha.cells[8].innerText.toLowerCase() : '';      // Coluna I
-        const colunaCandidato = linha.cells[10] ? linha.cells[10].innerText.toLowerCase() : ''; // Coluna K (Busca global em texto)
-        const colunaZona = linha.cells[12] ? linha.cells[12].innerText.toLowerCase() : '';      // Coluna M
-        const colunaSecao = linha.cells[13] ? linha.cells[13].innerText.toLowerCase() : '';     // Coluna N
-        const colunaLocalVot = linha.cells[15] ? linha.cells[15].innerText.toLowerCase() : '';  // Coluna P
-        const colunaData = linha.cells[19] ? linha.cells[19].innerText : '';                    // Coluna T
-        const colunaNivel = linha.cells[20] ? linha.cells[20].innerText.toLowerCase() : '';     // Coluna U
+    // Helper para extração segura de texto cru da célula usando .textContent
+    const getTexto = (idx) => td[idx] ? td[idx].textContent.trim() : "";
 
-        let atende = true;
-
-        // Validações com .includes() para garantir que qualquer trecho (inclusive o 2º candidato) localize
-        if (fNome && !colunaNome.includes(fNome)) atende = false;
-        if (fBairro && !colunaBairro.includes(fBairro)) atende = false;
-        if (fCidade && !colunaCidade.includes(fCidade)) atende = false;
-        if (fCandidato && !colunaCandidato.includes(fCandidato)) atende = false;
-        if (fZona && !colunaZona.includes(fZona)) atende = false;
-        if (fSecao && !colunaSecao.includes(fSecao)) atende = false;
-        if (fLocalVot && !colunaLocalVot.includes(fLocalVot)) atende = false;
-        if (fNivel && !colunaNivel.includes(fNivel)) atende = false;
-        if (fResponsavel && !colunaResp.includes(fResponsavel)) atende = false;
-        if (fAdmin && !colunaAdmin.includes(fAdmin)) atende = false;
-
-        // Filtro por Data Cadastro
-        if (fDataInicio || fDataFim) {
-            let dataLinhaStr = colunaData.split(' ')[0];
-            if (dataLinhaStr.includes('/')) {
-                const partes = dataLinhaStr.split('/');
-                if (partes.length === 3) dataLinhaStr = `${partes[2]}-${partes[1]}-${partes[0]}`;
-            }
-
-            if (fDataInicio && dataLinhaStr < fDataInicio) atende = false;
-            if (fDataFim && dataLinhaStr > fDataFim) atende = false;
-        }
-
-        // Aplica exibição imediata
-        if (atende) {
-            linha.style.display = '';
-            totalExibidos++;
-        } else {
-            linha.style.display = 'none';
-        }
+    // CPF (Ignora formatação e busca por pedaços)
+    if (fCpf !== "") {
+      const cpfTabela = getTexto(1).replace(/\D/g, "");
+      if (cpfTabela.indexOf(fCpf) === -1) mostrar = false;
     }
 
-    // 4. Atualiza o contador no rodapé
-    const spanExibidos = document.getElementById('totalExibidos');
-    if (spanExibidos) {
-        spanExibidos.innerText = totalExibidos;
+    // NOME (Busca com 1 ou mais letras)
+    if (fNome !== "") {
+      const nomeTabela = getTexto(2).toUpperCase();
+      if (nomeTabela.indexOf(fNome) === -1) mostrar = false;
     }
+
+    // STATUS
+    if (fStatus !== "") {
+      const statusTabela = getTexto(11);
+      if (statusTabela !== fStatus) mostrar = false;
+    }
+
+    // SITUAÇÃO
+    if (fSituacao !== "") {
+      const situacaoTabela = getTexto(16).toUpperCase();
+      if (situacaoTabela.indexOf(fSituacao) === -1) mostrar = false;
+    }
+
+    // PRAZO
+    if (fPrazo !== "") {
+      const prazoTabela = getTexto(17).toUpperCase();
+      if (prazoTabela.indexOf(fPrazo) === -1) mostrar = false;
+    }
+
+    // Nº ARCE
+    if (fProcessoArce !== "") {
+      const arceTabela = getTexto(18).toUpperCase();
+      if (arceTabela.indexOf(fProcessoArce) === -1) mostrar = false;
+    }
+
+    // LOTE
+    if (fLote !== "") {
+      const loteTabela = getTexto(15).toUpperCase();
+      if (loteTabela !== fLote) mostrar = false;
+    }
+  
+    // ADMIN (filtros exclusivos de admin)
+    if (isAdmin) {
+      if (fVia !== "") {
+        const viaTabela = getTexto(6).toUpperCase();
+        if (viaTabela.indexOf(fVia) === -1) mostrar = false;
+      }
+      if (fParc !== "") {
+        const parcTabela = getTexto(7).toUpperCase();
+        if (parcTabela.indexOf(fParc) === -1) mostrar = false;
+      }
+    }
+    
+    // FILTRO ATENDENTE
+    if (fAtend !== "") {
+      const atendTabela = getTexto(9).toUpperCase();
+      if (atendTabela.indexOf(fAtend) === -1) mostrar = false;
+    }
+    
+    // Aplica o display dinamicamente (se apagar o filtro, 'mostrar' vira true e exibe novamente)
+    tr[i].style.display = mostrar ? "" : "none";
+    if (mostrar) contadorVisiveis++;
+  }
+
+  // Atualiza o contador de registros visíveis na tela
+  const elNumLinhas = document.getElementById("numLinhas");
+  if (elNumLinhas) elNumLinhas.innerText = contadorVisiveis;
+
+  // Reaplica as regras de colunas ocultas via checkboxes se existirem
+  const checks = document.querySelectorAll('#containerChecks input[type="checkbox"]');
+  checks.forEach((input) => {
+    const idx = input.getAttribute('data-idx');
+    if (idx && idx !== "null") {
+        try {
+            const visivel = input.checked;
+            const colunas = tabela.querySelectorAll(`tr > *:nth-child(${parseInt(idx) + 1})`);
+            colunas.forEach(cel => { cel.style.display = visivel ? "" : "none"; });
+        } catch(e) {}
+    }
+  });
 }
 
 // ==========================================
 // FUNÇÃO PARA LIMPAR TODOS OS FILTROS
 // ==========================================
 function limparFiltros() {
-    document.getElementById('fNome').value = '';
-    document.getElementById('fBairro').value = '';
-    document.getElementById('fCidade').value = '';
-    document.getElementById('fCandidato').value = '';
-    document.getElementById('fZona').value = '';
-    document.getElementById('fSecao').value = '';
-    document.getElementById('fLocalVot').value = '';
-    document.getElementById('fNivel').value = '';
-    document.getElementById('fResponsavel').value = '';
-    document.getElementById('fAdmin').value = '';
-    document.getElementById('fDataInicio').value = '';
-    document.getElementById('fDataFim').value = '';
-
-    // Reaplica o filtro vazio para restaurar todas as linhas
-    filtrarTabela();
-}
-
-// ==========================================
-// LIMPAR FILTROS
-// ==========================================
-function limparFiltros() {
+    // Lista de todos os IDs de inputs de filtro que podem existir na tela
     const campos = [
-        'fNome', 'fBairro', 'fCidade', 'fCandidato', 
-        'fZona', 'fSecao', 'fLocalVot', 'fNivel', 
-        'fResponsavel', 'fAdmin'
+        'fCpf', 'fNome', 'fStatus', 'fSituacao', 'fPrazo', 
+        'fProcessoArce', 'fLote', 'fParceiro', 'fAtend', 'fVia',
+        'fBairro', 'fCidade', 'fCandidato', 'fZona', 'fSecao', 
+        'fLocalVot', 'fNivel', 'fResponsavel', 'fAdmin', 
+        'fDataInicio', 'fDataFim'
     ];
     
+    // Limpa o valor de cada campo de forma segura caso ele exista na tela
     campos.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -525,14 +544,10 @@ function limparFiltros() {
         }
     });
     
-    const hoje = new Date().toISOString().split('T')[0];
-    const dataInicio = document.getElementById('fDataInicio');
-    const dataFim = document.getElementById('fDataFim');
-    if (dataInicio) dataInicio.value = hoje;
-    if (dataFim) dataFim.value = hoje;
-    
-    dadosFiltrados = [...todosOsDados];
-    renderizarTabela();
+    // Dispara a função de filtro avançado para restaurar todas as linhas da tabela
+    if (typeof filtrarTabelaAvancado === 'function') {
+        filtrarTabelaAvancado();
+    }
 }
 
 // ==========================================
