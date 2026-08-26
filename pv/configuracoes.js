@@ -2,15 +2,15 @@
 // CONFIGURACOES.JS
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', function() {
-    const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
-    const tipoUsuario = localStorage.getItem('pv43_tipo_usuario');
+document.addEventListener("DOMContentLoaded", function () {
+    // 🔒 VERIFICAÇÃO RIGOROSA DE ADMIN
+    const tipoUsuario = localStorage.getItem("pv43_tipo_usuario");
 
-    // VERIFICA SE ESTÁ LOGADO
-    if (!nomeUsuario) {
-        alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
-        window.location.href = 'pv43.html';
-        return;
+    // Se não for admin, bloqueia imediatamente e chuta para o menu
+    if (tipoUsuario !== "admin") {
+        alert("⛔ Acesso restrito! Apenas administradores podem acessar esta página.");
+        window.location.href = "menu.html"; // Redireciona para o menu principal
+        return; // Interrompe a execução de qualquer outra coisa no script
     }
 
     // EXIBE NOME DO USUÁRIO
