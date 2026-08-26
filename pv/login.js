@@ -1,265 +1,98 @@
-// login.js - Substitua o bloco de login
-
-document.addEventListener('DOMContentLoaded', function () {
-    const loginBox = document.getElementById('login-box');
-    const trocaSenhaBox = document.getElementById('troca-senha-box');
-    const linkTrocarSenha = document.getElementById('link-trocar-senha');
-    const linkVoltarLogin = document.getElementById('link-voltar-login');
-
-    if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
-        console.error('API_CONFIG não encontrada.');
-        alert('Erro de configuração: a URL da API não foi encontrada.');
-        return;
-    }
-
-    console.log('API configurada:', API_CONFIG.BASE_URL);
-
-    // =====================================================
-    // Alternar entre Login e Troca de Senha
-    // =====================================================
-    if (linkTrocarSenha) {
-        linkTrocarSenha.addEventListener('click', function (e) {
-            e.preventDefault();
-            loginBox.classList.add('hidden');
-            trocaSenhaBox.classList.remove('hidden');
-        });
-    }
-
-    if (linkVoltarLogin) {
-        linkVoltarLogin.addEventListener('click', function (e) {
-            e.preventDefault();
-            trocaSenhaBox.classList.add('hidden');
-            loginBox.classList.remove('hidden');
-        });
-    }
-
-    // =====================================================
-    // LOGIN (POST com URLSearchParams)
-    // =====================================================
-    const formLogin = document.getElementById('form-login');
-
-    if (formLogin) {
-        formLogin.addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const usuarioInput = document.getElementById('usuario');
-            const senhaInput = document.getElementById('senha');
-
-            const usuario = usuarioInput.value.trim();
-            const senha = senhaInput.value.trim();
-
-            if (!usuario) {
-                alert('Digite o usuário.');
-                usuarioInput.focus();
-                return;
-            }
-
-            if (!senha) {
-                alert('Digite a senha.');
-                senhaInput.focus();
-                return;
-            }
-
-            const botao = formLogin.querySelector('button[type="submit"]');
-            const textoOriginal = botao ? botao.innerText : 'Entrar';
-
-            if (botao) {
-                botao.disabled = true;
-                botao.innerText = 'Entrando...';
-            }
-
-            try {
-                // 🔥 USANDO POST com URLSearchParams
-                const params = new URLSearchParams();
-                params.append('acao', 'login');
-                params.append('usuario', usuario);
-                params.append('senha', senha);
-
-                console.log('📡 Enviando POST para:', API_CONFIG.BASE_URL);
-                console.log('📦 Dados:', params.toString());
-
-                const respostaHTTP = await fetch(API_CONFIG.BASE_URL, {
-                    method: 'POST',
-                    body: params  // ← URLSearchParams, NÃO JSON
-                });
-
-                if (!respostaHTTP.ok) {
-                    throw new Error('Servidor retornou HTTP ' + respostaHTTP.status);
-                }
-
-                const resposta = await respostaHTTP.json();
-                console.log('📥 Resposta:', resposta);
-
-                if (resposta.sucesso) {
-                    localStorage.setItem('pv43_nome_usuario', resposta.nome || usuario);
-                    localStorage.setItem('pv43_login_usuario', usuario);
-                    localStorage.setItem('pv43_tipo_usuario', resposta.tipo || '');
-                    window.location.href = 'menu.html';
-                } else {
-                    alert('Erro no login:\n\n' + (resposta.mensagem || 'Usuário ou senha incorretos.'));
-                }
-
-            } catch (erro) {
-                console.error('ERRO COMPLETO NO LOGIN:', erro);
-                alert('Erro na comunicação com o servidor.\n\n' + erro.message);
-            } finally {
-                if (botao) {
-                    botao.disabled = false;
-                    botao.innerText = textoOriginal;
-                }
-            }
-        });
-    }
-
-    // =====================================================
-    // TROCA DE SENHA (POST com URLSearchParams)
-    // =====================================================
-    const formTroca = document.getElementById('form-troca');
-
-    if (formTroca) {
-        formTroca.addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const usuarioInput = document.getElementById('usuario-troca');
-            const senhaAtualInput = document.getElementById('senha-atual');
-            const novaSenhaInput = document.getElementById('nova-senha');
-
-            const usuario = usuarioInput.value.trim();
-            const senhaAtual = senhaAtualInput.value.trim();
-            const novaSenha = novaSenhaInput.value.trim();
-
-            if (!usuario) {
-                alert('Digite o usuário.');
-                usuarioInput.focus();
-                return;
-            }
-
-            if (!senhaAtual) {
-                alert('Digite a senha atual.');
-                senhaAtualInput.focus();
-                return;
-            }
-
-            if (!novaSenha) {
-                alert('Digite a nova senha.');
-                novaSenhaInput.focus();
-                return;
-            }
-
-            try {
-                const params = new URLSearchParams();
-                params.append('acao', 'trocarSenha');
-                params.append('usuario', usuario);
-                params.append('senhaAtual', senhaAtual);
-                params.append('novaSenha', novaSenha);
-
-                const respostaHTTP = await fetch(API_CONFIG.BASE_URL, {
-                    method: 'POST',
-                    body: params
-                });
-
-                if (!respostaHTTP.ok) {
-                    throw new Error('Servidor retornou HTTP ' + respostaHTTP.status);
-                }
-
-                const resposta = await respostaHTTP.json();
-
-                if (resposta.sucesso) {
-                    alert('Senha alterada com sucesso!');
-                    trocaSenhaBox.classList.add('hidden');
-                    loginBox.classList.remove('hidden');
-                    formTroca.reset();
-                } else {
-                    alert('Erro:\n\n' + (resposta.mensagem || 'Não foi possível alterar a senha.'));
-                }
-
-            } catch (erro) {
-                console.error('ERRO NA TROCA DE SENHA:', erro);
-                alert('Erro na comunicação com o servidor.\n\n' + erro.message);
-            }
-        });
-    }
-});
-
 // ============================================================
-// FUNÇÕES GLOBAIS PARA CONFIGURAÇÕES (POST com URLSearchParams)
+// LOGIN.JS - LÓGICA DA TELA DE LOGIN E TROCA DE SENHA
 // ============================================================
 
-window.listarUsuarios = function() {
-    return new Promise((resolve, reject) => {
-        if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
-            reject(new Error('API não configurada'));
-            return;
-        }
-        
-        // Usando GET para listagem (leitura)
-        const url = API_CONFIG.BASE_URL + '?acao=listarUsuarios';
-        console.log('📡 Listando usuários (GET):', url);
+document.addEventListener("DOMContentLoaded", function () {
+    const formLogin = document.getElementById("form-login");
+    const formTroca = document.getElementById("form-troca");
+    
+    const loginBox = document.getElementById("login-box");
+    const trocaSenhaBox = document.getElementById("troca-senha-box");
+    
+    const linkTrocaSenha = document.getElementById("link-trocar-senha");
+    const linkVoltarLogin = document.getElementById("link-voltar-login");
 
-        fetch(url, { method: 'GET' })
+    // Alternar visibilidade das telas
+    linkTrocaSenha.addEventListener("click", function (e) {
+        e.preventDefault();
+        loginBox.classList.add("hidden");
+        trocaSenhaBox.classList.remove("hidden");
+    });
+
+    linkVoltarLogin.addEventListener("click", function (e) {
+        e.preventDefault();
+        trocaSenhaBox.classList.add("hidden");
+        loginBox.classList.remove("hidden");
+    });
+
+    // Ação de Login
+    formLogin.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const usuario = document.getElementById("usuario").value.trim();
+        const senha = document.getElementById("senha").value.trim();
+
+        const botao = formLogin.querySelector("button[type='submit']");
+        botao.disabled = true;
+        botao.innerText = "Entrando...";
+
+        chamarAPI_POST("login", { usuario: usuario, senha: senha })
             .then(response => {
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                return response.json();
+                if (response.sucesso) {
+                    // Salva os dados do usuário logado no localStorage (usado no menu principal)
+                    localStorage.setItem("pv43_nome_usuario", response.nome || usuario);
+                    localStorage.setItem("pv43_tipo_usuario", response.tipo || "usuario");
+                    
+                    alert("✅ Login realizado com sucesso!");
+                    window.location.href = "menu.html"; // Redireciona para o menu principal
+                } else {
+                    alert("⚠️ " + (response.mensagem || "Usuário ou senha inválidos."));
+                    botao.disabled = false;
+                    botao.innerText = "Entrar";
+                }
             })
-            .then(resolve)
-            .catch(reject);
+            .catch(erro => {
+                console.error("Erro no login:", erro);
+                alert("❌ Erro ao conectar com o servidor.");
+                botao.disabled = false;
+                botao.innerText = "Entrar";
+            });
     });
-};
 
-window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
-    return new Promise((resolve, reject) => {
-        if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
-            reject(new Error('API não configurada'));
-            return;
-        }
-        
-        const dados = new URLSearchParams();
-        dados.append('acao', 'cadastrarUsuario');
-        dados.append('usuario', usuario);
-        dados.append('senha', senha);
-        dados.append('nome', nome);
-        dados.append('tipo', tipo);
-        dados.append('cadastrado_por', cadastradoPor);
+    // Ação de Troca de Senha
+    formTroca.addEventListener("submit", function (e) {
+        e.preventDefault();
 
-        console.log('📡 Cadastrando usuário:', usuario);
+        const usuario = document.getElementById("usuario-troca").value.trim();
+        const senhaAtual = document.getElementById("senha-atual").value.trim();
+        const novaSenha = document.getElementById("nova-senha").value.trim();
 
-        fetch(API_CONFIG.BASE_URL, {
-            method: 'POST',
-            body: dados
+        const botao = formTroca.querySelector("button[type='submit']");
+        botao.disabled = true;
+        botao.innerText = "Atualizando...";
+
+        chamarAPI_POST("trocarSenha", {
+            usuario: usuario,
+            senhaAtual: senhaAtual,
+            novaSenha: novaSenha
         })
         .then(response => {
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            return response.json();
+            if (response.sucesso) {
+                alert("✅ Senha alterada com sucesso! Faça login com a nova senha.");
+                formTroca.reset();
+                trocaSenhaBox.classList.add("hidden");
+                loginBox.classList.remove("hidden");
+            } else {
+                alert("⚠️ " + (response.mensagem || "Não foi possível alterar a senha."));
+            }
+            botao.disabled = false;
+            botao.innerText = "Atualizar Senha";
         })
-        .then(resolve)
-        .catch(reject);
+        .catch(erro => {
+            console.error("Erro na troca de senha:", erro);
+            alert("❌ Erro ao conectar com o servidor.");
+            botao.disabled = false;
+            botao.innerText = "Atualizar Senha";
+        });
     });
-};
-
-window.excluirUsuario = function(usuario) {
-    return new Promise((resolve, reject) => {
-        if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
-            reject(new Error('API não configurada'));
-            return;
-        }
-        
-        const dados = new URLSearchParams();
-        dados.append('acao', 'excluirUsuario');
-        dados.append('usuario', usuario);
-
-        console.log('📡 Excluindo usuário:', usuario);
-
-        fetch(API_CONFIG.BASE_URL, {
-            method: 'POST',
-            body: dados
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            return response.json();
-        })
-        .then(resolve)
-        .catch(reject);
-    });
-};
-
-console.log('✅ login.js carregado (versão POST)');
+});
