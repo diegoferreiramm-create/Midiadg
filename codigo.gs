@@ -46,7 +46,7 @@ function doGet(e) {
 }
 
 // ============================================================
-// doPost - COM CORS
+// doPost - COM CORS - CORRIGIDO
 // ============================================================
 function doPost(e) {
   // 🔥 CRIA SAÍDA COM CORS
@@ -63,8 +63,9 @@ function doPost(e) {
     var dadosPost = {};
     var acao = '';
     
-    // Lê os parâmetros (funciona com URLSearchParams do login.js)
+    // 🔥 EXTRAI DADOS DO URLSearchParams (que vem de e.parameter)
     if (e && e.parameter) {
+      Logger.log("📥 PARÂMETROS RECEBIDOS: " + JSON.stringify(e.parameter));
       for (var chave in e.parameter) {
         dadosPost[chave] = e.parameter[chave];
         if (chave === 'acao' || chave === 'action') {
@@ -108,26 +109,25 @@ function doPost(e) {
       resultado = excluirCadastroPorId(dadosPost.id);
     
     // ==========================================
-    // CONFIGURAÇÕES - CORRIGIDO PARA PASSAR PARÂMETROS INDIVIDUAIS
+    // CONFIGURAÇÕES - PASSA PARÂMETROS INDIVIDUAIS
     // ==========================================
     } else if (acao === "listarUsuarios") {
       resultado = listarUsuarios();
     } else if (acao === "cadastrarUsuario") {
-      // 🔥 CORREÇÃO: Passa os parâmetros individuais igual ao roteador
+      // 🔥 PASSA CADA PARÂMETRO INDIVIDUALMENTE
       resultado = cadastrarUsuario(
-        dadosPost.usuario || '',
-        dadosPost.senha || '',
-        dadosPost.nome || '',
-        dadosPost.tipo || 'operador',
-        dadosPost.cadastrado_por || ''
+        dadosPost.usuario,
+        dadosPost.senha,
+        dadosPost.nome,
+        dadosPost.tipo,
+        dadosPost.cadastrado_por
       );
     } else if (acao === "excluirUsuario") {
-      // 🔥 CORREÇÃO: Passa apenas o usuário
-      resultado = excluirUsuario(dadosPost.usuario || '');
+      resultado = excluirUsuario(dadosPost.usuario);
     } else if (acao === "verificarAdmin") {
-      resultado = verificarAdmin(dadosPost.usuario || '');
+      resultado = verificarAdmin(dadosPost.usuario);
     } else if (acao === "buscarUsuario") {
-      resultado = buscarUsuario(dadosPost.login || '');
+      resultado = buscarUsuario(dadosPost.login);
     } else if (acao === "atualizarUsuario") {
       resultado = atualizarUsuario(dadosPost);
     
@@ -142,6 +142,7 @@ function doPost(e) {
     return saida;
 
   } catch (erro) {
+    Logger.log("❌ ERRO NO doPost: " + erro.message);
     saida.setContent(JSON.stringify({
       sucesso: false,
       mensagem: "Erro no servidor: " + erro.message
@@ -211,25 +212,24 @@ function roteador(e) {
       retorno = alterarSenha(parametros.usuario, parametros.senhaAtual, parametros.novaSenha);
     
     // ==========================================
-    // CONFIGURAÇÕES (configuracoes.gs) - CORRIGIDO
+    // CONFIGURAÇÕES (configuracoes.gs)
     // ==========================================
     } else if (action === "listarUsuarios") {
       retorno = listarUsuarios();
     } else if (action === "cadastrarUsuario") {
-      // 🔥 CORREÇÃO: Passa os parâmetros individuais
       retorno = cadastrarUsuario(
-        parametros.usuario || '',
-        parametros.senha || '',
-        parametros.nome || '',
-        parametros.tipo || 'operador',
-        parametros.cadastrado_por || ''
+        parametros.usuario,
+        parametros.senha,
+        parametros.nome,
+        parametros.tipo,
+        parametros.cadastrado_por
       );
     } else if (action === "excluirUsuario") {
-      retorno = excluirUsuario(parametros.usuario || '');
+      retorno = excluirUsuario(parametros.usuario);
     } else if (action === "verificarAdmin") {
-      retorno = verificarAdmin(parametros.usuario || '');
+      retorno = verificarAdmin(parametros.usuario);
     } else if (action === "buscarUsuario") {
-      retorno = buscarUsuario(parametros.login || '');
+      retorno = buscarUsuario(parametros.login);
     } else if (action === "atualizarUsuario") {
       retorno = atualizarUsuario(parametros);
     
@@ -246,6 +246,7 @@ function roteador(e) {
     return retorno;
 
   } catch (err) {
+    Logger.log("❌ ERRO NO ROTEADOR: " + err.toString());
     return { 
       sucesso: false, 
       mensagem: "Erro: " + err.toString() 
