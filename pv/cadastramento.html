@@ -204,39 +204,25 @@
             const secaoInput = document.getElementById('secao');
 
             function buscarDadosVotacao() {
-                const zona = document.getElementById('zona').value.trim();
-                const secao = document.getElementById('secao').value.trim();
+                const zona = zonaInput.value.trim();
+                const secao = secaoInput.value.trim();
             
-                if (zona.length === 0 && secao.length === 0) {
-                    document.getElementById('local_vot').value = '';
-                    document.getElementById('bairro_vot').value = '';
-                    document.getElementById('endereco_vot').value = '';
-                    return;
-                }
+                const urlApi = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
+                    ? API_CONFIG.BASE_URL 
+                    : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
             
-                if (zona.length === 0 || secao.length === 0) {
-                    return;
-                }
-            
-                // ✅ USANDO google.script.run (NÃO TEM CORS)
-                google.script.run
-                    .withSuccessHandler(function(resposta) {
-                        console.log('📦 Resposta:', resposta);
-                        if (resposta.sucesso) {
-                            document.getElementById('local_vot').value = resposta.local_vot || '';
-                            document.getElementById('bairro_vot').value = resposta.bairro_vot || '';
-                            document.getElementById('endereco_vot').value = resposta.endereco_vot || '';
-                        } else {
-                            document.getElementById('local_vot').value = '';
-                            document.getElementById('bairro_vot').value = '';
-                            document.getElementById('endereco_vot').value = '';
-                            console.log('⚠️ ' + resposta.mensagem);
-                        }
+                if (zona.length > 0 || secao.length > 0) {
+                    // ❌ AINDA ESTÁ USANDO POST!
+                    fetch(urlApi, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            acao: 'buscarZona',
+                            zona: zona,
+                            secao: secao
+                        })
                     })
-                    .withFailureHandler(function(erro) {
-                        console.error('❌ Erro ao buscar:', erro);
-                    })
-                    .buscarLocalVotacao(zona, secao);
+                    // ...
+                }
             }
             zonaInput.addEventListener('input', buscarDadosVotacao);
             secaoInput.addEventListener('input', buscarDadosVotacao);
