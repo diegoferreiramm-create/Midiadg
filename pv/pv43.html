@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PV43 - Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="login-container">
+        <!-- Logo do Partido Verde -->
+        <div class="logo-wrapper">
+            <img src="logo-pv.jpg" alt="Logo Partido Verde" class="logo-img">
+            <!-- ✅ ADICIONADO: Nome da cidade abaixo da logo -->
+            <h3 class="cidade-nome">MARACANAÚ</h3>
+        </div>
+
+        <!-- Formulário de Login -->
+        <div id="login-box" class="form-box">
+            <h2>Acesso ao Sistema</h2>
+            <form id="form-login">
+                <div class="input-group">
+                    <label for="usuario">Usuário</label>
+                    <input type="text" id="usuario" name="usuario" required placeholder="Digite seu usuário">
+                </div>
+                
+                <div class="input-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" required placeholder="Digite sua senha">
+                </div>
+
+                <button type="submit" class="btn-primary">Entrar</button>
+            </form>
+            
+            <div class="form-footer">
+                <a href="#" id="link-trocar-senha">Esqueceu ou deseja trocar a senha?</a>
+            </div>
+        </div>
+
+        <!-- Formulário de Troca de Senha (Oculto Inicialmente) -->
+        <div id="troca-senha-box" class="form-box hidden">
+            <h2>Trocar Senha</h2>
+            <form id="form-troca">
+                <div class="input-group">
+                    <label for="usuario-troca">Usuário</label>
+                    <input type="text" id="usuario-troca" name="usuario-troca" required placeholder="Seu usuário">
+                </div>
+                
+                <div class="input-group">
+                    <label for="senha-atual">Senha Atual</label>
+                    <input type="password" id="senha-atual" name="senha-atual" required placeholder="Senha atual">
+                </div>
+
+                <div class="input-group">
+                    <label for="nova-senha">Nova Senha</label>
+                    <input type="password" id="nova-senha" name="nova-senha" required placeholder="Nova senha">
+                </div>
+
+                <button type="submit" class="btn-primary">Atualizar Senha</button>
+            </form>
+            
+            <div class="form-footer">
+                <a href="#" id="link-voltar-login">Voltar para o Login</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ordem correta dos scripts -->
+    <script src="api.js"></script>
+    <script src="login.js"></script>
+</body>
+</html>
