@@ -99,53 +99,55 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!senha) { mostrarErro('Digite a senha.'); return; }
         if (!nome) { mostrarErro('Digite o nome completo.'); return; }
 
-        // PEGA QUEM ESTÁ CADASTRANDO
-        const nomeLogado = localStorage.getItem('pv43_nome_usuario');
         const loginLogado = localStorage.getItem('pv43_login_usuario') || localStorage.getItem('pv43_nome_usuario');
 
+        // 🔥 ENVIANDO NO MESMO FORMATO DE JSON SEGURO QUE O RESTO DO SISTEMA USA
         const dados = {
+            acao: 'cadastrarUsuario',
             usuario: usuario,
             senha: senha,
             nome: nome,
             tipo: tipo,
-            cadastrado_por: loginLogado  // ← quem cadastrou (login)
+            cadastrado_por: loginLogado
         };
 
         this.disabled = true;
         this.innerText = 'Cadastrando...';
 
-        chamarAPI('cadastrarUsuario', dados)
-            .then(resposta => {
-                if (resposta.sucesso) {
-                    msgSucesso.innerText = '✅ ' + resposta.mensagem;
-                    msgSucesso.style.display = 'block';
-                    
-                    // Limpa o formulário
-                    document.getElementById('novo-usuario').value = '';
-                    document.getElementById('nova-senha').value = '';
-                    document.getElementById('novo-nome').value = '';
-                    document.getElementById('novo-tipo').value = 'operador';
+        // Usando fetch direto para garantir compatibilidade total com o doPost original do seu projeto
+        fetch(API_CONFIG.BASE_URL, {
+            method: 'POST',
+            body: JSON.stringify(dados),
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8' // Padrão ideal para Apps Script receber JSON sem bloqueio CORS de preflight
+            }
+        })
+        .then(response => response.json())
+        .then(resposta => {
+            if (resposta.sucesso) {
+                msgSucesso.innerText = '✅ ' + resposta.mensagem;
+                msgSucesso.style.display = 'block';
+                
+                // Limpa o formulário
+                document.getElementById('novo-usuario').value = '';
+                document.getElementById('nova-senha').value = '';
+                document.getElementById('novo-nome').value = '';
+                document.getElementById('novo-tipo').value = 'operador';
 
-                    // Recarrega a lista
-                    carregarUsuarios();
-                } else {
-                    mostrarErro(resposta.mensagem || 'Erro ao cadastrar usuário.');
-                }
-            })
-            .catch(erro => {
-                mostrarErro('Erro de comunicação: ' + erro.message);
-            })
-            .finally(() => {
-                this.disabled = false;
-                this.innerText = '✅ Cadastrar Usuário';
-            });
+                // Recarrega a lista
+                carregarUsuarios();
+            } else {
+                mostrarErro(resposta.mensagem || 'Erro ao cadastrar usuário.');
+            }
+        })
+        .catch(erro => {
+            mostrarErro('Erro de comunicação: ' + erro.message);
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.innerText = '✅ Cadastrar Usuário';
+        });
     });
-
-    function mostrarErro(mensagem) {
-        const msgErro = document.getElementById('msg-erro');
-        msgErro.innerText = '❌ ' + mensagem;
-        msgErro.style.display = 'block';
-    }
 
     // ==========================================
     // EXCLUIR USUÁRIO (APENAS ADMIN)
