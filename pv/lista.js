@@ -332,26 +332,33 @@ function renderizarTabela() {
             // ==========================================
             switch(col.id) {
                 case 'id': valor = item.id || ''; break;
-                case 'numero_cha': valor = item.numero_cha || ''; break; // Corrigido
-                case 'numero_sec': valor = item.numero_sec || ''; break; // Corrigido
+                case 'numero_cha': valor = item.numero_cha || ''; break;
+                case 'numero_sec': valor = item.numero_sec || ''; break;
                 case 'nome': valor = item.nome || ''; break;
                 case 'data_nasc': valor = item.data_nasc || ''; break;
-                case 'endereco': valor = item.endereco || ''; break;
+                case 'endereco': valor = item.endereço || item.endereco || ''; break; // ← COM ç
                 case 'n_casa': valor = item.n_casa || ''; break;
                 case 'bairro': valor = item.bairro || ''; break;
                 case 'cidade': valor = item.cidade || ''; break;
                 case 'telefone': valor = item.telefone || ''; break;
-                case 'candidato': valor = item.candidato || ''; break; // Corrigido
+                case 'candidato': valor = item.candidato || ''; break;
                 case 'titulo': valor = item.titulo || ''; break;
                 case 'zona': valor = item.zona || ''; break;
                 case 'secao': valor = item.secao || ''; break;
                 case 'nome_mae': valor = item.nome_mae || ''; break;
                 case 'local_vot': valor = item.local_vot || ''; break;
                 case 'bairro_vot': valor = item.bairro_vot || ''; break;
-                case 'endereco_vot': valor = item.endereco_vot || ''; break;
+                case 'endereco_vot': valor = item.endereço_vot || item.endereco_vot || ''; break; // ← COM ç
                 case 'obs': valor = item.obs || ''; break;
-                case 'data': valor = item.data || ''; break; // Corrigido
-                case 'nivel': valor = item.nivel || ''; break;
+                case 'data': valor = item.data || ''; break;
+                case 'nivel': 
+                    const nivelMap = {
+                        '1': '<span class="badge-nivel badge-nivel-1">COMUM</span>',
+                        '2': '<span class="badge-nivel badge-nivel-2">RELEVANTE</span>',
+                        '3': '<span class="badge-nivel badge-nivel-3">LÍDER</span>'
+                    };
+                    valor = nivelMap[item.nivel] || item.nivel || '';
+                    break;
                 case 'acoes': 
                     const id = item.id || '';
                     valor = `
@@ -585,13 +592,11 @@ console.log('📡 API URL:', URL_API || '❌ NÃO CONFIGURADA');
 window.filtrarTabela = function() {
     console.log('🔍 FILTRO CHAMADO!');
     
-    // Verifica se os dados existem
     if (!todosOsDados || todosOsDados.length === 0) {
         console.warn('⏳ Aguardando dados carregarem...');
         return;
     }
 
-    // Pega os valores dos filtros
     const fNome = document.getElementById('fNome')?.value?.trim() || '';
     const fBairro = document.getElementById('fBairro')?.value?.trim() || '';
     const fCidade = document.getElementById('fCidade')?.value?.trim() || '';
@@ -605,21 +610,18 @@ window.filtrarTabela = function() {
     const fDataInicio = document.getElementById('fDataInicio')?.value || '';
     const fDataFim = document.getElementById('fDataFim')?.value || '';
 
-    console.log('📝 Filtros:', { fNome, fBairro, fCidade, fCandidato, fNivel });
+    console.log('📝 Filtro NOME:', fNome || '(vazio)');
 
-    // VERIFICA SE TODOS OS FILTROS ESTÃO VAZIOS
     const tudoVazio = !fNome && !fBairro && !fCidade && !fCandidato && 
                      !fZona && !fSecao && !fLocalVot && !fNivel && 
                      !fResponsavel && !fAdmin && !fDataInicio && !fDataFim;
 
-    // SE TUDO VAZIO, RESTAURA A LISTA COMPLETA
     if (tudoVazio) {
         dadosFiltrados = [...todosOsDados];
         console.log('🔄 Lista completa restaurada:', dadosFiltrados.length);
     } else {
-        // APLICA OS FILTROS
         dadosFiltrados = todosOsDados.filter(item => {
-            // Converte para string e minúsculas para comparação (mais seguro)
+            // USANDO OS NOMES CORRETOS COM Ç
             const nome = String(item.nome || '').toLowerCase();
             const bairro = String(item.bairro || '').toLowerCase();
             const cidade = String(item.cidade || '').toLowerCase();
@@ -632,7 +634,6 @@ window.filtrarTabela = function() {
             const admin = String(item.numero_cha || '').toLowerCase();
             const dataCadastro = String(item.data || '');
 
-            // Aplica cada filtro (usando toLowerCase)
             if (fNome && !nome.includes(fNome.toLowerCase())) return false;
             if (fBairro && !bairro.includes(fBairro.toLowerCase())) return false;
             if (fCidade && !cidade.includes(fCidade.toLowerCase())) return false;
@@ -643,21 +644,30 @@ window.filtrarTabela = function() {
             if (fNivel && nivel !== fNivel) return false;
             if (fResponsavel && !responsavel.includes(fResponsavel.toLowerCase())) return false;
             if (fAdmin && !admin.includes(fAdmin.toLowerCase())) return false;
-            
-            // Filtro de data
             if (fDataInicio && dataCadastro && dataCadastro < fDataInicio) return false;
             if (fDataFim && dataCadastro && dataCadastro > fDataFim) return false;
 
             return true;
         });
         
-        console.log('🔍 Filtros aplicados - Encontrados:', dadosFiltrados.length);
+        console.log('🔍 Encontrados:', dadosFiltrados.length, 'registros');
     }
 
-    // Renderiza a tabela e atualiza contadores
-    renderizarTabela();
+    // Chamar a renderização
+    if (typeof renderizarTabela === 'function') {
+        renderizarTabela();
+    } else {
+        // Se renderizarTabela não existe, usa a função inline
+        renderizarTabelaDireta();
+    }
+    
     document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
 };
+
+// Função auxiliar se renderizarTabela não existir
+function renderizarTabelaDireta() {
+    // ... (mesmo código de renderização que você já tem)
+}
 
 // ==========================================
 // LIMPAR TODOS OS FILTROS
