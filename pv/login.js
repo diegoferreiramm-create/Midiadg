@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ============================================================
-// 🔥 FUNÇÕES GLOBAIS PARA CONFIGURAÇÕES (COM HEADERS CORRETOS)
+// 🔥 FUNÇÕES GLOBAIS - USANDO JSON (IGUAL AO CADASTRAMENTO)
 // ============================================================
 
 // ============================================================
@@ -194,7 +194,7 @@ window.listarUsuarios = function() {
 };
 
 // ============================================================
-// CADASTRAR USUÁRIO (POST - ESCRITA) - COM HEADERS CORRETOS
+// CADASTRAR USUÁRIO (POST - JSON) - IGUAL AO CADASTRAMENTO
 // ============================================================
 window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
     return new Promise((resolve, reject) => {
@@ -203,20 +203,24 @@ window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
             return;
         }
         
-        // 🔥 CONSTRÓI O FORM DATA
-        var formData = new FormData();
-        formData.append('acao', 'cadastrarUsuario');
-        formData.append('usuario', usuario);
-        formData.append('senha', senha);
-        formData.append('nome', nome);
-        formData.append('tipo', tipo);
-        formData.append('cadastrado_por', cadastradoPor);
+        // 🔥 JSON - IGUAL AO CADASTRAMENTO
+        const dadosEnvio = {
+            acao: 'cadastrarUsuario',
+            usuario: usuario,
+            senha: senha,
+            nome: nome,
+            tipo: tipo,
+            cadastrado_por: cadastradoPor
+        };
 
-        console.log('📡 Cadastrando usuário (POST com FormData):', usuario);
+        console.log('📡 Cadastrando usuário (POST JSON):', usuario);
 
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
-            body: formData  // ← FormData, não URLSearchParams
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dadosEnvio)
         })
         .then(response => {
             if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -228,7 +232,7 @@ window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
 };
 
 // ============================================================
-// EXCLUIR USUÁRIO (POST - ESCRITA) - COM HEADERS CORRETOS
+// EXCLUIR USUÁRIO (POST - JSON) - IGUAL AO CADASTRAMENTO
 // ============================================================
 window.excluirUsuario = function(usuario) {
     return new Promise((resolve, reject) => {
@@ -237,15 +241,19 @@ window.excluirUsuario = function(usuario) {
             return;
         }
         
-        var formData = new FormData();
-        formData.append('acao', 'excluirUsuario');
-        formData.append('usuario', usuario);
+        const dadosEnvio = {
+            acao: 'excluirUsuario',
+            usuario: usuario
+        };
 
-        console.log('📡 Excluindo usuário (POST com FormData):', usuario);
+        console.log('📡 Excluindo usuário (POST JSON):', usuario);
 
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dadosEnvio)
         })
         .then(response => {
             if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -258,4 +266,4 @@ window.excluirUsuario = function(usuario) {
 
 console.log('✅ login.js carregado');
 console.log('📖 GET (leitura): listarUsuarios');
-console.log('✏️ POST (escrita): cadastrarUsuario, excluirUsuario (com FormData)');
+console.log('✏️ POST (escrita): cadastrarUsuario, excluirUsuario (JSON)');
