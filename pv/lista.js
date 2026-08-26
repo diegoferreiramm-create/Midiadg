@@ -404,7 +404,7 @@ function renderizarTabela() {
 // FUNÇÃO DE FILTRAGEM AVANÇADA DA TABELA
 // ==========================================
 function filtrarTabela() {
-    // 1. Captura os valores digitados/selecionados nos inputs e selects de filtro
+    // 1. Captura os valores atuais dos inputs e selects
     const fNome = document.getElementById('fNome').value.toLowerCase().trim();
     const fBairro = document.getElementById('fBairro').value.toLowerCase().trim();
     const fCidade = document.getElementById('fCidade').value.toLowerCase().trim();
@@ -418,37 +418,36 @@ function filtrarTabela() {
     const fDataInicio = document.getElementById('fDataInicio').value;
     const fDataFim = document.getElementById('fDataFim').value;
 
-    // 2. Seleciona todas as linhas do corpo da tabela (exceto a mensagem de "carregando" se houver)
+    // 2. Seleciona as linhas da tabela
     const tbody = document.getElementById('corpo-tabela');
+    if (!tbody) return;
     const linhas = tbody.getElementsByTagName('tr');
 
     let totalExibidos = 0;
 
-    // 3. Itera sobre cada linha da tabela para verificar se atende aos critérios
+    // 3. Itera sobre cada linha
     for (let i = 0; i < linhas.length; i++) {
         const linha = linhas[i];
         
-        // Pula linhas que sejam de aviso (ex: "Carregando dados...")
+        // Pula linhas de aviso/carregamento
         if (linha.cells.length <= 1) continue;
 
-        // ATENÇÃO: Ajuste os índices das colunas (cells[index]) conforme a ordem real 
-        // em que as 21 colunas são geradas no seu script da tabela.
-        // Exemplo padrão baseado nos labels do seu HTML:
+        // Mapeamento das colunas (conforme ordem padrão do seu sistema)
         const colunaAdmin = linha.cells[1] ? linha.cells[1].innerText.toLowerCase() : '';       // Coluna B
         const colunaResp = linha.cells[2] ? linha.cells[2].innerText.toLowerCase() : '';        // Coluna C
         const colunaNome = linha.cells[3] ? linha.cells[3].innerText.toLowerCase() : '';        // Coluna D
         const colunaBairro = linha.cells[7] ? linha.cells[7].innerText.toLowerCase() : '';      // Coluna H
         const colunaCidade = linha.cells[8] ? linha.cells[8].innerText.toLowerCase() : '';      // Coluna I
-        const colunaCandidato = linha.cells[10] ? linha.cells[10].innerText.toLowerCase() : ''; // Coluna K
+        const colunaCandidato = linha.cells[10] ? linha.cells[10].innerText.toLowerCase() : ''; // Coluna K (Busca global em texto)
         const colunaZona = linha.cells[12] ? linha.cells[12].innerText.toLowerCase() : '';      // Coluna M
         const colunaSecao = linha.cells[13] ? linha.cells[13].innerText.toLowerCase() : '';     // Coluna N
         const colunaLocalVot = linha.cells[15] ? linha.cells[15].innerText.toLowerCase() : '';  // Coluna P
-        const colunaData = linha.cells[19] ? linha.cells[19].innerText : '';                    // Coluna T (Formato esperado: AAAA-MM-DD ou DD/MM/AAAA)
+        const colunaData = linha.cells[19] ? linha.cells[19].innerText : '';                    // Coluna T
         const colunaNivel = linha.cells[20] ? linha.cells[20].innerText.toLowerCase() : '';     // Coluna U
 
-        // 4. Valida cada condição de filtro
         let atende = true;
 
+        // Validações com .includes() para garantir que qualquer trecho (inclusive o 2º candidato) localize
         if (fNome && !colunaNome.includes(fNome)) atende = false;
         if (fBairro && !colunaBairro.includes(fBairro)) atende = false;
         if (fCidade && !colunaCidade.includes(fCidade)) atende = false;
@@ -460,12 +459,10 @@ function filtrarTabela() {
         if (fResponsavel && !colunaResp.includes(fResponsavel)) atende = false;
         if (fAdmin && !colunaAdmin.includes(fAdmin)) atende = false;
 
-        // Filtro por Período de Data (Data Cadastro)
+        // Filtro por Data Cadastro
         if (fDataInicio || fDataFim) {
-            // Normaliza a data da linha para comparação (supondo formato YYYY-MM-DD ou convertendo)
-            let dataLinhaStr = colunaData.split(' ')[0]; // Pega só a parte da data se houver hora
+            let dataLinhaStr = colunaData.split(' ')[0];
             if (dataLinhaStr.includes('/')) {
-                // Se estiver no formato DD/MM/YYYY, converte para YYYY-MM-DD
                 const partes = dataLinhaStr.split('/');
                 if (partes.length === 3) dataLinhaStr = `${partes[2]}-${partes[1]}-${partes[0]}`;
             }
@@ -474,7 +471,7 @@ function filtrarTabela() {
             if (fDataFim && dataLinhaStr > fDataFim) atende = false;
         }
 
-        // 5. Mostra ou oculta a linha com base no resultado dos filtros
+        // Aplica exibição imediata
         if (atende) {
             linha.style.display = '';
             totalExibidos++;
@@ -483,7 +480,7 @@ function filtrarTabela() {
         }
     }
 
-    // 6. Atualiza o contador de registros exibidos no rodapé
+    // 4. Atualiza o contador no rodapé
     const spanExibidos = document.getElementById('totalExibidos');
     if (spanExibidos) {
         spanExibidos.innerText = totalExibidos;
