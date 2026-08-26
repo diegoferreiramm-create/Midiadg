@@ -1,5 +1,5 @@
 // ==========================================
-// CONFIGURACOES.JS - VERSÃO POST (IGUAL AO LOGIN)
+// CONFIGURACOES.JS - GET para listar, POST para salvar
 // ==========================================
 
 function mostrarErroTela(mensagem) {
@@ -14,24 +14,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
     const tipoUsuario = localStorage.getItem('pv43_tipo_usuario');
 
-    // VERIFICA SE ESTÁ LOGADO
     if (!nomeUsuario) {
         alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
         window.location.href = 'pv43.html';
         return;
     }
 
-    // EXIBE NOME DO USUÁRIO
     document.getElementById('usuario-logado-texto').innerText = `Logado como: ${nomeUsuario} (${tipoUsuario.toUpperCase()})`;
 
-    // VERIFICA SE É ADMIN
     if (tipoUsuario !== 'admin') {
         document.getElementById('aviso-admin').style.display = 'block';
         document.getElementById('form-cadastro-user').style.display = 'none';
     }
 
     // ==========================================
-    // CARREGAR LISTA DE USUÁRIOS (POST - IGUAL AO LOGIN)
+    // CARREGAR LISTA DE USUÁRIOS (GET - IGUAL AO CARTEIRAS)
     // ==========================================
     function carregarUsuarios() {
         const tbody = document.getElementById('corpo-tabela-usuarios');
@@ -43,30 +40,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // ==========================================
-        // 🔥 POST - IGUAL AO LOGIN.JS
+        // 🔥 GET para LEITURA
         // ==========================================
-        const dados = new URLSearchParams();
-        dados.append('acao', 'listarUsuarios');
+        const url = API_CONFIG.BASE_URL + '?action=listarUsuarios';
+        console.log('📡 Carregando usuários (GET):', url);
 
-        fetch(API_CONFIG.BASE_URL, {
-            method: 'POST',
-            body: dados
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            return response.json();
-        })
-        .then(resposta => {
-            if (resposta.sucesso && resposta.dados) {
-                renderizarTabela(resposta.dados);
-            } else {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ ' + (resposta.mensagem || 'Erro ao carregar usuários.') + '</td></tr>';
-            }
-        })
-        .catch(erro => {
-            console.error('❌ Erro:', erro);
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ Erro: ' + erro.message + '</td></tr>';
-        });
+        fetch(url, { method: 'GET' })
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(resposta => {
+                if (resposta.sucesso && resposta.dados) {
+                    renderizarTabela(resposta.dados);
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ ' + (resposta.mensagem || 'Erro ao carregar usuários.') + '</td></tr>';
+                }
+            })
+            .catch(erro => {
+                console.error('❌ Erro:', erro);
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ Erro: ' + erro.message + '</td></tr>';
+            });
     }
 
     function renderizarTabela(usuarios) {
@@ -126,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
         this.innerText = 'Cadastrando...';
 
         // ==========================================
-        // 🔥 POST - IGUAL AO LOGIN.JS
+        // 🔥 POST para ESCRITA (salvar na planilha)
         // ==========================================
         const dados = new URLSearchParams();
         dados.append('acao', 'cadastrarUsuario');
@@ -135,6 +129,8 @@ document.addEventListener('DOMContentLoaded', function() {
         dados.append('nome', nome);
         dados.append('tipo', tipo);
         dados.append('cadastrado_por', loginLogado);
+
+        console.log('📡 Cadastrando usuário (POST):', dados.toString());
 
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
@@ -160,6 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(erro => {
+            console.error('❌ Erro:', erro);
             mostrarErroTela('Erro de comunicação: ' + erro.message);
         })
         .finally(() => {
@@ -175,11 +172,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!confirm('⚠️ Tem certeza que deseja excluir o usuário "' + usuario + '"?\n\nEsta ação não pode ser desfeita!')) return;
 
         // ==========================================
-        // 🔥 POST - IGUAL AO LOGIN.JS
+        // 🔥 POST para ESCRITA (excluir da planilha)
         // ==========================================
         const dados = new URLSearchParams();
         dados.append('acao', 'excluirUsuario');
         dados.append('usuario', usuario);
+
+        console.log('📡 Excluindo usuário (POST):', dados.toString());
 
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
@@ -200,8 +199,5 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
     };
 
-    // ==========================================
-    // INICIALIZAR
-    // ==========================================
     carregarUsuarios();
 });
