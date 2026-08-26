@@ -654,7 +654,7 @@
 
     </div>
 
-    <!-- Script de Filtro Fluido Direto no HTML para Garantir Funcionamento -->
+    <!-- Script de Filtro Fluido Corrigido e Blindado -->
     <script>
         function filtrarTabela() {
             if (typeof todosOsDados === 'undefined' || !Array.isArray(todosOsDados)) return;
@@ -673,17 +673,18 @@
             const fDataFim = document.getElementById('fDataFim')?.value || '';
 
             dadosFiltrados = todosOsDados.filter(item => {
-                const nome = (item.nome || '').toUpperCase();
-                const bairro = (item.bairro || '').toUpperCase();
-                const cidade = (item.cidade || '').toUpperCase();
-                const candidato = (item.candidato || '').toUpperCase();
-                const zona = String(item.zona || '');
-                const secao = String(item.secao || '');
-                const localVot = (item.local_vot || '').toUpperCase();
-                const nivel = String(item.nivel || '');
-                const responsavel = (item.numero_sec || '').toUpperCase();
-                const admin = (item.numero_cha || '').toUpperCase();
-                const dataCadastro = item.data || '';
+                // Tenta pegar a propriedade de várias formas possíveis para garantir que ache o dado
+                const nome = String(item.nome || item.NOME || item.nome_completo || '').toUpperCase();
+                const bairro = String(item.bairro || item.BAIRRO || '').toUpperCase();
+                const cidade = String(item.cidade || item.CIDADE || '').toUpperCase();
+                const candidato = String(item.candidato || item.CANDIDATO || '').toUpperCase();
+                const zona = String(item.zona || item.ZONA || '');
+                const secao = String(item.secao || item.SECAO || '');
+                const localVot = String(item.local_vot || item.localVotacao || item.LOCAL_VOTACAO || '').toUpperCase();
+                const nivel = String(item.nivel || item.NIVEL || '');
+                const responsavel = String(item.numero_sec || item.responsavel || item.RESPONSAVEL || '').toUpperCase();
+                const admin = String(item.numero_cha || item.admin || item.ADMIN || '').toUpperCase();
+                const dataCadastro = String(item.data || item.data_cadastro || item.DATA || '');
 
                 if (fNome && !nome.includes(fNome)) return false;
                 if (fBairro && !bairro.includes(fBairro)) return false;
@@ -702,8 +703,33 @@
             });
 
             if (typeof paginaAtual !== 'undefined') paginaAtual = 1;
+            
+            // Verifica qual função de renderização o seu lista.js usa para atualizar a tela
             if (typeof renderizarTabela === 'function') {
                 renderizarTabela();
+            } else if (typeof montarTabela === 'function') {
+                montarTabela();
+            }
+        }
+        function limparFiltros() {
+            // Limpa todos os inputs de texto e selects do bloco de filtros
+            const inputs = document.querySelectorAll('.filtros-area input, .filtros-area select');
+            inputs.forEach(input => {
+                input.value = '';
+            });
+
+            // Restaura os dados filtrados para contemplar todos os dados originais
+            if (typeof todosOsDados !== 'undefined' && Array.isArray(todosOsDados)) {
+                dadosFiltrados = [...todosOsDados];
+            }
+
+            if (typeof paginaAtual !== 'undefined') paginaAtual = 1;
+
+            // Renderiza novamente a tabela inteira
+            if (typeof renderizarTabela === 'function') {
+                renderizarTabela();
+            } else if (typeof montarTabela === 'function') {
+                montarTabela();
             }
         }
     </script>
