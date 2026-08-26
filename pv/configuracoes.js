@@ -1,5 +1,5 @@
 // ==========================================
-// CONFIGURACOES.JS - VERSÃO SEGURA (SEM SENHA NO CONSOLE)
+// CONFIGURACOES.JS - VERSÃO CORRIGIDA (PORTUGUÊS)
 // ==========================================
 
 function mostrarErroTela(mensagem) {
@@ -39,6 +39,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // ==========================================
+        // 🔥 GET - listarUsuarios (PORTUGUÊS)
+        // ==========================================
         const url = API_CONFIG.BASE_URL + '?action=listarUsuarios';
         console.log('📡 Carregando usuários...');
 
@@ -117,25 +120,18 @@ document.addEventListener('DOMContentLoaded', function() {
         this.innerText = 'Cadastrando...';
 
         // ==========================================
-        // 🔥 POST - SEM EXPOR SENHA NO CONSOLE
+        // 🔥 POST - cadastrarUsuario (PORTUGUÊS)
         // ==========================================
         const dados = new URLSearchParams();
-        dados.append('acao', 'cadastrarUsuario');
+        dados.append('acao', 'cadastrarUsuario');  // ← PORTUGUÊS
         dados.append('usuario', usuario);
         dados.append('senha', senha);
         dados.append('nome', nome);
         dados.append('tipo', tipo);
         dados.append('cadastrado_por', loginLogado);
 
-        // ✅ SEGURO - mostra APENAS o usuário, NÃO a senha
+        // ✅ SEGURO - mostra APENAS o usuário
         console.log('📡 Cadastrando usuário:', usuario);
-        console.log('📡 Dados enviados (sem senha):', {
-            acao: 'cadastrarUsuario',
-            usuario: usuario,
-            nome: nome,
-            tipo: tipo,
-            cadastrado_por: loginLogado
-        });
 
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
@@ -146,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(resposta => {
-            console.log('📡 Resposta do servidor:', resposta);
+            console.log('📡 Resposta:', resposta);
             
             if (resposta.sucesso) {
                 msgSucesso.innerText = '✅ ' + resposta.mensagem;
@@ -178,8 +174,11 @@ document.addEventListener('DOMContentLoaded', function() {
     window.excluirUsuario = function(usuario) {
         if (!confirm('⚠️ Tem certeza que deseja excluir o usuário "' + usuario + '"?\n\nEsta ação não pode ser desfeita!')) return;
 
+        // ==========================================
+        // 🔥 POST - excluirUsuario (PORTUGUÊS)
+        // ==========================================
         const dados = new URLSearchParams();
-        dados.append('acao', 'excluirUsuario');
+        dados.append('acao', 'excluirUsuario');  // ← PORTUGUÊS
         dados.append('usuario', usuario);
 
         console.log('📡 Excluindo usuário:', usuario);
