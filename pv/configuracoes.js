@@ -1,5 +1,5 @@
 // ==========================================
-// CONFIGURACOES.JS - COMPLETO E CORRIGIDO
+// CONFIGURACOES.JS - COMPLETO E CORRIGIDO (ESTILO CARTEIRAS - GET)
 // ==========================================
 
 // ==========================================
@@ -34,18 +34,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // CARREGAR LISTA DE USUÁRIOS
+    // CARREGAR LISTA DE USUÁRIOS (ESTILO CARTEIRAS - GET)
     // ==========================================
     function carregarUsuarios() {
         const tbody = document.getElementById('corpo-tabela-usuarios');
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">⏳ Carregando...</td></tr>';
 
-        if (typeof chamarAPI === 'undefined') {
+        if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ API não configurada.</td></tr>';
             return;
         }
 
-        chamarAPI('listarUsuarios')
+        // ==========================================
+        // 🔥 CHAMADA ESTILO CARTEIRAS (GET)
+        // ==========================================
+        const url = API_CONFIG.BASE_URL + '?action=listarUsuarios';
+        console.log('📡 Chamando:', url);
+
+        fetch(url, { method: 'GET' })
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
             .then(resposta => {
                 if (resposta.sucesso && resposta.dados) {
                     renderizarTabela(resposta.dados);
@@ -92,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // CADASTRAR USUÁRIO (Usando o padrão do seu sistema)
+    // CADASTRAR USUÁRIO (ESTILO CARTEIRAS - GET)
     // ==========================================
     document.getElementById('btn-cadastrar-user').addEventListener('click', function() {
         const usuario = document.getElementById('novo-usuario').value.trim();
@@ -112,20 +122,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const loginLogado = localStorage.getItem('pv43_login_usuario') || localStorage.getItem('pv43_nome_usuario');
 
-        // Objeto de dados enviado através da função central chamarAPI do sistema
-        const dados = {
-            usuario: usuario,
-            senha: senha,
-            nome: nome,
-            tipo: tipo,
-            cadastrado_por: loginLogado
-        };
-
         this.disabled = true;
         this.innerText = 'Cadastrando...';
 
-        // Usa a mesma função padrão do api.js que o resto do sistema usa com sucesso
-        chamarAPI('cadastrarUsuario', dados)
+        // ==========================================
+        // 🔥 CHAMADA ESTILO CARTEIRAS (GET)
+        // ==========================================
+        const url = API_CONFIG.BASE_URL + 
+            '?action=cadastrarUsuario' +
+            '&usuario=' + encodeURIComponent(usuario) +
+            '&senha=' + encodeURIComponent(senha) +
+            '&nome=' + encodeURIComponent(nome) +
+            '&tipo=' + encodeURIComponent(tipo) +
+            '&cadastrado_por=' + encodeURIComponent(loginLogado);
+
+        console.log('📡 Cadastrando usuário:', url);
+
+        fetch(url, { method: 'GET' })
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
             .then(resposta => {
                 if (resposta.sucesso) {
                     msgSucesso.innerText = '✅ ' + resposta.mensagem;
@@ -153,12 +170,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ==========================================
-    // EXCLUIR USUÁRIO (APENAS ADMIN)
+    // EXCLUIR USUÁRIO (APENAS ADMIN) - ESTILO CARTEIRAS (GET)
     // ==========================================
     window.excluirUsuario = function(usuario) {
         if (!confirm('⚠️ Tem certeza que deseja excluir o usuário "' + usuario + '"?\n\nEsta ação não pode ser desfeita!')) return;
 
-        chamarAPI('excluirUsuario', { usuario: usuario })
+        // ==========================================
+        // 🔥 CHAMADA ESTILO CARTEIRAS (GET)
+        // ==========================================
+        const url = API_CONFIG.BASE_URL + '?action=excluirUsuario&usuario=' + encodeURIComponent(usuario);
+        console.log('📡 Excluindo usuário:', url);
+
+        fetch(url, { method: 'GET' })
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
             .then(resposta => {
                 if (resposta.sucesso) {
                     alert('✅ Usuário excluído com sucesso!');
