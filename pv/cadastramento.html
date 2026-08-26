@@ -5,18 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PV43 - Cadastramento</title>
     <link rel="stylesheet" href="style.css">
-    <script>
-    // 🔒 VERIFICAÇÃO DE SEGURANÇA IMEDIATA
-    (function() {
-        const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
-        if (!nomeUsuario) {
-            alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
-            window.location.href = 'pv43.html';
-            return;
-        }
-    })();
     
-    // ... resto do seu código ...
+    <!-- 🔒 BLOQUEIO DE SEGURANÇA IMEDIATO (IMPEDE ACESSO DIRETO VIA URL) -->
+    <script>
+        (function() {
+            const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
+            if (!nomeUsuario) {
+                alert('⚠️ Acesso restrito! Por favor, faça o login primeiro.');
+                window.location.href = 'pv43.html'; // Redireciona para a tela de login
+            }
+        })();
     </script>
 </head>
 <body>
@@ -162,16 +160,6 @@
     </div>
 
     <script>
-        // 🔒 VERIFICAÇÃO DE SEGURANÇA
-        (function() {
-            const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
-            if (!nomeUsuario) {
-                alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
-                window.location.href = 'pv43.html';
-                return;
-            }
-        })();
-
         // ==========================================
         // CÓDIGO DO CADASTRAMENTO
         // ==========================================
@@ -211,60 +199,51 @@
             });
 
             // ==========================================
-        // BUSCA AUTOMÁTICA DE ZONA E SEÇÃO (CORRIGIDA)
-        // ==========================================
-        const zonaInput = document.getElementById('zona');
-        const secaoInput = document.getElementById('secao');
-        let timerBusca = null;
+            // BUSCA AUTOMÁTICA DE ZONA E SEÇÃO (CORRIGIDA)
+            // ==========================================
+            const zonaInput = document.getElementById('zona');
+            const secaoInput = document.getElementById('secao');
+            let timerBusca = null;
 
-        function buscarDadosVotacao() {
-            const zona = zonaInput.value.trim();
-            const secao = secaoInput.value.trim();
+            function buscarDadosVotacao() {
+                const zona = zonaInput.value.trim();
+                const secao = secaoInput.value.trim();
 
-            // Só busca se houver algo digitado em ambos para evitar consultas incompletas
-            if (zona.length === 0 && secao.length === 0) {
-                document.getElementById('local_vot').value = '';
-                document.getElementById('bairro_vot').value = '';
-                document.getElementById('endereco_vot').value = '';
-                return;
+                if (zona.length === 0 && secao.length === 0) {
+                    document.getElementById('local_vot').value = '';
+                    document.getElementById('bairro_vot').value = '';
+                    document.getElementById('endereco_vot').value = '';
+                    return;
+                }
+
+                const urlApi = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
+                    ? API_CONFIG.BASE_URL 
+                    : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
+
+                const urlCompleta = `${urlApi}?acao=buscarZona&zona=${encodeURIComponent(zona)}&secao=${encodeURIComponent(secao)}`;
+
+                fetch(urlCompleta, {
+                    method: 'GET',
+                    redirect: 'follow'
+                })
+                .then(response => response.json())
+                .then(resposta => {
+                    if (resposta.sucesso) {
+                        document.getElementById('local_vot').value = resposta.local_vot || '';
+                        document.getElementById('bairro_vot').value = resposta.bairro_vot || '';
+                        document.getElementById('endereco_vot').value = resposta.endereco_vot || '';
+                    }
+                })
+                .catch(err => console.error('❌ Erro ao buscar dados de votação:', err));
             }
 
-            const urlApi = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
-                ? API_CONFIG.BASE_URL 
-                : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
+            function acionarBuscaComAtraso() {
+                clearTimeout(timerBusca);
+                timerBusca = setTimeout(buscarDadosVotacao, 400);
+            }
 
-            // Monta a URL com os parâmetros corretos via GET
-            const urlCompleta = `${urlApi}?acao=buscarZona&zona=${encodeURIComponent(zona)}&secao=${encodeURIComponent(secao)}`;
-
-            console.log('🔍 Buscando no TRE:', urlCompleta);
-
-            fetch(urlCompleta, {
-                method: 'GET',
-                redirect: 'follow'
-            })
-            .then(response => response.json())
-            .then(resposta => {
-                console.log('📦 Resposta recebida:', resposta);
-                if (resposta.sucesso) {
-                    document.getElementById('local_vot').value = resposta.local_vot || '';
-                    document.getElementById('bairro_vot').value = resposta.bairro_vot || '';
-                    document.getElementById('endereco_vot').value = resposta.endereco_vot || '';
-                } else {
-                    // Se não achar, apenas avisa no console, sem limpar campos bruscamente enquanto digita
-                    console.log('⚠️ ' + (resposta.mensagem || 'Local não encontrado.'));
-                }
-            })
-            .catch(err => console.error('❌ Erro ao buscar dados de votação:', err));
-        }
-
-        // Sistema de atraso (Debounce) de 400ms: espera você terminar de digitar para buscar
-        function acionarBuscaComAtraso() {
-            clearTimeout(timerBusca);
-            timerBusca = setTimeout(buscarDadosVotacao, 400);
-        }
-
-        zonaInput.addEventListener('input', acionarBuscaComAtraso);
-        secaoInput.addEventListener('input', acionarBuscaComAtraso);
+            zonaInput.addEventListener('input', acionarBuscaComAtraso);
+            secaoInput.addEventListener('input', acionarBuscaComAtraso);
 
             // ==========================================
             // VALIDAÇÃO DO TÍTULO DE ELEITOR
@@ -364,11 +343,9 @@
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
 
-                // ✅ PEGA O NÍVEL SELECIONADO
                 const nivelSelecionado = document.querySelector('input[name="nivel"]:checked');
                 const nivel = nivelSelecionado ? nivelSelecionado.value : '';
 
-                // Valida se o nível foi selecionado
                 if (!nivel) {
                     alert('⚠️ Por favor, selecione um NÍVEL DE ATUAÇÃO (1, 2 ou 3).');
                     return;
@@ -417,10 +394,8 @@
                     bairro_vot: document.getElementById('bairro_vot').value,
                     endereco_vot: document.getElementById('endereco_vot').value,
                     obs: document.getElementById('obs').value,
-                    nivel: nivel  // ✅ COLUNA "U" NA PLANILHA
+                    nivel: nivel
                 };
-
-                console.log('📤 Enviando dados:', dadosEnvio);
 
                 fetch(urlApiEnvio, {
                     method: 'POST',
@@ -433,7 +408,6 @@
                         form.reset();
                         tituloInput.style.borderColor = "";
                         tituloInput.style.backgroundColor = "";
-                        // Reseta o span do nível
                         document.getElementById('nivel-selecionado').innerText = 'Nenhum nível selecionado';
                         document.getElementById('nivel-selecionado').style.color = '#888';
                         document.getElementById('nivel-selecionado').style.fontWeight = 'normal';
