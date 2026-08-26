@@ -583,6 +583,8 @@ console.log('📡 API URL:', URL_API || '❌ NÃO CONFIGURADA');
 // SOBRESCREVER A FUNÇÃO filtrarTabela DO HTML
 // ==========================================
 window.filtrarTabela = function() {
+    console.log('🔍 FILTRO CHAMADO!');
+    
     // Verifica se os dados existem
     if (!todosOsDados || todosOsDados.length === 0) {
         console.warn('⏳ Aguardando dados carregarem...');
@@ -590,18 +592,20 @@ window.filtrarTabela = function() {
     }
 
     // Pega os valores dos filtros
-    const fNome = document.getElementById('fNome')?.value?.toUpperCase().trim() || '';
-    const fBairro = document.getElementById('fBairro')?.value?.toUpperCase().trim() || '';
-    const fCidade = document.getElementById('fCidade')?.value?.toUpperCase().trim() || '';
-    const fCandidato = document.getElementById('fCandidato')?.value?.toUpperCase().trim() || '';
+    const fNome = document.getElementById('fNome')?.value?.trim() || '';
+    const fBairro = document.getElementById('fBairro')?.value?.trim() || '';
+    const fCidade = document.getElementById('fCidade')?.value?.trim() || '';
+    const fCandidato = document.getElementById('fCandidato')?.value?.trim() || '';
     const fZona = document.getElementById('fZona')?.value?.trim() || '';
     const fSecao = document.getElementById('fSecao')?.value?.trim() || '';
-    const fLocalVot = document.getElementById('fLocalVot')?.value?.toUpperCase().trim() || '';
+    const fLocalVot = document.getElementById('fLocalVot')?.value?.trim() || '';
     const fNivel = document.getElementById('fNivel')?.value?.trim() || '';
-    const fResponsavel = document.getElementById('fResponsavel')?.value?.toUpperCase().trim() || '';
-    const fAdmin = document.getElementById('fAdmin')?.value?.toUpperCase().trim() || '';
+    const fResponsavel = document.getElementById('fResponsavel')?.value?.trim() || '';
+    const fAdmin = document.getElementById('fAdmin')?.value?.trim() || '';
     const fDataInicio = document.getElementById('fDataInicio')?.value || '';
     const fDataFim = document.getElementById('fDataFim')?.value || '';
+
+    console.log('📝 Filtros:', { fNome, fBairro, fCidade, fCandidato, fNivel });
 
     // VERIFICA SE TODOS OS FILTROS ESTÃO VAZIOS
     const tudoVazio = !fNome && !fBairro && !fCidade && !fCandidato && 
@@ -611,34 +615,34 @@ window.filtrarTabela = function() {
     // SE TUDO VAZIO, RESTAURA A LISTA COMPLETA
     if (tudoVazio) {
         dadosFiltrados = [...todosOsDados];
-        console.log('🔄 Todos os filtros vazios - Lista completa restaurada:', dadosFiltrados.length, 'registros');
+        console.log('🔄 Lista completa restaurada:', dadosFiltrados.length);
     } else {
         // APLICA OS FILTROS
         dadosFiltrados = todosOsDados.filter(item => {
-            // Normaliza os campos para comparação
-            const nome = String(item.nome || '').toUpperCase();
-            const bairro = String(item.bairro || '').toUpperCase();
-            const cidade = String(item.cidade || '').toUpperCase();
-            const candidato = String(item.candidato || '').toUpperCase();
+            // Converte para string e minúsculas para comparação (mais seguro)
+            const nome = String(item.nome || '').toLowerCase();
+            const bairro = String(item.bairro || '').toLowerCase();
+            const cidade = String(item.cidade || '').toLowerCase();
+            const candidato = String(item.candidato || '').toLowerCase();
             const zona = String(item.zona || '');
             const secao = String(item.secao || '');
-            const localVot = String(item.local_vot || '').toUpperCase();
+            const localVot = String(item.local_vot || '').toLowerCase();
             const nivel = String(item.nivel || '');
-            const responsavel = String(item.numero_sec || '').toUpperCase();
-            const admin = String(item.numero_cha || '').toUpperCase();
+            const responsavel = String(item.numero_sec || '').toLowerCase();
+            const admin = String(item.numero_cha || '').toLowerCase();
             const dataCadastro = String(item.data || '');
 
-            // Aplica cada filtro
-            if (fNome && !nome.includes(fNome)) return false;
-            if (fBairro && !bairro.includes(fBairro)) return false;
-            if (fCidade && !cidade.includes(fCidade)) return false;
-            if (fCandidato && !candidato.includes(fCandidato)) return false;
+            // Aplica cada filtro (usando toLowerCase)
+            if (fNome && !nome.includes(fNome.toLowerCase())) return false;
+            if (fBairro && !bairro.includes(fBairro.toLowerCase())) return false;
+            if (fCidade && !cidade.includes(fCidade.toLowerCase())) return false;
+            if (fCandidato && !candidato.includes(fCandidato.toLowerCase())) return false;
             if (fZona && !zona.includes(fZona)) return false;
             if (fSecao && !secao.includes(fSecao)) return false;
-            if (fLocalVot && !localVot.includes(fLocalVot)) return false;
+            if (fLocalVot && !localVot.includes(fLocalVot.toLowerCase())) return false;
             if (fNivel && nivel !== fNivel) return false;
-            if (fResponsavel && !responsavel.includes(fResponsavel)) return false;
-            if (fAdmin && !admin.includes(fAdmin)) return false;
+            if (fResponsavel && !responsavel.includes(fResponsavel.toLowerCase())) return false;
+            if (fAdmin && !admin.includes(fAdmin.toLowerCase())) return false;
             
             // Filtro de data
             if (fDataInicio && dataCadastro && dataCadastro < fDataInicio) return false;
@@ -647,14 +651,7 @@ window.filtrarTabela = function() {
             return true;
         });
         
-        console.log('🔍 Filtros aplicados:', {
-            nome: fNome || '(vazio)',
-            bairro: fBairro || '(vazio)',
-            cidade: fCidade || '(vazio)',
-            candidato: fCandidato || '(vazio)',
-            nivel: fNivel || '(vazio)',
-            total_encontrado: dadosFiltrados.length
-        });
+        console.log('🔍 Filtros aplicados - Encontrados:', dadosFiltrados.length);
     }
 
     // Renderiza a tabela e atualiza contadores
