@@ -10,32 +10,35 @@ const API_CONFIG = {
 window.API_CONFIG = API_CONFIG;
 
 // ============================================================
-// FUNÇÃO PARA CHAMAR A API (USANDO A MESMA LÓGICA DO SEU OUTRO PROJETO)
+// FUNÇÃO PARA CHAMAR A API (USANDO POST COM URLSearchParams - IGUAL O LOGIN.JS)
 // ============================================================
 function chamarAPI(action, dados) {
     return new Promise((resolve, reject) => {
-        var url = API_CONFIG.BASE_URL;
+        // Cria o FormData igual ao login.js
+        const params = new URLSearchParams();
+        params.append('acao', action);  // ← usa 'acao' igual o login.js
         
-        // Se já tem '?', adiciona &, senão adiciona ?
-        var separador = url.includes('?') ? '&' : '?';
-        url += separador + 'action=' + encodeURIComponent(action);
-        
-        // Adiciona os parâmetros na URL (GET)
+        // Adiciona os parâmetros
         if (dados) {
             for (var chave in dados) {
-                url += '&' + encodeURIComponent(chave) + '=' + encodeURIComponent(dados[chave]);
+                params.append(chave, dados[chave]);
             }
         }
         
-        console.log('📡 Chamando API:', url);
+        console.log('📡 Chamando API:', API_CONFIG.BASE_URL);
+        console.log('📦 Ação:', action);
+        console.log('📦 Dados:', params.toString());
         
-        fetch(url, {
-            method: 'GET',  // Usando GET como no seu outro projeto
-            headers: {
-                'Content-Type': 'application/json',
-            }
+        fetch(API_CONFIG.BASE_URL, {
+            method: 'POST',        // ← POST igual o login.js
+            body: params           // ← URLSearchParams igual o login.js
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            return response.json();
+        })
         .then(resolve)
         .catch(reject);
     });
