@@ -1,17 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    // =====================================================
-    // ELEMENTOS DA TELA
-    // =====================================================
-
     const loginBox = document.getElementById('login-box');
     const trocaSenhaBox = document.getElementById('troca-senha-box');
     const linkTrocarSenha = document.getElementById('link-trocar-senha');
     const linkVoltarLogin = document.getElementById('link-voltar-login');
-
-    // =====================================================
-    // VERIFICAÇÃO DA API
-    // =====================================================
 
     if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
         console.error('API_CONFIG não encontrada.');
@@ -21,10 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     console.log('API configurada:', API_CONFIG.BASE_URL);
 
-    // =====================================================
-    // ALTERNAR PARA TELA DE TROCA DE SENHA
-    // =====================================================
-
     if (linkTrocarSenha) {
         linkTrocarSenha.addEventListener('click', function (e) {
             e.preventDefault();
@@ -32,10 +20,6 @@ document.addEventListener('DOMContentLoaded', function () {
             trocaSenhaBox.classList.remove('hidden');
         });
     }
-
-    // =====================================================
-    // VOLTAR PARA O LOGIN
-    // =====================================================
 
     if (linkVoltarLogin) {
         linkVoltarLogin.addEventListener('click', function (e) {
@@ -46,9 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =====================================================
-    // LOGIN (GET - IGUAL AO ORIGINAL)
+    // LOGIN (GET)
     // =====================================================
-
     const formLogin = document.getElementById('form-login');
 
     if (formLogin) {
@@ -82,35 +65,23 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             try {
-                console.log('Enviando login...');
-                console.log('Usuário:', usuario);
-
-                // 🔥 GET - IGUAL AO ORIGINAL
                 const url = API_CONFIG.BASE_URL + 
                     '?action=login' +
                     '&usuario=' + encodeURIComponent(usuario) +
                     '&senha=' + encodeURIComponent(senha);
 
-                console.log('📡 URL:', url);
-
                 const respostaHTTP = await fetch(url, { method: 'GET' });
-
-                console.log('Status HTTP:', respostaHTTP.status);
 
                 if (!respostaHTTP.ok) {
                     throw new Error('Servidor retornou HTTP ' + respostaHTTP.status);
                 }
 
                 const resposta = await respostaHTTP.json();
-                console.log('Resposta da API:', resposta);
 
                 if (resposta.sucesso) {
-                    console.log('Login realizado com sucesso.');
-
                     localStorage.setItem('pv43_nome_usuario', resposta.nome || usuario);
                     localStorage.setItem('pv43_login_usuario', usuario);
                     localStorage.setItem('pv43_tipo_usuario', resposta.tipo || '');
-
                     window.location.href = 'menu.html';
                 } else {
                     alert('Erro no login:\n\n' + (resposta.mensagem || 'Usuário ou senha incorretos.'));
@@ -129,9 +100,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =====================================================
-    // TROCA DE SENHA (GET - IGUAL AO ORIGINAL QUE FUNCIONA)
+    // TROCA DE SENHA (GET)
     // =====================================================
-
     const formTroca = document.getElementById('form-troca');
 
     if (formTroca) {
@@ -165,26 +135,19 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             try {
-                // 🔥 GET - IGUAL AO ORIGINAL QUE FUNCIONA
                 const url = API_CONFIG.BASE_URL + 
                     '?action=trocarSenha' +
                     '&usuario=' + encodeURIComponent(usuario) +
                     '&senhaAtual=' + encodeURIComponent(senhaAtual) +
                     '&novaSenha=' + encodeURIComponent(novaSenha);
 
-                console.log('📡 URL:', url);
-                console.log('Solicitando alteração de senha...');
-
                 const respostaHTTP = await fetch(url, { method: 'GET' });
-
-                console.log('Status HTTP:', respostaHTTP.status);
 
                 if (!respostaHTTP.ok) {
                     throw new Error('Servidor retornou HTTP ' + respostaHTTP.status);
                 }
 
                 const resposta = await respostaHTTP.json();
-                console.log('Resposta da troca de senha:', resposta);
 
                 if (resposta.sucesso) {
                     alert('Senha alterada com sucesso!');
@@ -204,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ============================================================
-// 🔥 FUNÇÕES GLOBAIS PARA CONFIGURAÇÕES (NOVAS)
+// 🔥 FUNÇÕES GLOBAIS PARA CONFIGURAÇÕES (COM HEADERS CORRETOS)
 // ============================================================
 
 // ============================================================
@@ -231,7 +194,7 @@ window.listarUsuarios = function() {
 };
 
 // ============================================================
-// CADASTRAR USUÁRIO (POST - ESCRITA)
+// CADASTRAR USUÁRIO (POST - ESCRITA) - COM HEADERS CORRETOS
 // ============================================================
 window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
     return new Promise((resolve, reject) => {
@@ -240,19 +203,20 @@ window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
             return;
         }
         
-        const dados = new URLSearchParams();
-        dados.append('acao', 'cadastrarUsuario');
-        dados.append('usuario', usuario);
-        dados.append('senha', senha);
-        dados.append('nome', nome);
-        dados.append('tipo', tipo);
-        dados.append('cadastrado_por', cadastradoPor);
+        // 🔥 CONSTRÓI O FORM DATA
+        var formData = new FormData();
+        formData.append('acao', 'cadastrarUsuario');
+        formData.append('usuario', usuario);
+        formData.append('senha', senha);
+        formData.append('nome', nome);
+        formData.append('tipo', tipo);
+        formData.append('cadastrado_por', cadastradoPor);
 
-        console.log('📡 Cadastrando usuário (POST):', usuario);
+        console.log('📡 Cadastrando usuário (POST com FormData):', usuario);
 
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
-            body: dados
+            body: formData  // ← FormData, não URLSearchParams
         })
         .then(response => {
             if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -264,7 +228,7 @@ window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
 };
 
 // ============================================================
-// EXCLUIR USUÁRIO (POST - ESCRITA)
+// EXCLUIR USUÁRIO (POST - ESCRITA) - COM HEADERS CORRETOS
 // ============================================================
 window.excluirUsuario = function(usuario) {
     return new Promise((resolve, reject) => {
@@ -273,15 +237,15 @@ window.excluirUsuario = function(usuario) {
             return;
         }
         
-        const dados = new URLSearchParams();
-        dados.append('acao', 'excluirUsuario');
-        dados.append('usuario', usuario);
+        var formData = new FormData();
+        formData.append('acao', 'excluirUsuario');
+        formData.append('usuario', usuario);
 
-        console.log('📡 Excluindo usuário (POST):', usuario);
+        console.log('📡 Excluindo usuário (POST com FormData):', usuario);
 
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
-            body: dados
+            body: formData
         })
         .then(response => {
             if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -294,4 +258,4 @@ window.excluirUsuario = function(usuario) {
 
 console.log('✅ login.js carregado');
 console.log('📖 GET (leitura): listarUsuarios');
-console.log('✏️ POST (escrita): cadastrarUsuario, excluirUsuario');
+console.log('✏️ POST (escrita): cadastrarUsuario, excluirUsuario (com FormData)');
