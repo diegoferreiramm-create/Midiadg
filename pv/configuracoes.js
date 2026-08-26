@@ -1,5 +1,5 @@
 // ==========================================
-// CONFIGURACOES.JS - GET para listar, POST para salvar
+// CONFIGURACOES.JS - VERSÃO SEGURA
 // ==========================================
 
 function mostrarErroTela(mensagem) {
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // CARREGAR LISTA DE USUÁRIOS (GET - IGUAL AO CARTEIRAS)
+    // CARREGAR LISTA DE USUÁRIOS (GET)
     // ==========================================
     function carregarUsuarios() {
         const tbody = document.getElementById('corpo-tabela-usuarios');
@@ -39,11 +39,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // ==========================================
-        // 🔥 GET para LEITURA
-        // ==========================================
         const url = API_CONFIG.BASE_URL + '?action=listarUsuarios';
-        console.log('📡 Carregando usuários (GET):', url);
+        console.log('📡 Carregando usuários...');
 
         fetch(url, { method: 'GET' })
             .then(response => {
@@ -96,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // CADASTRAR USUÁRIO (POST - IGUAL AO LOGIN)
+    // CADASTRAR USUÁRIO (POST - SEGURO)
     // ==========================================
     document.getElementById('btn-cadastrar-user').addEventListener('click', function() {
         const usuario = document.getElementById('novo-usuario').value.trim();
@@ -120,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
         this.innerText = 'Cadastrando...';
 
         // ==========================================
-        // 🔥 POST para ESCRITA (salvar na planilha)
+        // 🔥 POST - SEM EXPOR SENHA NO CONSOLE
         // ==========================================
         const dados = new URLSearchParams();
         dados.append('acao', 'cadastrarUsuario');
@@ -130,7 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
         dados.append('tipo', tipo);
         dados.append('cadastrado_por', loginLogado);
 
-        console.log('📡 Cadastrando usuário (POST):', dados.toString());
+        // ✅ SEGURO - não mostra a senha
+        console.log('📡 Cadastrando usuário:', usuario);
 
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
@@ -166,19 +164,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ==========================================
-    // EXCLUIR USUÁRIO (POST - IGUAL AO LOGIN)
+    // EXCLUIR USUÁRIO (POST)
     // ==========================================
     window.excluirUsuario = function(usuario) {
         if (!confirm('⚠️ Tem certeza que deseja excluir o usuário "' + usuario + '"?\n\nEsta ação não pode ser desfeita!')) return;
 
-        // ==========================================
-        // 🔥 POST para ESCRITA (excluir da planilha)
-        // ==========================================
         const dados = new URLSearchParams();
         dados.append('acao', 'excluirUsuario');
         dados.append('usuario', usuario);
 
-        console.log('📡 Excluindo usuário (POST):', dados.toString());
+        console.log('📡 Excluindo usuário:', usuario);
 
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
