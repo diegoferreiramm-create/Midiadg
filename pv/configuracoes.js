@@ -104,15 +104,15 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!senha) { mostrarErro('Digite a senha.'); return; }
             if (!nome) { mostrarErro('Digite o nome completo.'); return; }
 
-            // PEGA QUEM ESTÁ CADASTRANDO
-            const loginLogado = localStorage.getItem('pv43_login_usuario') || localStorage.getItem('pv43_nome_usuario') || 'Admin';
-
+            // PEGA O NOME COMPLETO DE QUEM ESTÁ CADASTRANDO
+            const nomeCompletoLogado = localStorage.getItem('pv43_nome_usuario') || 'Administrador Principal';
+            
             const dados = {
                 usuario: usuario,
                 senha: senha,
                 nome: nome,
                 tipo: tipo,
-                cadastrado_por: nomeCompletoLogado  // ← Vai preencher certinho na Coluna E
+                cadastrado_por: nomeCompletoLogado  // ← Agora vai o nome completo para a Coluna E
             };
 
             this.disabled = true;
