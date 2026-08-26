@@ -1,5 +1,5 @@
 // ==========================================
-// CONFIGURACOES.JS - VERSÃO SEGURA
+// CONFIGURACOES.JS - VERSÃO SEGURA (SEM SENHA NO CONSOLE)
 // ==========================================
 
 function mostrarErroTela(mensagem) {
@@ -127,8 +127,15 @@ document.addEventListener('DOMContentLoaded', function() {
         dados.append('tipo', tipo);
         dados.append('cadastrado_por', loginLogado);
 
-        // ✅ SEGURO - não mostra a senha
+        // ✅ SEGURO - mostra APENAS o usuário, NÃO a senha
         console.log('📡 Cadastrando usuário:', usuario);
+        console.log('📡 Dados enviados (sem senha):', {
+            acao: 'cadastrarUsuario',
+            usuario: usuario,
+            nome: nome,
+            tipo: tipo,
+            cadastrado_por: loginLogado
+        });
 
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
@@ -139,6 +146,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(resposta => {
+            console.log('📡 Resposta do servidor:', resposta);
+            
             if (resposta.sucesso) {
                 msgSucesso.innerText = '✅ ' + resposta.mensagem;
                 msgSucesso.style.display = 'block';
