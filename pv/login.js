@@ -1,267 +1,181 @@
-document.addEventListener('DOMContentLoaded', function () {
+    <!-- ========================================== -->
+    <!-- SCRIPTS - ORDEM CORRETA -->
+    <!-- ========================================== -->
+    <script src="api.js"></script>
+    
+    <!-- 🔥 LOGIN.JS PRIMEIRO (tem as funções) -->
+    <script src="login.js"></script>
+    
+    <!-- ========================================== -->
+    <!-- CONFIGURAÇÕES - CÓDIGO EMBUTIDO -->
+    <!-- ========================================== -->
+    <script>
+        (function() {
+            'use strict';
 
-    // =====================================================
-    // ELEMENTOS DA TELA
-    // =====================================================
+            console.log('🔧 Inicializando configurações...');
+            console.log('📡 API_CONFIG:', typeof API_CONFIG !== 'undefined' ? 'OK' : 'NÃO ENCONTRADO');
+            console.log('📡 window.listarUsuarios:', typeof window.listarUsuarios !== 'undefined' ? 'OK' : 'NÃO ENCONTRADO');
 
-    const loginBox = document.getElementById('login-box');
-    const trocaSenhaBox = document.getElementById('troca-senha-box');
-    const linkTrocarSenha = document.getElementById('link-trocar-senha');
-    const linkVoltarLogin = document.getElementById('link-voltar-login');
+            const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
+            const tipoUsuario = localStorage.getItem('pv43_tipo_usuario');
 
-    // =====================================================
-    // VERIFICAÇÃO DA API
-    // =====================================================
-
-    if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
-        console.error('API_CONFIG não encontrada.');
-        alert('Erro de configuração: a URL da API não foi encontrada.');
-        return;
-    }
-
-    console.log('API configurada:', API_CONFIG.BASE_URL);
-
-    // =====================================================
-    // ALTERNAR PARA TELA DE TROCA DE SENHA
-    // =====================================================
-
-    if (linkTrocarSenha) {
-        linkTrocarSenha.addEventListener('click', function (e) {
-            e.preventDefault();
-            loginBox.classList.add('hidden');
-            trocaSenhaBox.classList.remove('hidden');
-        });
-    }
-
-    // =====================================================
-    // VOLTAR PARA O LOGIN
-    // =====================================================
-
-    if (linkVoltarLogin) {
-        linkVoltarLogin.addEventListener('click', function (e) {
-            e.preventDefault();
-            trocaSenhaBox.classList.add('hidden');
-            loginBox.classList.remove('hidden');
-        });
-    }
-
-    // =====================================================
-    // LOGIN
-    // =====================================================
-
-    const formLogin = document.getElementById('form-login');
-
-    if (formLogin) {
-        formLogin.addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const usuarioInput = document.getElementById('usuario');
-            const senhaInput = document.getElementById('senha');
-
-            const usuario = usuarioInput.value.trim();
-            const senha = senhaInput.value.trim();
-
-            if (!usuario) {
-                alert('Digite o usuário.');
-                usuarioInput.focus();
+            // ==========================================
+            // VERIFICA LOGIN
+            // ==========================================
+            if (!nomeUsuario) {
+                alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
+                window.location.href = 'pv43.html';
                 return;
             }
 
-            if (!senha) {
-                alert('Digite a senha.');
-                senhaInput.focus();
+            document.getElementById('usuario-logado-texto').innerText = `Logado como: ${nomeUsuario} (${tipoUsuario.toUpperCase()})`;
+
+            if (tipoUsuario !== 'admin') {
+                document.getElementById('aviso-admin').style.display = 'block';
+                document.getElementById('form-cadastro-user').style.display = 'none';
+            }
+
+            // ==========================================
+            // VERIFICA SE AS FUNÇÕES DO LOGIN.JS ESTÃO DISPONÍVEIS
+            // ==========================================
+            if (typeof window.listarUsuarios === 'undefined') {
+                console.error('❌ Função listarUsuarios não encontrada!');
+                document.getElementById('corpo-tabela-usuarios').innerHTML = 
+                    '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ Erro: login.js não carregado. <br> <button onclick="location.reload()">Recarregar</button></td></tr>';
                 return;
             }
 
-            const botao = formLogin.querySelector('button[type="submit"]');
-            const textoOriginal = botao ? botao.innerText : 'Entrar';
+            // ==========================================
+            // CARREGAR LISTA DE USUÁRIOS
+            // ==========================================
+            function carregarUsuarios() {
+                const tbody = document.getElementById('corpo-tabela-usuarios');
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">⏳ Carregando...</td></tr>';
 
-            if (botao) {
-                botao.disabled = true;
-                botao.innerText = 'Entrando...';
+                window.listarUsuarios()
+                    .then(resposta => {
+                        console.log('📡 Resposta listarUsuarios:', resposta);
+                        if (resposta.sucesso && resposta.dados) {
+                            renderizarTabela(resposta.dados);
+                        } else {
+                            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ ' + (resposta.mensagem || 'Erro ao carregar usuários.') + '</td></tr>';
+                        }
+                    })
+                    .catch(erro => {
+                        console.error('❌ Erro:', erro);
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ Erro: ' + erro.message + '</td></tr>';
+                    });
             }
 
-            try {
-                console.log('Enviando login...');
-                console.log('Usuário:', usuario);
+            function renderizarTabela(usuarios) {
+                const tbody = document.getElementById('corpo-tabela-usuarios');
+                
+                if (!usuarios || usuarios.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">📭 Nenhum usuário cadastrado.</td></tr>';
+                    return;
+                }
 
-                const url = API_CONFIG.BASE_URL + 
-                    '?action=login' +
-                    '&usuario=' + encodeURIComponent(usuario) +
-                    '&senha=' + encodeURIComponent(senha);
+                let html = '';
+                usuarios.forEach(user => {
+                    const tipoBadge = user.tipo === 'admin' 
+                        ? '<span class="badge-admin">🔑 ADMIN</span>' 
+                        : '<span class="badge-operador">👤 OPERADOR</span>';
 
-                console.log('📡 URL:', url);
+                    const podeExcluir = user.usuario !== 'admin' ? 
+                        `<button class="btn-excluir-user" onclick="window.excluirUsuarioHandler('${user.usuario}')">🗑️</button>` : 
+                        '<span style="color:#999;font-size:0.7rem;">✖️</span>';
 
-                const respostaHTTP = await fetch(url, {
-                    method: 'GET'
+                    html += `
+                        <tr>
+                            <td><strong>${user.usuario}</strong></td>
+                            <td>${user.nome || '-'}</td>
+                            <td>${tipoBadge}</td>
+                            <td>${user.cadastrado_por || '-'}</td>
+                            <td>${podeExcluir}</td>
+                        </tr>
+                    `;
                 });
 
-                console.log('Status HTTP:', respostaHTTP.status);
-
-                if (!respostaHTTP.ok) {
-                    throw new Error('Servidor retornou HTTP ' + respostaHTTP.status);
-                }
-
-                const resposta = await respostaHTTP.json();
-                console.log('Resposta da API:', resposta);
-
-                if (resposta.sucesso) {
-                    console.log('Login realizado com sucesso.');
-
-                    localStorage.setItem('pv43_nome_usuario', resposta.nome || usuario);
-                    localStorage.setItem('pv43_login_usuario', usuario);
-                    localStorage.setItem('pv43_tipo_usuario', resposta.tipo || '');
-
-                    window.location.href = 'menu.html';
-                } else {
-                    alert('Erro no login:\n\n' + (resposta.mensagem || 'Usuário ou senha incorretos.'));
-                }
-
-            } catch (erro) {
-                console.error('ERRO COMPLETO NO LOGIN:', erro);
-                alert('Erro na comunicação com o servidor.\n\n' + erro.message);
-            } finally {
-                if (botao) {
-                    botao.disabled = false;
-                    botao.innerText = textoOriginal;
-                }
-            }
-        });
-    }
-
-    // =====================================================
-    // TROCA DE SENHA
-    // =====================================================
-
-    const formTroca = document.getElementById('form-troca');
-
-    if (formTroca) {
-        formTroca.addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const usuarioInput = document.getElementById('usuario-troca');
-            const senhaAtualInput = document.getElementById('senha-atual');
-            const novaSenhaInput = document.getElementById('nova-senha');
-
-            const usuario = usuarioInput.value.trim();
-            const senhaAtual = senhaAtualInput.value.trim();
-            const novaSenha = novaSenhaInput.value.trim();
-
-            if (!usuario) {
-                alert('Digite o usuário.');
-                usuarioInput.focus();
-                return;
+                tbody.innerHTML = html;
             }
 
-            if (!senhaAtual) {
-                alert('Digite a senha atual.');
-                senhaAtualInput.focus();
-                return;
-            }
+            // ==========================================
+            // CADASTRAR USUÁRIO
+            // ==========================================
+            document.getElementById('btn-cadastrar-user').addEventListener('click', function() {
+                const usuario = document.getElementById('novo-usuario').value.trim();
+                const senha = document.getElementById('nova-senha').value.trim();
+                const nome = document.getElementById('novo-nome').value.trim();
+                const tipo = document.getElementById('novo-tipo').value;
 
-            if (!novaSenha) {
-                alert('Digite a nova senha.');
-                novaSenhaInput.focus();
-                return;
-            }
+                const msgErro = document.getElementById('msg-erro');
+                const msgSucesso = document.getElementById('msg-sucesso');
 
-            try {
-                const url = API_CONFIG.BASE_URL + 
-                    '?action=trocarSenha' +
-                    '&usuario=' + encodeURIComponent(usuario) +
-                    '&senhaAtual=' + encodeURIComponent(senhaAtual) +
-                    '&novaSenha=' + encodeURIComponent(novaSenha);
+                msgErro.style.display = 'none';
+                msgSucesso.style.display = 'none';
 
-                console.log('📡 URL:', url);
+                if (!usuario) { alert('Digite o usuário.'); return; }
+                if (!senha) { alert('Digite a senha.'); return; }
+                if (!nome) { alert('Digite o nome completo.'); return; }
 
-                const respostaHTTP = await fetch(url, {
-                    method: 'GET'
-                });
+                const loginLogado = localStorage.getItem('pv43_login_usuario') || localStorage.getItem('pv43_nome_usuario');
 
-                if (!respostaHTTP.ok) {
-                    throw new Error('Servidor retornou HTTP ' + respostaHTTP.status);
-                }
+                this.disabled = true;
+                this.innerText = 'Cadastrando...';
 
-                const resposta = await respostaHTTP.json();
+                window.cadastrarUsuario(usuario, senha, nome, tipo, loginLogado)
+                    .then(resposta => {
+                        console.log('📡 Resposta cadastrarUsuario:', resposta);
+                        if (resposta.sucesso) {
+                            msgSucesso.innerText = '✅ ' + resposta.mensagem;
+                            msgSucesso.style.display = 'block';
+                            
+                            document.getElementById('novo-usuario').value = '';
+                            document.getElementById('nova-senha').value = '';
+                            document.getElementById('novo-nome').value = '';
+                            document.getElementById('novo-tipo').value = 'operador';
 
-                if (resposta.sucesso) {
-                    alert('Senha alterada com sucesso!');
-                    trocaSenhaBox.classList.add('hidden');
-                    loginBox.classList.remove('hidden');
-                    formTroca.reset();
-                } else {
-                    alert('Erro:\n\n' + (resposta.mensagem || 'Não foi possível alterar a senha.'));
-                }
+                            carregarUsuarios();
+                        } else {
+                            alert('❌ ' + (resposta.mensagem || 'Erro ao cadastrar usuário.'));
+                        }
+                    })
+                    .catch(erro => {
+                        console.error('❌ Erro:', erro);
+                        alert('❌ Erro de comunicação: ' + erro.message);
+                    })
+                    .finally(() => {
+                        this.disabled = false;
+                        this.innerText = '✅ Cadastrar Usuário';
+                    });
+            });
 
-            } catch (erro) {
-                console.error('ERRO NA TROCA DE SENHA:', erro);
-                alert('Erro na comunicação com o servidor.\n\n' + erro.message);
-            }
-        });
-    }
+            // ==========================================
+            // EXCLUIR USUÁRIO
+            // ==========================================
+            window.excluirUsuarioHandler = function(usuario) {
+                if (!confirm('⚠️ Tem certeza que deseja excluir o usuário "' + usuario + '"?\n\nEsta ação não pode ser desfeita!')) return;
 
-    // =====================================================
-    // 🔥 FUNÇÕES DE CONFIGURAÇÕES (UNIFICADAS AQUI)
-    // =====================================================
+                window.excluirUsuario(usuario)
+                    .then(resposta => {
+                        console.log('📡 Resposta excluirUsuario:', resposta);
+                        if (resposta.sucesso) {
+                            alert('✅ Usuário excluído com sucesso!');
+                            carregarUsuarios();
+                        } else {
+                            alert('❌ ' + (resposta.mensagem || 'Erro ao excluir'));
+                        }
+                    })
+                    .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
+            };
 
-    // =====================================================
-    // LISTAR USUÁRIOS
-    // =====================================================
-    window.listarUsuarios = function() {
-        return new Promise((resolve, reject) => {
-            const url = API_CONFIG.BASE_URL + '?action=listarUsuarios';
-            console.log('📡 Listando usuários:', url);
+            // ==========================================
+            // INICIALIZAR
+            // ==========================================
+            carregarUsuarios();
 
-            fetch(url, { method: 'GET' })
-                .then(response => {
-                    if (!response.ok) throw new Error('HTTP ' + response.status);
-                    return response.json();
-                })
-                .then(resolve)
-                .catch(reject);
-        });
-    };
-
-    // =====================================================
-    // CADASTRAR USUÁRIO
-    // =====================================================
-    window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
-        return new Promise((resolve, reject) => {
-            const url = API_CONFIG.BASE_URL + 
-                '?action=cadastrarUsuario' +
-                '&usuario=' + encodeURIComponent(usuario) +
-                '&senha=' + encodeURIComponent(senha) +
-                '&nome=' + encodeURIComponent(nome) +
-                '&tipo=' + encodeURIComponent(tipo) +
-                '&cadastrado_por=' + encodeURIComponent(cadastradoPor);
-
-            console.log('📡 Cadastrando usuário:', usuario);
-
-            fetch(url, { method: 'GET' })
-                .then(response => {
-                    if (!response.ok) throw new Error('HTTP ' + response.status);
-                    return response.json();
-                })
-                .then(resolve)
-                .catch(reject);
-        });
-    };
-
-    // =====================================================
-    // EXCLUIR USUÁRIO
-    // =====================================================
-    window.excluirUsuario = function(usuario) {
-        return new Promise((resolve, reject) => {
-            const url = API_CONFIG.BASE_URL + '?action=excluirUsuario&usuario=' + encodeURIComponent(usuario);
-            console.log('📡 Excluindo usuário:', usuario);
-
-            fetch(url, { method: 'GET' })
-                .then(response => {
-                    if (!response.ok) throw new Error('HTTP ' + response.status);
-                    return response.json();
-                })
-                .then(resolve)
-                .catch(reject);
-        });
-    };
-});
+        })();
+    </script>
+</body>
+</html>
