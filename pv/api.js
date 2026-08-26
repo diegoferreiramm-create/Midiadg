@@ -1,20 +1,19 @@
 // ============================================================
-// API.JS - CONFIGURAÇÃO CENTRALIZADA (ESTILO CARTEIRAS)
+// API.JS - CONFIGURAÇÃO CENTRALIZADA (ESTILO CARTEIRAS - GET)
 // ============================================================
 
 const API_CONFIG = {
-    // Sua URL atual de execução do Apps Script publicada como Web App
     BASE_URL: "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec"
 };
 
 window.API_CONFIG = API_CONFIG;
 
 // ============================================================
-// FUNÇÃO PARA CHAMAR A API (ESTILO CARTEIRAS - GET)
+// FUNÇÃO PARA CHAMAR A API (GET PURO - IGUAL AO CARTEIRAS)
 // ============================================================
 function chamarAPI(action, dados) {
     return new Promise((resolve, reject) => {
-        // CONSTRÓI A URL COM PARÂMETROS (ESTILO CARTEIRAS)
+        // CONSTRÓI A URL (IGUAL AO CARTEIRAS)
         var url = API_CONFIG.BASE_URL + '?action=' + encodeURIComponent(action);
         
         if (dados) {
@@ -25,7 +24,9 @@ function chamarAPI(action, dados) {
         
         console.log('📡 Chamando API (GET):', url);
         
-        // CHAMADA GET (ESTILO CARTEIRAS)
+        // ==========================================
+        // 🔥 GET PURO - IGUAL AO CARTEIRAS
+        // ==========================================
         fetch(url, {
             method: 'GET'
         })
