@@ -401,13 +401,13 @@ function renderizarTabela() {
 }
 
 // ==========================================
-// FILTRAR TABELA
+// FILTRAR TABELA (Otimizado para busca instantânea)
 // ==========================================
 function filtrarTabela() {
     const fNome = document.getElementById('fNome')?.value?.trim()?.toUpperCase() || '';
     const fBairro = document.getElementById('fBairro')?.value?.trim()?.toUpperCase() || '';
     const fCidade = document.getElementById('fCidade')?.value?.trim()?.toUpperCase() || '';
-    const fCandidato = document.getElementById('fCandidato')?.value || '';
+    const fCandidato = document.getElementById('fCandidato')?.value?.trim()?.toUpperCase() || '';
     const fZona = document.getElementById('fZona')?.value?.trim() || '';
     const fSecao = document.getElementById('fSecao')?.value?.trim() || '';
     const fLocalVot = document.getElementById('fLocalVot')?.value?.trim()?.toUpperCase() || '';
@@ -417,27 +417,51 @@ function filtrarTabela() {
     const fDataInicio = document.getElementById('fDataInicio')?.value || '';
     const fDataFim = document.getElementById('fDataFim')?.value || '';
 
-    dadosFiltrados = todosOsDados.filter(item => {
+    // Se 'todosOsDados' estiver vazio, evita quebrar a tela
+    if (!window.todosOsDados || !Array.isArray(window.todosOsDados)) {
+        return;
+    }
+
+    window.dadosFiltrados = window.todosOsDados.filter(item => {
+        // Filtro por Nome (busca por qualquer letra digitada)
         if (fNome && !(item.nome || '').toUpperCase().includes(fNome)) return false;
+        
+        // Filtro por Bairro
         if (fBairro && !(item.bairro || '').toUpperCase().includes(fBairro)) return false;
+        
+        // Filtro por Cidade
         if (fCidade && !(item.cidade || '').toUpperCase().includes(fCidade)) return false;
+        
+        // Filtro por Candidato (Ajustado para lidar com múltiplos ou parciais)
         if (fCandidato) {
-            const candidatos = item.candidato || '';
-            if (!candidatos.toUpperCase().includes(fCandidato.toUpperCase())) return false;
+            const candidatosItem = (item.candidato || '').toUpperCase();
+            // Pega apenas a palavra-chave principal (ex: EDUARDO ou JULINHO) para garantir o match
+            if (!candidatosItem.includes(fCandidato)) return false;
         }
-        if (fZona && (item.zona || '') !== fZona) return false;
-        if (fSecao && (item.secao || '') !== fSecao) return false;
+
+        // Filtro por Zona
+        if (fZona && (item.zona || '').trim() !== fZona) return false;
+        
+        // Filtro por Seção
+        if (fSecao && (item.secao || '').trim() !== fSecao) return false;
+        
+        // Filtro por Local de Votação
         if (fLocalVot && !(item.local_vot || '').toUpperCase().includes(fLocalVot)) return false;
-        if (fNivel && item.nivel != fNivel) return false;
+        
+        // Filtro por Nível
+        if (fNivel && String(item.nivel) !== String(fNivel)) return false;
+        
+        // Filtro por Responsável
         if (fResponsavel && !(item.numero_sec || '').toUpperCase().includes(fResponsavel)) return false;
+        
+        // Filtro por Admin
         if (fAdmin) {
             const adminVal = item.numero_cha || '';
             if (fAdmin === 'Administrador' && adminVal !== 'Administrador') return false;
             if (fAdmin === 'Operador' && adminVal !== 'Operador') return false;
-            if (fAdmin !== 'Administrador' && fAdmin !== 'Operador') {
-                if (!adminVal.toUpperCase().includes(fAdmin.toUpperCase())) return false;
-            }
         }
+
+        // Filtro por Data
         if (fDataInicio || fDataFim) {
             const dataCadastro = item.data || '';
             let dataComparar = '';
@@ -452,10 +476,14 @@ function filtrarTabela() {
             if (fDataInicio && dataComparar < fDataInicio) return false;
             if (fDataFim && dataComparar > fDataFim) return false;
         }
+
         return true;
     });
 
-    renderizarTabela();
+    // Atualiza a renderização na tela imediatamente
+    if (typeof renderizarTabela === 'function') {
+        renderizarTabela();
+    }
 }
 
 // ==========================================
