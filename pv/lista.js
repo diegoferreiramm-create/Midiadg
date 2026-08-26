@@ -10,7 +10,7 @@ if (!URL_API) {
 }
 
 let todosOsDados = [];
-let dadosFiltrados = [];
+let dadosFiltrados = []; 
 let colunasVisiveis = {};
 
 // ==========================================
