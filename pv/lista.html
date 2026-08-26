@@ -524,7 +524,7 @@
         </div>
 
         <!-- ==========================================
-             ÁREA DE FILTROS (Com os gatilhos oninput e onchange)
+             ÁREA DE FILTROS 
              ========================================== -->
         <div class="filtros-area" id="filtrosArea">
             
@@ -549,11 +549,7 @@
             <!-- CANDIDATO (Coluna K) -->
             <div class="grupo-filtro">
                 <label for="fCandidato">CANDIDATO</label>
-                <select id="fCandidato" onchange="filtrarTabela()">
-                    <option value="">Todos</option>
-                    <option value="EDUARDO BISMARCK 4343 (FEDERAL)">Eduardo Bismarck (Federal)</option>
-                    <option value="JULINHO 13789 (ESTADUAL)">Julinho (Estadual)</option>
-                </select>
+                <input type="text" id="fCandidato" placeholder="Candidato..." oninput="filtrarTabela()">
             </div>
 
             <!-- ZONA (Coluna M) -->
@@ -574,14 +570,14 @@
                 <input type="text" id="fLocalVot" placeholder="Local..." oninput="filtrarTabela()">
             </div>
 
-            <!-- NÍVEL (Coluna U) -->
+            <!-- NÍVEL (Coluna U) - Apenas 1, 2 e 3 -->
             <div class="grupo-filtro">
                 <label for="fNivel">NÍVEL</label>
                 <select id="fNivel" onchange="filtrarTabela()">
                     <option value="">Todos</option>
-                    <option value="1">🟩 NÍVEL 1 (COMUM)</option>
-                    <option value="2">🟩 NÍVEL 2 (RELEVANTE)</option>
-                    <option value="3">🟩 NÍVEL 3 (LÍDER)</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
                 </select>
             </div>
 
@@ -591,14 +587,10 @@
                 <input type="text" id="fResponsavel" placeholder="Responsável..." oninput="filtrarTabela()">
             </div>
 
-            <!-- ADMIN (Coluna B) -->
+            <!-- ADMIN (Coluna B) - Caixa de texto livre para digitar o nome -->
             <div class="grupo-filtro">
                 <label for="fAdmin">ADMIN</label>
-                <select id="fAdmin" onchange="filtrarTabela()">
-                    <option value="">Todos</option>
-                    <option value="Administrador">✅ Administrador</option>
-                    <option value="Operador">👤 Operador</option>
-                </select>
+                <input type="text" id="fAdmin" placeholder="Nome do admin..." oninput="filtrarTabela()">
             </div>
 
             <!-- DATA CADASTRO (Coluna T) -->
@@ -609,11 +601,6 @@
                     <span>até</span>
                     <input type="date" id="fDataFim" onchange="filtrarTabela()">
                 </div>
-            </div>
-
-            <!-- BOTÃO LIMPAR -->
-            <div class="filtros-botoes">
-                <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar Filtros</button>
             </div>
 
         </div>
