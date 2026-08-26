@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =====================================================
-    // LOGIN (GET - LEITURA)
+    // LOGIN (GET - IGUAL AO ORIGINAL)
     // =====================================================
 
     const formLogin = document.getElementById('form-login');
@@ -82,24 +82,35 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             try {
-                // 🔥 GET - LEITURA
+                console.log('Enviando login...');
+                console.log('Usuário:', usuario);
+
+                // 🔥 GET - IGUAL AO ORIGINAL
                 const url = API_CONFIG.BASE_URL + 
                     '?action=login' +
                     '&usuario=' + encodeURIComponent(usuario) +
                     '&senha=' + encodeURIComponent(senha);
 
+                console.log('📡 URL:', url);
+
                 const respostaHTTP = await fetch(url, { method: 'GET' });
+
+                console.log('Status HTTP:', respostaHTTP.status);
 
                 if (!respostaHTTP.ok) {
                     throw new Error('Servidor retornou HTTP ' + respostaHTTP.status);
                 }
 
                 const resposta = await respostaHTTP.json();
+                console.log('Resposta da API:', resposta);
 
                 if (resposta.sucesso) {
+                    console.log('Login realizado com sucesso.');
+
                     localStorage.setItem('pv43_nome_usuario', resposta.nome || usuario);
                     localStorage.setItem('pv43_login_usuario', usuario);
                     localStorage.setItem('pv43_tipo_usuario', resposta.tipo || '');
+
                     window.location.href = 'menu.html';
                 } else {
                     alert('Erro no login:\n\n' + (resposta.mensagem || 'Usuário ou senha incorretos.'));
@@ -118,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =====================================================
-    // TROCA DE SENHA (POST - ESCRITA)
+    // TROCA DE SENHA (GET - IGUAL AO ORIGINAL QUE FUNCIONA)
     // =====================================================
 
     const formTroca = document.getElementById('form-troca');
@@ -154,23 +165,26 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             try {
-                // 🔥 POST - ESCRITA
-                const dados = new URLSearchParams();
-                dados.append('acao', 'trocarSenha');
-                dados.append('usuario', usuario);
-                dados.append('senhaAtual', senhaAtual);
-                dados.append('novaSenha', novaSenha);
+                // 🔥 GET - IGUAL AO ORIGINAL QUE FUNCIONA
+                const url = API_CONFIG.BASE_URL + 
+                    '?action=trocarSenha' +
+                    '&usuario=' + encodeURIComponent(usuario) +
+                    '&senhaAtual=' + encodeURIComponent(senhaAtual) +
+                    '&novaSenha=' + encodeURIComponent(novaSenha);
 
-                const respostaHTTP = await fetch(API_CONFIG.BASE_URL, {
-                    method: 'POST',
-                    body: dados
-                });
+                console.log('📡 URL:', url);
+                console.log('Solicitando alteração de senha...');
+
+                const respostaHTTP = await fetch(url, { method: 'GET' });
+
+                console.log('Status HTTP:', respostaHTTP.status);
 
                 if (!respostaHTTP.ok) {
                     throw new Error('Servidor retornou HTTP ' + respostaHTTP.status);
                 }
 
                 const resposta = await respostaHTTP.json();
+                console.log('Resposta da troca de senha:', resposta);
 
                 if (resposta.sucesso) {
                     alert('Senha alterada com sucesso!');
@@ -190,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ============================================================
-// 🔥 FUNÇÕES GLOBAIS PARA CONFIGURAÇÕES
+// 🔥 FUNÇÕES GLOBAIS PARA CONFIGURAÇÕES (NOVAS)
 // ============================================================
 
 // ============================================================
@@ -203,7 +217,6 @@ window.listarUsuarios = function() {
             return;
         }
         
-        // 🔥 GET - LEITURA
         const url = API_CONFIG.BASE_URL + '?action=listarUsuarios';
         console.log('📡 Listando usuários (GET):', url);
 
@@ -227,7 +240,6 @@ window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
             return;
         }
         
-        // 🔥 POST - ESCRITA
         const dados = new URLSearchParams();
         dados.append('acao', 'cadastrarUsuario');
         dados.append('usuario', usuario);
@@ -261,7 +273,6 @@ window.excluirUsuario = function(usuario) {
             return;
         }
         
-        // 🔥 POST - ESCRITA
         const dados = new URLSearchParams();
         dados.append('acao', 'excluirUsuario');
         dados.append('usuario', usuario);
