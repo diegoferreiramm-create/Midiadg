@@ -401,99 +401,114 @@ function renderizarTabela() {
 }
 
 // ==========================================
-// FILTRAR TABELA (Baseado no seu projeto de sucesso)
+// FUNÇÃO DE FILTRAGEM AVANÇADA DA TABELA
 // ==========================================
 function filtrarTabela() {
-    const fNome = document.getElementById('fNome') ? document.getElementById('fNome').value.toUpperCase().trim() : "";
-    const fBairro = document.getElementById('fBairro') ? document.getElementById('fBairro').value.toUpperCase().trim() : "";
-    const fCidade = document.getElementById('fCidade') ? document.getElementById('fCidade').value.toUpperCase().trim() : "";
-    const fCandidato = document.getElementById('fCandidato') ? document.getElementById('fCandidato').value.toUpperCase().trim() : "";
-    const fZona = document.getElementById('fZona') ? document.getElementById('fZona').value.trim() : "";
-    const fSecao = document.getElementById('fSecao') ? document.getElementById('fSecao').value.trim() : "";
-    const fLocalVot = document.getElementById('fLocalVot') ? document.getElementById('fLocalVot').value.toUpperCase().trim() : "";
-    const fNivel = document.getElementById('fNivel') ? document.getElementById('fNivel').value : "";
-    const fResponsavel = document.getElementById('fResponsavel') ? document.getElementById('fResponsavel').value.toUpperCase().trim() : "";
-    const fAdmin = document.getElementById('fAdmin') ? document.getElementById('fAdmin').value.toUpperCase().trim() : "";
-    const fDataInicio = document.getElementById('fDataInicio') ? document.getElementById('fDataInicio').value : "";
-    const fDataFim = document.getElementById('fDataFim') ? document.getElementById('fDataFim').value : "";
+    // 1. Captura os valores digitados/selecionados nos inputs e selects de filtro
+    const fNome = document.getElementById('fNome').value.toLowerCase().trim();
+    const fBairro = document.getElementById('fBairro').value.toLowerCase().trim();
+    const fCidade = document.getElementById('fCidade').value.toLowerCase().trim();
+    const fCandidato = document.getElementById('fCandidato').value.toLowerCase().trim();
+    const fZona = document.getElementById('fZona').value.toLowerCase().trim();
+    const fSecao = document.getElementById('fSecao').value.toLowerCase().trim();
+    const fLocalVot = document.getElementById('fLocalVot').value.toLowerCase().trim();
+    const fNivel = document.getElementById('fNivel').value.toLowerCase().trim();
+    const fResponsavel = document.getElementById('fResponsavel').value.toLowerCase().trim();
+    const fAdmin = document.getElementById('fAdmin').value.toLowerCase().trim();
+    const fDataInicio = document.getElementById('fDataInicio').value;
+    const fDataFim = document.getElementById('fDataFim').value;
 
-    const tabela = document.getElementById('tabela-lista'); // Ajuste para o ID da sua tabela atual se necessário
-    if (!tabela) return;
-    
-    const tr = tabela.getElementsByTagName('tr');
-    let contadorVisiveis = 0;
+    // 2. Seleciona todas as linhas do corpo da tabela (exceto a mensagem de "carregando" se houver)
+    const tbody = document.getElementById('corpo-tabela');
+    const linhas = tbody.getElementsByTagName('tr');
 
-    for (let i = 1; i < tr.length; i++) {
-        const td = tr[i].getElementsByTagName('td');
-        if (!td || td.length === 0) continue;
-        if (td.length === 1) continue; // Pula linha de "carregando"
+    let totalExibidos = 0;
 
-        let mostrar = true;
+    // 3. Itera sobre cada linha da tabela para verificar se atende aos critérios
+    for (let i = 0; i < linhas.length; i++) {
+        const linha = linhas[i];
+        
+        // Pula linhas que sejam de aviso (ex: "Carregando dados...")
+        if (linha.cells.length <= 1) continue;
 
-        // Mapeamento idêntico ao seu projeto bom (ajustado para as colunas do seu array atual):
-        // TD[1] = Admin (numero_cha), TD[2] = Responsável (numero_sec), TD[3] = Nome
-        // TD[7] = Bairro, TD[8] = Cidade, TD[10] = Candidato, TD[12] = Zona, TD[13] = Seção
-        // TD[15] = Local Votação, TD[19] = Data, TD[20] = Nível
+        // ATENÇÃO: Ajuste os índices das colunas (cells[index]) conforme a ordem real 
+        // em que as 21 colunas são geradas no seu script da tabela.
+        // Exemplo padrão baseado nos labels do seu HTML:
+        const colunaAdmin = linha.cells[1] ? linha.cells[1].innerText.toLowerCase() : '';       // Coluna B
+        const colunaResp = linha.cells[2] ? linha.cells[2].innerText.toLowerCase() : '';        // Coluna C
+        const colunaNome = linha.cells[3] ? linha.cells[3].innerText.toLowerCase() : '';        // Coluna D
+        const colunaBairro = linha.cells[7] ? linha.cells[7].innerText.toLowerCase() : '';      // Coluna H
+        const colunaCidade = linha.cells[8] ? linha.cells[8].innerText.toLowerCase() : '';      // Coluna I
+        const colunaCandidato = linha.cells[10] ? linha.cells[10].innerText.toLowerCase() : ''; // Coluna K
+        const colunaZona = linha.cells[12] ? linha.cells[12].innerText.toLowerCase() : '';      // Coluna M
+        const colunaSecao = linha.cells[13] ? linha.cells[13].innerText.toLowerCase() : '';     // Coluna N
+        const colunaLocalVot = linha.cells[15] ? linha.cells[15].innerText.toLowerCase() : '';  // Coluna P
+        const colunaData = linha.cells[19] ? linha.cells[19].innerText : '';                    // Coluna T (Formato esperado: AAAA-MM-DD ou DD/MM/AAAA)
+        const colunaNivel = linha.cells[20] ? linha.cells[20].innerText.toLowerCase() : '';     // Coluna U
 
-        // NOME (Índice 3)
-        if (fNome !== "" && td[3] && td[3].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
-        
-        // BAIRRO (Índice 7)
-        if (fBairro !== "" && td[7] && td[7].innerText.toUpperCase().indexOf(fBairro) === -1) mostrar = false;
-        
-        // CIDADE (Índice 8)
-        if (fCidade !== "" && td[8] && td[8].innerText.toUpperCase().indexOf(fCidade) === -1) mostrar = false;
-        
-        // CANDIDATO (Índice 10)
-        if (fCandidato !== "" && td[10] && td[10].innerText.toUpperCase().indexOf(fCandidato) === -1) mostrar = false;
-        
-        // ZONA (Índice 12)
-        if (fZona !== "" && td[12] && td[12].innerText.trim() !== fZona) mostrar = false;
-        
-        // SEÇÃO (Índice 13)
-        if (fSecao !== "" && td[13] && td[13].innerText.trim() !== fSecao) mostrar = false;
-        
-        // LOCAL VOTAÇÃO (Índice 15)
-        if (fLocalVot !== "" && td[15] && td[15].innerText.toUpperCase().indexOf(fLocalVot) === -1) mostrar = false;
-        
-        // NÍVEL (Índice 20)
-        if (fNivel !== "" && td[20]) {
-            const textoNivel = td[20].innerText.toUpperCase();
-            if (fNivel === '1' && !textoNivel.includes('COMUM')) mostrar = false;
-            if (fNivel === '2' && !textoNivel.includes('RELEVANTE')) mostrar = false;
-            if (fNivel === '3' && !textoNivel.includes('LÍDER')) mostrar = false;
-        }
-        
-        // RESPONSÁVEL (Índice 2)
-        if (fResponsavel !== "" && td[2] && td[2].innerText.toUpperCase().indexOf(fResponsavel) === -1) mostrar = false;
-        
-        // ADMIN (Índice 1)
-        if (fAdmin !== "" && td[1] && td[1].innerText.toUpperCase().indexOf(fAdmin) === -1) mostrar = false;
+        // 4. Valida cada condição de filtro
+        let atende = true;
 
-        // DATA
-        if ((fDataInicio || fDataFim) && td[19]) {
-            const dataTexto = td[19].innerText.trim();
-            let dataComparar = '';
-            if (dataTexto.includes('/')) {
-                const partes = dataTexto.split('/');
-                if (partes.length === 3) {
-                    dataComparar = partes[2] + '-' + partes[1].padStart(2, '0') + '-' + partes[0].padStart(2, '0');
-                }
-            } else {
-                dataComparar = dataTexto;
+        if (fNome && !colunaNome.includes(fNome)) atende = false;
+        if (fBairro && !colunaBairro.includes(fBairro)) atende = false;
+        if (fCidade && !colunaCidade.includes(fCidade)) atende = false;
+        if (fCandidato && !colunaCandidato.includes(fCandidato)) atende = false;
+        if (fZona && !colunaZona.includes(fZona)) atende = false;
+        if (fSecao && !colunaSecao.includes(fSecao)) atende = false;
+        if (fLocalVot && !colunaLocalVot.includes(fLocalVot)) atende = false;
+        if (fNivel && !colunaNivel.includes(fNivel)) atende = false;
+        if (fResponsavel && !colunaResp.includes(fResponsavel)) atende = false;
+        if (fAdmin && !colunaAdmin.includes(fAdmin)) atende = false;
+
+        // Filtro por Período de Data (Data Cadastro)
+        if (fDataInicio || fDataFim) {
+            // Normaliza a data da linha para comparação (supondo formato YYYY-MM-DD ou convertendo)
+            let dataLinhaStr = colunaData.split(' ')[0]; // Pega só a parte da data se houver hora
+            if (dataLinhaStr.includes('/')) {
+                // Se estiver no formato DD/MM/YYYY, converte para YYYY-MM-DD
+                const partes = dataLinhaStr.split('/');
+                if (partes.length === 3) dataLinhaStr = `${partes[2]}-${partes[1]}-${partes[0]}`;
             }
 
-            if (fDataInicio && dataComparar && dataComparar < fDataInicio) mostrar = false;
-            if (fDataFim && dataComparar && dataComparar > fDataFim) mostrar = false;
+            if (fDataInicio && dataLinhaStr < fDataInicio) atende = false;
+            if (fDataFim && dataLinhaStr > fDataFim) atende = false;
         }
 
-        tr[i].style.display = mostrar ? "" : "none";
-        if (mostrar) contadorVisiveis++;
+        // 5. Mostra ou oculta a linha com base no resultado dos filtros
+        if (atende) {
+            linha.style.display = '';
+            totalExibidos++;
+        } else {
+            linha.style.display = 'none';
+        }
     }
 
-    // Atualiza o contador igualzinho ao outro projeto
-    const elNumLinhas = document.getElementById("totalExibidos") || document.getElementById("numLinhas");
-    if (elNumLinhas) elNumLinhas.innerText = contadorVisiveis;
+    // 6. Atualiza o contador de registros exibidos no rodapé
+    const spanExibidos = document.getElementById('totalExibidos');
+    if (spanExibidos) {
+        spanExibidos.innerText = totalExibidos;
+    }
+}
+
+// ==========================================
+// FUNÇÃO PARA LIMPAR TODOS OS FILTROS
+// ==========================================
+function limparFiltros() {
+    document.getElementById('fNome').value = '';
+    document.getElementById('fBairro').value = '';
+    document.getElementById('fCidade').value = '';
+    document.getElementById('fCandidato').value = '';
+    document.getElementById('fZona').value = '';
+    document.getElementById('fSecao').value = '';
+    document.getElementById('fLocalVot').value = '';
+    document.getElementById('fNivel').value = '';
+    document.getElementById('fResponsavel').value = '';
+    document.getElementById('fAdmin').value = '';
+    document.getElementById('fDataInicio').value = '';
+    document.getElementById('fDataFim').value = '';
+
+    // Reaplica o filtro vazio para restaurar todas as linhas
+    filtrarTabela();
 }
 
 // ==========================================
