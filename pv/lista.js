@@ -587,7 +587,7 @@ console.log('✅ lista.js carregado com sucesso!');
 console.log('📡 API URL:', URL_API || '❌ NÃO CONFIGURADA');
 
 // ==========================================
-// SOBRESCREVER A FUNÇÃO filtrarTabela DO HTML
+// FILTRO FLUIDO - ADAPTADO DO PROJETO FUNCIONAL
 // ==========================================
 window.filtrarTabela = function() {
     console.log('🔍 FILTRO CHAMADO!');
@@ -597,55 +597,98 @@ window.filtrarTabela = function() {
         return;
     }
 
-    const fNome = document.getElementById('fNome')?.value?.trim() || '';
-    const fBairro = document.getElementById('fBairro')?.value?.trim() || '';
-    const fCidade = document.getElementById('fCidade')?.value?.trim() || '';
-    const fCandidato = document.getElementById('fCandidato')?.value?.trim() || '';
+    // ==========================================
+    // PEGA OS VALORES DOS FILTROS
+    // ==========================================
+    const fNome = document.getElementById('fNome')?.value?.trim()?.toUpperCase() || '';
+    const fBairro = document.getElementById('fBairro')?.value?.trim()?.toUpperCase() || '';
+    const fCidade = document.getElementById('fCidade')?.value?.trim()?.toUpperCase() || '';
+    const fCandidato = document.getElementById('fCandidato')?.value?.trim()?.toUpperCase() || '';
     const fZona = document.getElementById('fZona')?.value?.trim() || '';
     const fSecao = document.getElementById('fSecao')?.value?.trim() || '';
-    const fLocalVot = document.getElementById('fLocalVot')?.value?.trim() || '';
+    const fLocalVot = document.getElementById('fLocalVot')?.value?.trim()?.toUpperCase() || '';
     const fNivel = document.getElementById('fNivel')?.value?.trim() || '';
-    const fResponsavel = document.getElementById('fResponsavel')?.value?.trim() || '';
-    const fAdmin = document.getElementById('fAdmin')?.value?.trim() || '';
+    const fResponsavel = document.getElementById('fResponsavel')?.value?.trim()?.toUpperCase() || '';
+    const fAdmin = document.getElementById('fAdmin')?.value?.trim()?.toUpperCase() || '';
     const fDataInicio = document.getElementById('fDataInicio')?.value || '';
     const fDataFim = document.getElementById('fDataFim')?.value || '';
 
-    console.log('📝 Filtro NOME:', fNome || '(vazio)');
+    console.log('📝 Filtros:', { 
+        nome: fNome || '(vazio)',
+        bairro: fBairro || '(vazio)',
+        cidade: fCidade || '(vazio)',
+        candidato: fCandidato || '(vazio)',
+        nivel: fNivel || '(vazio)'
+    });
 
+    // ==========================================
+    // VERIFICA SE TODOS OS FILTROS ESTÃO VAZIOS
+    // ==========================================
     const tudoVazio = !fNome && !fBairro && !fCidade && !fCandidato && 
                      !fZona && !fSecao && !fLocalVot && !fNivel && 
                      !fResponsavel && !fAdmin && !fDataInicio && !fDataFim;
 
+    // ==========================================
+    // APLICA OS FILTROS OU RESTAURA LISTA COMPLETA
+    // ==========================================
     if (tudoVazio) {
         dadosFiltrados = [...todosOsDados];
         console.log('🔄 Lista completa restaurada:', dadosFiltrados.length);
     } else {
         dadosFiltrados = todosOsDados.filter(item => {
-            // USANDO OS NOMES CORRETOS COM Ç
-            const nome = String(item.nome || '').toLowerCase();
-            const bairro = String(item.bairro || '').toLowerCase();
-            const cidade = String(item.cidade || '').toLowerCase();
-            const candidato = String(item.candidato || '').toLowerCase();
+            // ==========================================
+            // PEGA OS VALORES DA LINHA (em MAIÚSCULAS para comparação)
+            // ==========================================
+            const nome = String(item.nome || '').toUpperCase();
+            const bairro = String(item.bairro || '').toUpperCase();
+            const cidade = String(item.cidade || '').toUpperCase();
+            const candidato = String(item.candidato || '').toUpperCase();
             const zona = String(item.zona || '');
             const secao = String(item.secao || '');
-            const localVot = String(item.local_vot || '').toLowerCase();
+            const localVot = String(item.local_vot || '').toUpperCase();
             const nivel = String(item.nivel || '');
-            const responsavel = String(item.numero_sec || '').toLowerCase();
-            const admin = String(item.numero_cha || '').toLowerCase();
+            const responsavel = String(item.numero_sec || '').toUpperCase();
+            const admin = String(item.numero_cha || '').toUpperCase();
             const dataCadastro = String(item.data || '');
 
-            if (fNome && !nome.includes(fNome.toLowerCase())) return false;
-            if (fBairro && !bairro.includes(fBairro.toLowerCase())) return false;
-            if (fCidade && !cidade.includes(fCidade.toLowerCase())) return false;
-            if (fCandidato && !candidato.includes(fCandidato.toLowerCase())) return false;
-            if (fZona && !zona.includes(fZona)) return false;
-            if (fSecao && !secao.includes(fSecao)) return false;
-            if (fLocalVot && !localVot.includes(fLocalVot.toLowerCase())) return false;
-            if (fNivel && nivel !== fNivel) return false;
-            if (fResponsavel && !responsavel.includes(fResponsavel.toLowerCase())) return false;
-            if (fAdmin && !admin.includes(fAdmin.toLowerCase())) return false;
-            if (fDataInicio && dataCadastro && dataCadastro < fDataInicio) return false;
-            if (fDataFim && dataCadastro && dataCadastro > fDataFim) return false;
+            // ==========================================
+            // APLICA CADA FILTRO (MESMA LÓGICA DO SEU PROJETO FUNCIONAL)
+            // ==========================================
+            // FILTRO NOME
+            if (fNome !== '' && nome.indexOf(fNome) === -1) return false;
+            
+            // FILTRO BAIRRO
+            if (fBairro !== '' && bairro.indexOf(fBairro) === -1) return false;
+            
+            // FILTRO CIDADE
+            if (fCidade !== '' && cidade.indexOf(fCidade) === -1) return false;
+            
+            // FILTRO CANDIDATO
+            if (fCandidato !== '' && candidato.indexOf(fCandidato) === -1) return false;
+            
+            // FILTRO ZONA
+            if (fZona !== '' && zona.indexOf(fZona) === -1) return false;
+            
+            // FILTRO SEÇÃO
+            if (fSecao !== '' && secao.indexOf(fSecao) === -1) return false;
+            
+            // FILTRO LOCAL VOTAÇÃO
+            if (fLocalVot !== '' && localVot.indexOf(fLocalVot) === -1) return false;
+            
+            // FILTRO NÍVEL (EXATO, IGUAL AO SELECT)
+            if (fNivel !== '' && nivel !== fNivel) return false;
+            
+            // FILTRO RESPONSÁVEL
+            if (fResponsavel !== '' && responsavel.indexOf(fResponsavel) === -1) return false;
+            
+            // FILTRO ADMIN
+            if (fAdmin !== '' && admin.indexOf(fAdmin) === -1) return false;
+            
+            // FILTRO DATA INÍCIO
+            if (fDataInicio !== '' && dataCadastro && dataCadastro < fDataInicio) return false;
+            
+            // FILTRO DATA FIM
+            if (fDataFim !== '' && dataCadastro && dataCadastro > fDataFim) return false;
 
             return true;
         });
@@ -653,20 +696,84 @@ window.filtrarTabela = function() {
         console.log('🔍 Encontrados:', dadosFiltrados.length, 'registros');
     }
 
-    // Chamar a renderização
+    // ==========================================
+    // RENDERIZA A TABELA (MESMA LÓGICA DO SEU PROJETO FUNCIONAL)
+    // ==========================================
+    const tbody = document.getElementById('corpo-tabela');
+    if (!tbody) return;
+
+    if (dadosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="30" style="text-align:center; padding:40px; color:#94a3b8;">📭 Nenhum registro encontrado.</td></tr>`;
+        document.getElementById('totalExibidos').innerText = '0';
+        return;
+    }
+
+    // Usa a função renderizarTabela já existente
     if (typeof renderizarTabela === 'function') {
         renderizarTabela();
     } else {
-        // Se renderizarTabela não existe, usa a função inline
-        renderizarTabelaDireta();
+        // Fallback: renderização inline
+        let html = '';
+        dadosFiltrados.forEach(item => {
+            html += `<tr>
+                <td>${item.id || ''}</td>
+                <td>${item.numero_cha || ''}</td>
+                <td>${item.numero_sec || ''}</td>
+                <td>${item.nome || ''}</td>
+                <td>${item.data_nasc || ''}</td>
+                <td>${item.endereco || ''}</td>
+                <td>${item.n_casa || ''}</td>
+                <td>${item.bairro || ''}</td>
+                <td>${item.cidade || ''}</td>
+                <td>${item.telefone || ''}</td>
+                <td>${item.candidato || ''}</td>
+                <td>${item.titulo || ''}</td>
+                <td>${item.zona || ''}</td>
+                <td>${item.secao || ''}</td>
+                <td>${item.nome_mae || ''}</td>
+                <td>${item.local_vot || ''}</td>
+                <td>${item.bairro_vot || ''}</td>
+                <td>${item.endereco_vot || ''}</td>
+                <td>${item.obs || ''}</td>
+                <td>${item.data || ''}</td>
+                <td><span class="badge-nivel badge-nivel-${item.nivel || ''}">${item.nivel || ''}</span></td>
+                <td class="col-acoes">
+                    <button class="btn-visualizar" onclick="visualizarRegistro('${item.id}')">👁️</button>
+                    <button class="btn-editar" onclick="editarRegistro('${item.id}')">✏️</button>
+                    <button class="btn-excluir" onclick="excluirRegistro('${item.id}')">🗑️</button>
+                </td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
     }
     
+    // Atualiza contador
     document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
 };
 
-// Função auxiliar se renderizarTabela não existir
-function renderizarTabelaDireta() {
-    // ... (mesmo código de renderização que você já tem)
+// ==========================================
+// FUNÇÃO PARA LIMPAR FILTROS (MESMA LÓGICA)
+// ==========================================
+function limparFiltros() {
+    const campos = ['fNome', 'fBairro', 'fCidade', 'fCandidato', 'fZona', 'fSecao', 'fLocalVot', 'fResponsavel', 'fAdmin'];
+    
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    
+    const selectNivel = document.getElementById('fNivel');
+    if (selectNivel) selectNivel.value = '';
+    
+    const dataInicio = document.getElementById('fDataInicio');
+    const dataFim = document.getElementById('fDataFim');
+    if (dataInicio) dataInicio.value = '';
+    if (dataFim) dataFim.value = '';
+    
+    dadosFiltrados = [...todosOsDados];
+    renderizarTabela();
+    document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
+    console.log('🧹 Filtros limpos - Lista completa:', dadosFiltrados.length, 'registros');
 }
 
 // ==========================================
