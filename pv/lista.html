@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PV43 - Lista Geral</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ==========================================
+           ESTILOS EXCLUSIVOS PARA A LISTA
+           ========================================== */
+        
+        .lista-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 20px auto;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0, 86, 46, 0.15);
+        }
+
+        /* Área de Filtros */
+        .filtros-area {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 10px;
+            align-items: end;
+        }
+
+        .filtros-area .grupo-filtro {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filtros-area .grupo-filtro label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filtros-area .grupo-filtro input,
+        .filtros-area .grupo-filtro select {
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            background: white;
+            color: #1e293b;
+            transition: all 0.2s;
+            height: 32px;
+            width: 100%;
+        }
+
+        .filtros-area .grupo-filtro input:focus,
+        .filtros-area .grupo-filtro select:focus {
+            border-color: var(--pv-green-dark);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 86, 46, 0.1);
+        }
+
+        .filtros-area .grupo-filtro input::placeholder {
+            color: #94a3b8;
+            font-size: 0.7rem;
+        }
+
+        .filtros-area .grupo-filtro-data {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filtros-area .grupo-filtro-data .data-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .filtros-area .grupo-filtro-data .data-row input {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            height: 32px;
+            min-width: 70px;
+        }
+
+        .filtros-area .grupo-filtro-data .data-row span {
+            font-size: 0.65rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .filtros-botoes {
+            display: flex;
+            gap: 8px;
+            align-items: end;
+            grid-column: span 2;
+        }
+
+        .btn-limpar {
+            background: #e2e8f0;
+            color: #475569;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            height: 32px;
+            white-space: nowrap;
+        }
+
+        .btn-limpar:hover {
+            background: #cbd5e1;
+        }
+
+        /* ==========================================
+           CONTROLES DE COLUNAS - 21 CHECKBOXES
+           ========================================== */
+        .colunas-controles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 12px 15px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+            align-items: center;
+        }
+
+        .colunas-controles .titulo-colunas {
+            width: 100%;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .colunas-controles .grupo-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .colunas-controles label {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 0.6rem;
+            color: #334155;
+            cursor: pointer;
+            padding: 2px 8px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .colunas-controles label:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+        }
+
+        .colunas-controles label input[type="checkbox"] {
+            accent-color: var(--pv-green-dark);
+            width: 12px;
+            height: 12px;
+            cursor: pointer;
+        }
+
+        .colunas-controles label.checked {
+            background: #dcfce7;
+            border-color: #22c55e;
+        }
+
+        .btn-reset-colunas {
+            padding: 4px 14px;
+            background: #e2e8f0;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.6rem;
+            cursor: pointer;
+            color: #475569;
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            height: 28px;
+            white-space: nowrap;
+            margin-left: auto;
+        }
+
+        .btn-reset-colunas:hover {
+            background: #cbd5e1;
+        }
+
+        /* Tabela */
+        .tabela-wrapper {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        #tabela-lista {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.7rem;
+            min-width: 1200px;
+        }
+
+        #tabela-lista thead {
+            background: var(--pv-green-dark);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        #tabela-lista th {
+            padding: 6px 8px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #tabela-lista th:last-child {
+            border-right: none;
+        }
+
+        #tabela-lista td {
+            padding: 5px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #tabela-lista tr:hover td {
+            background: #f8fafc;
+        }
+
+        #tabela-lista .col-acoes {
+            text-align: center;
+            min-width: 100px;
+        }
+
+        #tabela-lista .btn-editar {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.55rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        #tabela-lista .btn-editar:hover {
+            background: #d97706;
+        }
+
+        #tabela-lista .btn-excluir {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.55rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-left: 3px;
+        }
+
+        #tabela-lista .btn-excluir:hover {
+            background: #dc2626;
+        }
+
+        #tabela-lista .btn-visualizar {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.55rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-left: 3px;
+        }
+
+        #tabela-lista .btn-visualizar:hover {
+            background: #2563eb;
+        }
+
+        /* Badges */
+        .badge-nivel {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-size: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-nivel-1 {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-nivel-2 {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .badge-nivel-3 {
+            background: #d6d8db;
+            color: #1b1e21;
+        }
+
+        .badge-candidato {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.5rem;
+            margin: 1px;
+        }
+
+        .badge-admin {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-size: 0.5rem;
+            font-weight: 700;
+        }
+
+        .badge-admin-sim {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-admin-nao {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Rodapé */
+        .tabela-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            font-size: 0.8rem;
+            color: #475569;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tabela-footer .total-registros {
+            font-weight: 600;
+            color: var(--pv-green-dark);
+        }
+
+        .tabela-footer .botoes-exportacao {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tabela-footer .btn-exportar {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-exportar-excel {
+            background: #217346;
+            color: white;
+        }
+        .btn-exportar-excel:hover {
+            background: #1a5c3a;
+        }
+
+        .btn-exportar-pdf {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-exportar-pdf:hover {
+            background: #b02a37;
+        }
+
+        .btn-exportar-csv {
+            background: #0d6efd;
+            color: white;
+        }
+        .btn-exportar-csv:hover {
+            background: #0a58ca;
+        }
+
+        /* Responsivo */
+        @media (max-width: 1024px) {
+            .filtros-area {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .lista-container {
+                padding: 10px;
+            }
+
+            .filtros-area {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 6px;
+                padding: 10px;
+            }
+
+            .filtros-area .grupo-filtro label {
+                font-size: 0.5rem;
+            }
+
+            .filtros-area .grupo-filtro input,
+            .filtros-area .grupo-filtro select {
+                font-size: 0.65rem;
+                padding: 4px 6px;
+                height: 28px;
+            }
+
+            .filtros-area .grupo-filtro-data .data-row input {
+                font-size: 0.65rem;
+                padding: 4px 6px;
+                height: 28px;
+                min-width: 50px;
+            }
+
+            .btn-limpar {
+                font-size: 0.65rem;
+                padding: 4px 10px;
+                height: 28px;
+            }
+
+            .filtros-botoes {
+                grid-column: span 1;
+            }
+
+            .colunas-controles {
+                padding: 8px 10px;
+            }
+
+            .colunas-controles label {
+                font-size: 0.5rem;
+                padding: 2px 5px;
+            }
+
+            .btn-reset-colunas {
+                font-size: 0.5rem;
+                padding: 2px 10px;
+                height: 24px;
+            }
+
+            #tabela-lista {
+                font-size: 0.55rem;
+                min-width: 700px;
+            }
+
+            #tabela-lista th,
+            #tabela-lista td {
+                padding: 3px 5px;
+            }
+
+            .tabela-footer {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .tabela-footer .botoes-exportacao {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .filtros-area {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lista-container">
+        
+        <!-- Cabeçalho -->
+        <div class="welcome-header" style="margin-bottom: 15px;">
+            <h2>📋 Lista Geral de Cadastros</h2>
+            <p id="usuario-logado-texto" style="font-size: 0.85rem; color: #555;">Carregando...</p>
+        </div>
+
+        <!-- ==========================================
+             ÁREA DE FILTROS
+             ========================================== -->
+        <div class="filtros-area" id="filtrosArea">
+            
+            <!-- NOME (Coluna D) -->
+            <div class="grupo-filtro">
+                <label for="fNome">NOME</label>
+                <input type="text" id="fNome" placeholder="Digite o nome...">
+            </div>
+
+            <!-- BAIRRO (Coluna H) -->
+            <div class="grupo-filtro">
+                <label for="fBairro">BAIRRO</label>
+                <input type="text" id="fBairro" placeholder="Bairro...">
+            </div>
+
+            <!-- CIDADE (Coluna I) -->
+            <div class="grupo-filtro">
+                <label for="fCidade">CIDADE</label>
+                <input type="text" id="fCidade" placeholder="Cidade...">
+            </div>
+
+            <!-- CANDIDATO (Coluna K) -->
+            <div class="grupo-filtro">
+                <label for="fCandidato">CANDIDATO</label>
+                <select id="fCandidato">
+                    <option value="">Todos</option>
+                    <option value="EDUARDO BISMARCK 4343 (FEDERAL)">Eduardo Bismarck (Federal)</option>
+                    <option value="JULINHO 13789 (ESTADUAL)">Julinho (Estadual)</option>
+                </select>
+            </div>
+
+            <!-- ZONA (Coluna M) -->
+            <div class="grupo-filtro">
+                <label for="fZona">ZONA</label>
+                <input type="text" id="fZona" placeholder="Zona...">
+            </div>
+
+            <!-- SEÇÃO (Coluna N) -->
+            <div class="grupo-filtro">
+                <label for="fSecao">SEÇÃO</label>
+                <input type="text" id="fSecao" placeholder="Seção...">
+            </div>
+
+            <!-- LOCAL VOTAÇÃO (Coluna P) -->
+            <div class="grupo-filtro">
+                <label for="fLocalVot">LOCAL VOTAÇÃO</label>
+                <input type="text" id="fLocalVot" placeholder="Local...">
+            </div>
+
+            <!-- NÍVEL (Coluna U) -->
+            <div class="grupo-filtro">
+                <label for="fNivel">NÍVEL</label>
+                <select id="fNivel">
+                    <option value="">Todos</option>
+                    <option value="1">🟩 NÍVEL 1 (COMUM)</option>
+                    <option value="2">🟩 NÍVEL 2 (RELEVANTE)</option>
+                    <option value="3">🟩 NÍVEL 3 (LÍDER)</option>
+                </select>
+            </div>
+
+            <!-- RESPONSÁVEL (Coluna C) -->
+            <div class="grupo-filtro">
+                <label for="fResponsavel">RESPONSÁVEL</label>
+                <input type="text" id="fResponsavel" placeholder="Responsável...">
+            </div>
+
+            <!-- ADMIN (Coluna B) -->
+            <div class="grupo-filtro">
+                <label for="fAdmin">ADMIN</label>
+                <select id="fAdmin">
+                    <option value="">Todos</option>
+                    <option value="Administrador">✅ Administrador</option>
+                    <option value="Operador">👤 Operador</option>
+                </select>
+            </div>
+
+            <!-- DATA CADASTRO (Coluna T) -->
+            <div class="grupo-filtro grupo-filtro-data" style="grid-column: span 2;">
+                <label>DATA CADASTRO</label>
+                <div class="data-row">
+                    <input type="date" id="fDataInicio">
+                    <span>até</span>
+                    <input type="date" id="fDataFim">
+                </div>
+            </div>
+
+            <!-- BOTÃO LIMPAR -->
+            <div class="filtros-botoes">
+                <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar Filtros</button>
+            </div>
+
+        </div>
+
+        <!-- ==========================================
+             CONTROLES DE COLUNAS - 21 CHECKBOXES
+             ========================================== -->
+        <div class="colunas-controles" id="colunasControles">
+            <div class="titulo-colunas">📊 Exibir/Ocultar Colunas: <span style="font-weight:normal; font-size:0.55rem; color:#94a3b8;">(clique para mostrar/ocultar)</span></div>
+            <div class="grupo-checkboxes" id="grupoCheckboxes">
+                <!-- Gerado via JavaScript com 21 colunas -->
+            </div>
+            <button class="btn-reset-colunas" onclick="resetarColunas()">↺ Resetar</button>
+        </div>
+
+        <!-- ==========================================
+             TABELA
+             ========================================== -->
+        <div class="tabela-wrapper">
+            <table id="tabela-lista">
+                <thead id="cabecalho-tabela">
+                    <!-- Gerado via JavaScript -->
+                </thead>
+                <tbody id="corpo-tabela">
+                    <tr>
+                        <td colspan="30" style="text-align:center; padding:40px; color:#94a3b8;">
+                            ⏳ Carregando dados...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ==========================================
+             RODAPÉ DA TABELA
+             ========================================== -->
+        <div class="tabela-footer">
+            <div>
+                Total: <span class="total-registros" id="totalRegistros">0</span> registros
+                <span style="margin-left: 15px; color: #94a3b8; font-size: 0.75rem;">
+                    Exibindo: <span id="totalExibidos">0</span>
+                </span>
+            </div>
+            <div class="botoes-exportacao">
+                <button class="btn-exportar btn-exportar-csv" onclick="exportarCSV()">📊 CSV</button>
+                <button class="btn-exportar btn-exportar-excel" onclick="exportarExcel()">📊 Excel</button>
+                <button class="btn-exportar btn-exportar-pdf" onclick="exportarPDF()">📄 PDF</button>
+                <button onclick="window.location.href='menu.html'" class="btn-secondary" style="width:auto; padding:6px 16px; font-size:0.75rem;">← Menu</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="api.js"></script>
+    <script src="lista.js"></script>
+</body>
+</html>
