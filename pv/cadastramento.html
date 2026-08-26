@@ -204,24 +204,29 @@
             const secaoInput = document.getElementById('secao');
 
             function buscarDadosVotacao() {
-                const zona = zonaInput.value.trim();
-                const secao = secaoInput.value.trim();
-
+                const zona = document.getElementById('zona').value.trim();
+                const secao = document.getElementById('secao').value.trim();
+            
                 const urlApi = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
                     ? API_CONFIG.BASE_URL 
                     : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
-
-                if (zona.length > 0 || secao.length > 0) {
-                    fetch(urlApi, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            acao: 'buscarZona',
-                            zona: zona,
-                            secao: secao
-                        })
+            
+                if (zona.length > 0 && secao.length > 0) {
+                    // ✅ USANDO GET COM PARÂMETROS NA URL
+                    var url = urlApi + '?acao=buscarZona&zona=' + encodeURIComponent(zona) + '&secao=' + encodeURIComponent(secao);
+                    console.log('🔍 Buscando (GET):', url);
+                    
+                    fetch(url, {
+                        method: 'GET'  // ← GET!
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        return response.json();
+                    })
                     .then(resposta => {
+                        console.log('📦 Resposta:', resposta);
                         if (resposta.sucesso) {
                             document.getElementById('local_vot').value = resposta.local_vot || '';
                             document.getElementById('bairro_vot').value = resposta.bairro_vot || '';
@@ -232,7 +237,9 @@
                             document.getElementById('endereco_vot').value = '';
                         }
                     })
-                    .catch(err => console.error('Erro ao buscar:', err));
+                    .catch(err => {
+                        console.error('❌ Erro ao buscar:', err);
+                    });
                 } else {
                     document.getElementById('local_vot').value = '';
                     document.getElementById('bairro_vot').value = '';
