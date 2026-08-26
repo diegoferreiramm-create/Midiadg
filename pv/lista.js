@@ -216,7 +216,7 @@ function aplicarVisibilidadeColunas() {
 }
 
 // ==========================================
-// CARREGAR DADOS - USANDO GET (igual seu outro projeto)
+// CARREGAR DADOS - USANDO GET
 // ==========================================
 function carregarDados() {
     const tbody = document.getElementById('corpo-tabela');
@@ -231,9 +231,6 @@ function carregarDados() {
         return;
     }
 
-    // ==========================================
-    // USANDO GET COM PARÂMETRO NA URL (igual seu outro projeto)
-    // ==========================================
     var url = URL_API + '?acao=listarCadastros';
     console.log('🔍 Chamando:', url);
 
@@ -273,7 +270,7 @@ function carregarDados() {
 }
 
 // ==========================================
-// EXCLUIR REGISTRO - USANDO GET (igual seu outro projeto)
+// EXCLUIR REGISTRO - USANDO GET
 // ==========================================
 function excluirRegistro(id) {
     if (!id) { alert('❌ ID inválido!'); return; }
@@ -299,122 +296,8 @@ function excluirRegistro(id) {
     .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
 }
 
-function carregarDadosViaScript() {
-    const tbody = document.getElementById('corpo-tabela');
-    if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="30" style="text-align:center; padding:40px; color:#94a3b8;">⏳ Carregando dados via script...</td></tr>';
-    }
-
-    // Criar um form dinâmico para enviar a requisição
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = URL_API;
-    form.target = 'hiddenFrame';
-    form.style.display = 'none';
-
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'acao';
-    input.value = 'listarCadastros';
-    form.appendChild(input);
-
-    document.body.appendChild(form);
-
-    // Criar um iframe oculto para receber a resposta
-    const iframe = document.createElement('iframe');
-    iframe.name = 'hiddenFrame';
-    iframe.style.display = 'none';
-    iframe.onload = function() {
-        try {
-            // Tentar ler o conteúdo do iframe
-            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-            const conteudo = iframeDoc.body.innerText;
-            console.log('📄 Conteúdo do iframe:', conteudo);
-            
-            try {
-                const resposta = JSON.parse(conteudo);
-                console.log('📦 Resposta:', resposta);
-                
-                if (resposta.sucesso && resposta.dados) {
-                    todosOsDados = resposta.dados;
-                    dadosFiltrados = [...todosOsDados];
-                    
-                    document.getElementById('totalRegistros').innerText = todosOsDados.length;
-                    document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
-                    
-                    renderizarTabela();
-                } else {
-                    if (tbody) {
-                        tbody.innerHTML = '<tr><td colspan="30" style="text-align:center; padding:40px; color:#ef4444;">❌ ' + (resposta.mensagem || 'Erro ao carregar dados.') + '</td></tr>';
-                    }
-                }
-            } catch (e) {
-                console.error('❌ Erro ao parsear JSON:', e);
-                // Se não for JSON, tenta carregar via fetch normal (com CORS)
-                carregarDadosViaFetch();
-            }
-        } catch (e) {
-            console.error('❌ Erro ao ler iframe:', e);
-            // Fallback: tentar fetch normal
-            carregarDadosViaFetch();
-        }
-        
-        document.body.removeChild(form);
-        document.body.removeChild(iframe);
-    };
-
-    document.body.appendChild(iframe);
-    form.submit();
-}
-
-function carregarDadosViaFetch() {
-    const tbody = document.getElementById('corpo-tabela');
-    if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="30" style="text-align:center; padding:40px; color:#94a3b8;">⏳ Tentando carregar via fetch...</td></tr>';
-    }
-
-    // Tentar com x-www-form-urlencoded sem no-cors
-    fetch(URL_API, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'acao=listarCadastros'
-    })
-    .then(response => response.text())
-    .then(texto => {
-        console.log('📄 Resposta fetch:', texto);
-        try {
-            return JSON.parse(texto);
-        } catch (e) {
-            throw new Error('Não é JSON: ' + texto.substring(0, 100));
-        }
-    })
-    .then(resposta => {
-        if (resposta.sucesso && resposta.dados) {
-            todosOsDados = resposta.dados;
-            dadosFiltrados = [...todosOsDados];
-            
-            document.getElementById('totalRegistros').innerText = todosOsDados.length;
-            document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
-            
-            renderizarTabela();
-        } else {
-            if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="30" style="text-align:center; padding:40px; color:#ef4444;">❌ ' + (resposta.mensagem || 'Erro ao carregar dados.') + '</td></tr>';
-            }
-        }
-    })
-    .catch(erro => {
-        console.error('❌ Fetch falhou:', erro);
-        if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="30" style="text-align:center; padding:40px; color:#ef4444;">❌ Não foi possível carregar os dados. Verifique a conexão com a API.</td></tr>';
-        }
-    });
-}
-
 // ==========================================
-// RENDERIZAR TABELA
+// RENDERIZAR TABELA (MAPEAMENTO CORRIGIDO E ALINHADO)
 // ==========================================
 function renderizarTabela() {
     const thead = document.getElementById('cabecalho-tabela');
@@ -444,11 +327,13 @@ function renderizarTabela() {
             let valor = '';
             const visivel = colunasVisiveis[col.id] !== false;
             
-            // Mapeamento dos campos
+            // ==========================================
+            // MAPEAMENTO EXATO COM OS NOMES DO BACK-END
+            // ==========================================
             switch(col.id) {
                 case 'id': valor = item.id || ''; break;
-                case 'numero_cha': valor = item.tipo || ''; break;
-                case 'numero_sec': valor = item.responsavel || ''; break;
+                case 'numero_cha': valor = item.numero_cha || ''; break; // Corrigido
+                case 'numero_sec': valor = item.numero_sec || ''; break; // Corrigido
                 case 'nome': valor = item.nome || ''; break;
                 case 'data_nasc': valor = item.data_nasc || ''; break;
                 case 'endereco': valor = item.endereco || ''; break;
@@ -456,7 +341,7 @@ function renderizarTabela() {
                 case 'bairro': valor = item.bairro || ''; break;
                 case 'cidade': valor = item.cidade || ''; break;
                 case 'telefone': valor = item.telefone || ''; break;
-                case 'candidato': valor = item.candidatos || ''; break;
+                case 'candidato': valor = item.candidato || ''; break; // Corrigido
                 case 'titulo': valor = item.titulo || ''; break;
                 case 'zona': valor = item.zona || ''; break;
                 case 'secao': valor = item.secao || ''; break;
@@ -465,7 +350,7 @@ function renderizarTabela() {
                 case 'bairro_vot': valor = item.bairro_vot || ''; break;
                 case 'endereco_vot': valor = item.endereco_vot || ''; break;
                 case 'obs': valor = item.obs || ''; break;
-                case 'data': valor = item.data_cadastro || ''; break;
+                case 'data': valor = item.data || ''; break; // Corrigido
                 case 'nivel': valor = item.nivel || ''; break;
                 case 'acoes': 
                     const id = item.id || '';
@@ -533,49 +418,28 @@ function filtrarTabela() {
     const fDataFim = document.getElementById('fDataFim')?.value || '';
 
     dadosFiltrados = todosOsDados.filter(item => {
-        // NOME
         if (fNome && !(item.nome || '').toUpperCase().includes(fNome)) return false;
-
-        // BAIRRO
         if (fBairro && !(item.bairro || '').toUpperCase().includes(fBairro)) return false;
-
-        // CIDADE
         if (fCidade && !(item.cidade || '').toUpperCase().includes(fCidade)) return false;
-
-        // CANDIDATO
         if (fCandidato) {
-            const candidatos = item.candidatos || '';
+            const candidatos = item.candidato || '';
             if (!candidatos.toUpperCase().includes(fCandidato.toUpperCase())) return false;
         }
-
-        // ZONA
         if (fZona && (item.zona || '') !== fZona) return false;
-
-        // SEÇÃO
         if (fSecao && (item.secao || '') !== fSecao) return false;
-
-        // LOCAL VOTAÇÃO
         if (fLocalVot && !(item.local_vot || '').toUpperCase().includes(fLocalVot)) return false;
-
-        // NÍVEL
         if (fNivel && item.nivel != fNivel) return false;
-
-        // RESPONSÁVEL
-        if (fResponsavel && !(item.responsavel || '').toUpperCase().includes(fResponsavel)) return false;
-
-        // ADMIN
+        if (fResponsavel && !(item.numero_sec || '').toUpperCase().includes(fResponsavel)) return false;
         if (fAdmin) {
-            const adminVal = item.tipo || '';
+            const adminVal = item.numero_cha || '';
             if (fAdmin === 'Administrador' && adminVal !== 'Administrador') return false;
             if (fAdmin === 'Operador' && adminVal !== 'Operador') return false;
             if (fAdmin !== 'Administrador' && fAdmin !== 'Operador') {
                 if (!adminVal.toUpperCase().includes(fAdmin.toUpperCase())) return false;
             }
         }
-
-        // DATA CADASTRO
         if (fDataInicio || fDataFim) {
-            const dataCadastro = item.data_cadastro || '';
+            const dataCadastro = item.data || '';
             let dataComparar = '';
             if (dataCadastro.includes('/')) {
                 const partes = dataCadastro.split('/');
@@ -588,7 +452,6 @@ function filtrarTabela() {
             if (fDataInicio && dataComparar < fDataInicio) return false;
             if (fDataFim && dataComparar > fDataFim) return false;
         }
-
         return true;
     });
 
@@ -608,11 +471,7 @@ function limparFiltros() {
     campos.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            if (el.tagName === 'SELECT') {
-                el.value = '';
-            } else {
-                el.value = '';
-            }
+            el.value = '';
         }
     });
     
@@ -636,22 +495,6 @@ function editarRegistro(id) {
     alert('✏️ Editar registro ID: ' + id + '\n\n' + JSON.stringify(registro, null, 2));
 }
 
-function excluirRegistro(id) {
-    if (!id) { alert('❌ ID inválido!'); return; }
-    if (!confirm('⚠️ Tem certeza que deseja EXCLUIR o registro ID: ' + id + '?\n\nEsta ação não pode ser desfeita!')) return;
-
-    chamarAPI('excluirCadastro', { id: id })
-        .then(resposta => {
-            if (resposta.sucesso) {
-                alert('✅ Registro ID: ' + id + ' excluído com sucesso!');
-                carregarDados();
-            } else {
-                alert('❌ Erro ao excluir: ' + (resposta.mensagem || 'Erro desconhecido'));
-            }
-        })
-        .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
-}
-
 function visualizarRegistro(id) {
     if (!id) { alert('❌ ID inválido!'); return; }
     const registro = todosOsDados.find(item => item.id === id);
@@ -660,15 +503,15 @@ function visualizarRegistro(id) {
     let mensagem = '📋 DETALHES DO CADASTRO\n';
     mensagem += '═'.repeat(40) + '\n';
     mensagem += 'ID: ' + (registro.id || '-') + '\n';
-    mensagem += 'ADMIN: ' + (registro.tipo || '-') + '\n';
-    mensagem += 'RESPONSÁVEL: ' + (registro.responsavel || '-') + '\n';
+    mensagem += 'ADMIN: ' + (registro.numero_cha || '-') + '\n';
+    mensagem += 'RESPONSÁVEL: ' + (registro.numero_sec || '-') + '\n';
     mensagem += 'NOME: ' + (registro.nome || '-') + '\n';
     mensagem += 'NASCIMENTO: ' + (registro.data_nasc || '-') + '\n';
     mensagem += 'ENDEREÇO: ' + (registro.endereco || '') + ', ' + (registro.n_casa || '') + '\n';
     mensagem += 'BAIRRO: ' + (registro.bairro || '-') + '\n';
     mensagem += 'CIDADE: ' + (registro.cidade || '-') + '\n';
     mensagem += 'TELEFONE: ' + (registro.telefone || '-') + '\n';
-    mensagem += 'CANDIDATO: ' + (registro.candidatos || '-') + '\n';
+    mensagem += 'CANDIDATO: ' + (registro.candidato || '-') + '\n';
     mensagem += 'TÍTULO: ' + (registro.titulo || '-') + '\n';
     mensagem += 'ZONA/SEÇÃO: ' + (registro.zona || '-') + '/' + (registro.secao || '-') + '\n';
     mensagem += 'NOME MÃE: ' + (registro.nome_mae || '-') + '\n';
@@ -676,7 +519,7 @@ function visualizarRegistro(id) {
     mensagem += 'BAIRRO VOTAÇÃO: ' + (registro.bairro_vot || '-') + '\n';
     mensagem += 'END VOTAÇÃO: ' + (registro.endereco_vot || '-') + '\n';
     mensagem += 'OBS: ' + (registro.obs || '-') + '\n';
-    mensagem += 'DATA CADASTRO: ' + (registro.data_cadastro || '-') + '\n';
+    mensagem += 'DATA CADASTRO: ' + (registro.data || '-') + '\n';
     mensagem += 'NÍVEL: ' + (registro.nivel || '-') + '\n';
     mensagem += '═'.repeat(40);
 
