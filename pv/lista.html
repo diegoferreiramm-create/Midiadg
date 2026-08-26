@@ -524,32 +524,32 @@
         </div>
 
         <!-- ==========================================
-             ÁREA DE FILTROS
+             ÁREA DE FILTROS (Com os gatilhos oninput e onchange)
              ========================================== -->
         <div class="filtros-area" id="filtrosArea">
             
             <!-- NOME (Coluna D) -->
             <div class="grupo-filtro">
                 <label for="fNome">NOME</label>
-                <input type="text" id="fNome" placeholder="Digite o nome...">
+                <input type="text" id="fNome" placeholder="Digite o nome..." oninput="filtrarTabela()">
             </div>
 
             <!-- BAIRRO (Coluna H) -->
             <div class="grupo-filtro">
                 <label for="fBairro">BAIRRO</label>
-                <input type="text" id="fBairro" placeholder="Bairro...">
+                <input type="text" id="fBairro" placeholder="Bairro..." oninput="filtrarTabela()">
             </div>
 
             <!-- CIDADE (Coluna I) -->
             <div class="grupo-filtro">
                 <label for="fCidade">CIDADE</label>
-                <input type="text" id="fCidade" placeholder="Cidade...">
+                <input type="text" id="fCidade" placeholder="Cidade..." oninput="filtrarTabela()">
             </div>
 
             <!-- CANDIDATO (Coluna K) -->
             <div class="grupo-filtro">
                 <label for="fCandidato">CANDIDATO</label>
-                <select id="fCandidato">
+                <select id="fCandidato" onchange="filtrarTabela()">
                     <option value="">Todos</option>
                     <option value="EDUARDO BISMARCK 4343 (FEDERAL)">Eduardo Bismarck (Federal)</option>
                     <option value="JULINHO 13789 (ESTADUAL)">Julinho (Estadual)</option>
@@ -559,25 +559,25 @@
             <!-- ZONA (Coluna M) -->
             <div class="grupo-filtro">
                 <label for="fZona">ZONA</label>
-                <input type="text" id="fZona" placeholder="Zona...">
+                <input type="text" id="fZona" placeholder="Zona..." oninput="filtrarTabela()">
             </div>
 
             <!-- SEÇÃO (Coluna N) -->
             <div class="grupo-filtro">
                 <label for="fSecao">SEÇÃO</label>
-                <input type="text" id="fSecao" placeholder="Seção...">
+                <input type="text" id="fSecao" placeholder="Seção..." oninput="filtrarTabela()">
             </div>
 
             <!-- LOCAL VOTAÇÃO (Coluna P) -->
             <div class="grupo-filtro">
                 <label for="fLocalVot">LOCAL VOTAÇÃO</label>
-                <input type="text" id="fLocalVot" placeholder="Local...">
+                <input type="text" id="fLocalVot" placeholder="Local..." oninput="filtrarTabela()">
             </div>
 
             <!-- NÍVEL (Coluna U) -->
             <div class="grupo-filtro">
                 <label for="fNivel">NÍVEL</label>
-                <select id="fNivel">
+                <select id="fNivel" onchange="filtrarTabela()">
                     <option value="">Todos</option>
                     <option value="1">🟩 NÍVEL 1 (COMUM)</option>
                     <option value="2">🟩 NÍVEL 2 (RELEVANTE)</option>
@@ -588,13 +588,13 @@
             <!-- RESPONSÁVEL (Coluna C) -->
             <div class="grupo-filtro">
                 <label for="fResponsavel">RESPONSÁVEL</label>
-                <input type="text" id="fResponsavel" placeholder="Responsável...">
+                <input type="text" id="fResponsavel" placeholder="Responsável..." oninput="filtrarTabela()">
             </div>
 
             <!-- ADMIN (Coluna B) -->
             <div class="grupo-filtro">
                 <label for="fAdmin">ADMIN</label>
-                <select id="fAdmin">
+                <select id="fAdmin" onchange="filtrarTabela()">
                     <option value="">Todos</option>
                     <option value="Administrador">✅ Administrador</option>
                     <option value="Operador">👤 Operador</option>
@@ -605,9 +605,9 @@
             <div class="grupo-filtro grupo-filtro-data" style="grid-column: span 2;">
                 <label>DATA CADASTRO</label>
                 <div class="data-row">
-                    <input type="date" id="fDataInicio">
+                    <input type="date" id="fDataInicio" onchange="filtrarTabela()">
                     <span>até</span>
-                    <input type="date" id="fDataFim">
+                    <input type="date" id="fDataFim" onchange="filtrarTabela()">
                 </div>
             </div>
 
