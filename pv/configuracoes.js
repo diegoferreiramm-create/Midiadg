@@ -1,10 +1,7 @@
 // ==========================================
-// CONFIGURACOES.JS - COMPLETO E CORRIGIDO (ESTILO CARTEIRAS - GET)
+// CONFIGURACOES.JS - USANDO chamarAPI (GET)
 // ==========================================
 
-// ==========================================
-// FUNÇÃO GLOBAL PARA MOSTRAR ERROS
-// ==========================================
 function mostrarErroTela(mensagem) {
     const msgErro = document.getElementById('msg-erro');
     if (msgErro) {
@@ -17,45 +14,33 @@ document.addEventListener('DOMContentLoaded', function() {
     const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
     const tipoUsuario = localStorage.getItem('pv43_tipo_usuario');
 
-    // VERIFICA SE ESTÁ LOGADO
     if (!nomeUsuario) {
         alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
         window.location.href = 'pv43.html';
         return;
     }
 
-    // EXIBE NOME DO USUÁRIO
     document.getElementById('usuario-logado-texto').innerText = `Logado como: ${nomeUsuario} (${tipoUsuario.toUpperCase()})`;
 
-    // VERIFICA SE É ADMIN
     if (tipoUsuario !== 'admin') {
         document.getElementById('aviso-admin').style.display = 'block';
         document.getElementById('form-cadastro-user').style.display = 'none';
     }
 
     // ==========================================
-    // CARREGAR LISTA DE USUÁRIOS (ESTILO CARTEIRAS - GET)
+    // CARREGAR LISTA DE USUÁRIOS (GET)
     // ==========================================
     function carregarUsuarios() {
         const tbody = document.getElementById('corpo-tabela-usuarios');
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">⏳ Carregando...</td></tr>';
 
-        if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
+        if (typeof chamarAPI === 'undefined') {
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ API não configurada.</td></tr>';
             return;
         }
 
-        // ==========================================
-        // 🔥 CHAMADA ESTILO CARTEIRAS (GET)
-        // ==========================================
-        const url = API_CONFIG.BASE_URL + '?action=listarUsuarios';
-        console.log('📡 Chamando:', url);
-
-        fetch(url, { method: 'GET' })
-            .then(response => {
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                return response.json();
-            })
+        // 🔥 GET - IGUAL AO CARTEIRAS
+        chamarAPI('listarUsuarios')
             .then(resposta => {
                 if (resposta.sucesso && resposta.dados) {
                     renderizarTabela(resposta.dados);
@@ -102,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // CADASTRAR USUÁRIO (ESTILO CARTEIRAS - GET)
+    // CADASTRAR USUÁRIO (GET)
     // ==========================================
     document.getElementById('btn-cadastrar-user').addEventListener('click', function() {
         const usuario = document.getElementById('novo-usuario').value.trim();
@@ -125,67 +110,46 @@ document.addEventListener('DOMContentLoaded', function() {
         this.disabled = true;
         this.innerText = 'Cadastrando...';
 
-        // ==========================================
-        // 🔥 CHAMADA ESTILO CARTEIRAS (GET)
-        // ==========================================
-        const url = API_CONFIG.BASE_URL + 
-            '?action=cadastrarUsuario' +
-            '&usuario=' + encodeURIComponent(usuario) +
-            '&senha=' + encodeURIComponent(senha) +
-            '&nome=' + encodeURIComponent(nome) +
-            '&tipo=' + encodeURIComponent(tipo) +
-            '&cadastrado_por=' + encodeURIComponent(loginLogado);
+        // 🔥 GET - IGUAL AO CARTEIRAS
+        chamarAPI('cadastrarUsuario', {
+            usuario: usuario,
+            senha: senha,
+            nome: nome,
+            tipo: tipo,
+            cadastrado_por: loginLogado
+        })
+        .then(resposta => {
+            if (resposta.sucesso) {
+                msgSucesso.innerText = '✅ ' + resposta.mensagem;
+                msgSucesso.style.display = 'block';
+                
+                document.getElementById('novo-usuario').value = '';
+                document.getElementById('nova-senha').value = '';
+                document.getElementById('novo-nome').value = '';
+                document.getElementById('novo-tipo').value = 'operador';
 
-        console.log('📡 Cadastrando usuário:', url);
-
-        fetch(url, { method: 'GET' })
-            .then(response => {
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                return response.json();
-            })
-            .then(resposta => {
-                if (resposta.sucesso) {
-                    msgSucesso.innerText = '✅ ' + resposta.mensagem;
-                    msgSucesso.style.display = 'block';
-                    
-                    // Limpa o formulário
-                    document.getElementById('novo-usuario').value = '';
-                    document.getElementById('nova-senha').value = '';
-                    document.getElementById('novo-nome').value = '';
-                    document.getElementById('novo-tipo').value = 'operador';
-
-                    // Recarrega a lista
-                    carregarUsuarios();
-                } else {
-                    mostrarErroTela(resposta.mensagem || 'Erro ao cadastrar usuário.');
-                }
-            })
-            .catch(erro => {
-                mostrarErroTela('Erro de comunicação: ' + erro.message);
-            })
-            .finally(() => {
-                this.disabled = false;
-                this.innerText = '✅ Cadastrar Usuário';
-            });
+                carregarUsuarios();
+            } else {
+                mostrarErroTela(resposta.mensagem || 'Erro ao cadastrar usuário.');
+            }
+        })
+        .catch(erro => {
+            mostrarErroTela('Erro de comunicação: ' + erro.message);
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.innerText = '✅ Cadastrar Usuário';
+        });
     });
 
     // ==========================================
-    // EXCLUIR USUÁRIO (APENAS ADMIN) - ESTILO CARTEIRAS (GET)
+    // EXCLUIR USUÁRIO (GET)
     // ==========================================
     window.excluirUsuario = function(usuario) {
         if (!confirm('⚠️ Tem certeza que deseja excluir o usuário "' + usuario + '"?\n\nEsta ação não pode ser desfeita!')) return;
 
-        // ==========================================
-        // 🔥 CHAMADA ESTILO CARTEIRAS (GET)
-        // ==========================================
-        const url = API_CONFIG.BASE_URL + '?action=excluirUsuario&usuario=' + encodeURIComponent(usuario);
-        console.log('📡 Excluindo usuário:', url);
-
-        fetch(url, { method: 'GET' })
-            .then(response => {
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                return response.json();
-            })
+        // 🔥 GET - IGUAL AO CARTEIRAS
+        chamarAPI('excluirUsuario', { usuario: usuario })
             .then(resposta => {
                 if (resposta.sucesso) {
                     alert('✅ Usuário excluído com sucesso!');
@@ -197,8 +161,5 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
     };
 
-    // ==========================================
-    // INICIALIZAR
-    // ==========================================
     carregarUsuarios();
 });
