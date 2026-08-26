@@ -95,7 +95,32 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ==========================================
-// FUNÇÃO DE FILTRO - VERSÃO SIMPLES E FUNCIONAL
+// FUNÇÃO PARA CONVERTER DATA DD/MM/AAAA PARA TIMESTAMP
+// ==========================================
+function converterDataParaTimestamp(dataStr) {
+    if (!dataStr) return null;
+    
+    // Se já estiver no formato YYYY-MM-DD (input date)
+    if (dataStr.includes('-')) {
+        return new Date(dataStr + 'T00:00:00').getTime();
+    }
+    
+    // Se estiver no formato DD/MM/AAAA
+    if (dataStr.includes('/')) {
+        const partes = dataStr.split('/');
+        if (partes.length === 3) {
+            const dia = parseInt(partes[0]);
+            const mes = parseInt(partes[1]) - 1;
+            const ano = parseInt(partes[2]);
+            return new Date(ano, mes, dia).getTime();
+        }
+    }
+    
+    return null;
+}
+
+// ==========================================
+// FUNÇÃO DE FILTRO - COM DATA CORRIGIDA
 // ==========================================
 window.filtrarTabela = function() {
     console.log('🔍 FILTRO EXECUTADO!');
@@ -119,7 +144,10 @@ window.filtrarTabela = function() {
     const fDataInicio = document.getElementById('fDataInicio')?.value || '';
     const fDataFim = document.getElementById('fDataFim')?.value || '';
 
-    console.log('📝 Valores dos filtros:', { fNome, fBairro, fCidade });
+    console.log('📝 Valores dos filtros:', { 
+        fNome, fBairro, fCidade, 
+        fDataInicio, fDataFim 
+    });
 
     // VERIFICA SE TEM ALGUM FILTRO PREENCHIDO
     const temFiltro = fNome !== '' || fBairro !== '' || fCidade !== '' || 
@@ -148,8 +176,14 @@ window.filtrarTabela = function() {
         const nivel = String(item.nivel || '');
         const responsavel = String(item.numero_sec || '').toUpperCase();
         const admin = String(item.numero_cha || '').toUpperCase();
-        const dataCadastro = String(item.data || '');
+        
+        // DATA - CONVERTER PARA TIMESTAMP PARA COMPARAÇÃO
+        const dataCadastro = item.data || '';
+        const dataTimestamp = converterDataParaTimestamp(dataCadastro);
+        const dataInicioTimestamp = fDataInicio ? new Date(fDataInicio + 'T00:00:00').getTime() : null;
+        const dataFimTimestamp = fDataFim ? new Date(fDataFim + 'T00:00:00').getTime() : null;
 
+        // APLICA OS FILTROS
         if (fNome && !nome.includes(fNome.toUpperCase())) return false;
         if (fBairro && !bairro.includes(fBairro.toUpperCase())) return false;
         if (fCidade && !cidade.includes(fCidade.toUpperCase())) return false;
@@ -160,8 +194,10 @@ window.filtrarTabela = function() {
         if (fNivel && nivel !== fNivel) return false;
         if (fResponsavel && !responsavel.includes(fResponsavel.toUpperCase())) return false;
         if (fAdmin && !admin.includes(fAdmin.toUpperCase())) return false;
-        if (fDataInicio && dataCadastro && dataCadastro < fDataInicio) return false;
-        if (fDataFim && dataCadastro && dataCadastro > fDataFim) return false;
+        
+        // FILTRO DE DATA - COMPARANDO TIMESTAMPS
+        if (fDataInicio && dataTimestamp !== null && dataTimestamp < dataInicioTimestamp) return false;
+        if (fDataFim && dataTimestamp !== null && dataTimestamp > dataFimTimestamp) return false;
 
         return true;
     });
@@ -171,7 +207,6 @@ window.filtrarTabela = function() {
     renderizarTabela();
     document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
 };
-
 // ==========================================
 // FUNÇÃO PARA LIMPAR FILTROS
 // ==========================================
