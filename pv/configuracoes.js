@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // CADASTRAR USUÁRIO
+    // CADASTRAR USUÁRIO (Usando o padrão do seu sistema)
     // ==========================================
     document.getElementById('btn-cadastrar-user').addEventListener('click', function() {
         const usuario = document.getElementById('novo-usuario').value.trim();
@@ -106,8 +106,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const loginLogado = localStorage.getItem('pv43_login_usuario') || localStorage.getItem('pv43_nome_usuario');
 
+        // Objeto de dados enviado através da função central chamarAPI do sistema
         const dados = {
-            acao: 'cadastrarUsuario',
             usuario: usuario,
             senha: senha,
             nome: nome,
@@ -118,38 +118,32 @@ document.addEventListener('DOMContentLoaded', function() {
         this.disabled = true;
         this.innerText = 'Cadastrando...';
 
-        fetch(API_CONFIG.BASE_URL, {
-            method: 'POST',
-            body: JSON.stringify(dados),
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8'
-            }
-        })
-        .then(response => response.json())
-        .then(resposta => {
-            if (resposta.sucesso) {
-                msgSucesso.innerText = '✅ ' + resposta.mensagem;
-                msgSucesso.style.display = 'block';
-                
-                // Limpa o formulário
-                document.getElementById('novo-usuario').value = '';
-                document.getElementById('nova-senha').value = '';
-                document.getElementById('novo-nome').value = '';
-                document.getElementById('novo-tipo').value = 'operador';
+        // Usa a mesma função padrão do api.js que o resto do sistema usa com sucesso
+        chamarAPI('cadastrarUsuario', dados)
+            .then(resposta => {
+                if (resposta.sucesso) {
+                    msgSucesso.innerText = '✅ ' + resposta.mensagem;
+                    msgSucesso.style.display = 'block';
+                    
+                    // Limpa o formulário
+                    document.getElementById('novo-usuario').value = '';
+                    document.getElementById('nova-senha').value = '';
+                    document.getElementById('novo-nome').value = '';
+                    document.getElementById('novo-tipo').value = 'operador';
 
-                // Recarrega a lista
-                carregarUsuarios();
-            } else {
-                mostrarErroTela(resposta.mensagem || 'Erro ao cadastrar usuário.');
-            }
-        })
-        .catch(erro => {
-            mostrarErroTela('Erro de comunicação: ' + erro.message);
-        })
-        .finally(() => {
-            this.disabled = false;
-            this.innerText = '✅ Cadastrar Usuário';
-        });
+                    // Recarrega a lista
+                    carregarUsuarios();
+                } else {
+                    mostrarErroTela(resposta.mensagem || 'Erro ao cadastrar usuário.');
+                }
+            })
+            .catch(erro => {
+                mostrarErroTela('Erro de comunicação: ' + erro.message);
+            })
+            .finally(() => {
+                this.disabled = false;
+                this.innerText = '✅ Cadastrar Usuário';
+            });
     });
 
     // ==========================================
