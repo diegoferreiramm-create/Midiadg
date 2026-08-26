@@ -13,13 +13,13 @@ document.addEventListener("DOMContentLoaded", function () {
         return; // Interrompe a execução de qualquer outra coisa no script
     }
 
-    // EXIBE NOME DO USUÁRIO
-    document.getElementById('usuario-logado-texto').innerText = `Logado como: ${nomeUsuario} (${tipoUsuario.toUpperCase()})`;
+    // PEGA OS DADOS DO USUÁRIO LOGADO CORRETAMENTE
+    const nomeUsuario = localStorage.getItem("pv43_nome_usuario") || "Administrador";
 
-    // VERIFICA SE É ADMIN
-    if (tipoUsuario !== 'admin') {
-        document.getElementById('aviso-admin').style.display = 'block';
-        document.getElementById('form-cadastro-user').style.display = 'none';
+    // EXIBE NOME DO USUÁRIO NA TELA
+    const elTextoLogado = document.getElementById('usuario-logado-texto');
+    if (elTextoLogado) {
+        elTextoLogado.innerText = `Logado como: ${nomeUsuario} (${tipoUsuario.toUpperCase()})`;
     }
 
     // ==========================================
@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // ==========================================
     function carregarUsuarios() {
         const tbody = document.getElementById('corpo-tabela-usuarios');
+        if (!tbody) return;
+
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">⏳ Carregando...</td></tr>';
 
         if (typeof chamarAPI === 'undefined') {
@@ -50,6 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function renderizarTabela(usuarios) {
         const tbody = document.getElementById('corpo-tabela-usuarios');
+        if (!tbody) return;
         
         if (!usuarios || usuarios.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">📭 Nenhum usuário cadastrado.</td></tr>';
@@ -83,68 +86,76 @@ document.addEventListener("DOMContentLoaded", function () {
     // ==========================================
     // CADASTRAR USUÁRIO
     // ==========================================
-    document.getElementById('btn-cadastrar-user').addEventListener('click', function() {
-        const usuario = document.getElementById('novo-usuario').value.trim();
-        const senha = document.getElementById('nova-senha').value.trim();
-        const nome = document.getElementById('novo-nome').value.trim();
-        const tipo = document.getElementById('novo-tipo').value;
+    const btnCadastrar = document.getElementById('btn-cadastrar-user');
+    if (btnCadastrar) {
+        btnCadastrar.addEventListener('click', function() {
+            const usuario = document.getElementById('novo-usuario').value.trim();
+            const senha = document.getElementById('nova-senha').value.trim();
+            const nome = document.getElementById('novo-nome').value.trim();
+            const tipo = document.getElementById('novo-tipo').value;
 
-        const msgErro = document.getElementById('msg-erro');
-        const msgSucesso = document.getElementById('msg-sucesso');
+            const msgErro = document.getElementById('msg-erro');
+            const msgSucesso = document.getElementById('msg-sucesso');
 
-        msgErro.style.display = 'none';
-        msgSucesso.style.display = 'none';
+            if (msgErro) msgErro.style.display = 'none';
+            if (msgSucesso) msgSucesso.style.display = 'none';
 
-        if (!usuario) { mostrarErro('Digite o usuário.'); return; }
-        if (!senha) { mostrarErro('Digite a senha.'); return; }
-        if (!nome) { mostrarErro('Digite o nome completo.'); return; }
+            if (!usuario) { mostrarErro('Digite o usuário.'); return; }
+            if (!senha) { mostrarErro('Digite a senha.'); return; }
+            if (!nome) { mostrarErro('Digite o nome completo.'); return; }
 
-        // PEGA QUEM ESTÁ CADASTRANDO
-        const nomeLogado = localStorage.getItem('pv43_nome_usuario');
-        const loginLogado = localStorage.getItem('pv43_login_usuario') || localStorage.getItem('pv43_nome_usuario');
+            // PEGA QUEM ESTÁ CADASTRANDO
+            const loginLogado = localStorage.getItem('pv43_login_usuario') || localStorage.getItem('pv43_nome_usuario') || 'Admin';
 
-        const dados = {
-            usuario: usuario,
-            senha: senha,
-            nome: nome,
-            tipo: tipo,
-            cadastrado_por: loginLogado  // ← quem cadastrou (login)
-        };
+            const dados = {
+                usuario: usuario,
+                senha: senha,
+                nome: nome,
+                tipo: tipo,
+                cadastrado_por: loginLogado  // ← Vai preencher certinho na Coluna E
+            };
 
-        this.disabled = true;
-        this.innerText = 'Cadastrando...';
+            this.disabled = true;
+            this.innerText = 'Cadastrando...';
 
-        chamarAPI('cadastrarUsuario', dados)
-            .then(resposta => {
-                if (resposta.sucesso) {
-                    msgSucesso.innerText = '✅ ' + resposta.mensagem;
-                    msgSucesso.style.display = 'block';
-                    
-                    // Limpa o formulário
-                    document.getElementById('novo-usuario').value = '';
-                    document.getElementById('nova-senha').value = '';
-                    document.getElementById('novo-nome').value = '';
-                    document.getElementById('novo-tipo').value = 'operador';
+            chamarAPI('cadastrarUsuario', dados)
+                .then(resposta => {
+                    if (resposta.sucesso) {
+                        if (msgSucesso) {
+                            msgSucesso.innerText = '✅ ' + resposta.mensagem;
+                            msgSucesso.style.display = 'block';
+                        }
+                        
+                        // Limpa o formulário
+                        document.getElementById('novo-usuario').value = '';
+                        document.getElementById('nova-senha').value = '';
+                        document.getElementById('novo-nome').value = '';
+                        document.getElementById('novo-tipo').value = 'operador';
 
-                    // Recarrega a lista
-                    carregarUsuarios();
-                } else {
-                    mostrarErro(resposta.mensagem || 'Erro ao cadastrar usuário.');
-                }
-            })
-            .catch(erro => {
-                mostrarErro('Erro de comunicação: ' + erro.message);
-            })
-            .finally(() => {
-                this.disabled = false;
-                this.innerText = '✅ Cadastrar Usuário';
-            });
-    });
+                        // Recarrega a lista
+                        carregarUsuarios();
+                    } else {
+                        mostrarErro(resposta.mensagem || 'Erro ao cadastrar usuário.');
+                    }
+                })
+                .catch(erro => {
+                    mostrarErro('Erro de comunicação: ' + erro.message);
+                })
+                .finally(() => {
+                    this.disabled = false;
+                    this.innerText = '✅ Cadastrar Usuário';
+                });
+        });
+    }
 
     function mostrarErro(mensagem) {
         const msgErro = document.getElementById('msg-erro');
-        msgErro.innerText = '❌ ' + mensagem;
-        msgErro.style.display = 'block';
+        if (msgErro) {
+            msgErro.innerText = '❌ ' + mensagem;
+            msgErro.style.display = 'block';
+        } else {
+            alert('❌ ' + mensagem);
+        }
     }
 
     // ==========================================
