@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =====================================================
-    // LOGIN (ESTILO CARTEIRAS - GET)
+    // LOGIN
     // =====================================================
 
     const formLogin = document.getElementById('form-login');
@@ -55,19 +55,11 @@ document.addEventListener('DOMContentLoaded', function () {
         formLogin.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            // ---------------------------------------------
-            // PEGA OS DADOS
-            // ---------------------------------------------
-
             const usuarioInput = document.getElementById('usuario');
             const senhaInput = document.getElementById('senha');
 
             const usuario = usuarioInput.value.trim();
             const senha = senhaInput.value.trim();
-
-            // ---------------------------------------------
-            // VALIDAÇÃO
-            // ---------------------------------------------
 
             if (!usuario) {
                 alert('Digite o usuário.');
@@ -81,10 +73,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // ---------------------------------------------
-            // BOTÃO
-            // ---------------------------------------------
-
             const botao = formLogin.querySelector('button[type="submit"]');
             const textoOriginal = botao ? botao.innerText : 'Entrar';
 
@@ -97,9 +85,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log('Enviando login...');
                 console.log('Usuário:', usuario);
 
-                // ==========================================
-                // 🔥 CHAMADA ESTILO CARTEIRAS (GET)
-                // ==========================================
                 const url = API_CONFIG.BASE_URL + 
                     '?action=login' +
                     '&usuario=' + encodeURIComponent(usuario) +
@@ -108,49 +93,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log('📡 URL:', url);
 
                 const respostaHTTP = await fetch(url, {
-                    method: 'GET'  // ← APENAS GET, IGUAL AO CARTEIRAS
+                    method: 'GET'
                 });
 
                 console.log('Status HTTP:', respostaHTTP.status);
-
-                // -----------------------------------------
-                // VERIFICA STATUS HTTP
-                // -----------------------------------------
 
                 if (!respostaHTTP.ok) {
                     throw new Error('Servidor retornou HTTP ' + respostaHTTP.status);
                 }
 
-                // -----------------------------------------
-                // CONVERTE RESPOSTA PARA JSON
-                // -----------------------------------------
-
                 const resposta = await respostaHTTP.json();
                 console.log('Resposta da API:', resposta);
-
-                // -----------------------------------------
-                // LOGIN APROVADO
-                // -----------------------------------------
 
                 if (resposta.sucesso) {
                     console.log('Login realizado com sucesso.');
 
-                    // ==========================================
-                    // 🔥 SALVA DADOS DA SESSÃO
-                    // ==========================================
                     localStorage.setItem('pv43_nome_usuario', resposta.nome || usuario);
                     localStorage.setItem('pv43_login_usuario', usuario);
                     localStorage.setItem('pv43_tipo_usuario', resposta.tipo || '');
 
-                    // REDIRECIONA PARA O MENU
                     window.location.href = 'menu.html';
-                }
-
-                // -----------------------------------------
-                // LOGIN NEGADO
-                // -----------------------------------------
-
-                else {
+                } else {
                     alert('Erro no login:\n\n' + (resposta.mensagem || 'Usuário ou senha incorretos.'));
                 }
 
@@ -158,7 +121,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('ERRO COMPLETO NO LOGIN:', erro);
                 alert('Erro na comunicação com o servidor.\n\n' + erro.message);
             } finally {
-                // RESTAURA BOTÃO
                 if (botao) {
                     botao.disabled = false;
                     botao.innerText = textoOriginal;
@@ -168,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =====================================================
-    // TROCA DE SENHA (ESTILO CARTEIRAS - GET)
+    // TROCA DE SENHA
     // =====================================================
 
     const formTroca = document.getElementById('form-troca');
@@ -177,10 +139,6 @@ document.addEventListener('DOMContentLoaded', function () {
         formTroca.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            // ---------------------------------------------
-            // PEGA OS DADOS
-            // ---------------------------------------------
-
             const usuarioInput = document.getElementById('usuario-troca');
             const senhaAtualInput = document.getElementById('senha-atual');
             const novaSenhaInput = document.getElementById('nova-senha');
@@ -188,10 +146,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const usuario = usuarioInput.value.trim();
             const senhaAtual = senhaAtualInput.value.trim();
             const novaSenha = novaSenhaInput.value.trim();
-
-            // ---------------------------------------------
-            // VALIDAÇÃO
-            // ---------------------------------------------
 
             if (!usuario) {
                 alert('Digite o usuário.');
@@ -211,14 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // ---------------------------------------------
-            // ENVIA PARA A API (ESTILO CARTEIRAS - GET)
-            // ---------------------------------------------
-
             try {
-                // ==========================================
-                // 🔥 CHAMADA ESTILO CARTEIRAS (GET)
-                // ==========================================
                 const url = API_CONFIG.BASE_URL + 
                     '?action=trocarSenha' +
                     '&usuario=' + encodeURIComponent(usuario) +
@@ -226,37 +173,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     '&novaSenha=' + encodeURIComponent(novaSenha);
 
                 console.log('📡 URL:', url);
-                console.log('Solicitando alteração de senha...');
 
                 const respostaHTTP = await fetch(url, {
-                    method: 'GET'  // ← APENAS GET
+                    method: 'GET'
                 });
-
-                console.log('Status HTTP:', respostaHTTP.status);
 
                 if (!respostaHTTP.ok) {
                     throw new Error('Servidor retornou HTTP ' + respostaHTTP.status);
                 }
 
                 const resposta = await respostaHTTP.json();
-                console.log('Resposta da troca de senha:', resposta);
-
-                // -------------------------------------
-                // SENHA ALTERADA
-                // -------------------------------------
 
                 if (resposta.sucesso) {
                     alert('Senha alterada com sucesso!');
                     trocaSenhaBox.classList.add('hidden');
                     loginBox.classList.remove('hidden');
                     formTroca.reset();
-                }
-
-                // -------------------------------------
-                // ERRO
-                // -------------------------------------
-
-                else {
+                } else {
                     alert('Erro:\n\n' + (resposta.mensagem || 'Não foi possível alterar a senha.'));
                 }
 
@@ -266,4 +199,69 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // =====================================================
+    // 🔥 FUNÇÕES DE CONFIGURAÇÕES (UNIFICADAS AQUI)
+    // =====================================================
+
+    // =====================================================
+    // LISTAR USUÁRIOS
+    // =====================================================
+    window.listarUsuarios = function() {
+        return new Promise((resolve, reject) => {
+            const url = API_CONFIG.BASE_URL + '?action=listarUsuarios';
+            console.log('📡 Listando usuários:', url);
+
+            fetch(url, { method: 'GET' })
+                .then(response => {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.json();
+                })
+                .then(resolve)
+                .catch(reject);
+        });
+    };
+
+    // =====================================================
+    // CADASTRAR USUÁRIO
+    // =====================================================
+    window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
+        return new Promise((resolve, reject) => {
+            const url = API_CONFIG.BASE_URL + 
+                '?action=cadastrarUsuario' +
+                '&usuario=' + encodeURIComponent(usuario) +
+                '&senha=' + encodeURIComponent(senha) +
+                '&nome=' + encodeURIComponent(nome) +
+                '&tipo=' + encodeURIComponent(tipo) +
+                '&cadastrado_por=' + encodeURIComponent(cadastradoPor);
+
+            console.log('📡 Cadastrando usuário:', usuario);
+
+            fetch(url, { method: 'GET' })
+                .then(response => {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.json();
+                })
+                .then(resolve)
+                .catch(reject);
+        });
+    };
+
+    // =====================================================
+    // EXCLUIR USUÁRIO
+    // =====================================================
+    window.excluirUsuario = function(usuario) {
+        return new Promise((resolve, reject) => {
+            const url = API_CONFIG.BASE_URL + '?action=excluirUsuario&usuario=' + encodeURIComponent(usuario);
+            console.log('📡 Excluindo usuário:', usuario);
+
+            fetch(url, { method: 'GET' })
+                .then(response => {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.json();
+                })
+                .then(resolve)
+                .catch(reject);
+        });
+    };
 });
