@@ -203,7 +203,7 @@
             const zonaInput = document.getElementById('zona');
             const secaoInput = document.getElementById('secao');
 
-            function buscarDadosVotacao() {
+           function buscarDadosVotacao() {
                 const zona = zonaInput.value.trim();
                 const secao = secaoInput.value.trim();
             
@@ -212,16 +212,43 @@
                     : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
             
                 if (zona.length > 0 || secao.length > 0) {
-                    // ❌ AINDA ESTÁ USANDO POST!
+                    // ✅ USANDO POST COM JSON (QUE FUNCIONAVA)
                     fetch(urlApi, {
                         method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
                         body: JSON.stringify({
                             acao: 'buscarZona',
                             zona: zona,
                             secao: secao
                         })
                     })
-                    // ...
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(resposta => {
+                        console.log('📦 Resposta:', resposta);
+                        if (resposta.sucesso) {
+                            document.getElementById('local_vot').value = resposta.local_vot || '';
+                            document.getElementById('bairro_vot').value = resposta.bairro_vot || '';
+                            document.getElementById('endereco_vot').value = resposta.endereco_vot || '';
+                        } else {
+                            document.getElementById('local_vot').value = '';
+                            document.getElementById('bairro_vot').value = '';
+                            document.getElementById('endereco_vot').value = '';
+                        }
+                    })
+                    .catch(err => {
+                        console.error('❌ Erro ao buscar:', err);
+                    });
+                } else {
+                    document.getElementById('local_vot').value = '';
+                    document.getElementById('bairro_vot').value = '';
+                    document.getElementById('endereco_vot').value = '';
                 }
             }
             zonaInput.addEventListener('input', buscarDadosVotacao);
