@@ -578,3 +578,114 @@ document.addEventListener('keydown', function(e) {
 
 console.log('✅ lista.js carregado com sucesso!');
 console.log('📡 API URL:', URL_API || '❌ NÃO CONFIGURADA');
+
+// ==========================================
+// SOBRESCREVER A FUNÇÃO filtrarTabela DO HTML
+// ==========================================
+window.filtrarTabela = function() {
+    // Verifica se os dados existem
+    if (!todosOsDados || todosOsDados.length === 0) {
+        console.warn('⏳ Aguardando dados carregarem...');
+        return;
+    }
+
+    // Pega os valores dos filtros
+    const fNome = document.getElementById('fNome')?.value?.toUpperCase().trim() || '';
+    const fBairro = document.getElementById('fBairro')?.value?.toUpperCase().trim() || '';
+    const fCidade = document.getElementById('fCidade')?.value?.toUpperCase().trim() || '';
+    const fCandidato = document.getElementById('fCandidato')?.value?.toUpperCase().trim() || '';
+    const fZona = document.getElementById('fZona')?.value?.trim() || '';
+    const fSecao = document.getElementById('fSecao')?.value?.trim() || '';
+    const fLocalVot = document.getElementById('fLocalVot')?.value?.toUpperCase().trim() || '';
+    const fNivel = document.getElementById('fNivel')?.value?.trim() || '';
+    const fResponsavel = document.getElementById('fResponsavel')?.value?.toUpperCase().trim() || '';
+    const fAdmin = document.getElementById('fAdmin')?.value?.toUpperCase().trim() || '';
+    const fDataInicio = document.getElementById('fDataInicio')?.value || '';
+    const fDataFim = document.getElementById('fDataFim')?.value || '';
+
+    // VERIFICA SE TODOS OS FILTROS ESTÃO VAZIOS
+    const tudoVazio = !fNome && !fBairro && !fCidade && !fCandidato && 
+                     !fZona && !fSecao && !fLocalVot && !fNivel && 
+                     !fResponsavel && !fAdmin && !fDataInicio && !fDataFim;
+
+    // SE TUDO VAZIO, RESTAURA A LISTA COMPLETA
+    if (tudoVazio) {
+        dadosFiltrados = [...todosOsDados];
+        console.log('🔄 Todos os filtros vazios - Lista completa restaurada:', dadosFiltrados.length, 'registros');
+    } else {
+        // APLICA OS FILTROS
+        dadosFiltrados = todosOsDados.filter(item => {
+            // Normaliza os campos para comparação
+            const nome = String(item.nome || '').toUpperCase();
+            const bairro = String(item.bairro || '').toUpperCase();
+            const cidade = String(item.cidade || '').toUpperCase();
+            const candidato = String(item.candidato || '').toUpperCase();
+            const zona = String(item.zona || '');
+            const secao = String(item.secao || '');
+            const localVot = String(item.local_vot || '').toUpperCase();
+            const nivel = String(item.nivel || '');
+            const responsavel = String(item.numero_sec || '').toUpperCase();
+            const admin = String(item.numero_cha || '').toUpperCase();
+            const dataCadastro = String(item.data || '');
+
+            // Aplica cada filtro
+            if (fNome && !nome.includes(fNome)) return false;
+            if (fBairro && !bairro.includes(fBairro)) return false;
+            if (fCidade && !cidade.includes(fCidade)) return false;
+            if (fCandidato && !candidato.includes(fCandidato)) return false;
+            if (fZona && !zona.includes(fZona)) return false;
+            if (fSecao && !secao.includes(fSecao)) return false;
+            if (fLocalVot && !localVot.includes(fLocalVot)) return false;
+            if (fNivel && nivel !== fNivel) return false;
+            if (fResponsavel && !responsavel.includes(fResponsavel)) return false;
+            if (fAdmin && !admin.includes(fAdmin)) return false;
+            
+            // Filtro de data
+            if (fDataInicio && dataCadastro && dataCadastro < fDataInicio) return false;
+            if (fDataFim && dataCadastro && dataCadastro > fDataFim) return false;
+
+            return true;
+        });
+        
+        console.log('🔍 Filtros aplicados:', {
+            nome: fNome || '(vazio)',
+            bairro: fBairro || '(vazio)',
+            cidade: fCidade || '(vazio)',
+            candidato: fCandidato || '(vazio)',
+            nivel: fNivel || '(vazio)',
+            total_encontrado: dadosFiltrados.length
+        });
+    }
+
+    // Renderiza a tabela e atualiza contadores
+    renderizarTabela();
+    document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
+};
+
+// ==========================================
+// LIMPAR TODOS OS FILTROS
+// ==========================================
+function limparFiltros() {
+    const campos = ['fNome', 'fBairro', 'fCidade', 'fCandidato', 'fZona', 'fSecao', 'fLocalVot', 'fResponsavel', 'fAdmin'];
+    
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    
+    // Limpar selects
+    const selectNivel = document.getElementById('fNivel');
+    if (selectNivel) selectNivel.value = '';
+    
+    // Limpar datas
+    const dataInicio = document.getElementById('fDataInicio');
+    const dataFim = document.getElementById('fDataFim');
+    if (dataInicio) dataInicio.value = '';
+    if (dataFim) dataFim.value = '';
+    
+    // Restaurar lista completa
+    dadosFiltrados = [...todosOsDados];
+    renderizarTabela();
+    document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
+    console.log('🧹 Filtros limpos - Lista completa:', dadosFiltrados.length, 'registros');
+}
