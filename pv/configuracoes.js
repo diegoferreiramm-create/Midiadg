@@ -95,13 +95,18 @@ document.addEventListener('DOMContentLoaded', function() {
         msgErro.style.display = 'none';
         msgSucesso.style.display = 'none';
 
-        if (!usuario) { mostrarErro('Digite o usuário.'); return; }
-        if (!senha) { mostrarErro('Digite a senha.'); return; }
-        if (!nome) { mostrarErro('Digite o nome completo.'); return; }
+        // Função local para exibir erros com segurança
+        function exibirErroLocal(mensagem) {
+            msgErro.innerText = '❌ ' + mensagem;
+            msgErro.style.display = 'block';
+        }
+
+        if (!usuario) { exibirErroLocal('Digite o usuário.'); return; }
+        if (!senha) { exibirErroLocal('Digite a senha.'); return; }
+        if (!nome) { exibirErroLocal('Digite o nome completo.'); return; }
 
         const loginLogado = localStorage.getItem('pv43_login_usuario') || localStorage.getItem('pv43_nome_usuario');
 
-        // 🔥 ENVIANDO NO MESMO FORMATO DE JSON SEGURO QUE O RESTO DO SISTEMA USA
         const dados = {
             acao: 'cadastrarUsuario',
             usuario: usuario,
@@ -114,12 +119,11 @@ document.addEventListener('DOMContentLoaded', function() {
         this.disabled = true;
         this.innerText = 'Cadastrando...';
 
-        // Usando fetch direto para garantir compatibilidade total com o doPost original do seu projeto
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
             body: JSON.stringify(dados),
             headers: {
-                'Content-Type': 'text/plain;charset=utf-8' // Padrão ideal para Apps Script receber JSON sem bloqueio CORS de preflight
+                'Content-Type': 'text/plain;charset=utf-8'
             }
         })
         .then(response => response.json())
@@ -137,11 +141,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Recarrega a lista
                 carregarUsuarios();
             } else {
-                mostrarErro(resposta.mensagem || 'Erro ao cadastrar usuário.');
+                exibirErroLocal(resposta.mensagem || 'Erro ao cadastrar usuário.');
             }
         })
         .catch(erro => {
-            mostrarErro('Erro de comunicação: ' + erro.message);
+            exibirErroLocal('Erro de comunicação: ' + erro.message);
         })
         .finally(() => {
             this.disabled = false;
