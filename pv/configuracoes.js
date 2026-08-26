@@ -1,5 +1,5 @@
 // ==========================================
-// CONFIGURACOES.JS
+// CONFIGURACOES.JS - COMPLETO E CORRIGIDO
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -95,15 +95,14 @@ document.addEventListener('DOMContentLoaded', function() {
         msgErro.style.display = 'none';
         msgSucesso.style.display = 'none';
 
-        // Função local para exibir erros com segurança
-        function exibirErroLocal(mensagem) {
+        function mostrarErroTela(mensagem) {
             msgErro.innerText = '❌ ' + mensagem;
             msgErro.style.display = 'block';
         }
 
-        if (!usuario) { exibirErroLocal('Digite o usuário.'); return; }
-        if (!senha) { exibirErroLocal('Digite a senha.'); return; }
-        if (!nome) { exibirErroLocal('Digite o nome completo.'); return; }
+        if (!usuario) { mostrarErroTela('Digite o usuário.'); return; }
+        if (!senha) { mostrarErroTela('Digite a senha.'); return; }
+        if (!nome) { mostrarErroTela('Digite o nome completo.'); return; }
 
         const loginLogado = localStorage.getItem('pv43_login_usuario') || localStorage.getItem('pv43_nome_usuario');
 
@@ -141,11 +140,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Recarrega a lista
                 carregarUsuarios();
             } else {
-                exibirErroLocal(resposta.mensagem || 'Erro ao cadastrar usuário.');
+                mostrarErroTela(resposta.mensagem || 'Erro ao cadastrar usuário.');
             }
         })
         .catch(erro => {
-            exibirErroLocal('Erro de comunicação: ' + erro.message);
+            mostrarErroTela('Erro de comunicação: ' + erro.message);
         })
         .finally(() => {
             this.disabled = false;
