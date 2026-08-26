@@ -400,154 +400,88 @@ function renderizarTabela() {
     document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
 }
 
-// Tabela e Filtros - Versão Corrigida e Funcional
-function filtrarTabelaAvancado(valorForcado) {
-  const sessao = sessionStorage.getItem("usuario");
-  if (!sessao) return;
-  const user = JSON.parse(sessao);
-  const isAdmin = (user.parceiro.toString() === "97");
+// ==========================================
+// FILTRAR TABELA (CORRIGIDO PARA A ARQUITETURA ATUAL)
+// ==========================================
+function filtrarTabela() {
+    // Captura os valores dos filtros da tela (convertendo para maiúsculas para facilitar a busca)
+    const fNome = document.getElementById('fNome')?.value.toUpperCase().trim() || '';
+    const fBairro = document.getElementById('fBairro')?.value.toUpperCase().trim() || '';
+    const fCidade = document.getElementById('fCidade')?.value.toUpperCase().trim() || '';
+    const fCandidato = document.getElementById('fCandidato')?.value.toUpperCase().trim() || '';
+    const fZona = document.getElementById('fZona')?.value.trim() || '';
+    const fSecao = document.getElementById('fSecao')?.value.trim() || '';
+    const fLocalVot = document.getElementById('fLocalVot')?.value.toUpperCase().trim() || '';
+    const fNivel = document.getElementById('fNivel')?.value.trim() || '';
+    const fResponsavel = document.getElementById('fResponsavel')?.value.toUpperCase().trim() || '';
+    const fAdmin = document.getElementById('fAdmin')?.value.toUpperCase().trim() || '';
+    const fDataInicio = document.getElementById('fDataInicio')?.value || '';
+    const fDataFim = document.getElementById('fDataFim')?.value || '';
 
-  // Captura os valores dos filtros em letras minúsculas/maiúsculas de forma segura
-  const fCpf = document.getElementById("fCpf") ? document.getElementById("fCpf").value.replace(/\D/g, "") : "";
-  const fNome = document.getElementById("fNome") ? document.getElementById("fNome").value.toUpperCase().trim() : "";
-  const fStatus = document.getElementById("fStatus") ? document.getElementById("fStatus").value.trim() : "";
-  
-  const fSituacao = document.getElementById("fSituacao") ? document.getElementById("fSituacao").value.trim().toUpperCase() : "";
-  const fPrazo = document.getElementById("fPrazo") ? document.getElementById("fPrazo").value.trim().toUpperCase() : "";
-  const fProcessoArce = document.getElementById("fProcessoArce") ? document.getElementById("fProcessoArce").value.trim().toUpperCase() : "";
-  
-  let fLote = "";
-  if (valorForcado) {
-    fLote = valorForcado.toString().trim().toUpperCase();
-  } else {
-    fLote = document.getElementById("fLote") ? document.getElementById("fLote").value.trim().toUpperCase() : "";
-  }
- 
-  const fParc = (isAdmin && document.getElementById("fParceiro")) ? document.getElementById("fParceiro").value.toUpperCase().trim() : "";
-  const fAtend = document.getElementById("fAtend") ? document.getElementById("fAtend").value.toUpperCase().trim() : "";
-  const fVia = (isAdmin && document.getElementById("fVia")) ? document.getElementById("fVia").value.toUpperCase().trim() : "";
+    // Filtra o array principal 'todosOsDados'
+    dadosFiltrados = todosOsDados.filter(item => {
+        // Mapeamento seguro dos campos do item
+        const nome = (item.nome || '').toUpperCase();
+        const bairro = (item.bairro || '').toUpperCase();
+        const cidade = (item.cidade || '').toUpperCase();
+        const candidato = (item.candidato || '').toUpperCase();
+        const zona = String(item.zona || '');
+        const secao = String(item.secao || '');
+        const localVot = (item.local_vot || '').toUpperCase();
+        const nivel = String(item.nivel || '');
+        const responsavel = (item.numero_sec || '').toUpperCase();
+        const admin = (item.numero_cha || '').toUpperCase();
+        const dataCadastro = item.data || ''; // Espera formato YYYY-MM-DD ou similar dependendo do backend
 
-  const tabela = document.getElementById("tabelaListas");
-  if (!tabela) return;
-  const tr = tabela.getElementsByTagName("tr");
-  let contadorVisiveis = 0;
+        // Aplicação das condições de filtro
+        if (fNome && !nome.includes(fNome)) return false;
+        if (fBairro && !bairro.includes(fBairro)) return false;
+        if (fCidade && !cidade.includes(fCidade)) return false;
+        if (fCandidato && !candidato.includes(fCandidato)) return false;
+        if (fZona && !zona.includes(fZona)) return false;
+        if (fSecao && !secao.includes(fSecao)) return false;
+        if (fLocalVot && !localVot.includes(fLocalVot)) return false;
+        if (fNivel && nivel !== fNivel) return false;
+        if (fResponsavel && !responsavel.includes(fResponsavel)) return false;
+        if (fAdmin && !admin.includes(fAdmin)) return false;
 
-  for (let i = 1; i < tr.length; i++) {
-    const td = tr[i].getElementsByTagName("td");
-    if (!td[0] || td.length <= 1) continue;
-    let mostrar = true;
+        // Filtro por intervalo de datas (se preenchido)
+        if (fDataInicio && dataCadastro && dataCadastro < fDataInicio) return false;
+        if (fDataFim && dataCadastro && dataCadastro > fDataFim) return false;
 
-    // Helper para extração segura de texto cru da célula usando .textContent
-    const getTexto = (idx) => td[idx] ? td[idx].textContent.trim() : "";
+        return true;
+    });
 
-    // CPF (Ignora formatação e busca por pedaços)
-    if (fCpf !== "") {
-      const cpfTabela = getTexto(1).replace(/\D/g, "");
-      if (cpfTabela.indexOf(fCpf) === -1) mostrar = false;
-    }
-
-    // NOME (Busca com 1 ou mais letras)
-    if (fNome !== "") {
-      const nomeTabela = getTexto(2).toUpperCase();
-      if (nomeTabela.indexOf(fNome) === -1) mostrar = false;
-    }
-
-    // STATUS
-    if (fStatus !== "") {
-      const statusTabela = getTexto(11);
-      if (statusTabela !== fStatus) mostrar = false;
-    }
-
-    // SITUAÇÃO
-    if (fSituacao !== "") {
-      const situacaoTabela = getTexto(16).toUpperCase();
-      if (situacaoTabela.indexOf(fSituacao) === -1) mostrar = false;
-    }
-
-    // PRAZO
-    if (fPrazo !== "") {
-      const prazoTabela = getTexto(17).toUpperCase();
-      if (prazoTabela.indexOf(fPrazo) === -1) mostrar = false;
-    }
-
-    // Nº ARCE
-    if (fProcessoArce !== "") {
-      const arceTabela = getTexto(18).toUpperCase();
-      if (arceTabela.indexOf(fProcessoArce) === -1) mostrar = false;
-    }
-
-    // LOTE
-    if (fLote !== "") {
-      const loteTabela = getTexto(15).toUpperCase();
-      if (loteTabela !== fLote) mostrar = false;
-    }
-  
-    // ADMIN (filtros exclusivos de admin)
-    if (isAdmin) {
-      if (fVia !== "") {
-        const viaTabela = getTexto(6).toUpperCase();
-        if (viaTabela.indexOf(fVia) === -1) mostrar = false;
-      }
-      if (fParc !== "") {
-        const parcTabela = getTexto(7).toUpperCase();
-        if (parcTabela.indexOf(fParc) === -1) mostrar = false;
-      }
-    }
-    
-    // FILTRO ATENDENTE
-    if (fAtend !== "") {
-      const atendTabela = getTexto(9).toUpperCase();
-      if (atendTabela.indexOf(fAtend) === -1) mostrar = false;
-    }
-    
-    // Aplica o display dinamicamente (se apagar o filtro, 'mostrar' vira true e exibe novamente)
-    tr[i].style.display = mostrar ? "" : "none";
-    if (mostrar) contadorVisiveis++;
-  }
-
-  // Atualiza o contador de registros visíveis na tela
-  const elNumLinhas = document.getElementById("numLinhas");
-  if (elNumLinhas) elNumLinhas.innerText = contadorVisiveis;
-
-  // Reaplica as regras de colunas ocultas via checkboxes se existirem
-  const checks = document.querySelectorAll('#containerChecks input[type="checkbox"]');
-  checks.forEach((input) => {
-    const idx = input.getAttribute('data-idx');
-    if (idx && idx !== "null") {
-        try {
-            const visivel = input.checked;
-            const colunas = tabela.querySelectorAll(`tr > *:nth-child(${parseInt(idx) + 1})`);
-            colunas.forEach(cel => { cel.style.display = visivel ? "" : "none"; });
-        } catch(e) {}
-    }
-  });
+    // Re-renderiza a tabela com os dados filtrados e atualiza o contador na tela
+    renderizarTabela();
 }
 
 // ==========================================
 // FUNÇÃO PARA LIMPAR TODOS OS FILTROS
 // ==========================================
 function limparFiltros() {
-    // Lista de todos os IDs de inputs de filtro que podem existir na tela
     const campos = [
-        'fCpf', 'fNome', 'fStatus', 'fSituacao', 'fPrazo', 
-        'fProcessoArce', 'fLote', 'fParceiro', 'fAtend', 'fVia',
-        'fBairro', 'fCidade', 'fCandidato', 'fZona', 'fSecao', 
-        'fLocalVot', 'fNivel', 'fResponsavel', 'fAdmin', 
-        'fDataInicio', 'fDataFim'
+        'fNome', 'fBairro', 'fCidade', 'fCandidato', 
+        'fZona', 'fSecao', 'fLocalVot', 'fNivel', 
+        'fResponsavel', 'fAdmin', 'fDataInicio', 'fDataFim'
     ];
     
-    // Limpa o valor de cada campo de forma segura caso ele exista na tela
     campos.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
             el.value = '';
         }
     });
+
+    // Reseta as datas para o dia de hoje (conforme inicialização original do seu código)
+    const hoje = new Date().toISOString().split('T')[0];
+    const dataInicio = document.getElementById('fDataInicio');
+    const dataFim = document.getElementById('fDataFim');
+    if (dataInicio) dataInicio.value = hoje;
+    if (dataFim) dataFim.value = hoje;
     
-    // Dispara a função de filtro avançado para restaurar todas as linhas da tabela
-    if (typeof filtrarTabelaAvancado === 'function') {
-        filtrarTabelaAvancado();
-    }
+    // Reaplica o filtro para restaurar a tabela
+    filtrarTabela();
 }
 
 // ==========================================
