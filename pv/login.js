@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ============================================================
-// 🔥 FUNÇÕES GLOBAIS - POST SEM HEADER (IGUAL AO CADASTRAMENTO)
+// 🔥 FUNÇÕES GLOBAIS - POST COM URLSearchParams
 // ============================================================
 
 // ============================================================
@@ -194,7 +194,7 @@ window.listarUsuarios = function() {
 };
 
 // ============================================================
-// CADASTRAR USUÁRIO (POST - SEM HEADER) - IGUAL AO CADASTRAMENTO
+// CADASTRAR USUÁRIO (POST com URLSearchParams)
 // ============================================================
 window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
     return new Promise((resolve, reject) => {
@@ -203,22 +203,20 @@ window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
             return;
         }
         
-        // 🔥 JSON - SEM HEADER (IGUAL AO CADASTRAMENTO)
-        const dadosEnvio = {
-            acao: 'cadastrarUsuario',
-            usuario: usuario,
-            senha: senha,
-            nome: nome,
-            tipo: tipo,
-            cadastrado_por: cadastradoPor
-        };
+        // 🔥 URLSearchParams - NÃO FAZ PREFLIGHT
+        const dados = new URLSearchParams();
+        dados.append('acao', 'cadastrarUsuario');
+        dados.append('usuario', usuario);
+        dados.append('senha', senha);
+        dados.append('nome', nome);
+        dados.append('tipo', tipo);
+        dados.append('cadastrado_por', cadastradoPor);
 
-        console.log('📡 Cadastrando usuário (POST):', usuario);
+        console.log('📡 Cadastrando usuário:', usuario);
 
-        // 🔥 SEM HEADER - IGUAL AO CADASTRAMENTO
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
-            body: JSON.stringify(dadosEnvio)
+            body: dados
         })
         .then(response => {
             if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -230,7 +228,7 @@ window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
 };
 
 // ============================================================
-// EXCLUIR USUÁRIO (POST - SEM HEADER) - IGUAL AO CADASTRAMENTO
+// EXCLUIR USUÁRIO (POST com URLSearchParams)
 // ============================================================
 window.excluirUsuario = function(usuario) {
     return new Promise((resolve, reject) => {
@@ -239,17 +237,15 @@ window.excluirUsuario = function(usuario) {
             return;
         }
         
-        const dadosEnvio = {
-            acao: 'excluirUsuario',
-            usuario: usuario
-        };
+        const dados = new URLSearchParams();
+        dados.append('acao', 'excluirUsuario');
+        dados.append('usuario', usuario);
 
-        console.log('📡 Excluindo usuário (POST):', usuario);
+        console.log('📡 Excluindo usuário:', usuario);
 
-        // 🔥 SEM HEADER - IGUAL AO CADASTRAMENTO
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
-            body: JSON.stringify(dadosEnvio)
+            body: dados
         })
         .then(response => {
             if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -262,4 +258,4 @@ window.excluirUsuario = function(usuario) {
 
 console.log('✅ login.js carregado');
 console.log('📖 GET (leitura): listarUsuarios');
-console.log('✏️ POST (escrita): cadastrarUsuario, excluirUsuario (JSON sem header)');
+console.log('✏️ POST (escrita): cadastrarUsuario, excluirUsuario');
