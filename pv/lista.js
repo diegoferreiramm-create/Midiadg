@@ -401,42 +401,40 @@ function renderizarTabela() {
 }
 
 // ==========================================
-// FILTRAR TABELA (Baseado no seu outro projeto - Direto na Tela)
+// FILTRAR TABELA (Baseado no seu projeto de sucesso)
 // ==========================================
 function filtrarTabela() {
-    const fNome = document.getElementById('fNome')?.value?.trim()?.toUpperCase() || '';
-    const fBairro = document.getElementById('fBairro')?.value?.trim()?.toUpperCase() || '';
-    const fCidade = document.getElementById('fCidade')?.value?.trim()?.toUpperCase() || '';
-    const fCandidato = document.getElementById('fCandidato')?.value?.trim()?.toUpperCase() || '';
-    const fZona = document.getElementById('fZona')?.value?.trim() || '';
-    const fSecao = document.getElementById('fSecao')?.value?.trim() || '';
-    const fLocalVot = document.getElementById('fLocalVot')?.value?.trim()?.toUpperCase() || '';
-    const fNivel = document.getElementById('fNivel')?.value || '';
-    const fResponsavel = document.getElementById('fResponsavel')?.value?.trim()?.toUpperCase() || '';
-    const fAdmin = document.getElementById('fAdmin')?.value || '';
-    const fDataInicio = document.getElementById('fDataInicio')?.value || '';
-    const fDataFim = document.getElementById('fDataFim')?.value || '';
+    const fNome = document.getElementById('fNome') ? document.getElementById('fNome').value.toUpperCase().trim() : "";
+    const fBairro = document.getElementById('fBairro') ? document.getElementById('fBairro').value.toUpperCase().trim() : "";
+    const fCidade = document.getElementById('fCidade') ? document.getElementById('fCidade').value.toUpperCase().trim() : "";
+    const fCandidato = document.getElementById('fCandidato') ? document.getElementById('fCandidato').value.toUpperCase().trim() : "";
+    const fZona = document.getElementById('fZona') ? document.getElementById('fZona').value.trim() : "";
+    const fSecao = document.getElementById('fSecao') ? document.getElementById('fSecao').value.trim() : "";
+    const fLocalVot = document.getElementById('fLocalVot') ? document.getElementById('fLocalVot').value.toUpperCase().trim() : "";
+    const fNivel = document.getElementById('fNivel') ? document.getElementById('fNivel').value : "";
+    const fResponsavel = document.getElementById('fResponsavel') ? document.getElementById('fResponsavel').value.toUpperCase().trim() : "";
+    const fAdmin = document.getElementById('fAdmin') ? document.getElementById('fAdmin').value.toUpperCase().trim() : "";
+    const fDataInicio = document.getElementById('fDataInicio') ? document.getElementById('fDataInicio').value : "";
+    const fDataFim = document.getElementById('fDataFim') ? document.getElementById('fDataFim').value : "";
 
-    const tabela = document.getElementById('tabela-lista');
+    const tabela = document.getElementById('tabela-lista'); // Ajuste para o ID da sua tabela atual se necessário
     if (!tabela) return;
     
     const tr = tabela.getElementsByTagName('tr');
     let contadorVisiveis = 0;
 
-    // Começa do 1 para pular o cabeçalho (thead)
     for (let i = 1; i < tr.length; i++) {
         const td = tr[i].getElementsByTagName('td');
         if (!td || td.length === 0) continue;
-        
-        // Se a linha for a mensagem de "carregando" ou "nenhum registro", ignora o filtro nela
-        if (td.length === 1) continue;
+        if (td.length === 1) continue; // Pula linha de "carregando"
 
         let mostrar = true;
 
-        // Mapeamento dos índices das colunas no seu COLUNAS[]:
-        // 0: id, 1: numero_cha (ADMIN), 2: numero_sec (RESPONSÁVEL), 3: nome, 7: bairro, 8: cidade, 
-        // 10: candidato, 12: zona, 13: secao, 15: local_vot, 19: data, 20: nivel
-        
+        // Mapeamento idêntico ao seu projeto bom (ajustado para as colunas do seu array atual):
+        // TD[1] = Admin (numero_cha), TD[2] = Responsável (numero_sec), TD[3] = Nome
+        // TD[7] = Bairro, TD[8] = Cidade, TD[10] = Candidato, TD[12] = Zona, TD[13] = Seção
+        // TD[15] = Local Votação, TD[19] = Data, TD[20] = Nível
+
         // NOME (Índice 3)
         if (fNome !== "" && td[3] && td[3].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
         
@@ -470,20 +468,16 @@ function filtrarTabela() {
         if (fResponsavel !== "" && td[2] && td[2].innerText.toUpperCase().indexOf(fResponsavel) === -1) mostrar = false;
         
         // ADMIN (Índice 1)
-        if (fAdmin !== "" && td[1]) {
-            const textoAdmin = td[1].innerText.toUpperCase();
-            if (fAdmin.toUpperCase() === 'ADMINISTRADOR' && !textoAdmin.includes('ADMINISTRADOR')) mostrar = false;
-            if (fAdmin.toUpperCase() === 'OPERADOR' && !textoAdmin.includes('OPERADOR')) mostrar = false;
-        }
+        if (fAdmin !== "" && td[1] && td[1].innerText.toUpperCase().indexOf(fAdmin) === -1) mostrar = false;
 
-        // DATA CADASTRO (Índice 19)
-        if (fDataInicio || fDataFim) {
-            const dataTexto = td[19] ? td[19].innerText.trim() : ''; // Formato esperado DD/MM/YYYY ou YYYY-MM-DD
+        // DATA
+        if ((fDataInicio || fDataFim) && td[19]) {
+            const dataTexto = td[19].innerText.trim();
             let dataComparar = '';
             if (dataTexto.includes('/')) {
                 const partes = dataTexto.split('/');
                 if (partes.length === 3) {
-                    dataComparar = partes[2] + '-' + partes[1].padStart(2, '0'] + '-' + partes[0].padStart(2, '0');
+                    dataComparar = partes[2] + '-' + partes[1].padStart(2, '0') + '-' + partes[0].padStart(2, '0');
                 }
             } else {
                 dataComparar = dataTexto;
@@ -497,10 +491,11 @@ function filtrarTabela() {
         if (mostrar) contadorVisiveis++;
     }
 
-    // Atualiza o contador de exibidos no rodapé
-    const elExibidos = document.getElementById('totalExibidos');
-    if (elExibidos) elExibidos.innerText = contadorVisiveis;
+    // Atualiza o contador igualzinho ao outro projeto
+    const elNumLinhas = document.getElementById("totalExibidos") || document.getElementById("numLinhas");
+    if (elNumLinhas) elNumLinhas.innerText = contadorVisiveis;
 }
+
 // ==========================================
 // LIMPAR FILTROS
 // ==========================================
