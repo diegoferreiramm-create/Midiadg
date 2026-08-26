@@ -401,7 +401,7 @@ function renderizarTabela() {
 }
 
 // ==========================================
-// FILTRAR TABELA (Otimizado para busca instantânea)
+// FILTRAR TABELA (Versão Blindada)
 // ==========================================
 function filtrarTabela() {
     const fNome = document.getElementById('fNome')?.value?.trim()?.toUpperCase() || '';
@@ -417,13 +417,20 @@ function filtrarTabela() {
     const fDataInicio = document.getElementById('fDataInicio')?.value || '';
     const fDataFim = document.getElementById('fDataFim')?.value || '';
 
-    // Se 'todosOsDados' estiver vazio, evita quebrar a tela
-    if (!window.todosOsDados || !Array.isArray(window.todosOsDados)) {
-        return;
+    // Pega os dados da lista original, independentemente de como a variável foi declarada no seu arquivo
+    let listaOriginal = [];
+    if (typeof todosOsDados !== 'undefined' && Array.isArray(todosOsDados)) {
+        listaOriginal = todosOsDados;
+    } else if (typeof window.todosOsDados !== 'undefined' && Array.isArray(window.todosOsDados)) {
+        listaOriginal = window.todosOsDados;
     }
 
-    window.dadosFiltrados = window.todosOsDados.filter(item => {
-        // Filtro por Nome (busca por qualquer letra digitada)
+    if (listaOriginal.length === 0) {
+        return; // Se ainda não carregou os dados da planilha, não faz nada
+    }
+
+    dadosFiltrados = listaOriginal.filter(item => {
+        // Filtro por Nome
         if (fNome && !(item.nome || '').toUpperCase().includes(fNome)) return false;
         
         // Filtro por Bairro
@@ -432,10 +439,9 @@ function filtrarTabela() {
         // Filtro por Cidade
         if (fCidade && !(item.cidade || '').toUpperCase().includes(fCidade)) return false;
         
-        // Filtro por Candidato (Ajustado para lidar com múltiplos ou parciais)
+        // Filtro por Candidato
         if (fCandidato) {
             const candidatosItem = (item.candidato || '').toUpperCase();
-            // Pega apenas a palavra-chave principal (ex: EDUARDO ou JULINHO) para garantir o match
             if (!candidatosItem.includes(fCandidato)) return false;
         }
 
@@ -480,7 +486,7 @@ function filtrarTabela() {
         return true;
     });
 
-    // Atualiza a renderização na tela imediatamente
+    // Atualiza a tabela na tela
     if (typeof renderizarTabela === 'function') {
         renderizarTabela();
     }
