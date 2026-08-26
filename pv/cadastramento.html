@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PV43 - Cadastramento</title>
     <link rel="stylesheet" href="style.css">
+    <script>
+    // 🔒 VERIFICAÇÃO DE SEGURANÇA IMEDIATA
+    (function() {
+        const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
+        if (!nomeUsuario) {
+            alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
+            window.location.href = 'pv43.html';
+            return;
+        }
+    })();
+    
+    // ... resto do seu código ...
+    </script>
 </head>
 <body>
 
