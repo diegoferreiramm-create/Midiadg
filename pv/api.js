@@ -1,5 +1,5 @@
 // ============================================================
-// API.JS - CONFIGURAÇÃO CENTRALIZADA
+// API.JS - CONFIGURAÇÃO CENTRALIZADA (ESTILO CARTEIRAS)
 // ============================================================
 
 const API_CONFIG = {
@@ -10,28 +10,24 @@ const API_CONFIG = {
 window.API_CONFIG = API_CONFIG;
 
 // ============================================================
-// FUNÇÃO PARA CHAMAR A API (USANDO POST COM URLSearchParams - IGUAL O LOGIN.JS)
+// FUNÇÃO PARA CHAMAR A API (ESTILO CARTEIRAS - GET)
 // ============================================================
 function chamarAPI(action, dados) {
     return new Promise((resolve, reject) => {
-        // Cria o FormData igual ao login.js
-        const params = new URLSearchParams();
-        params.append('acao', action);  // ← usa 'acao' igual o login.js
+        // CONSTRÓI A URL COM PARÂMETROS (ESTILO CARTEIRAS)
+        var url = API_CONFIG.BASE_URL + '?action=' + encodeURIComponent(action);
         
-        // Adiciona os parâmetros
         if (dados) {
             for (var chave in dados) {
-                params.append(chave, dados[chave]);
+                url += '&' + encodeURIComponent(chave) + '=' + encodeURIComponent(dados[chave]);
             }
         }
         
-        console.log('📡 Chamando API:', API_CONFIG.BASE_URL);
-        console.log('📦 Ação:', action);
-        console.log('📦 Dados:', params.toString());
+        console.log('📡 Chamando API (GET):', url);
         
-        fetch(API_CONFIG.BASE_URL, {
-            method: 'POST',        // ← POST igual o login.js
-            body: params           // ← URLSearchParams igual o login.js
+        // CHAMADA GET (ESTILO CARTEIRAS)
+        fetch(url, {
+            method: 'GET'
         })
         .then(response => {
             if (!response.ok) {
