@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 senha: senha,
                 nome: nome,
                 tipo: tipo,
-                cadastrado_por: loginLogado  // ← Vai preencher certinho na Coluna E
+                cadastrado_por: nomeCompletoLogado  // ← Vai preencher certinho na Coluna E
             };
 
             this.disabled = true;
