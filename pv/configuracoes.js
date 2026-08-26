@@ -1,5 +1,5 @@
 // ==========================================
-// CONFIGURACOES.JS - USANDO chamarAPI (GET)
+// CONFIGURACOES.JS - VERSÃO POST (IGUAL AO LOGIN)
 // ==========================================
 
 function mostrarErroTela(mensagem) {
@@ -14,44 +14,59 @@ document.addEventListener('DOMContentLoaded', function() {
     const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
     const tipoUsuario = localStorage.getItem('pv43_tipo_usuario');
 
+    // VERIFICA SE ESTÁ LOGADO
     if (!nomeUsuario) {
         alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
         window.location.href = 'pv43.html';
         return;
     }
 
+    // EXIBE NOME DO USUÁRIO
     document.getElementById('usuario-logado-texto').innerText = `Logado como: ${nomeUsuario} (${tipoUsuario.toUpperCase()})`;
 
+    // VERIFICA SE É ADMIN
     if (tipoUsuario !== 'admin') {
         document.getElementById('aviso-admin').style.display = 'block';
         document.getElementById('form-cadastro-user').style.display = 'none';
     }
 
     // ==========================================
-    // CARREGAR LISTA DE USUÁRIOS (GET)
+    // CARREGAR LISTA DE USUÁRIOS (POST - IGUAL AO LOGIN)
     // ==========================================
     function carregarUsuarios() {
         const tbody = document.getElementById('corpo-tabela-usuarios');
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">⏳ Carregando...</td></tr>';
 
-        if (typeof chamarAPI === 'undefined') {
+        if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ API não configurada.</td></tr>';
             return;
         }
 
-        // 🔥 GET - IGUAL AO CARTEIRAS
-        chamarAPI('listarUsuarios')
-            .then(resposta => {
-                if (resposta.sucesso && resposta.dados) {
-                    renderizarTabela(resposta.dados);
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ ' + (resposta.mensagem || 'Erro ao carregar usuários.') + '</td></tr>';
-                }
-            })
-            .catch(erro => {
-                console.error('❌ Erro:', erro);
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ Erro: ' + erro.message + '</td></tr>';
-            });
+        // ==========================================
+        // 🔥 POST - IGUAL AO LOGIN.JS
+        // ==========================================
+        const dados = new URLSearchParams();
+        dados.append('acao', 'listarUsuarios');
+
+        fetch(API_CONFIG.BASE_URL, {
+            method: 'POST',
+            body: dados
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.json();
+        })
+        .then(resposta => {
+            if (resposta.sucesso && resposta.dados) {
+                renderizarTabela(resposta.dados);
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ ' + (resposta.mensagem || 'Erro ao carregar usuários.') + '</td></tr>';
+            }
+        })
+        .catch(erro => {
+            console.error('❌ Erro:', erro);
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#ef4444;">❌ Erro: ' + erro.message + '</td></tr>';
+        });
     }
 
     function renderizarTabela(usuarios) {
@@ -87,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // CADASTRAR USUÁRIO (GET)
+    // CADASTRAR USUÁRIO (POST - IGUAL AO LOGIN)
     // ==========================================
     document.getElementById('btn-cadastrar-user').addEventListener('click', function() {
         const usuario = document.getElementById('novo-usuario').value.trim();
@@ -110,13 +125,24 @@ document.addEventListener('DOMContentLoaded', function() {
         this.disabled = true;
         this.innerText = 'Cadastrando...';
 
-        // 🔥 GET - IGUAL AO CARTEIRAS
-        chamarAPI('cadastrarUsuario', {
-            usuario: usuario,
-            senha: senha,
-            nome: nome,
-            tipo: tipo,
-            cadastrado_por: loginLogado
+        // ==========================================
+        // 🔥 POST - IGUAL AO LOGIN.JS
+        // ==========================================
+        const dados = new URLSearchParams();
+        dados.append('acao', 'cadastrarUsuario');
+        dados.append('usuario', usuario);
+        dados.append('senha', senha);
+        dados.append('nome', nome);
+        dados.append('tipo', tipo);
+        dados.append('cadastrado_por', loginLogado);
+
+        fetch(API_CONFIG.BASE_URL, {
+            method: 'POST',
+            body: dados
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.json();
         })
         .then(resposta => {
             if (resposta.sucesso) {
@@ -143,23 +169,39 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ==========================================
-    // EXCLUIR USUÁRIO (GET)
+    // EXCLUIR USUÁRIO (POST - IGUAL AO LOGIN)
     // ==========================================
     window.excluirUsuario = function(usuario) {
         if (!confirm('⚠️ Tem certeza que deseja excluir o usuário "' + usuario + '"?\n\nEsta ação não pode ser desfeita!')) return;
 
-        // 🔥 GET - IGUAL AO CARTEIRAS
-        chamarAPI('excluirUsuario', { usuario: usuario })
-            .then(resposta => {
-                if (resposta.sucesso) {
-                    alert('✅ Usuário excluído com sucesso!');
-                    carregarUsuarios();
-                } else {
-                    alert('❌ Erro ao excluir: ' + (resposta.mensagem || 'Erro desconhecido'));
-                }
-            })
-            .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
+        // ==========================================
+        // 🔥 POST - IGUAL AO LOGIN.JS
+        // ==========================================
+        const dados = new URLSearchParams();
+        dados.append('acao', 'excluirUsuario');
+        dados.append('usuario', usuario);
+
+        fetch(API_CONFIG.BASE_URL, {
+            method: 'POST',
+            body: dados
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.json();
+        })
+        .then(resposta => {
+            if (resposta.sucesso) {
+                alert('✅ Usuário excluído com sucesso!');
+                carregarUsuarios();
+            } else {
+                alert('❌ Erro ao excluir: ' + (resposta.mensagem || 'Erro desconhecido'));
+            }
+        })
+        .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
     };
 
+    // ==========================================
+    // INICIALIZAR
+    // ==========================================
     carregarUsuarios();
 });
