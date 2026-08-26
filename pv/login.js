@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =====================================================
-    // LOGIN (GET)
+    // LOGIN - POST com URLSearchParams
     // =====================================================
     const formLogin = document.getElementById('form-login');
 
@@ -65,15 +65,21 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             try {
-                const url = API_CONFIG.BASE_URL + 
-                    '?action=login' +
-                    '&usuario=' + encodeURIComponent(usuario) +
-                    '&senha=' + encodeURIComponent(senha);
+                const params = new URLSearchParams();
+                params.append('acao', 'login');
+                params.append('usuario', usuario);
+                params.append('senha', senha);
 
-                const respostaHTTP = await fetch(url, { method: 'GET' });
+                const respostaHTTP = await fetch(API_CONFIG.BASE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: params
+                });
 
                 if (!respostaHTTP.ok) {
-                    throw new Error('Servidor retornou HTTP ' + respostaHTTP.status);
+                    throw new Error('HTTP ' + respostaHTTP.status);
                 }
 
                 const resposta = await respostaHTTP.json();
@@ -100,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // =====================================================
-    // TROCA DE SENHA (GET)
+    // TROCA DE SENHA - POST com URLSearchParams
     // =====================================================
     const formTroca = document.getElementById('form-troca');
 
@@ -135,16 +141,22 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             try {
-                const url = API_CONFIG.BASE_URL + 
-                    '?action=trocarSenha' +
-                    '&usuario=' + encodeURIComponent(usuario) +
-                    '&senhaAtual=' + encodeURIComponent(senhaAtual) +
-                    '&novaSenha=' + encodeURIComponent(novaSenha);
+                const params = new URLSearchParams();
+                params.append('acao', 'trocarSenha');
+                params.append('usuario', usuario);
+                params.append('senhaAtual', senhaAtual);
+                params.append('novaSenha', novaSenha);
 
-                const respostaHTTP = await fetch(url, { method: 'GET' });
+                const respostaHTTP = await fetch(API_CONFIG.BASE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: params
+                });
 
                 if (!respostaHTTP.ok) {
-                    throw new Error('Servidor retornou HTTP ' + respostaHTTP.status);
+                    throw new Error('HTTP ' + respostaHTTP.status);
                 }
 
                 const resposta = await respostaHTTP.json();
@@ -167,12 +179,9 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ============================================================
-// 🔥 FUNÇÕES GLOBAIS - POST COM URLSearchParams
+// FUNÇÕES GLOBAIS - POST com URLSearchParams
 // ============================================================
 
-// ============================================================
-// LISTAR USUÁRIOS (GET - LEITURA)
-// ============================================================
 window.listarUsuarios = function() {
     return new Promise((resolve, reject) => {
         if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
@@ -180,43 +189,15 @@ window.listarUsuarios = function() {
             return;
         }
         
-        const url = API_CONFIG.BASE_URL + '?action=listarUsuarios';
-        console.log('📡 Listando usuários (GET):', url);
-
-        fetch(url, { method: 'GET' })
-            .then(response => {
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                return response.json();
-            })
-            .then(resolve)
-            .catch(reject);
-    });
-};
-
-// ============================================================
-// CADASTRAR USUÁRIO (POST com URLSearchParams)
-// ============================================================
-window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
-    return new Promise((resolve, reject) => {
-        if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
-            reject(new Error('API não configurada'));
-            return;
-        }
-        
-        // 🔥 URLSearchParams - NÃO FAZ PREFLIGHT
-        const dados = new URLSearchParams();
-        dados.append('acao', 'cadastrarUsuario');
-        dados.append('usuario', usuario);
-        dados.append('senha', senha);
-        dados.append('nome', nome);
-        dados.append('tipo', tipo);
-        dados.append('cadastrado_por', cadastradoPor);
-
-        console.log('📡 Cadastrando usuário:', usuario);
+        const params = new URLSearchParams();
+        params.append('acao', 'listarUsuarios');
 
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
-            body: dados
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params
         })
         .then(response => {
             if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -227,9 +208,37 @@ window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
     });
 };
 
-// ============================================================
-// EXCLUIR USUÁRIO (POST com URLSearchParams)
-// ============================================================
+window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
+    return new Promise((resolve, reject) => {
+        if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
+            reject(new Error('API não configurada'));
+            return;
+        }
+        
+        const params = new URLSearchParams();
+        params.append('acao', 'cadastrarUsuario');
+        params.append('usuario', usuario);
+        params.append('senha', senha);
+        params.append('nome', nome);
+        params.append('tipo', tipo);
+        params.append('cadastrado_por', cadastradoPor);
+
+        fetch(API_CONFIG.BASE_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.json();
+        })
+        .then(resolve)
+        .catch(reject);
+    });
+};
+
 window.excluirUsuario = function(usuario) {
     return new Promise((resolve, reject) => {
         if (typeof API_CONFIG === 'undefined' || !API_CONFIG.BASE_URL) {
@@ -237,15 +246,16 @@ window.excluirUsuario = function(usuario) {
             return;
         }
         
-        const dados = new URLSearchParams();
-        dados.append('acao', 'excluirUsuario');
-        dados.append('usuario', usuario);
-
-        console.log('📡 Excluindo usuário:', usuario);
+        const params = new URLSearchParams();
+        params.append('acao', 'excluirUsuario');
+        params.append('usuario', usuario);
 
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
-            body: dados
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params
         })
         .then(response => {
             if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -257,5 +267,5 @@ window.excluirUsuario = function(usuario) {
 };
 
 console.log('✅ login.js carregado');
-console.log('📖 GET (leitura): listarUsuarios');
+console.log('📖 POST (leitura): listarUsuarios');
 console.log('✏️ POST (escrita): cadastrarUsuario, excluirUsuario');
