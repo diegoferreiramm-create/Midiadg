@@ -401,7 +401,7 @@ function renderizarTabela() {
 }
 
 // ==========================================
-// FILTRAR TABELA (Versão Blindada)
+// FILTRAR TABELA NA TELA (FRONT-END)
 // ==========================================
 function filtrarTabela() {
     const fNome = document.getElementById('fNome')?.value?.trim()?.toUpperCase() || '';
@@ -417,57 +417,32 @@ function filtrarTabela() {
     const fDataInicio = document.getElementById('fDataInicio')?.value || '';
     const fDataFim = document.getElementById('fDataFim')?.value || '';
 
-    // Pega os dados da lista original, independentemente de como a variável foi declarada no seu arquivo
-    let listaOriginal = [];
-    if (typeof todosOsDados !== 'undefined' && Array.isArray(todosOsDados)) {
-        listaOriginal = todosOsDados;
-    } else if (typeof window.todosOsDados !== 'undefined' && Array.isArray(window.todosOsDados)) {
-        listaOriginal = window.todosOsDados;
+    if (!todosOsDados || todosOsDados.length === 0) {
+        return;
     }
 
-    if (listaOriginal.length === 0) {
-        return; // Se ainda não carregou os dados da planilha, não faz nada
-    }
-
-    dadosFiltrados = listaOriginal.filter(item => {
-        // Filtro por Nome
+    dadosFiltrados = todosOsDados.filter(item => {
         if (fNome && !(item.nome || '').toUpperCase().includes(fNome)) return false;
-        
-        // Filtro por Bairro
         if (fBairro && !(item.bairro || '').toUpperCase().includes(fBairro)) return false;
-        
-        // Filtro por Cidade
         if (fCidade && !(item.cidade || '').toUpperCase().includes(fCidade)) return false;
         
-        // Filtro por Candidato
         if (fCandidato) {
             const candidatosItem = (item.candidato || '').toUpperCase();
             if (!candidatosItem.includes(fCandidato)) return false;
         }
 
-        // Filtro por Zona
         if (fZona && (item.zona || '').trim() !== fZona) return false;
-        
-        // Filtro por Seção
         if (fSecao && (item.secao || '').trim() !== fSecao) return false;
-        
-        // Filtro por Local de Votação
         if (fLocalVot && !(item.local_vot || '').toUpperCase().includes(fLocalVot)) return false;
-        
-        // Filtro por Nível
         if (fNivel && String(item.nivel) !== String(fNivel)) return false;
-        
-        // Filtro por Responsável
         if (fResponsavel && !(item.numero_sec || '').toUpperCase().includes(fResponsavel)) return false;
         
-        // Filtro por Admin
         if (fAdmin) {
             const adminVal = item.numero_cha || '';
             if (fAdmin === 'Administrador' && adminVal !== 'Administrador') return false;
             if (fAdmin === 'Operador' && adminVal !== 'Operador') return false;
         }
 
-        // Filtro por Data
         if (fDataInicio || fDataFim) {
             const dataCadastro = item.data || '';
             let dataComparar = '';
@@ -486,10 +461,7 @@ function filtrarTabela() {
         return true;
     });
 
-    // Atualiza a tabela na tela
-    if (typeof renderizarTabela === 'function') {
-        renderizarTabela();
-    }
+    renderizarTabela();
 }
 
 // ==========================================
