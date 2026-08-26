@@ -1,5 +1,5 @@
 // ==========================================
-// CONFIGURACOES.JS - PADRÃO CARTEIRAS
+// CONFIGURACOES.JS - IGUAL AO LOGIN (COMUNICAÇÃO DIRETA)
 // ==========================================
 
 function mostrarErroTela(mensagem) {
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // CARREGAR LISTA DE USUÁRIOS (GET)
+    // CARREGAR LISTA DE USUÁRIOS (IGUAL AO LOGIN)
     // ==========================================
     function carregarUsuarios() {
         const tbody = document.getElementById('corpo-tabela-usuarios');
@@ -39,13 +39,20 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // 🔥 CHAMADA IGUAL AO CARTEIRAS
+        // ==========================================
+        // 🔥 IGUAL AO LOGIN - GET DIRETO
+        // ==========================================
         const url = API_CONFIG.BASE_URL + '?action=listarUsuarios';
-        console.log('📡 Carregando usuários...');
+        console.log('📡 Carregando usuários:', url);
 
         fetch(url, { method: 'GET' })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
             .then(resposta => {
+                console.log('📡 Resposta listarUsuarios:', resposta);
+                
                 if (resposta.sucesso && resposta.dados) {
                     renderizarTabela(resposta.dados);
                 } else {
@@ -91,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // CADASTRAR USUÁRIO - PADRÃO CARTEIRAS
+    // CADASTRAR USUÁRIO (IGUAL AO LOGIN - POST)
     // ==========================================
     document.getElementById('btn-cadastrar-user').addEventListener('click', function() {
         const usuario = document.getElementById('novo-usuario').value.trim();
@@ -115,70 +122,89 @@ document.addEventListener('DOMContentLoaded', function() {
         this.innerText = 'Cadastrando...';
 
         // ==========================================
-        // 🔥 IGUAL AO CARTEIRAS - TUDO NA URL
+        // 🔥 IGUAL AO LOGIN - POST COM URLSearchParams
         // ==========================================
-        const url = API_CONFIG.BASE_URL + 
-            '?action=cadastrarUsuario' +
-            '&usuario=' + encodeURIComponent(usuario) +
-            '&senha=' + encodeURIComponent(senha) +
-            '&nome=' + encodeURIComponent(nome) +
-            '&tipo=' + encodeURIComponent(tipo) +
-            '&cadastrado_por=' + encodeURIComponent(loginLogado);
+        const dados = new URLSearchParams();
+        dados.append('acao', 'cadastrarUsuario');
+        dados.append('usuario', usuario);
+        dados.append('senha', senha);
+        dados.append('nome', nome);
+        dados.append('tipo', tipo);
+        dados.append('cadastrado_por', loginLogado);
 
-        console.log('📡 URL:', url);
+        console.log('📡 Cadastrando usuário:', usuario);
+        console.log('📡 Dados enviados:', dados.toString());
 
-        fetch(url, { method: 'GET' })
-            .then(response => {
-                console.log('📡 Status:', response.status);
-                return response.json();
-            })
-            .then(resposta => {
-                console.log('📡 Resposta:', resposta);
+        fetch(API_CONFIG.BASE_URL, {
+            method: 'POST',
+            body: dados
+        })
+        .then(response => {
+            console.log('📡 Status HTTP:', response.status);
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.json();
+        })
+        .then(resposta => {
+            console.log('📡 Resposta cadastrarUsuario:', resposta);
+            
+            if (resposta.sucesso) {
+                msgSucesso.innerText = '✅ ' + resposta.mensagem;
+                msgSucesso.style.display = 'block';
                 
-                if (resposta.sucesso) {
-                    msgSucesso.innerText = '✅ ' + resposta.mensagem;
-                    msgSucesso.style.display = 'block';
-                    
-                    document.getElementById('novo-usuario').value = '';
-                    document.getElementById('nova-senha').value = '';
-                    document.getElementById('novo-nome').value = '';
-                    document.getElementById('novo-tipo').value = 'operador';
+                document.getElementById('novo-usuario').value = '';
+                document.getElementById('nova-senha').value = '';
+                document.getElementById('novo-nome').value = '';
+                document.getElementById('novo-tipo').value = 'operador';
 
-                    carregarUsuarios();
-                } else {
-                    mostrarErroTela(resposta.mensagem || 'Erro ao cadastrar usuário.');
-                }
-            })
-            .catch(erro => {
-                console.error('❌ Erro:', erro);
-                mostrarErroTela('Erro de comunicação: ' + erro.message);
-            })
-            .finally(() => {
-                this.disabled = false;
-                this.innerText = '✅ Cadastrar Usuário';
-            });
+                carregarUsuarios();
+            } else {
+                mostrarErroTela(resposta.mensagem || 'Erro ao cadastrar usuário.');
+            }
+        })
+        .catch(erro => {
+            console.error('❌ Erro:', erro);
+            mostrarErroTela('Erro de comunicação: ' + erro.message);
+        })
+        .finally(() => {
+            this.disabled = false;
+            this.innerText = '✅ Cadastrar Usuário';
+        });
     });
 
     // ==========================================
-    // EXCLUIR USUÁRIO - PADRÃO CARTEIRAS
+    // EXCLUIR USUÁRIO (IGUAL AO LOGIN - POST)
     // ==========================================
     window.excluirUsuario = function(usuario) {
         if (!confirm('⚠️ Tem certeza que deseja excluir o usuário "' + usuario + '"?\n\nEsta ação não pode ser desfeita!')) return;
 
-        const url = API_CONFIG.BASE_URL + '?action=excluirUsuario&usuario=' + encodeURIComponent(usuario);
-        console.log('📡 URL:', url);
+        // ==========================================
+        // 🔥 IGUAL AO LOGIN - POST COM URLSearchParams
+        // ==========================================
+        const dados = new URLSearchParams();
+        dados.append('acao', 'excluirUsuario');
+        dados.append('usuario', usuario);
 
-        fetch(url, { method: 'GET' })
-            .then(response => response.json())
-            .then(resposta => {
-                if (resposta.sucesso) {
-                    alert('✅ Usuário excluído com sucesso!');
-                    carregarUsuarios();
-                } else {
-                    alert('❌ Erro ao excluir: ' + (resposta.mensagem || 'Erro desconhecido'));
-                }
-            })
-            .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
+        console.log('📡 Excluindo usuário:', usuario);
+
+        fetch(API_CONFIG.BASE_URL, {
+            method: 'POST',
+            body: dados
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.json();
+        })
+        .then(resposta => {
+            console.log('📡 Resposta excluirUsuario:', resposta);
+            
+            if (resposta.sucesso) {
+                alert('✅ Usuário excluído com sucesso!');
+                carregarUsuarios();
+            } else {
+                alert('❌ Erro ao excluir: ' + (resposta.mensagem || 'Erro desconhecido'));
+            }
+        })
+        .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
     };
 
     carregarUsuarios();
