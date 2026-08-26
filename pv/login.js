@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ============================================================
-// 🔥 FUNÇÕES GLOBAIS - USANDO JSON (IGUAL AO CADASTRAMENTO)
+// 🔥 FUNÇÕES GLOBAIS - POST SEM HEADER (IGUAL AO CADASTRAMENTO)
 // ============================================================
 
 // ============================================================
@@ -194,7 +194,7 @@ window.listarUsuarios = function() {
 };
 
 // ============================================================
-// CADASTRAR USUÁRIO (POST - JSON) - IGUAL AO CADASTRAMENTO
+// CADASTRAR USUÁRIO (POST - SEM HEADER) - IGUAL AO CADASTRAMENTO
 // ============================================================
 window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
     return new Promise((resolve, reject) => {
@@ -203,7 +203,7 @@ window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
             return;
         }
         
-        // 🔥 JSON - IGUAL AO CADASTRAMENTO
+        // 🔥 JSON - SEM HEADER (IGUAL AO CADASTRAMENTO)
         const dadosEnvio = {
             acao: 'cadastrarUsuario',
             usuario: usuario,
@@ -213,13 +213,11 @@ window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
             cadastrado_por: cadastradoPor
         };
 
-        console.log('📡 Cadastrando usuário (POST JSON):', usuario);
+        console.log('📡 Cadastrando usuário (POST):', usuario);
 
+        // 🔥 SEM HEADER - IGUAL AO CADASTRAMENTO
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify(dadosEnvio)
         })
         .then(response => {
@@ -232,7 +230,7 @@ window.cadastrarUsuario = function(usuario, senha, nome, tipo, cadastradoPor) {
 };
 
 // ============================================================
-// EXCLUIR USUÁRIO (POST - JSON) - IGUAL AO CADASTRAMENTO
+// EXCLUIR USUÁRIO (POST - SEM HEADER) - IGUAL AO CADASTRAMENTO
 // ============================================================
 window.excluirUsuario = function(usuario) {
     return new Promise((resolve, reject) => {
@@ -246,13 +244,11 @@ window.excluirUsuario = function(usuario) {
             usuario: usuario
         };
 
-        console.log('📡 Excluindo usuário (POST JSON):', usuario);
+        console.log('📡 Excluindo usuário (POST):', usuario);
 
+        // 🔥 SEM HEADER - IGUAL AO CADASTRAMENTO
         fetch(API_CONFIG.BASE_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify(dadosEnvio)
         })
         .then(response => {
@@ -266,4 +262,4 @@ window.excluirUsuario = function(usuario) {
 
 console.log('✅ login.js carregado');
 console.log('📖 GET (leitura): listarUsuarios');
-console.log('✏️ POST (escrita): cadastrarUsuario, excluirUsuario (JSON)');
+console.log('✏️ POST (escrita): cadastrarUsuario, excluirUsuario (JSON sem header)');
