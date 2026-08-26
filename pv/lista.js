@@ -401,7 +401,7 @@ function renderizarTabela() {
 }
 
 // ==========================================
-// FILTRAR TABELA NA TELA (FRONT-END)
+// FILTRAR TABELA (Baseado no seu outro projeto - Direto na Tela)
 // ==========================================
 function filtrarTabela() {
     const fNome = document.getElementById('fNome')?.value?.trim()?.toUpperCase() || '';
@@ -417,53 +417,90 @@ function filtrarTabela() {
     const fDataInicio = document.getElementById('fDataInicio')?.value || '';
     const fDataFim = document.getElementById('fDataFim')?.value || '';
 
-    if (!todosOsDados || todosOsDados.length === 0) {
-        return;
+    const tabela = document.getElementById('tabela-lista');
+    if (!tabela) return;
+    
+    const tr = tabela.getElementsByTagName('tr');
+    let contadorVisiveis = 0;
+
+    // Começa do 1 para pular o cabeçalho (thead)
+    for (let i = 1; i < tr.length; i++) {
+        const td = tr[i].getElementsByTagName('td');
+        if (!td || td.length === 0) continue;
+        
+        // Se a linha for a mensagem de "carregando" ou "nenhum registro", ignora o filtro nela
+        if (td.length === 1) continue;
+
+        let mostrar = true;
+
+        // Mapeamento dos índices das colunas no seu COLUNAS[]:
+        // 0: id, 1: numero_cha (ADMIN), 2: numero_sec (RESPONSÁVEL), 3: nome, 7: bairro, 8: cidade, 
+        // 10: candidato, 12: zona, 13: secao, 15: local_vot, 19: data, 20: nivel
+        
+        // NOME (Índice 3)
+        if (fNome !== "" && td[3] && td[3].innerText.toUpperCase().indexOf(fNome) === -1) mostrar = false;
+        
+        // BAIRRO (Índice 7)
+        if (fBairro !== "" && td[7] && td[7].innerText.toUpperCase().indexOf(fBairro) === -1) mostrar = false;
+        
+        // CIDADE (Índice 8)
+        if (fCidade !== "" && td[8] && td[8].innerText.toUpperCase().indexOf(fCidade) === -1) mostrar = false;
+        
+        // CANDIDATO (Índice 10)
+        if (fCandidato !== "" && td[10] && td[10].innerText.toUpperCase().indexOf(fCandidato) === -1) mostrar = false;
+        
+        // ZONA (Índice 12)
+        if (fZona !== "" && td[12] && td[12].innerText.trim() !== fZona) mostrar = false;
+        
+        // SEÇÃO (Índice 13)
+        if (fSecao !== "" && td[13] && td[13].innerText.trim() !== fSecao) mostrar = false;
+        
+        // LOCAL VOTAÇÃO (Índice 15)
+        if (fLocalVot !== "" && td[15] && td[15].innerText.toUpperCase().indexOf(fLocalVot) === -1) mostrar = false;
+        
+        // NÍVEL (Índice 20)
+        if (fNivel !== "" && td[20]) {
+            const textoNivel = td[20].innerText.toUpperCase();
+            if (fNivel === '1' && !textoNivel.includes('COMUM')) mostrar = false;
+            if (fNivel === '2' && !textoNivel.includes('RELEVANTE')) mostrar = false;
+            if (fNivel === '3' && !textoNivel.includes('LÍDER')) mostrar = false;
+        }
+        
+        // RESPONSÁVEL (Índice 2)
+        if (fResponsavel !== "" && td[2] && td[2].innerText.toUpperCase().indexOf(fResponsavel) === -1) mostrar = false;
+        
+        // ADMIN (Índice 1)
+        if (fAdmin !== "" && td[1]) {
+            const textoAdmin = td[1].innerText.toUpperCase();
+            if (fAdmin.toUpperCase() === 'ADMINISTRADOR' && !textoAdmin.includes('ADMINISTRADOR')) mostrar = false;
+            if (fAdmin.toUpperCase() === 'OPERADOR' && !textoAdmin.includes('OPERADOR')) mostrar = false;
+        }
+
+        // DATA CADASTRO (Índice 19)
+        if (fDataInicio || fDataFim) {
+            const dataTexto = td[19] ? td[19].innerText.trim() : ''; // Formato esperado DD/MM/YYYY ou YYYY-MM-DD
+            let dataComparar = '';
+            if (dataTexto.includes('/')) {
+                const partes = dataTexto.split('/');
+                if (partes.length === 3) {
+                    dataComparar = partes[2] + '-' + partes[1].padStart(2, '0'] + '-' + partes[0].padStart(2, '0');
+                }
+            } else {
+                dataComparar = dataTexto;
+            }
+
+            if (fDataInicio && dataComparar && dataComparar < fDataInicio) mostrar = false;
+            if (fDataFim && dataComparar && dataComparar > fDataFim) mostrar = false;
+        }
+
+        tr[i].style.display = mostrar ? "" : "none";
+        if (mostrar) contadorVisiveis++;
     }
 
-    dadosFiltrados = todosOsDados.filter(item => {
-        if (fNome && !(item.nome || '').toUpperCase().includes(fNome)) return false;
-        if (fBairro && !(item.bairro || '').toUpperCase().includes(fBairro)) return false;
-        if (fCidade && !(item.cidade || '').toUpperCase().includes(fCidade)) return false;
-        
-        if (fCandidato) {
-            const candidatosItem = (item.candidato || '').toUpperCase();
-            if (!candidatosItem.includes(fCandidato)) return false;
-        }
-
-        if (fZona && (item.zona || '').trim() !== fZona) return false;
-        if (fSecao && (item.secao || '').trim() !== fSecao) return false;
-        if (fLocalVot && !(item.local_vot || '').toUpperCase().includes(fLocalVot)) return false;
-        if (fNivel && String(item.nivel) !== String(fNivel)) return false;
-        if (fResponsavel && !(item.numero_sec || '').toUpperCase().includes(fResponsavel)) return false;
-        
-        if (fAdmin) {
-            const adminVal = item.numero_cha || '';
-            if (fAdmin === 'Administrador' && adminVal !== 'Administrador') return false;
-            if (fAdmin === 'Operador' && adminVal !== 'Operador') return false;
-        }
-
-        if (fDataInicio || fDataFim) {
-            const dataCadastro = item.data || '';
-            let dataComparar = '';
-            if (dataCadastro.includes('/')) {
-                const partes = dataCadastro.split('/');
-                if (partes.length === 3) {
-                    dataComparar = partes[2] + '-' + partes[1].padStart(2, '0') + '-' + partes[0].padStart(2, '0');
-                }
-            }
-            if (!dataComparar) dataComparar = dataCadastro;
-
-            if (fDataInicio && dataComparar < fDataInicio) return false;
-            if (fDataFim && dataComparar > fDataFim) return false;
-        }
-
-        return true;
-    });
-
-    renderizarTabela();
+    // Atualiza o contador de exibidos no rodapé
+    const elExibidos = document.getElementById('totalExibidos');
+    if (elExibidos) elExibidos.innerText = contadorVisiveis;
 }
-
 // ==========================================
 // LIMPAR FILTROS
 // ==========================================
