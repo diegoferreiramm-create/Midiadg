@@ -237,15 +237,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     );
 
 
-                    // -------------------------------------
-                    // SALVA DADOS DA SESSÃO
-                    // -------------------------------------
-
+                    // ==========================================
+                    // 🔥 SALVA DADOS DA SESSÃO
+                    // ==========================================
                     localStorage.setItem(
                         'pv43_nome_usuario',
                         resposta.nome || usuario
                     );
 
+                    // ✅ ADICIONADO: SALVA O LOGIN DO USUÁRIO
+                    localStorage.setItem(
+                        'pv43_login_usuario',
+                        usuario
+                    );
 
                     localStorage.setItem(
                         'pv43_tipo_usuario',
