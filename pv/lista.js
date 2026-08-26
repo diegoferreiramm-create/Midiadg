@@ -10,11 +10,11 @@ if (!URL_API) {
 }
 
 let todosOsDados = [];
-let dadosFiltrados = []; 
+let dadosFiltrados = [];
 let colunasVisiveis = {};
 
 // ==========================================
-// DEFINIÇÃO DAS 21 COLUNAS (NOMES CORRETOS)
+// DEFINIÇÃO DAS 21 COLUNAS
 // ==========================================
 const COLUNAS = [
     { id: 'id', nome: 'ID', visivel: true, largura: '45px' },
@@ -57,11 +57,12 @@ document.addEventListener('DOMContentLoaded', function() {
         usuarioEl.innerText = `Logado como: ${nomeUsuario}`;
     }
 
-    const hoje = new Date().toISOString().split('T')[0];
-    const dataInicio = document.getElementById('fDataInicio');
-    const dataFim = document.getElementById('fDataFim');
-    if (dataInicio) dataInicio.value = hoje;
-    if (dataFim) dataFim.value = hoje;
+    // REMOVE AS DATAS AUTOMÁTICAS
+    // const hoje = new Date().toISOString().split('T')[0];
+    // const dataInicio = document.getElementById('fDataInicio');
+    // const dataFim = document.getElementById('fDataFim');
+    // if (dataInicio) dataInicio.value = hoje;
+    // if (dataFim) dataFim.value = hoje;
 
     COLUNAS.forEach(col => {
         colunasVisiveis[col.id] = col.visivel;
@@ -71,6 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
     gerarControlesColunas();
     carregarDados();
 
+    // CONECTA OS EVENTOS DOS FILTROS
     const camposFiltro = [
         'fNome', 'fBairro', 'fCidade', 'fCandidato', 
         'fZona', 'fSecao', 'fLocalVot', 'fNivel', 
@@ -80,143 +82,123 @@ document.addEventListener('DOMContentLoaded', function() {
     camposFiltro.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            el.addEventListener('input', filtrarTabela);
-            el.addEventListener('change', filtrarTabela);
+            el.addEventListener('input', function() {
+                console.log('🔄 Evento input em:', id, 'valor:', this.value);
+                window.filtrarTabela();
+            });
+            el.addEventListener('change', function() {
+                console.log('🔄 Evento change em:', id, 'valor:', this.value);
+                window.filtrarTabela();
+            });
         }
     });
 });
 
 // ==========================================
-// SALVAR PREFERÊNCIAS
+// FUNÇÃO DE FILTRO - VERSÃO SIMPLES E FUNCIONAL
 // ==========================================
-function salvarPreferenciasColunas() {
-    const preferencias = {};
-    COLUNAS.forEach(col => {
-        preferencias[col.id] = colunasVisiveis[col.id];
-    });
-    localStorage.setItem('pv43_colunas_visiveis', JSON.stringify(preferencias));
-}
-
-function carregarPreferenciasColunas() {
-    const salvo = localStorage.getItem('pv43_colunas_visiveis');
-    if (salvo) {
-        try {
-            const preferencias = JSON.parse(salvo);
-            COLUNAS.forEach(col => {
-                if (preferencias[col.id] !== undefined) {
-                    colunasVisiveis[col.id] = preferencias[col.id];
-                    col.visivel = preferencias[col.id];
-                }
-            });
-        } catch (e) {
-            console.log('Erro ao carregar preferências:', e);
-        }
-    }
-}
-
-// ==========================================
-// GERAR CHECKBOXES DAS 21 COLUNAS
-// ==========================================
-function gerarControlesColunas() {
-    const container = document.getElementById('grupoCheckboxes');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    COLUNAS.forEach((col, index) => {
-        if (col.id === 'acoes') return;
-
-        const label = document.createElement('label');
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = colunasVisiveis[col.id] !== false;
-        checkbox.dataset.index = index;
-        checkbox.dataset.colId = col.id;
-        checkbox.addEventListener('change', function() {
-            colunasVisiveis[col.id] = this.checked;
-            salvarPreferenciasColunas();
-            aplicarVisibilidadeColunas();
-            if (this.checked) {
-                label.classList.add('checked');
-            } else {
-                label.classList.remove('checked');
-            }
-        });
-        label.appendChild(checkbox);
-        label.appendChild(document.createTextNode(' ' + col.nome));
-        
-        if (colunasVisiveis[col.id] !== false) {
-            label.classList.add('checked');
-        }
-        
-        container.appendChild(label);
-    });
-}
-
-// ==========================================
-// RESETAR COLUNAS
-// ==========================================
-function resetarColunas() {
-    COLUNAS.forEach(col => {
-        colunasVisiveis[col.id] = col.visivel;
-    });
-    salvarPreferenciasColunas();
+window.filtrarTabela = function() {
+    console.log('🔍 FILTRO EXECUTADO!');
     
-    const container = document.getElementById('grupoCheckboxes');
-    if (container) {
-        const labels = container.querySelectorAll('label');
-        labels.forEach(label => {
-            const checkbox = label.querySelector('input[type="checkbox"]');
-            if (checkbox) {
-                const colId = checkbox.dataset.colId;
-                const col = COLUNAS.find(c => c.id === colId);
-                if (col) {
-                    checkbox.checked = col.visivel;
-                    if (col.visivel) {
-                        label.classList.add('checked');
-                    } else {
-                        label.classList.remove('checked');
-                    }
-                }
-            }
-        });
-    }
-    
-    aplicarVisibilidadeColunas();
-}
-
-// ==========================================
-// APLICAR VISIBILIDADE
-// ==========================================
-function aplicarVisibilidadeColunas() {
-    const tabela = document.getElementById('tabela-lista');
-    if (!tabela) return;
-
-    const cabecalho = tabela.querySelector('thead tr');
-    if (cabecalho) {
-        const ths = cabecalho.querySelectorAll('th');
-        ths.forEach((th, index) => {
-            if (index < COLUNAS.length) {
-                const colId = COLUNAS[index].id;
-                th.style.display = colunasVisiveis[colId] !== false ? '' : 'none';
-            }
-        });
+    if (!todosOsDados || todosOsDados.length === 0) {
+        console.warn('⏳ Sem dados para filtrar');
+        return;
     }
 
-    const linhas = tabela.querySelectorAll('tbody tr');
-    linhas.forEach(linha => {
-        const tds = linha.querySelectorAll('td');
-        tds.forEach((td, index) => {
-            if (index < COLUNAS.length) {
-                const colId = COLUNAS[index].id;
-                td.style.display = colunasVisiveis[colId] !== false ? '' : 'none';
-            }
-        });
+    // PEGA OS VALORES DOS FILTROS
+    const fNome = document.getElementById('fNome')?.value?.trim() || '';
+    const fBairro = document.getElementById('fBairro')?.value?.trim() || '';
+    const fCidade = document.getElementById('fCidade')?.value?.trim() || '';
+    const fCandidato = document.getElementById('fCandidato')?.value?.trim() || '';
+    const fZona = document.getElementById('fZona')?.value?.trim() || '';
+    const fSecao = document.getElementById('fSecao')?.value?.trim() || '';
+    const fLocalVot = document.getElementById('fLocalVot')?.value?.trim() || '';
+    const fNivel = document.getElementById('fNivel')?.value?.trim() || '';
+    const fResponsavel = document.getElementById('fResponsavel')?.value?.trim() || '';
+    const fAdmin = document.getElementById('fAdmin')?.value?.trim() || '';
+    const fDataInicio = document.getElementById('fDataInicio')?.value || '';
+    const fDataFim = document.getElementById('fDataFim')?.value || '';
+
+    console.log('📝 Valores dos filtros:', { fNome, fBairro, fCidade });
+
+    // VERIFICA SE TEM ALGUM FILTRO PREENCHIDO
+    const temFiltro = fNome !== '' || fBairro !== '' || fCidade !== '' || 
+                     fCandidato !== '' || fZona !== '' || fSecao !== '' || 
+                     fLocalVot !== '' || fNivel !== '' || fResponsavel !== '' || 
+                     fAdmin !== '' || fDataInicio !== '' || fDataFim !== '';
+
+    // SE NÃO TEM FILTRO, RESTAURA A LISTA COMPLETA
+    if (!temFiltro) {
+        dadosFiltrados = [...todosOsDados];
+        console.log('🔄 Nenhum filtro - Lista completa:', dadosFiltrados.length);
+        renderizarTabela();
+        document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
+        return;
+    }
+
+    // APLICA OS FILTROS
+    dadosFiltrados = todosOsDados.filter(item => {
+        const nome = String(item.nome || '').toUpperCase();
+        const bairro = String(item.bairro || '').toUpperCase();
+        const cidade = String(item.cidade || '').toUpperCase();
+        const candidato = String(item.candidato || '').toUpperCase();
+        const zona = String(item.zona || '');
+        const secao = String(item.secao || '');
+        const localVot = String(item.local_vot || '').toUpperCase();
+        const nivel = String(item.nivel || '');
+        const responsavel = String(item.numero_sec || '').toUpperCase();
+        const admin = String(item.numero_cha || '').toUpperCase();
+        const dataCadastro = String(item.data || '');
+
+        if (fNome && !nome.includes(fNome.toUpperCase())) return false;
+        if (fBairro && !bairro.includes(fBairro.toUpperCase())) return false;
+        if (fCidade && !cidade.includes(fCidade.toUpperCase())) return false;
+        if (fCandidato && !candidato.includes(fCandidato.toUpperCase())) return false;
+        if (fZona && !zona.includes(fZona)) return false;
+        if (fSecao && !secao.includes(fSecao)) return false;
+        if (fLocalVot && !localVot.includes(fLocalVot.toUpperCase())) return false;
+        if (fNivel && nivel !== fNivel) return false;
+        if (fResponsavel && !responsavel.includes(fResponsavel.toUpperCase())) return false;
+        if (fAdmin && !admin.includes(fAdmin.toUpperCase())) return false;
+        if (fDataInicio && dataCadastro && dataCadastro < fDataInicio) return false;
+        if (fDataFim && dataCadastro && dataCadastro > fDataFim) return false;
+
+        return true;
     });
+
+    console.log('🔍 Resultado do filtro:', dadosFiltrados.length, 'registros');
+
+    renderizarTabela();
+    document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
+};
+
+// ==========================================
+// FUNÇÃO PARA LIMPAR FILTROS
+// ==========================================
+function limparFiltros() {
+    const campos = ['fNome', 'fBairro', 'fCidade', 'fCandidato', 'fZona', 'fSecao', 'fLocalVot', 'fResponsavel', 'fAdmin'];
+    
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    
+    const selectNivel = document.getElementById('fNivel');
+    if (selectNivel) selectNivel.value = '';
+    
+    const dataInicio = document.getElementById('fDataInicio');
+    const dataFim = document.getElementById('fDataFim');
+    if (dataInicio) dataInicio.value = '';
+    if (dataFim) dataFim.value = '';
+    
+    dadosFiltrados = [...todosOsDados];
+    renderizarTabela();
+    document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
+    console.log('🧹 Filtros limpos - Lista completa:', dadosFiltrados.length);
 }
 
 // ==========================================
-// CARREGAR DADOS - USANDO GET
+// CARREGAR DADOS
 // ==========================================
 function carregarDados() {
     const tbody = document.getElementById('corpo-tabela');
@@ -270,34 +252,7 @@ function carregarDados() {
 }
 
 // ==========================================
-// EXCLUIR REGISTRO - USANDO GET
-// ==========================================
-function excluirRegistro(id) {
-    if (!id) { alert('❌ ID inválido!'); return; }
-    if (!confirm('⚠️ Tem certeza que deseja EXCLUIR o registro ID: ' + id + '?\n\nEsta ação não pode ser desfeita!')) return;
-
-    if (!URL_API) { alert('❌ API não configurada.'); return; }
-
-    var url = URL_API + '?acao=excluirCadastro&id=' + encodeURIComponent(id);
-    console.log('🔍 Excluindo:', url);
-
-    fetch(url, {
-        method: 'GET'
-    })
-    .then(response => response.json())
-    .then(resposta => {
-        if (resposta.sucesso) {
-            alert('✅ Registro ID: ' + id + ' excluído com sucesso!');
-            carregarDados();
-        } else {
-            alert('❌ Erro ao excluir: ' + (resposta.mensagem || 'Erro desconhecido'));
-        }
-    })
-    .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
-}
-
-// ==========================================
-// RENDERIZAR TABELA (MAPEAMENTO CORRIGIDO E ALINHADO)
+// RENDERIZAR TABELA
 // ==========================================
 function renderizarTabela() {
     const thead = document.getElementById('cabecalho-tabela');
@@ -320,23 +275,20 @@ function renderizarTabela() {
     }
 
     let bodyHtml = '';
-    dadosFiltrados.forEach((item, index) => {
+    dadosFiltrados.forEach((item) => {
         bodyHtml += '<tr>';
         
         COLUNAS.forEach(col => {
             let valor = '';
             const visivel = colunasVisiveis[col.id] !== false;
             
-            // ==========================================
-            // MAPEAMENTO EXATO COM OS NOMES DO BACK-END
-            // ==========================================
             switch(col.id) {
                 case 'id': valor = item.id || ''; break;
                 case 'numero_cha': valor = item.numero_cha || ''; break;
                 case 'numero_sec': valor = item.numero_sec || ''; break;
                 case 'nome': valor = item.nome || ''; break;
                 case 'data_nasc': valor = item.data_nasc || ''; break;
-                case 'endereco': valor = item.endereço || item.endereco || ''; break; // ← COM ç
+                case 'endereco': valor = item.endereco || ''; break;
                 case 'n_casa': valor = item.n_casa || ''; break;
                 case 'bairro': valor = item.bairro || ''; break;
                 case 'cidade': valor = item.cidade || ''; break;
@@ -348,7 +300,7 @@ function renderizarTabela() {
                 case 'nome_mae': valor = item.nome_mae || ''; break;
                 case 'local_vot': valor = item.local_vot || ''; break;
                 case 'bairro_vot': valor = item.bairro_vot || ''; break;
-                case 'endereco_vot': valor = item.endereço_vot || item.endereco_vot || ''; break; // ← COM ç
+                case 'endereco_vot': valor = item.endereco_vot || ''; break;
                 case 'obs': valor = item.obs || ''; break;
                 case 'data': valor = item.data || ''; break;
                 case 'nivel': 
@@ -372,31 +324,6 @@ function renderizarTabela() {
                 default: valor = '';
             }
 
-            // Formatação especial
-            if (col.id === 'numero_cha' && valor) {
-                valor = `<span class="badge-admin badge-admin-sim">✅ ${valor}</span>`;
-            }
-
-            if (col.id === 'nivel' && valor) {
-                const nivelMap = {
-                    '1': '<span class="badge-nivel badge-nivel-1">COMUM</span>',
-                    '2': '<span class="badge-nivel badge-nivel-2">RELEVANTE</span>',
-                    '3': '<span class="badge-nivel badge-nivel-3">LÍDER</span>'
-                };
-                valor = nivelMap[valor] || valor;
-            }
-
-            if (col.id === 'candidato' && valor) {
-                if (typeof valor === 'string' && valor.includes(',')) {
-                    const cands = valor.split(',').map(c => c.trim());
-                    valor = cands.map(c => `<span class="badge-candidato">${c}</span>`).join(' ');
-                }
-            }
-
-            if (typeof valor === 'string' && valor.length > 50 && col.id !== 'acoes' && col.id !== 'nivel' && col.id !== 'numero_cha') {
-                valor = valor.substring(0, 47) + '...';
-            }
-
             bodyHtml += `<td style="display: ${visivel ? '' : 'none'};">${valor}</td>`;
         });
 
@@ -407,10 +334,8 @@ function renderizarTabela() {
     document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
 }
 
-
-
 // ==========================================
-// AÇÕES
+// FUNÇÕES DE AÇÃO
 // ==========================================
 function editarRegistro(id) {
     if (!id) { alert('❌ ID inválido!'); return; }
@@ -448,6 +373,30 @@ function visualizarRegistro(id) {
     mensagem += '═'.repeat(40);
 
     alert(mensagem);
+}
+
+function excluirRegistro(id) {
+    if (!id) { alert('❌ ID inválido!'); return; }
+    if (!confirm('⚠️ Tem certeza que deseja EXCLUIR o registro ID: ' + id + '?\n\nEsta ação não pode ser desfeita!')) return;
+
+    if (!URL_API) { alert('❌ API não configurada.'); return; }
+
+    var url = URL_API + '?acao=excluirCadastro&id=' + encodeURIComponent(id);
+    console.log('🔍 Excluindo:', url);
+
+    fetch(url, {
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(resposta => {
+        if (resposta.sucesso) {
+            alert('✅ Registro ID: ' + id + ' excluído com sucesso!');
+            carregarDados();
+        } else {
+            alert('❌ Erro ao excluir: ' + (resposta.mensagem || 'Erro desconhecido'));
+        }
+    })
+    .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
 }
 
 // ==========================================
@@ -566,6 +515,126 @@ function exportarPDF() {
 }
 
 // ==========================================
+// CONTROLES DE COLUNAS
+// ==========================================
+function salvarPreferenciasColunas() {
+    const preferencias = {};
+    COLUNAS.forEach(col => {
+        preferencias[col.id] = colunasVisiveis[col.id];
+    });
+    localStorage.setItem('pv43_colunas_visiveis', JSON.stringify(preferencias));
+}
+
+function carregarPreferenciasColunas() {
+    const salvo = localStorage.getItem('pv43_colunas_visiveis');
+    if (salvo) {
+        try {
+            const preferencias = JSON.parse(salvo);
+            COLUNAS.forEach(col => {
+                if (preferencias[col.id] !== undefined) {
+                    colunasVisiveis[col.id] = preferencias[col.id];
+                    col.visivel = preferencias[col.id];
+                }
+            });
+        } catch (e) {
+            console.log('Erro ao carregar preferências:', e);
+        }
+    }
+}
+
+function gerarControlesColunas() {
+    const container = document.getElementById('grupoCheckboxes');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    COLUNAS.forEach((col, index) => {
+        if (col.id === 'acoes') return;
+
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = colunasVisiveis[col.id] !== false;
+        checkbox.dataset.index = index;
+        checkbox.dataset.colId = col.id;
+        checkbox.addEventListener('change', function() {
+            colunasVisiveis[col.id] = this.checked;
+            salvarPreferenciasColunas();
+            aplicarVisibilidadeColunas();
+            if (this.checked) {
+                label.classList.add('checked');
+            } else {
+                label.classList.remove('checked');
+            }
+        });
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(' ' + col.nome));
+        
+        if (colunasVisiveis[col.id] !== false) {
+            label.classList.add('checked');
+        }
+        
+        container.appendChild(label);
+    });
+}
+
+function resetarColunas() {
+    COLUNAS.forEach(col => {
+        colunasVisiveis[col.id] = col.visivel;
+    });
+    salvarPreferenciasColunas();
+    
+    const container = document.getElementById('grupoCheckboxes');
+    if (container) {
+        const labels = container.querySelectorAll('label');
+        labels.forEach(label => {
+            const checkbox = label.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                const colId = checkbox.dataset.colId;
+                const col = COLUNAS.find(c => c.id === colId);
+                if (col) {
+                    checkbox.checked = col.visivel;
+                    if (col.visivel) {
+                        label.classList.add('checked');
+                    } else {
+                        label.classList.remove('checked');
+                    }
+                }
+            }
+        });
+    }
+    
+    aplicarVisibilidadeColunas();
+}
+
+function aplicarVisibilidadeColunas() {
+    const tabela = document.getElementById('tabela-lista');
+    if (!tabela) return;
+
+    const cabecalho = tabela.querySelector('thead tr');
+    if (cabecalho) {
+        const ths = cabecalho.querySelectorAll('th');
+        ths.forEach((th, index) => {
+            if (index < COLUNAS.length) {
+                const colId = COLUNAS[index].id;
+                th.style.display = colunasVisiveis[colId] !== false ? '' : 'none';
+            }
+        });
+    }
+
+    const linhas = tabela.querySelectorAll('tbody tr');
+    linhas.forEach(linha => {
+        const tds = linha.querySelectorAll('td');
+        tds.forEach((td, index) => {
+            if (index < COLUNAS.length) {
+                const colId = COLUNAS[index].id;
+                td.style.display = colunasVisiveis[colId] !== false ? '' : 'none';
+            }
+        });
+    });
+}
+
+// ==========================================
 // ATALHOS
 // ==========================================
 document.addEventListener('keydown', function(e) {
@@ -585,221 +654,3 @@ document.addEventListener('keydown', function(e) {
 
 console.log('✅ lista.js carregado com sucesso!');
 console.log('📡 API URL:', URL_API || '❌ NÃO CONFIGURADA');
-
-// ==========================================
-// FILTRO FLUIDO - ADAPTADO DO PROJETO FUNCIONAL
-// ==========================================
-window.filtrarTabela = function() {
-    console.log('🔍 FILTRO CHAMADO!');
-    
-    if (!todosOsDados || todosOsDados.length === 0) {
-        console.warn('⏳ Aguardando dados carregarem...');
-        return;
-    }
-
-    // ==========================================
-    // PEGA OS VALORES DOS FILTROS
-    // ==========================================
-    const fNome = document.getElementById('fNome')?.value?.trim()?.toUpperCase() || '';
-    const fBairro = document.getElementById('fBairro')?.value?.trim()?.toUpperCase() || '';
-    const fCidade = document.getElementById('fCidade')?.value?.trim()?.toUpperCase() || '';
-    const fCandidato = document.getElementById('fCandidato')?.value?.trim()?.toUpperCase() || '';
-    const fZona = document.getElementById('fZona')?.value?.trim() || '';
-    const fSecao = document.getElementById('fSecao')?.value?.trim() || '';
-    const fLocalVot = document.getElementById('fLocalVot')?.value?.trim()?.toUpperCase() || '';
-    const fNivel = document.getElementById('fNivel')?.value?.trim() || '';
-    const fResponsavel = document.getElementById('fResponsavel')?.value?.trim()?.toUpperCase() || '';
-    const fAdmin = document.getElementById('fAdmin')?.value?.trim()?.toUpperCase() || '';
-    const fDataInicio = document.getElementById('fDataInicio')?.value || '';
-    const fDataFim = document.getElementById('fDataFim')?.value || '';
-
-    console.log('📝 Filtros:', { 
-        nome: fNome || '(vazio)',
-        bairro: fBairro || '(vazio)',
-        cidade: fCidade || '(vazio)',
-        candidato: fCandidato || '(vazio)',
-        nivel: fNivel || '(vazio)'
-    });
-
-    // ==========================================
-    // VERIFICA SE TODOS OS FILTROS ESTÃO VAZIOS
-    // ==========================================
-    const tudoVazio = !fNome && !fBairro && !fCidade && !fCandidato && 
-                     !fZona && !fSecao && !fLocalVot && !fNivel && 
-                     !fResponsavel && !fAdmin && !fDataInicio && !fDataFim;
-
-    // ==========================================
-    // APLICA OS FILTROS OU RESTAURA LISTA COMPLETA
-    // ==========================================
-    if (tudoVazio) {
-        dadosFiltrados = [...todosOsDados];
-        console.log('🔄 Lista completa restaurada:', dadosFiltrados.length);
-    } else {
-        dadosFiltrados = todosOsDados.filter(item => {
-            // ==========================================
-            // PEGA OS VALORES DA LINHA (em MAIÚSCULAS para comparação)
-            // ==========================================
-            const nome = String(item.nome || '').toUpperCase();
-            const bairro = String(item.bairro || '').toUpperCase();
-            const cidade = String(item.cidade || '').toUpperCase();
-            const candidato = String(item.candidato || '').toUpperCase();
-            const zona = String(item.zona || '');
-            const secao = String(item.secao || '');
-            const localVot = String(item.local_vot || '').toUpperCase();
-            const nivel = String(item.nivel || '');
-            const responsavel = String(item.numero_sec || '').toUpperCase();
-            const admin = String(item.numero_cha || '').toUpperCase();
-            const dataCadastro = String(item.data || '');
-
-            // ==========================================
-            // APLICA CADA FILTRO (MESMA LÓGICA DO SEU PROJETO FUNCIONAL)
-            // ==========================================
-            // FILTRO NOME
-            if (fNome !== '' && nome.indexOf(fNome) === -1) return false;
-            
-            // FILTRO BAIRRO
-            if (fBairro !== '' && bairro.indexOf(fBairro) === -1) return false;
-            
-            // FILTRO CIDADE
-            if (fCidade !== '' && cidade.indexOf(fCidade) === -1) return false;
-            
-            // FILTRO CANDIDATO
-            if (fCandidato !== '' && candidato.indexOf(fCandidato) === -1) return false;
-            
-            // FILTRO ZONA
-            if (fZona !== '' && zona.indexOf(fZona) === -1) return false;
-            
-            // FILTRO SEÇÃO
-            if (fSecao !== '' && secao.indexOf(fSecao) === -1) return false;
-            
-            // FILTRO LOCAL VOTAÇÃO
-            if (fLocalVot !== '' && localVot.indexOf(fLocalVot) === -1) return false;
-            
-            // FILTRO NÍVEL (EXATO, IGUAL AO SELECT)
-            if (fNivel !== '' && nivel !== fNivel) return false;
-            
-            // FILTRO RESPONSÁVEL
-            if (fResponsavel !== '' && responsavel.indexOf(fResponsavel) === -1) return false;
-            
-            // FILTRO ADMIN
-            if (fAdmin !== '' && admin.indexOf(fAdmin) === -1) return false;
-            
-            // FILTRO DATA INÍCIO
-            if (fDataInicio !== '' && dataCadastro && dataCadastro < fDataInicio) return false;
-            
-            // FILTRO DATA FIM
-            if (fDataFim !== '' && dataCadastro && dataCadastro > fDataFim) return false;
-
-            return true;
-        });
-        
-        console.log('🔍 Encontrados:', dadosFiltrados.length, 'registros');
-    }
-
-    // ==========================================
-    // RENDERIZA A TABELA (MESMA LÓGICA DO SEU PROJETO FUNCIONAL)
-    // ==========================================
-    const tbody = document.getElementById('corpo-tabela');
-    if (!tbody) return;
-
-    if (dadosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="30" style="text-align:center; padding:40px; color:#94a3b8;">📭 Nenhum registro encontrado.</td></tr>`;
-        document.getElementById('totalExibidos').innerText = '0';
-        return;
-    }
-
-    // Usa a função renderizarTabela já existente
-    if (typeof renderizarTabela === 'function') {
-        renderizarTabela();
-    } else {
-        // Fallback: renderização inline
-        let html = '';
-        dadosFiltrados.forEach(item => {
-            html += `<tr>
-                <td>${item.id || ''}</td>
-                <td>${item.numero_cha || ''}</td>
-                <td>${item.numero_sec || ''}</td>
-                <td>${item.nome || ''}</td>
-                <td>${item.data_nasc || ''}</td>
-                <td>${item.endereco || ''}</td>
-                <td>${item.n_casa || ''}</td>
-                <td>${item.bairro || ''}</td>
-                <td>${item.cidade || ''}</td>
-                <td>${item.telefone || ''}</td>
-                <td>${item.candidato || ''}</td>
-                <td>${item.titulo || ''}</td>
-                <td>${item.zona || ''}</td>
-                <td>${item.secao || ''}</td>
-                <td>${item.nome_mae || ''}</td>
-                <td>${item.local_vot || ''}</td>
-                <td>${item.bairro_vot || ''}</td>
-                <td>${item.endereco_vot || ''}</td>
-                <td>${item.obs || ''}</td>
-                <td>${item.data || ''}</td>
-                <td><span class="badge-nivel badge-nivel-${item.nivel || ''}">${item.nivel || ''}</span></td>
-                <td class="col-acoes">
-                    <button class="btn-visualizar" onclick="visualizarRegistro('${item.id}')">👁️</button>
-                    <button class="btn-editar" onclick="editarRegistro('${item.id}')">✏️</button>
-                    <button class="btn-excluir" onclick="excluirRegistro('${item.id}')">🗑️</button>
-                </td>
-            </tr>`;
-        });
-        tbody.innerHTML = html;
-    }
-    
-    // Atualiza contador
-    document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
-};
-
-// ==========================================
-// FUNÇÃO PARA LIMPAR FILTROS (MESMA LÓGICA)
-// ==========================================
-function limparFiltros() {
-    const campos = ['fNome', 'fBairro', 'fCidade', 'fCandidato', 'fZona', 'fSecao', 'fLocalVot', 'fResponsavel', 'fAdmin'];
-    
-    campos.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-    });
-    
-    const selectNivel = document.getElementById('fNivel');
-    if (selectNivel) selectNivel.value = '';
-    
-    const dataInicio = document.getElementById('fDataInicio');
-    const dataFim = document.getElementById('fDataFim');
-    if (dataInicio) dataInicio.value = '';
-    if (dataFim) dataFim.value = '';
-    
-    dadosFiltrados = [...todosOsDados];
-    renderizarTabela();
-    document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
-    console.log('🧹 Filtros limpos - Lista completa:', dadosFiltrados.length, 'registros');
-}
-
-// ==========================================
-// LIMPAR TODOS OS FILTROS
-// ==========================================
-function limparFiltros() {
-    const campos = ['fNome', 'fBairro', 'fCidade', 'fCandidato', 'fZona', 'fSecao', 'fLocalVot', 'fResponsavel', 'fAdmin'];
-    
-    campos.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-    });
-    
-    // Limpar selects
-    const selectNivel = document.getElementById('fNivel');
-    if (selectNivel) selectNivel.value = '';
-    
-    // Limpar datas
-    const dataInicio = document.getElementById('fDataInicio');
-    const dataFim = document.getElementById('fDataFim');
-    if (dataInicio) dataInicio.value = '';
-    if (dataFim) dataFim.value = '';
-    
-    // Restaurar lista completa
-    dadosFiltrados = [...todosOsDados];
-    renderizarTabela();
-    document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
-    console.log('🧹 Filtros limpos - Lista completa:', dadosFiltrados.length, 'registros');
-}
