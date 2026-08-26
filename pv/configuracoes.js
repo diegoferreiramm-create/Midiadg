@@ -1,5 +1,5 @@
 // ==========================================
-// CONFIGURACOES.JS - VERSÃO CORRIGIDA (PORTUGUÊS)
+// CONFIGURACOES.JS - PADRÃO CARTEIRAS
 // ==========================================
 
 function mostrarErroTela(mensagem) {
@@ -39,17 +39,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // ==========================================
-        // 🔥 GET - listarUsuarios (PORTUGUÊS)
-        // ==========================================
+        // 🔥 CHAMADA IGUAL AO CARTEIRAS
         const url = API_CONFIG.BASE_URL + '?action=listarUsuarios';
         console.log('📡 Carregando usuários...');
 
         fetch(url, { method: 'GET' })
-            .then(response => {
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                return response.json();
-            })
+            .then(response => response.json())
             .then(resposta => {
                 if (resposta.sucesso && resposta.dados) {
                     renderizarTabela(resposta.dados);
@@ -96,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // CADASTRAR USUÁRIO (POST - SEGURO)
+    // CADASTRAR USUÁRIO - PADRÃO CARTEIRAS
     // ==========================================
     document.getElementById('btn-cadastrar-user').addEventListener('click', function() {
         const usuario = document.getElementById('novo-usuario').value.trim();
@@ -120,86 +115,70 @@ document.addEventListener('DOMContentLoaded', function() {
         this.innerText = 'Cadastrando...';
 
         // ==========================================
-        // 🔥 POST - cadastrarUsuario (PORTUGUÊS)
+        // 🔥 IGUAL AO CARTEIRAS - TUDO NA URL
         // ==========================================
-        const dados = new URLSearchParams();
-        dados.append('acao', 'cadastrarUsuario');  // ← PORTUGUÊS
-        dados.append('usuario', usuario);
-        dados.append('senha', senha);
-        dados.append('nome', nome);
-        dados.append('tipo', tipo);
-        dados.append('cadastrado_por', loginLogado);
+        const url = API_CONFIG.BASE_URL + 
+            '?action=cadastrarUsuario' +
+            '&usuario=' + encodeURIComponent(usuario) +
+            '&senha=' + encodeURIComponent(senha) +
+            '&nome=' + encodeURIComponent(nome) +
+            '&tipo=' + encodeURIComponent(tipo) +
+            '&cadastrado_por=' + encodeURIComponent(loginLogado);
 
-        // ✅ SEGURO - mostra APENAS o usuário
-        console.log('📡 Cadastrando usuário:', usuario);
+        console.log('📡 URL:', url);
 
-        fetch(API_CONFIG.BASE_URL, {
-            method: 'POST',
-            body: dados
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            return response.json();
-        })
-        .then(resposta => {
-            console.log('📡 Resposta:', resposta);
-            
-            if (resposta.sucesso) {
-                msgSucesso.innerText = '✅ ' + resposta.mensagem;
-                msgSucesso.style.display = 'block';
+        fetch(url, { method: 'GET' })
+            .then(response => {
+                console.log('📡 Status:', response.status);
+                return response.json();
+            })
+            .then(resposta => {
+                console.log('📡 Resposta:', resposta);
                 
-                document.getElementById('novo-usuario').value = '';
-                document.getElementById('nova-senha').value = '';
-                document.getElementById('novo-nome').value = '';
-                document.getElementById('novo-tipo').value = 'operador';
+                if (resposta.sucesso) {
+                    msgSucesso.innerText = '✅ ' + resposta.mensagem;
+                    msgSucesso.style.display = 'block';
+                    
+                    document.getElementById('novo-usuario').value = '';
+                    document.getElementById('nova-senha').value = '';
+                    document.getElementById('novo-nome').value = '';
+                    document.getElementById('novo-tipo').value = 'operador';
 
-                carregarUsuarios();
-            } else {
-                mostrarErroTela(resposta.mensagem || 'Erro ao cadastrar usuário.');
-            }
-        })
-        .catch(erro => {
-            console.error('❌ Erro:', erro);
-            mostrarErroTela('Erro de comunicação: ' + erro.message);
-        })
-        .finally(() => {
-            this.disabled = false;
-            this.innerText = '✅ Cadastrar Usuário';
-        });
+                    carregarUsuarios();
+                } else {
+                    mostrarErroTela(resposta.mensagem || 'Erro ao cadastrar usuário.');
+                }
+            })
+            .catch(erro => {
+                console.error('❌ Erro:', erro);
+                mostrarErroTela('Erro de comunicação: ' + erro.message);
+            })
+            .finally(() => {
+                this.disabled = false;
+                this.innerText = '✅ Cadastrar Usuário';
+            });
     });
 
     // ==========================================
-    // EXCLUIR USUÁRIO (POST)
+    // EXCLUIR USUÁRIO - PADRÃO CARTEIRAS
     // ==========================================
     window.excluirUsuario = function(usuario) {
         if (!confirm('⚠️ Tem certeza que deseja excluir o usuário "' + usuario + '"?\n\nEsta ação não pode ser desfeita!')) return;
 
-        // ==========================================
-        // 🔥 POST - excluirUsuario (PORTUGUÊS)
-        // ==========================================
-        const dados = new URLSearchParams();
-        dados.append('acao', 'excluirUsuario');  // ← PORTUGUÊS
-        dados.append('usuario', usuario);
+        const url = API_CONFIG.BASE_URL + '?action=excluirUsuario&usuario=' + encodeURIComponent(usuario);
+        console.log('📡 URL:', url);
 
-        console.log('📡 Excluindo usuário:', usuario);
-
-        fetch(API_CONFIG.BASE_URL, {
-            method: 'POST',
-            body: dados
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            return response.json();
-        })
-        .then(resposta => {
-            if (resposta.sucesso) {
-                alert('✅ Usuário excluído com sucesso!');
-                carregarUsuarios();
-            } else {
-                alert('❌ Erro ao excluir: ' + (resposta.mensagem || 'Erro desconhecido'));
-            }
-        })
-        .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
+        fetch(url, { method: 'GET' })
+            .then(response => response.json())
+            .then(resposta => {
+                if (resposta.sucesso) {
+                    alert('✅ Usuário excluído com sucesso!');
+                    carregarUsuarios();
+                } else {
+                    alert('❌ Erro ao excluir: ' + (resposta.mensagem || 'Erro desconhecido'));
+                }
+            })
+            .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
     };
 
     carregarUsuarios();
