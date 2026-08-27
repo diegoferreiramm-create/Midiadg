@@ -9,12 +9,26 @@ if (!URL_API) {
     alert('Erro de configuração: API não encontrada.');
 }
 
+// ==========================================
+// VARIÁVEIS GLOBAIS DE CONTROLE DO SISTEMA
+// ==========================================
+// Armazena a lista completa de registros vindos do banco/arquivo JSON
 let todosOsDados = [];
+// Armazena apenas os registros que passaram pelo filtro de busca atual
 let dadosFiltrados = [];
+// Controla quais colunas da tabela devem aparecer ou ficar ocultas na tela
 let colunasVisiveis = {};
+// Armazena os dados do perfil do usuário logado atualmente no sistema
 let usuarioAtual = null;
+// Define se o usuário logado possui privilégios de Administrador (true ou false)
 let isAdmin = false;
+// Armazena o nome por extenso do usuário logado para exibição na interface
 let usuarioNome = '';
+// Controla em qual número de página o usuário está posicionado no momento
+let paginaAtual = 1;
+// Define quantos registros aparecem por página na tabela 
+// (Pode receber números fixos como 10, 25, 50, 100 ou a string 'todos' para desativar o corte e exibir tudo de uma vez)
+let itensPorPagina = 25;
 
 // ==========================================
 // BUSCAR DADOS DO USUÁRIO NA ABA "User"
@@ -372,7 +386,7 @@ function carregarDados() {
 }
 
 // ==========================================
-// RENDERIZAR TABELA - COM CONTROLE DE AÇÕES
+// RENDERIZAR TABELA - COM PAGINAÇÃO E CONTROLE DE AÇÕES
 // ==========================================
 function renderizarTabela() {
     const thead = document.getElementById('cabecalho-tabela');
@@ -393,12 +407,45 @@ function renderizarTabela() {
 
     if (!dadosFiltrados || dadosFiltrados.length === 0) {
         tbody.innerHTML = '<tr><td colspan="' + COLUNAS.length + '" style="text-align:center; padding:40px; color:#94a3b8;">📭 Nenhum registro encontrado.</td></tr>';
-        document.getElementById('totalExibidos').innerText = '0';
+        
+        // Atualiza os contadores para zero se não houver registros
+        const elPaginaAtual = document.getElementById('paginaAtual');
+        const elTotalPaginas = document.getElementById('totalPaginas');
+        const elTotalExibidos = document.getElementById('totalExibidos');
+        
+        if (elPaginaAtual) elPaginaAtual.innerText = '1';
+        if (elTotalPaginas) elTotalPaginas.innerText = '1';
+        if (elTotalExibidos) elTotalExibidos.innerText = '0';
         return;
     }
 
+    // ==========================================
+    // CÁLCULO DA PAGINAÇÃO E FATIAMENTO DOS DADOS
+    // ==========================================
+    const totalRegistros = dadosFiltrados.length;
+    const limite = itensPorPagina === 'todos' ? totalRegistros : itensPorPagina;
+    const totalPgs = itensPorPagina === 'todos' ? 1 : (Math.ceil(totalRegistros / limite) || 1);
+    
+    if (paginaAtual > totalPgs) paginaAtual = totalPgs;
+    if (paginaAtual < 1) paginaAtual = 1;
+
+    const inicio = itensPorPagina === 'todos' ? 0 : (paginaAtual - 1) * limite;
+    const fim = itensPorPagina === 'todos' ? totalRegistros : inicio + limite;
+    const dadosPaginados = dadosFiltrados.slice(inicio, fim);
+
+    // Atualiza os textos informativos da paginação na tela
+    const elPaginaAtual = document.getElementById('paginaAtual');
+    const elTotalPaginas = document.getElementById('totalPaginas');
+    const elTotalExibidos = document.getElementById('totalExibidos');
+    
+    if (elPaginaAtual) elPaginaAtual.innerText = paginaAtual;
+    if (elTotalPaginas) elTotalPaginas.innerText = totalPgs;
+    if (elTotalExibidos) elTotalExibidos.innerText = `${totalRegistros > 0 ? inicio + 1 : 0} - ${Math.min(fim, totalRegistros)} de ${totalRegistros}`;
+
     let bodyHtml = '';
-    dadosFiltrados.forEach((item) => {
+    
+    // Itera apenas sobre os dados fatiados da página atual (ou todos se "Mostrar Tudo" estiver ativo)
+    dadosPaginados.forEach((item) => {
         bodyHtml += '<tr>';
         
         COLUNAS.forEach(col => {
@@ -496,7 +543,6 @@ function renderizarTabela() {
     });
 
     tbody.innerHTML = bodyHtml;
-    document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
 }
 
 // ==========================================
@@ -579,6 +625,30 @@ function excluirRegistro(id) {
         }
     })
     .catch(erro => alert('❌ Erro de comunicação: ' + erro.message));
+}
+
+// Controla os botões de avançar, voltar e ir para primeira/última página
+function mudarPagina(destino) {
+    const totalRegistros = dadosFiltrados.length;
+    const limite = itensPorPagina === 'todos' ? totalRegistros : itensPorPagina;
+    const totalPgs = itensPorPagina === 'todos' ? 1 : (Math.ceil(totalRegistros / limite) || 1);
+
+    if (destino === 'primeira') paginaAtual = 1;
+    if (destino === 'anterior' && paginaAtual > 1) paginaAtual--;
+    if (destino === 'proxima' && paginaAtual < totalPgs) paginaAtual++;
+    if (destino === 'ultima') paginaAtual = totalPgs;
+
+    renderizarTabela();
+}
+
+// Controla quando você troca o select (de 25 para "Mostrar Tudo", por exemplo)
+function alterarItensPorPagina() {
+    const select = document.getElementById('itensPorPagina');
+    if (select) {
+        itensPorPagina = select.value === 'todos' ? 'todos' : (parseInt(select.value) || 25);
+        paginaAtual = 1; // Volta pra primeira página para não bugar a contagem
+        renderizarTabela();
+    }
 }
 
 // ==========================================
