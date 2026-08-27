@@ -285,66 +285,101 @@ function carregarDados() {
         return;
     }
 
-    var url = URL_API + '?acao=listarCadastros';
-    console.log('🔍 Chamando:', url);
+    // CARREGA O USUÁRIO DA SESSÃO
+    const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
+    
+    if (!nomeUsuario) {
+        alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
+        window.location.href = 'pv43.html';
+        return;
+    }
 
-    fetch(url, {
-        method: 'GET'
-    })
-    .then(response => {
-        console.log('📡 Status:', response.status);
-        if (!response.ok) {
-            throw new Error('HTTP ' + response.status);
-        }
-        return response.json();
-    })
-    .then(resposta => {
-        console.log('📦 Resposta:', resposta);
-        
-        if (resposta.sucesso && resposta.dados) {
-            // FILTRA OS DADOS BASEADO NO USUÁRIO
-            let dadosFiltradosPorUsuario = resposta.dados;
+    usuarioNome = nomeUsuario;
+
+    // BUSCA OS DADOS DO USUÁRIO NA PLANILHA
+    buscarDadosUsuario(nomeUsuario)
+        .then(dadosUsuario => {
+            console.log('👤 Dados do usuário:', dadosUsuario);
             
-            if (!isAdmin) {
-                // OPERADOR: mostra apenas registros onde numero_cha = nome do usuário
-                dadosFiltradosPorUsuario = resposta.dados.filter(item => {
-                    const adminDoRegistro = String(item.numero_cha || '').toUpperCase();
-                    const usuarioLogado = usuarioNome.toUpperCase();
-                    return adminDoRegistro === usuarioLogado;
-                });
-                
-                console.log('👤 OPERADOR - Mostrando apenas registros do usuário:', usuarioNome);
-                console.log('📊 Registros do usuário:', dadosFiltradosPorUsuario.length);
-            } else {
-                console.log('🔑 ADMIN - Mostrando todos os registros:', resposta.dados.length);
-            }
+            // Verifica se é admin baseado no campo 'tipo'
+            const tipo = dadosUsuario.tipo || 'operador';
+            isAdmin = tipo.toLowerCase() === 'admin';
             
-            todosOsDados = dadosFiltradosPorUsuario;
-            dadosFiltrados = [...todosOsDados];
+            // O numero_cha do usuário é o que será usado para filtrar
+            const numeroChaUsuario = dadosUsuario.numero_cha || nomeUsuario;
             
-            document.getElementById('totalRegistros').innerText = todosOsDados.length;
-            document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
+            console.log('👤 Usuário:', usuarioNome);
+            console.log('🔑 Admin:', isAdmin);
+            console.log('📛 numero_cha:', numeroChaUsuario);
             
             // Atualiza o texto do usuário logado
             const usuarioEl = document.getElementById('usuario-logado-texto');
             if (usuarioEl) {
                 const tipoUsuario = isAdmin ? '🔑 ADMIN' : '👤 OPERADOR';
-                usuarioEl.innerText = `Logado como: ${usuarioNome} (${tipoUsuario}) - ${todosOsDados.length} registros`;
+                usuarioEl.innerText = `Logado como: ${dadosUsuario.nome || nomeUsuario} (${tipoUsuario})`;
             }
+
+            // AGORA CARREGA OS DADOS DOS CADASTROS
+            var url = URL_API + '?acao=listarCadastros';
+            console.log('🔍 Chamando:', url);
+
+            return fetch(url, {
+                method: 'GET'
+            });
+        })
+        .then(response => {
+            console.log('📡 Status:', response.status);
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            return response.json();
+        })
+        .then(resposta => {
+            console.log('📦 Resposta:', resposta);
+            
+            if (resposta.sucesso && resposta.dados) {
+                let dadosFiltradosPorUsuario = resposta.dados;
+                
+                if (!isAdmin) {
+                    // OPERADOR: mostra apenas registros onde numero_cha = numero_cha do usuário
+                    return buscarDadosUsuario(usuarioNome)
+                        .then(dadosUsuario => {
+                            const numeroChaUsuario = dadosUsuario.numero_cha || usuarioNome;
+                            
+                            dadosFiltradosPorUsuario = resposta.dados.filter(item => {
+                                const adminDoRegistro = String(item.numero_cha || '').toUpperCase();
+                                const usuarioLogado = String(numeroChaUsuario).toUpperCase();
+                                return adminDoRegistro === usuarioLogado;
+                            });
+                            
+                            console.log('👤 OPERADOR - Mostrando apenas registros do usuário:', numeroChaUsuario);
+                            console.log('📊 Registros do usuário:', dadosFiltradosPorUsuario.length);
+                            
+                            return dadosFiltradosPorUsuario;
+                        });
+                } else {
+                    console.log('🔑 ADMIN - Mostrando todos os registros:', resposta.dados.length);
+                    return resposta.dados;
+                }
+            } else {
+                throw new Error(resposta.mensagem || 'Erro ao carregar dados');
+            }
+        })
+        .then(dadosFinais => {
+            todosOsDados = dadosFinais;
+            dadosFiltrados = [...todosOsDados];
+            
+            document.getElementById('totalRegistros').innerText = todosOsDados.length;
+            document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
             
             renderizarTabela();
-        } else {
+        })
+        .catch(erro => {
+            console.error('❌ Erro:', erro);
             if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="30" style="text-align:center; padding:40px; color:#ef4444;">❌ ' + (resposta.mensagem || 'Erro ao carregar dados.') + '</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="30" style="text-align:center; padding:40px; color:#ef4444;">❌ Erro: ' + erro.message + '</td></tr>';
             }
-        }
-    })
-    .catch(erro => {
-        console.error('❌ Erro:', erro);
-        if (tbody) {
-            tbody.innerHTML = '<tr><td colspan="30" style="text-align:center; padding:40px; color:#ef4444;">❌ Erro: ' + erro.message + '</td></tr>';
-        }
-    });
+        });
 }
 
 // ==========================================
