@@ -76,7 +76,7 @@ const COLUNAS = [
 ];
 
 // ==========================================
-// INICIALIZAÇÃO
+// INICIALIZAÇÃO - CORRIGIDA
 // ==========================================
 document.addEventListener('DOMContentLoaded', function() {
     // CARREGA O USUÁRIO DA SESSÃO
@@ -88,21 +88,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    usuarioNome = nomeUsuario || '';
-    // NÃO DEFINA isAdmin AQUI - será definido pelo carregarDados()
+    usuarioNome = nomeUsuario;
     usuarioAtual = usuarioNome;
 
-    console.log('👤 Usuário:', usuarioNome);
-    // NÃO LOGUE isAdmin AQUI - será definido depois
-
-    console.log('👤 Usuário:', usuarioNome);
-    console.log('🔑 Admin:', isAdmin);
-    
-    const usuarioEl = document.getElementById('usuario-logado-texto');
-    if (usuarioEl) {
-        const tipoUsuario = isAdmin ? '🔑 ADMIN' : '👤 OPERADOR';
-        usuarioEl.innerText = `Logado como: ${usuarioNome} (${tipoUsuario})`;
-    }
+    console.log('👤 Usuário logado:', usuarioNome);
 
     // REMOVE AS DATAS AUTOMÁTICAS
     // const hoje = new Date().toISOString().split('T')[0];
