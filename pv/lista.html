@@ -320,7 +320,7 @@
             display: inline-block;
             padding: 1px 8px;
             border-radius: 10px;
-            font-size: 0.5rem;
+            font-size: 0.6rem;
             font-weight: 700;
             text-transform: uppercase;
         }
@@ -340,12 +340,13 @@
             color: #1b1e21;
         }
 
+        /* Estilo da pílula do candidato */
         .badge-candidato {
             display: block;
             width: fit-content;
             padding: 3px 8px;
             border-radius: 12px;
-            font-size: 0.6rem;
+            font-size: 0.5rem; /* Ajuste aqui se quiser a letra menor/maior */
             font-weight: 700;
             margin: 2px 0; /* Espaço de 2px entre um candidato e outro */
             text-transform: uppercase;
@@ -359,6 +360,26 @@
         .badge-candidato-estadual {
             background: #f8d7da;
             color: #721c24;
+        }
+
+        /* Estilos extras para a função de redimensionar colunas (estilo Excel) */
+        th {
+            position: relative; 
+        }
+
+        .resizer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            cursor: col-resize; 
+            user-select: none;
+            touch-action: none;
+            height: 100%;
+        }
+
+        .resizer:hover {
+            background-color: rgba(0, 0, 0, 0.15); 
         }
 
         .badge-admin {
