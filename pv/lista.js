@@ -388,6 +388,9 @@ function renderizarTabela() {
     headerHtml += '</tr>';
     thead.innerHTML = headerHtml;
 
+    // Ativa o redimensionamento de colunas estilo Excel
+    setTimeout(tornarColunasRedimensionaveis, 50);
+
     if (!dadosFiltrados || dadosFiltrados.length === 0) {
         tbody.innerHTML = '<tr><td colspan="' + COLUNAS.length + '" style="text-align:center; padding:40px; color:#94a3b8;">📭 Nenhum registro encontrado.</td></tr>';
         document.getElementById('totalExibidos').innerText = '0';
@@ -424,11 +427,11 @@ function renderizarTabela() {
                             if (p !== '') {
                                 let textoUpper = p.toUpperCase();
                                 if (textoUpper.includes('FEDERAL') || textoUpper.includes('(FED')) {
-                                    htmlCandidatos += `<span class="badge-candidato badge-candidato-federal">${p}</span> `;
+                                    htmlCandidatos += `<span class="badge-candidato badge-candidato-federal">${p}</span>`;
                                 } else if (textoUpper.includes('ESTADUAL') || textoUpper.includes('(EST')) {
-                                    htmlCandidatos += `<span class="badge-candidato badge-candidato-estadual">${p}</span> `;
+                                    htmlCandidatos += `<span class="badge-candidato badge-candidato-estadual">${p}</span>`;
                                 } else {
-                                    htmlCandidatos += `<span class="badge-candidato badge-candidato-federal">${p}</span> `;
+                                    htmlCandidatos += `<span class="badge-candidato badge-candidato-federal">${p}</span>`;
                                 }
                             }
                         });
@@ -456,14 +459,11 @@ function renderizarTabela() {
                     break;
                 case 'acoes': 
                     const id = item.id || '';
-                    // VERIFICA SE O USUÁRIO PODE EDITAR
-                    // Admin pode tudo, Operador só pode editar se for o responsável
                     let podeEditar = false;
                     
                     if (isAdmin) {
                         podeEditar = true;
                     } else {
-                        // Busca o nome do usuário para comparar com o responsável
                         const nomeResponsavel = String(item.numero_sec || item.responsavel || '').toUpperCase();
                         const usuarioLogado = String(usuarioNome).toUpperCase();
                         podeEditar = nomeResponsavel === usuarioLogado;
@@ -478,7 +478,6 @@ function renderizarTabela() {
                             </div>
                         `;
                     } else {
-                        // OPERADOR SEM PERMISSÃO - só visualizar
                         valor = `
                             <div style="display: flex; gap: 3px; flex-wrap: wrap;">
                                 <button class="btn-visualizar" onclick="visualizarRegistro('${id}')" title="Visualizar">👁️</button>
