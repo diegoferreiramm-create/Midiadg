@@ -48,16 +48,27 @@ const COLUNAS = [
 // INICIALIZAÇÃO
 // ==========================================
 document.addEventListener('DOMContentLoaded', function() {
+    // CARREGA O USUÁRIO DA SESSÃO
     const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
+    const adminStatus = localStorage.getItem('pv43_is_admin');
+    
     if (!nomeUsuario) {
         alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
         window.location.href = 'pv43.html';
         return;
     }
     
+    usuarioNome = nomeUsuario || '';
+    isAdmin = adminStatus === 'true';
+    usuarioAtual = usuarioNome;
+
+    console.log('👤 Usuário:', usuarioNome);
+    console.log('🔑 Admin:', isAdmin);
+    
     const usuarioEl = document.getElementById('usuario-logado-texto');
     if (usuarioEl) {
-        usuarioEl.innerText = `Logado como: ${nomeUsuario}`;
+        const tipoUsuario = isAdmin ? '🔑 ADMIN' : '👤 OPERADOR';
+        usuarioEl.innerText = `Logado como: ${usuarioNome} (${tipoUsuario})`;
     }
 
     // REMOVE AS DATAS AUTOMÁTICAS
@@ -103,12 +114,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function converterDataParaTimestamp(dataStr) {
     if (!dataStr) return null;
     
-    // Se já estiver no formato YYYY-MM-DD (input date)
     if (dataStr.includes('-')) {
         return new Date(dataStr + 'T00:00:00').getTime();
     }
     
-    // Se estiver no formato DD/MM/AAAA
     if (dataStr.includes('/')) {
         const partes = dataStr.split('/');
         if (partes.length === 3) {
@@ -123,7 +132,7 @@ function converterDataParaTimestamp(dataStr) {
 }
 
 // ==========================================
-// FUNÇÃO DE FILTRO - COM DATA CORRIGIDA
+// FUNÇÃO DE FILTRO - COM DATA CORRIGIDA E HIERARQUIA
 // ==========================================
 window.filtrarTabela = function() {
     console.log('🔍 FILTRO EXECUTADO!');
@@ -133,7 +142,6 @@ window.filtrarTabela = function() {
         return;
     }
 
-    // PEGA OS VALORES DOS FILTROS
     const fNome = document.getElementById('fNome')?.value?.trim() || '';
     const fBairro = document.getElementById('fBairro')?.value?.trim() || '';
     const fCidade = document.getElementById('fCidade')?.value?.trim() || '';
@@ -152,13 +160,11 @@ window.filtrarTabela = function() {
         fDataInicio, fDataFim 
     });
 
-    // VERIFICA SE TEM ALGUM FILTRO PREENCHIDO
     const temFiltro = fNome !== '' || fBairro !== '' || fCidade !== '' || 
                      fCandidato !== '' || fZona !== '' || fSecao !== '' || 
                      fLocalVot !== '' || fNivel !== '' || fResponsavel !== '' || 
                      fAdmin !== '' || fDataInicio !== '' || fDataFim !== '';
 
-    // SE NÃO TEM FILTRO, RESTAURA A LISTA COMPLETA
     if (!temFiltro) {
         dadosFiltrados = [...todosOsDados];
         console.log('🔄 Nenhum filtro - Lista completa:', dadosFiltrados.length);
@@ -167,7 +173,6 @@ window.filtrarTabela = function() {
         return;
     }
 
-    // APLICA OS FILTROS
     dadosFiltrados = todosOsDados.filter(item => {
         const nome = String(item.nome || '').toUpperCase();
         const bairro = String(item.bairro || '').toUpperCase();
@@ -180,13 +185,11 @@ window.filtrarTabela = function() {
         const responsavel = String(item.numero_sec || '').toUpperCase();
         const admin = String(item.numero_cha || '').toUpperCase();
         
-        // DATA - CONVERTER PARA TIMESTAMP PARA COMPARAÇÃO
         const dataCadastro = item.data || '';
         const dataTimestamp = converterDataParaTimestamp(dataCadastro);
         const dataInicioTimestamp = fDataInicio ? new Date(fDataInicio + 'T00:00:00').getTime() : null;
         const dataFimTimestamp = fDataFim ? new Date(fDataFim + 'T00:00:00').getTime() : null;
 
-        // APLICA OS FILTROS
         if (fNome && !nome.includes(fNome.toUpperCase())) return false;
         if (fBairro && !bairro.includes(fBairro.toUpperCase())) return false;
         if (fCidade && !cidade.includes(fCidade.toUpperCase())) return false;
@@ -198,7 +201,6 @@ window.filtrarTabela = function() {
         if (fResponsavel && !responsavel.includes(fResponsavel.toUpperCase())) return false;
         if (fAdmin && !admin.includes(fAdmin.toUpperCase())) return false;
         
-        // FILTRO DE DATA - COMPARANDO TIMESTAMPS
         if (fDataInicio && dataTimestamp !== null && dataTimestamp < dataInicioTimestamp) return false;
         if (fDataFim && dataTimestamp !== null && dataTimestamp > dataFimTimestamp) return false;
 
@@ -210,6 +212,7 @@ window.filtrarTabela = function() {
     renderizarTabela();
     document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
 };
+
 // ==========================================
 // FUNÇÃO PARA LIMPAR FILTROS
 // ==========================================
@@ -251,17 +254,6 @@ function carregarDados() {
         return;
     }
 
-    // CARREGA O USUÁRIO DA SESSÃO
-    const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
-    const adminStatus = localStorage.getItem('pv43_is_admin');
-    
-    usuarioNome = nomeUsuario || '';
-    isAdmin = adminStatus === 'true';
-    usuarioAtual = usuarioNome;
-
-    console.log('👤 Usuário:', usuarioNome);
-    console.log('🔑 Admin:', isAdmin);
-
     var url = URL_API + '?acao=listarCadastros';
     console.log('🔍 Chamando:', url);
 
@@ -283,22 +275,17 @@ function carregarDados() {
             let dadosFiltradosPorUsuario = resposta.dados;
             
             if (!isAdmin) {
-                // Se NÃO for admin, mostra apenas os registros que o usuário cadastrou
-                // O campo 'numero_cha' é o ADMIN (quem cadastrou)
+                // OPERADOR: mostra apenas registros onde numero_cha = nome do usuário
                 dadosFiltradosPorUsuario = resposta.dados.filter(item => {
                     const adminDoRegistro = String(item.numero_cha || '').toUpperCase();
                     const usuarioLogado = usuarioNome.toUpperCase();
-                    const encontrou = adminDoRegistro === usuarioLogado;
-                    if (!encontrou) {
-                        console.log('🔒 Ocultando registro ID:', item.id, 'Admin:', adminDoRegistro, 'Usuário:', usuarioLogado);
-                    }
-                    return encontrou;
+                    return adminDoRegistro === usuarioLogado;
                 });
                 
-                console.log('👤 Operador - Mostrando apenas registros do usuário:', usuarioNome);
+                console.log('👤 OPERADOR - Mostrando apenas registros do usuário:', usuarioNome);
                 console.log('📊 Registros do usuário:', dadosFiltradosPorUsuario.length);
             } else {
-                console.log('🔑 Admin - Mostrando todos os registros:', resposta.dados.length);
+                console.log('🔑 ADMIN - Mostrando todos os registros:', resposta.dados.length);
             }
             
             todosOsDados = dadosFiltradosPorUsuario;
@@ -330,7 +317,7 @@ function carregarDados() {
 }
 
 // ==========================================
-// RENDERIZAR TABELA
+// RENDERIZAR TABELA - COM CONTROLE DE AÇÕES
 // ==========================================
 function renderizarTabela() {
     const thead = document.getElementById('cabecalho-tabela');
@@ -391,13 +378,26 @@ function renderizarTabela() {
                     break;
                 case 'acoes': 
                     const id = item.id || '';
-                    valor = `
-                        <div style="display: flex; gap: 3px; flex-wrap: wrap;">
-                            <button class="btn-editar" onclick="editarRegistro('${id}')" title="Editar">✏️</button>
-                            <button class="btn-excluir" onclick="excluirRegistro('${id}')" title="Excluir">🗑️</button>
-                            <button class="btn-visualizar" onclick="visualizarRegistro('${id}')" title="Visualizar">👁️</button>
-                        </div>
-                    `;
+                    // VERIFICA SE O USUÁRIO PODE EDITAR/EXCLUIR
+                    const podeEditar = isAdmin || String(item.numero_cha || '').toUpperCase() === usuarioNome.toUpperCase();
+                    
+                    if (podeEditar) {
+                        valor = `
+                            <div style="display: flex; gap: 3px; flex-wrap: wrap;">
+                                <button class="btn-editar" onclick="editarRegistro('${id}')" title="Editar">✏️</button>
+                                <button class="btn-excluir" onclick="excluirRegistro('${id}')" title="Excluir">🗑️</button>
+                                <button class="btn-visualizar" onclick="visualizarRegistro('${id}')" title="Visualizar">👁️</button>
+                            </div>
+                        `;
+                    } else {
+                        // OPERADOR SEM PERMISSÃO - só visualizar
+                        valor = `
+                            <div style="display: flex; gap: 3px; flex-wrap: wrap;">
+                                <button class="btn-visualizar" onclick="visualizarRegistro('${id}')" title="Visualizar">👁️</button>
+                                <span style="font-size: 0.5rem; color: #94a3b8; margin-left: 3px;">🔒</span>
+                            </div>
+                        `;
+                    }
                     break;
                 default: valor = '';
             }
@@ -417,6 +417,16 @@ function renderizarTabela() {
 // ==========================================
 function editarRegistro(id) {
     if (!id) { alert('❌ ID inválido!'); return; }
+    
+    // Verifica permissão
+    if (!isAdmin) {
+        const registro = todosOsDados.find(item => item.id === id);
+        if (registro && String(registro.numero_cha || '').toUpperCase() !== usuarioNome.toUpperCase()) {
+            alert('❌ Você não tem permissão para editar este registro!');
+            return;
+        }
+    }
+    
     const registro = todosOsDados.find(item => item.id === id);
     if (!registro) { alert('❌ Registro não encontrado!'); return; }
     alert('✏️ Editar registro ID: ' + id + '\n\n' + JSON.stringify(registro, null, 2));
@@ -455,6 +465,13 @@ function visualizarRegistro(id) {
 
 function excluirRegistro(id) {
     if (!id) { alert('❌ ID inválido!'); return; }
+    
+    // Verifica permissão - APENAS ADMIN PODE EXCLUIR
+    if (!isAdmin) {
+        alert('❌ Apenas administradores podem excluir registros!');
+        return;
+    }
+    
     if (!confirm('⚠️ Tem certeza que deseja EXCLUIR o registro ID: ' + id + '?\n\nEsta ação não pode ser desfeita!')) return;
 
     if (!URL_API) { alert('❌ API não configurada.'); return; }
@@ -478,10 +495,7 @@ function excluirRegistro(id) {
 }
 
 // ==========================================
-// EXPORTAÇÃO
-// ==========================================
-// ==========================================
-// EXPORTAÇÕES - VERSÃO CORRIGIDA
+// EXPORTAÇÕES
 // ==========================================
 
 // EXPORTAR CSV
@@ -493,13 +507,6 @@ window.exportarCSV = function() {
         return;
     }
 
-    // VERIFICA SE colunasVisiveis EXISTE
-    if (typeof colunasVisiveis === 'undefined') {
-        alert('❌ Erro: colunasVisiveis não definido!');
-        return;
-    }
-
-    // Pega apenas as colunas visíveis (excluindo AÇÕES)
     const colunasVisiveisArray = COLUNAS.filter(col => 
         colunasVisiveis[col.id] !== false && col.id !== 'acoes'
     );
@@ -509,16 +516,13 @@ window.exportarCSV = function() {
         return;
     }
 
-    // Cabeçalho
     const cabecalho = colunasVisiveisArray.map(col => col.nome);
     let csv = cabecalho.join(';') + '\n';
 
-    // Dados
     dadosFiltrados.forEach(item => {
         const linha = colunasVisiveisArray.map(col => {
             let valor = item[col.id] || '';
             
-            // Formatação especial para nível
             if (col.id === 'nivel' && valor) {
                 const nivelMap = {
                     '1': 'COMUM',
@@ -528,7 +532,6 @@ window.exportarCSV = function() {
                 valor = nivelMap[valor] || valor;
             }
             
-            // Escape para CSV
             if (typeof valor === 'string' && (valor.includes(';') || valor.includes('"') || valor.includes('\n'))) {
                 return '"' + valor.replace(/"/g, '""') + '"';
             }
@@ -537,7 +540,6 @@ window.exportarCSV = function() {
         csv += linha.join(';') + '\n';
     });
 
-    // BOM para UTF-8
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -559,13 +561,6 @@ window.exportarExcel = function() {
         return;
     }
 
-    // VERIFICA SE colunasVisiveis EXISTE
-    if (typeof colunasVisiveis === 'undefined') {
-        alert('❌ Erro: colunasVisiveis não definido!');
-        return;
-    }
-
-    // Pega apenas as colunas visíveis (excluindo AÇÕES)
     const colunasVisiveisArray = COLUNAS.filter(col => 
         colunasVisiveis[col.id] !== false && col.id !== 'acoes'
     );
@@ -575,7 +570,6 @@ window.exportarExcel = function() {
         return;
     }
 
-    // Cria o HTML para Excel
     let html = `
     <html xmlns:o="urn:schemas-microsoft-com:office:office" 
           xmlns:x="urn:schemas-microsoft-com:office:excel" 
@@ -610,19 +604,16 @@ window.exportarExcel = function() {
             <thead>
                 <tr>`;
 
-    // Cabeçalho
     colunasVisiveisArray.forEach(col => {
         html += `<th>${col.nome}</th>`;
     });
     html += `</tr></thead><tbody>`;
 
-    // Dados
     dadosFiltrados.forEach(item => {
         html += `<tr>`;
         colunasVisiveisArray.forEach(col => {
             let valor = item[col.id] || '';
             
-            // Formatação especial para nível
             if (col.id === 'nivel' && valor) {
                 const nivelMap = {
                     '1': 'COMUM',
@@ -646,7 +637,6 @@ window.exportarExcel = function() {
     </body>
     </html>`;
 
-    // Cria o blob com o tipo correto para Excel
     const blob = new Blob([html], { 
         type: 'application/vnd.ms-excel;charset=utf-8' 
     });
@@ -671,13 +661,6 @@ window.exportarPDF = function() {
         return;
     }
 
-    // VERIFICA SE colunasVisiveis EXISTE
-    if (typeof colunasVisiveis === 'undefined') {
-        alert('❌ Erro: colunasVisiveis não definido!');
-        return;
-    }
-
-    // Pega apenas as colunas visíveis (excluindo AÇÕES)
     const colunasVisiveisArray = COLUNAS.filter(col => 
         colunasVisiveis[col.id] !== false && col.id !== 'acoes'
     );
@@ -776,19 +759,16 @@ window.exportarPDF = function() {
             <thead>
                 <tr>`;
 
-    // Cabeçalho com as colunas visíveis
     colunasVisiveisArray.forEach(col => {
         html += `<th>${col.nome}</th>`;
     });
     html += `</tr></thead><tbody>`;
 
-    // Dados
     dadosFiltrados.forEach(item => {
         html += `<tr>`;
         colunasVisiveisArray.forEach(col => {
             let valor = item[col.id] || '';
             
-            // Formatação especial para nível
             if (col.id === 'nivel' && valor) {
                 const nivelMap = {
                     '1': 'COMUM',
@@ -798,7 +778,6 @@ window.exportarPDF = function() {
                 valor = nivelMap[valor] || valor;
             }
             
-            // Trunca textos longos
             if (typeof valor === 'string' && valor.length > 50) {
                 valor = valor.substring(0, 47) + '...';
             }
