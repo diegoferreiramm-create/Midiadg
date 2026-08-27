@@ -433,8 +433,18 @@ function renderizarTabela() {
                     break;
                 case 'acoes': 
                     const id = item.id || '';
-                    // VERIFICA SE O USUÁRIO PODE EDITAR/EXCLUIR
-                    const podeEditar = isAdmin || String(item.numero_cha || '').toUpperCase() === usuarioNome.toUpperCase();
+                    // VERIFICA SE O USUÁRIO PODE EDITAR
+                    // Admin pode tudo, Operador só pode editar se for o responsável
+                    let podeEditar = false;
+                    
+                    if (isAdmin) {
+                        podeEditar = true;
+                    } else {
+                        // Busca o nome do usuário para comparar com o responsável
+                        const nomeResponsavel = String(item.numero_sec || item.responsavel || '').toUpperCase();
+                        const usuarioLogado = String(usuarioNome).toUpperCase();
+                        podeEditar = nomeResponsavel === usuarioLogado;
+                    }
                     
                     if (podeEditar) {
                         valor = `
