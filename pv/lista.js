@@ -437,24 +437,42 @@ function excluirRegistro(id) {
 // ==========================================
 // EXPORTAÇÃO
 // ==========================================
-function exportarCSV() {
+// ==========================================
+// EXPORTAÇÕES - VERSÃO CORRIGIDA
+// ==========================================
+
+// EXPORTAR CSV
+window.exportarCSV = function() {
+    console.log('📊 Exportando CSV...');
+    
     if (!dadosFiltrados || dadosFiltrados.length === 0) {
         alert('❌ Não há dados para exportar!');
         return;
     }
 
+    // VERIFICA SE colunasVisiveis EXISTE
+    if (typeof colunasVisiveis === 'undefined') {
+        alert('❌ Erro: colunasVisiveis não definido!');
+        return;
+    }
+
     // Pega apenas as colunas visíveis (excluindo AÇÕES)
-    const colunasVisiveis = COLUNAS.filter(col => 
+    const colunasVisiveisArray = COLUNAS.filter(col => 
         colunasVisiveis[col.id] !== false && col.id !== 'acoes'
     );
 
+    if (colunasVisiveisArray.length === 0) {
+        alert('❌ Nenhuma coluna visível para exportar!');
+        return;
+    }
+
     // Cabeçalho
-    const cabecalho = colunasVisiveis.map(col => col.nome);
+    const cabecalho = colunasVisiveisArray.map(col => col.nome);
     let csv = cabecalho.join(';') + '\n';
 
     // Dados
     dadosFiltrados.forEach(item => {
-        const linha = colunasVisiveis.map(col => {
+        const linha = colunasVisiveisArray.map(col => {
             let valor = item[col.id] || '';
             
             // Formatação especial para nível
@@ -485,19 +503,36 @@ function exportarCSV() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
-}
-function exportarExcel() {
+    
+    console.log('✅ CSV exportado com sucesso!');
+};
+
+// EXPORTAR EXCEL
+window.exportarExcel = function() {
+    console.log('📊 Exportando Excel...');
+    
     if (!dadosFiltrados || dadosFiltrados.length === 0) {
         alert('❌ Não há dados para exportar!');
         return;
     }
 
+    // VERIFICA SE colunasVisiveis EXISTE
+    if (typeof colunasVisiveis === 'undefined') {
+        alert('❌ Erro: colunasVisiveis não definido!');
+        return;
+    }
+
     // Pega apenas as colunas visíveis (excluindo AÇÕES)
-    const colunasVisiveis = COLUNAS.filter(col => 
+    const colunasVisiveisArray = COLUNAS.filter(col => 
         colunasVisiveis[col.id] !== false && col.id !== 'acoes'
     );
 
-    // Cria o cabeçalho
+    if (colunasVisiveisArray.length === 0) {
+        alert('❌ Nenhuma coluna visível para exportar!');
+        return;
+    }
+
+    // Cria o HTML para Excel
     let html = `
     <html xmlns:o="urn:schemas-microsoft-com:office:office" 
           xmlns:x="urn:schemas-microsoft-com:office:excel" 
@@ -523,9 +558,6 @@ function exportarExcel() {
             th { background-color: #00562e; color: #ffffff; font-weight: bold; padding: 6px 8px; border: 1px solid #00562e; text-align: left; }
             td { padding: 4px 8px; border: 1px solid #cccccc; }
             tr:nth-child(even) { background-color: #f9f9f9; }
-            .nivel-1 { background-color: #d4edda; color: #155724; }
-            .nivel-2 { background-color: #cce5ff; color: #004085; }
-            .nivel-3 { background-color: #d6d8db; color: #1b1e21; }
         </style>
     </head>
     <body>
@@ -536,7 +568,7 @@ function exportarExcel() {
                 <tr>`;
 
     // Cabeçalho
-    colunasVisiveis.forEach(col => {
+    colunasVisiveisArray.forEach(col => {
         html += `<th>${col.nome}</th>`;
     });
     html += `</tr></thead><tbody>`;
@@ -544,7 +576,7 @@ function exportarExcel() {
     // Dados
     dadosFiltrados.forEach(item => {
         html += `<tr>`;
-        colunasVisiveis.forEach(col => {
+        colunasVisiveisArray.forEach(col => {
             let valor = item[col.id] || '';
             
             // Formatação especial para nível
@@ -583,28 +615,40 @@ function exportarExcel() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
-}
+    
+    console.log('✅ Excel exportado com sucesso!');
+};
 
-function exportarPDF() {
+// EXPORTAR PDF
+window.exportarPDF = function() {
+    console.log('📄 Exportando PDF...');
+    
     if (!dadosFiltrados || dadosFiltrados.length === 0) {
         alert('❌ Não há dados para exportar!');
         return;
     }
 
+    // VERIFICA SE colunasVisiveis EXISTE
+    if (typeof colunasVisiveis === 'undefined') {
+        alert('❌ Erro: colunasVisiveis não definido!');
+        return;
+    }
+
     // Pega apenas as colunas visíveis (excluindo AÇÕES)
-    const colunasVisiveis = COLUNAS.filter(col => 
+    const colunasVisiveisArray = COLUNAS.filter(col => 
         colunasVisiveis[col.id] !== false && col.id !== 'acoes'
     );
+
+    if (colunasVisiveisArray.length === 0) {
+        alert('❌ Nenhuma coluna visível para exportar!');
+        return;
+    }
 
     const janela = window.open('', '_blank', 'width=1200,height=800');
     if (!janela) {
         alert('❌ Por favor, permita pop-ups para exportar PDF.');
         return;
     }
-
-    // Calcula a largura da tabela baseado no número de colunas
-    const larguraColuna = Math.min(80, Math.floor(800 / colunasVisiveis.length));
-    const larguraTotal = colunasVisiveis.length * larguraColuna;
 
     let html = `
     <!DOCTYPE html>
@@ -683,14 +727,14 @@ function exportarPDF() {
             📋 LISTA DE CADASTROS
             <span>Total: ${dadosFiltrados.length} registros</span>
             <span>Gerado em: ${new Date().toLocaleString('pt-BR')}</span>
-            <span>Colunas: ${colunasVisiveis.length}</span>
+            <span>Colunas: ${colunasVisiveisArray.length}</span>
         </div>
         <table>
             <thead>
                 <tr>`;
 
     // Cabeçalho com as colunas visíveis
-    colunasVisiveis.forEach(col => {
+    colunasVisiveisArray.forEach(col => {
         html += `<th>${col.nome}</th>`;
     });
     html += `</tr></thead><tbody>`;
@@ -698,7 +742,7 @@ function exportarPDF() {
     // Dados
     dadosFiltrados.forEach(item => {
         html += `<tr>`;
-        colunasVisiveis.forEach(col => {
+        colunasVisiveisArray.forEach(col => {
             let valor = item[col.id] || '';
             
             // Formatação especial para nível
@@ -736,9 +780,7 @@ function exportarPDF() {
             </button>
         </div>
         <script>
-            // Auto-print após carregar
             window.onload = function() {
-                // Aguarda 1 segundo e abre a impressão
                 setTimeout(function() {
                     window.print();
                 }, 1000);
@@ -749,7 +791,14 @@ function exportarPDF() {
 
     janela.document.write(html);
     janela.document.close();
-}
+    
+    console.log('✅ PDF exportado com sucesso!');
+};
+
+console.log('✅ Funções de exportação carregadas!');
+console.log('📊 CSV disponível:', typeof window.exportarCSV);
+console.log('📊 Excel disponível:', typeof window.exportarExcel);
+console.log('📄 PDF disponível:', typeof window.exportarPDF);
 
 // ==========================================
 // CONTROLES DE COLUNAS
