@@ -28,7 +28,8 @@ let usuarioNome = '';
 let paginaAtual = 1;
 // Define quantos registros aparecem por página na tabela 
 // (Pode receber números fixos como 10, 25, 50, 100 ou a string 'todos' para desativar o corte e exibir tudo de uma vez)
-let itensPorPagina = 25;
+let itensPorPagina = 25; // Garanta que começa com número, nunca como elemento HTML
+let paginaAtual = 1;
 
 // ==========================================
 // BUSCAR DADOS DO USUÁRIO NA ABA "User"
@@ -641,12 +642,22 @@ function mudarPagina(destino) {
     renderizarTabela();
 }
 
-// Controla quando você troca o select (de 25 para "Mostrar Tudo", por exemplo)
+// ==========================================
+// CORREÇÃO DO SELETOR DE ITENS POR PÁGINA
+// ==========================================
 function alterarItensPorPagina() {
     const select = document.getElementById('itensPorPagina');
     if (select) {
-        itensPorPagina = select.value === 'todos' ? 'todos' : (parseInt(select.value) || 25);
-        paginaAtual = 1; // Volta pra primeira página para não bugar a contagem
+        // Pega explicitamente o .value do select (ex: "10", "25", "50", "100" ou "todos")
+        const valorSelecionado = select.value;
+        
+        if (valorSelecionado === 'todos') {
+            itensPorPagina = 'todos';
+        } else {
+            itensPorPagina = parseInt(valorSelecionado) || 25;
+        }
+        
+        paginaAtual = 1; // Volta para a primeira página sempre que alterar o limite
         renderizarTabela();
     }
 }
