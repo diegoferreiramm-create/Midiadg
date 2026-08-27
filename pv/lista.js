@@ -261,7 +261,7 @@ function limparFiltros() {
 }
 
 // ==========================================
-// CARREGAR DADOS - COM FILTRO POR USUÁRIO
+// CARREGAR DADOS - COM FILTRO POR RESPONSÁVEL
 // ==========================================
 function carregarDados() {
     const tbody = document.getElementById('corpo-tabela');
@@ -285,19 +285,18 @@ function carregarDados() {
             const tipo = dadosUsuario.tipo || 'operador';
             isAdmin = tipo.toLowerCase() === 'admin';
             
-            const numeroChaUsuario = dadosUsuario.numero_cha || usuarioNome;
+            // NOME do usuário (coluna C da aba User) - usado para filtrar como responsável
+            const nomeUsuario = dadosUsuario.nome || usuarioNome;
             
-            console.log('👤 Usuário:', usuarioNome);
+            console.log('👤 Usuário (login):', usuarioNome);
+            console.log('👤 Nome (para filtrar como responsável):', nomeUsuario);
             console.log('🔑 Admin:', isAdmin);
-            console.log('📛 numero_cha:', numeroChaUsuario);
-            console.log('📛 Tipo na planilha:', tipo);
             
-            // Atualiza o texto do usuário logado
+            // ATUALIZA O CABEÇALHO COM O NOME DA PESSOA
             const usuarioEl = document.getElementById('usuario-logado-texto');
             if (usuarioEl) {
                 const tipoUsuario = isAdmin ? '🔑 ADMIN' : '👤 OPERADOR';
-                const nomeExibicao = dadosUsuario.nome || usuarioNome;
-                usuarioEl.innerText = `Logado como: ${nomeExibicao} (${tipoUsuario})`;
+                usuarioEl.innerText = `Logado como: ${nomeUsuario} (${tipoUsuario})`;
             }
 
             // CARREGA OS DADOS DOS CADASTROS
@@ -322,19 +321,28 @@ function carregarDados() {
                 let dadosFiltradosPorUsuario = resposta.dados;
                 
                 if (!isAdmin) {
-                    // OPERADOR: mostra apenas registros onde numero_cha = numero_cha do usuário
+                    // OPERADOR: mostra apenas registros onde o NOME dele está no campo responsavel
                     return buscarDadosUsuario(usuarioNome)
                         .then(dadosUsuario => {
-                            const numeroChaUsuario = dadosUsuario.numero_cha || usuarioNome;
+                            const nomeResponsavel = dadosUsuario.nome || usuarioNome;
                             
                             dadosFiltradosPorUsuario = resposta.dados.filter(item => {
-                                const adminDoRegistro = String(item.numero_cha || '').toUpperCase();
-                                const usuarioLogado = String(numeroChaUsuario).toUpperCase();
-                                return adminDoRegistro === usuarioLogado;
+                                // Campo responsavel = numero_sec (coluna C) 
+                                // OU responsavel (dependendo de como vem do back-end)
+                                const responsavelRegistro = String(item.numero_sec || item.responsavel || '').toUpperCase();
+                                const nomeBusca = String(nomeResponsavel).toUpperCase();
+                                const encontrou = responsavelRegistro === nomeBusca;
+                                
+                                if (!encontrou) {
+                                    console.log('🔒 Ocultando registro ID:', item.id, 
+                                        'Responsável:', responsavelRegistro, 
+                                        'Usuário:', nomeBusca);
+                                }
+                                return encontrou;
                             });
                             
-                            console.log('👤 OPERADOR - Mostrando apenas registros do usuário:', numeroChaUsuario);
-                            console.log('📊 Registros do usuário:', dadosFiltradosPorUsuario.length);
+                            console.log('👤 OPERADOR - Filtrando por responsável:', nomeResponsavel);
+                            console.log('📊 Registros encontrados:', dadosFiltradosPorUsuario.length);
                             
                             return dadosFiltradosPorUsuario;
                         });
