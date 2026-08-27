@@ -413,7 +413,29 @@ function renderizarTabela() {
                 case 'bairro': valor = item.bairro || ''; break;
                 case 'cidade': valor = item.cidade || ''; break;
                 case 'telefone': valor = item.telefone || ''; break;
-                case 'candidato': valor = item.candidato || ''; break;
+                case 'candidato': 
+                    let textoCandidato = item.candidato || '';
+                    if (textoCandidato) {
+                        let partes = textoCandidato.split(/,|\n/);
+                        let htmlCandidatos = '';
+                        
+                        partes.forEach(parte => {
+                            let p = parte.trim();
+                            if (p !== '') {
+                                if (p.toUpperCase().includes('FEDERAL')) {
+                                    htmlCandidatos += `<span class="badge-candidato-federal">${p}</span> `;
+                                } else if (p.toUpperCase().includes('ESTADUAL')) {
+                                    htmlCandidatos += `<span class="badge-candidato-estadual">${p}</span> `;
+                                } else {
+                                    htmlCandidatos += `<span class="badge-candidato-federal">${p}</span> `;
+                                }
+                            }
+                        });
+                        valor = htmlCandidatos;
+                    } else {
+                        valor = '';
+                    }
+                    break;
                 case 'titulo': valor = item.titulo || ''; break;
                 case 'zona': valor = item.zona || ''; break;
                 case 'secao': valor = item.secao || ''; break;
