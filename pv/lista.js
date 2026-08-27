@@ -81,7 +81,6 @@ const COLUNAS = [
 document.addEventListener('DOMContentLoaded', function() {
     // CARREGA O USUÁRIO DA SESSÃO
     const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
-    const adminStatus = localStorage.getItem('pv43_is_admin');
     
     if (!nomeUsuario) {
         alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
@@ -90,8 +89,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     usuarioNome = nomeUsuario || '';
-    isAdmin = adminStatus === 'true';
+    // NÃO DEFINA isAdmin AQUI - será definido pelo carregarDados()
     usuarioAtual = usuarioNome;
+
+    console.log('👤 Usuário:', usuarioNome);
+    // NÃO LOGUE isAdmin AQUI - será definido depois
 
     console.log('👤 Usuário:', usuarioNome);
     console.log('🔑 Admin:', isAdmin);
