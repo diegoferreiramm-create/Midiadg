@@ -667,7 +667,7 @@
             </table>
         </div>
 
-        <!-- ==========================================
+       <!-- ==========================================
              RODAPÉ DA TABELA
              ========================================== -->
         <div class="tabela-footer">
@@ -677,6 +677,26 @@
                     Exibindo: <span id="totalExibidos">0</span>
                 </span>
             </div>
+
+            <!-- CONTROLES DE PAGINAÇÃO E MOSTRAR TUDO -->
+            <div class="paginacao-controles" style="display: flex; align-items: center; gap: 6px;">
+                <button class="btn-exportar" onclick="mudarPagina('primeira')" id="btnPrimeira" style="background: #475569; color: white; padding: 4px 8px;">«</button>
+                <button class="btn-exportar" onclick="mudarPagina('anterior')" id="btnAnterior" style="background: #475569; color: white; padding: 4px 8px;">‹</button>
+                <span style="font-size: 0.75rem; font-weight: 600; color: #475569; white-space: nowrap;">
+                    <span id="paginaAtual">1</span> / <span id="totalPaginas">1</span>
+                </span>
+                <button class="btn-exportar" onclick="mudarPagina('proxima')" id="btnProxima" style="background: #475569; color: white; padding: 4px 8px;">›</button>
+                <button class="btn-exportar" onclick="mudarPagina('ultima')" id="btnUltima" style="background: #475569; color: white; padding: 4px 8px;">»</button>
+                
+                <select id="itensPorPagina" onchange="alterarItensPorPagina()" style="padding: 4px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.7rem; background: #fff;">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="todos">Tudo</option>
+                </select>
+            </div>
+
             <div class="botoes-exportacao">
                 <button class="btn-exportar btn-exportar-csv" onclick="exportarCSV()">📊 CSV</button>
                 <button class="btn-exportar btn-exportar-excel" onclick="exportarExcel()">📊 Excel</button>
@@ -684,7 +704,6 @@
                 <button onclick="window.location.href='menu.html'" class="btn-secondary" style="width:auto; padding:6px 16px; font-size:0.75rem;">← Menu</button>
             </div>
         </div>
-
     </div>
 
     <script>
