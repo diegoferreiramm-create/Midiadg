@@ -17,6 +17,37 @@ let isAdmin = false;
 let usuarioNome = '';
 
 // ==========================================
+// BUSCAR DADOS DO USUÁRIO NA ABA "User"
+// ==========================================
+function buscarDadosUsuario(nomeUsuario) {
+    return new Promise((resolve, reject) => {
+        if (!URL_API) {
+            reject('API não configurada');
+            return;
+        }
+
+        var url = URL_API + '?acao=buscarUsuario&nome=' + encodeURIComponent(nomeUsuario);
+        console.log('🔍 Buscando usuário:', url);
+
+        fetch(url, {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(resposta => {
+            console.log('📦 Resposta usuário:', resposta);
+            if (resposta.sucesso && resposta.dados) {
+                resolve(resposta.dados);
+            } else {
+                reject(resposta.mensagem || 'Usuário não encontrado');
+            }
+        })
+        .catch(erro => {
+            reject(erro.message);
+        });
+    });
+}
+
+// ==========================================
 // DEFINIÇÃO DAS 21 COLUNAS
 // ==========================================
 const COLUNAS = [
