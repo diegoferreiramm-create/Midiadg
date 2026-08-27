@@ -276,41 +276,31 @@ function carregarDados() {
         return;
     }
 
-    // CARREGA O USUÁRIO DA SESSÃO
-    const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
-    
-    if (!nomeUsuario) {
-        alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
-        window.location.href = 'pv43.html';
-        return;
-    }
-
-    usuarioNome = nomeUsuario;
-
     // BUSCA OS DADOS DO USUÁRIO NA PLANILHA
-    buscarDadosUsuario(nomeUsuario)
+    buscarDadosUsuario(usuarioNome)
         .then(dadosUsuario => {
-            console.log('👤 Dados do usuário:', dadosUsuario);
+            console.log('👤 Dados do usuário encontrados:', dadosUsuario);
             
             // Verifica se é admin baseado no campo 'tipo'
             const tipo = dadosUsuario.tipo || 'operador';
             isAdmin = tipo.toLowerCase() === 'admin';
             
-            // O numero_cha do usuário é o que será usado para filtrar
-            const numeroChaUsuario = dadosUsuario.numero_cha || nomeUsuario;
+            const numeroChaUsuario = dadosUsuario.numero_cha || usuarioNome;
             
             console.log('👤 Usuário:', usuarioNome);
             console.log('🔑 Admin:', isAdmin);
             console.log('📛 numero_cha:', numeroChaUsuario);
+            console.log('📛 Tipo na planilha:', tipo);
             
             // Atualiza o texto do usuário logado
             const usuarioEl = document.getElementById('usuario-logado-texto');
             if (usuarioEl) {
                 const tipoUsuario = isAdmin ? '🔑 ADMIN' : '👤 OPERADOR';
-                usuarioEl.innerText = `Logado como: ${dadosUsuario.nome || nomeUsuario} (${tipoUsuario})`;
+                const nomeExibicao = dadosUsuario.nome || usuarioNome;
+                usuarioEl.innerText = `Logado como: ${nomeExibicao} (${tipoUsuario})`;
             }
 
-            // AGORA CARREGA OS DADOS DOS CADASTROS
+            // CARREGA OS DADOS DOS CADASTROS
             var url = URL_API + '?acao=listarCadastros';
             console.log('🔍 Chamando:', url);
 
