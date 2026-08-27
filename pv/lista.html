@@ -687,6 +687,46 @@
 
     </div>
 
+    <script>
+    // Função para redimensionar as colunas da tabela estilo Excel
+    function tornarColunasRedimensionaveis() {
+        const tabela = document.querySelector('table'); 
+        if (!tabela) return;
+
+        const colunas = tabela.querySelectorAll('th');
+        
+        colunas.forEach(th => {
+            if (th.querySelector('.resizer')) return;
+
+            let resizer = document.createElement('div');
+            resizer.className = 'resizer';
+            th.appendChild(resizer);
+
+            let x = 0;
+            let w = 0;
+
+            resizer.addEventListener('mousedown', function(e) {
+                x = e.clientX;
+                w = th.offsetWidth;
+                
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('mouseup', mouseUpHandler);
+                
+                e.stopPropagation();
+            });
+
+            function mouseMoveHandler(e) {
+                let dx = e.clientX - x;
+                th.style.width = `${w + dx}px`;
+            }
+
+            function mouseUpHandler() {
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+            }
+        });
+    }
+    </script>
     <script src="api.js"></script>
     <script src="lista.js"></script>
 </body>
