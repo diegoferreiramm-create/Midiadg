@@ -12,6 +12,9 @@ if (!URL_API) {
 let todosOsDados = [];
 let dadosFiltrados = [];
 let colunasVisiveis = {};
+let usuarioAtual = null;
+let isAdmin = false;
+let usuarioNome = '';
 
 // ==========================================
 // DEFINIÇÃO DAS 21 COLUNAS
@@ -233,7 +236,7 @@ function limparFiltros() {
 }
 
 // ==========================================
-// CARREGAR DADOS
+// CARREGAR DADOS - COM FILTRO POR USUÁRIO
 // ==========================================
 function carregarDados() {
     const tbody = document.getElementById('corpo-tabela');
@@ -247,6 +250,17 @@ function carregarDados() {
         }
         return;
     }
+
+    // CARREGA O USUÁRIO DA SESSÃO
+    const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
+    const adminStatus = localStorage.getItem('pv43_is_admin');
+    
+    usuarioNome = nomeUsuario || '';
+    isAdmin = adminStatus === 'true';
+    usuarioAtual = usuarioNome;
+
+    console.log('👤 Usuário:', usuarioNome);
+    console.log('🔑 Admin:', isAdmin);
 
     var url = URL_API + '?acao=listarCadastros';
     console.log('🔍 Chamando:', url);
@@ -265,11 +279,40 @@ function carregarDados() {
         console.log('📦 Resposta:', resposta);
         
         if (resposta.sucesso && resposta.dados) {
-            todosOsDados = resposta.dados;
+            // FILTRA OS DADOS BASEADO NO USUÁRIO
+            let dadosFiltradosPorUsuario = resposta.dados;
+            
+            if (!isAdmin) {
+                // Se NÃO for admin, mostra apenas os registros que o usuário cadastrou
+                // O campo 'numero_cha' é o ADMIN (quem cadastrou)
+                dadosFiltradosPorUsuario = resposta.dados.filter(item => {
+                    const adminDoRegistro = String(item.numero_cha || '').toUpperCase();
+                    const usuarioLogado = usuarioNome.toUpperCase();
+                    const encontrou = adminDoRegistro === usuarioLogado;
+                    if (!encontrou) {
+                        console.log('🔒 Ocultando registro ID:', item.id, 'Admin:', adminDoRegistro, 'Usuário:', usuarioLogado);
+                    }
+                    return encontrou;
+                });
+                
+                console.log('👤 Operador - Mostrando apenas registros do usuário:', usuarioNome);
+                console.log('📊 Registros do usuário:', dadosFiltradosPorUsuario.length);
+            } else {
+                console.log('🔑 Admin - Mostrando todos os registros:', resposta.dados.length);
+            }
+            
+            todosOsDados = dadosFiltradosPorUsuario;
             dadosFiltrados = [...todosOsDados];
             
             document.getElementById('totalRegistros').innerText = todosOsDados.length;
             document.getElementById('totalExibidos').innerText = dadosFiltrados.length;
+            
+            // Atualiza o texto do usuário logado
+            const usuarioEl = document.getElementById('usuario-logado-texto');
+            if (usuarioEl) {
+                const tipoUsuario = isAdmin ? '🔑 ADMIN' : '👤 OPERADOR';
+                usuarioEl.innerText = `Logado como: ${usuarioNome} (${tipoUsuario}) - ${todosOsDados.length} registros`;
+            }
             
             renderizarTabela();
         } else {
