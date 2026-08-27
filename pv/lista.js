@@ -443,13 +443,32 @@ function exportarCSV() {
         return;
     }
 
-    const cabecalho = COLUNAS.filter(col => col.id !== 'acoes').map(col => col.nome);
+    // Pega apenas as colunas visíveis (excluindo AÇÕES)
+    const colunasVisiveis = COLUNAS.filter(col => 
+        colunasVisiveis[col.id] !== false && col.id !== 'acoes'
+    );
+
+    // Cabeçalho
+    const cabecalho = colunasVisiveis.map(col => col.nome);
     let csv = cabecalho.join(';') + '\n';
 
+    // Dados
     dadosFiltrados.forEach(item => {
-        const linha = COLUNAS.filter(col => col.id !== 'acoes').map(col => {
+        const linha = colunasVisiveis.map(col => {
             let valor = item[col.id] || '';
-            if (typeof valor === 'string' && (valor.includes(';') || valor.includes('"'))) {
+            
+            // Formatação especial para nível
+            if (col.id === 'nivel' && valor) {
+                const nivelMap = {
+                    '1': 'COMUM',
+                    '2': 'RELEVANTE',
+                    '3': 'LÍDER'
+                };
+                valor = nivelMap[valor] || valor;
+            }
+            
+            // Escape para CSV
+            if (typeof valor === 'string' && (valor.includes(';') || valor.includes('"') || valor.includes('\n'))) {
                 return '"' + valor.replace(/"/g, '""') + '"';
             }
             return valor;
@@ -457,16 +476,113 @@ function exportarCSV() {
         csv += linha.join(';') + '\n';
     });
 
+    // BOM para UTF-8
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'cadastros_' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
 }
-
 function exportarExcel() {
-    exportarCSV();
+    if (!dadosFiltrados || dadosFiltrados.length === 0) {
+        alert('❌ Não há dados para exportar!');
+        return;
+    }
+
+    // Pega apenas as colunas visíveis (excluindo AÇÕES)
+    const colunasVisiveis = COLUNAS.filter(col => 
+        colunasVisiveis[col.id] !== false && col.id !== 'acoes'
+    );
+
+    // Cria o cabeçalho
+    let html = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+          xmlns:x="urn:schemas-microsoft-com:office:excel" 
+          xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+        <meta charset="UTF-8">
+        <!--[if gte mso 9]>
+        <xml>
+            <x:ExcelWorkbook>
+                <x:ExcelWorksheets>
+                    <x:ExcelWorksheet>
+                        <x:Name>Cadastros</x:Name>
+                        <x:WorksheetOptions>
+                            <x:DisplayGridlines/>
+                        </x:WorksheetOptions>
+                    </x:ExcelWorksheet>
+                </x:ExcelWorksheets>
+            </x:ExcelWorkbook>
+        </xml>
+        <![endif]-->
+        <style>
+            table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 11px; }
+            th { background-color: #00562e; color: #ffffff; font-weight: bold; padding: 6px 8px; border: 1px solid #00562e; text-align: left; }
+            td { padding: 4px 8px; border: 1px solid #cccccc; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+            .nivel-1 { background-color: #d4edda; color: #155724; }
+            .nivel-2 { background-color: #cce5ff; color: #004085; }
+            .nivel-3 { background-color: #d6d8db; color: #1b1e21; }
+        </style>
+    </head>
+    <body>
+        <h2 style="color: #00562e;">📋 LISTA DE CADASTROS - PV43</h2>
+        <p>Total: ${dadosFiltrados.length} registros | Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
+        <table>
+            <thead>
+                <tr>`;
+
+    // Cabeçalho
+    colunasVisiveis.forEach(col => {
+        html += `<th>${col.nome}</th>`;
+    });
+    html += `</tr></thead><tbody>`;
+
+    // Dados
+    dadosFiltrados.forEach(item => {
+        html += `<tr>`;
+        colunasVisiveis.forEach(col => {
+            let valor = item[col.id] || '';
+            
+            // Formatação especial para nível
+            if (col.id === 'nivel' && valor) {
+                const nivelMap = {
+                    '1': 'COMUM',
+                    '2': 'RELEVANTE',
+                    '3': 'LÍDER'
+                };
+                valor = nivelMap[valor] || valor;
+            }
+            
+            html += `<td>${valor}</td>`;
+        });
+        html += `</tr>`;
+    });
+
+    html += `
+            </tbody>
+        </table>
+        <p style="color: #999; font-size: 10px; margin-top: 10px;">
+            Relatório gerado pelo Sistema PV43 - Partido Verde
+        </p>
+    </body>
+    </html>`;
+
+    // Cria o blob com o tipo correto para Excel
+    const blob = new Blob([html], { 
+        type: 'application/vnd.ms-excel;charset=utf-8' 
+    });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'cadastros_' + new Date().toISOString().slice(0,10) + '.xls';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
 }
 
 function exportarPDF() {
@@ -475,11 +591,20 @@ function exportarPDF() {
         return;
     }
 
+    // Pega apenas as colunas visíveis (excluindo AÇÕES)
+    const colunasVisiveis = COLUNAS.filter(col => 
+        colunasVisiveis[col.id] !== false && col.id !== 'acoes'
+    );
+
     const janela = window.open('', '_blank', 'width=1200,height=800');
     if (!janela) {
         alert('❌ Por favor, permita pop-ups para exportar PDF.');
         return;
     }
+
+    // Calcula a largura da tabela baseado no número de colunas
+    const larguraColuna = Math.min(80, Math.floor(800 / colunasVisiveis.length));
+    const larguraTotal = colunasVisiveis.length * larguraColuna;
 
     let html = `
     <!DOCTYPE html>
@@ -488,65 +613,142 @@ function exportarPDF() {
         <meta charset="UTF-8">
         <title>Lista de Cadastros - PV43</title>
         <style>
-            @page { size: landscape; margin: 8mm; }
-            body { font-family: Arial, sans-serif; font-size: 9px; background: white; }
-            h1 { text-align: center; color: #00562e; font-size: 14px; margin-bottom: 3px; }
-            .info { text-align: center; color: #666; font-size: 10px; margin-bottom: 10px; }
-            table { width: 100%; border-collapse: collapse; font-size: 8px; }
-            th { background: #00562e; color: white; padding: 4px 3px; border: 1px solid #00562e; text-align: left; }
-            td { padding: 3px; border: 1px solid #ccc; text-align: left; }
-            tr:nth-child(even) { background: #f5f5f5; }
-            .badge-nivel { display: inline-block; padding: 1px 6px; border-radius: 8px; font-size: 7px; font-weight: bold; }
-            .badge-nivel-1 { background: #d4edda; color: #155724; }
-            .badge-nivel-2 { background: #cce5ff; color: #004085; }
-            .badge-nivel-3 { background: #d6d8db; color: #1b1e21; }
-            .footer { text-align: center; font-size: 8px; color: #999; margin-top: 8px; border-top: 1px solid #ddd; padding-top: 6px; }
+            @page { 
+                size: landscape; 
+                margin: 8mm;
+            }
+            body { 
+                font-family: Arial, sans-serif; 
+                font-size: 9px; 
+                background: white;
+                padding: 10px;
+            }
+            h1 { 
+                text-align: center; 
+                color: #00562e; 
+                font-size: 14px; 
+                margin-bottom: 3px; 
+            }
+            .info { 
+                text-align: center; 
+                color: #666; 
+                font-size: 10px; 
+                margin-bottom: 10px; 
+            }
+            .info span {
+                display: inline-block;
+                margin: 0 10px;
+            }
+            table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                font-size: 8px;
+                page-break-inside: auto;
+            }
+            th { 
+                background: #00562e; 
+                color: white; 
+                padding: 4px 6px; 
+                border: 1px solid #00562e; 
+                text-align: left;
+                font-weight: bold;
+            }
+            td { 
+                padding: 3px 6px; 
+                border: 1px solid #ccc; 
+                text-align: left;
+            }
+            tr:nth-child(even) { 
+                background: #f5f5f5; 
+            }
+            .footer { 
+                text-align: center; 
+                font-size: 8px; 
+                color: #999; 
+                margin-top: 8px; 
+                border-top: 1px solid #ddd; 
+                padding-top: 6px; 
+            }
+            @media print {
+                .no-print { display: none; }
+                table { page-break-inside: auto; }
+                tr { page-break-inside: avoid; page-break-after: auto; }
+                thead { display: table-header-group; }
+            }
         </style>
     </head>
     <body>
         <h1>🌿 PARTIDO VERDE - MARACANAÚ</h1>
-        <div class="info">📋 LISTA DE CADASTROS - Total: ${dadosFiltrados.length} registros<br>Gerado em: ${new Date().toLocaleString('pt-BR')}</div>
-        <table><thead><tr>`;
+        <div class="info">
+            📋 LISTA DE CADASTROS
+            <span>Total: ${dadosFiltrados.length} registros</span>
+            <span>Gerado em: ${new Date().toLocaleString('pt-BR')}</span>
+            <span>Colunas: ${colunasVisiveis.length}</span>
+        </div>
+        <table>
+            <thead>
+                <tr>`;
 
-    COLUNAS.forEach(col => {
-        if (colunasVisiveis[col.id] !== false && col.id !== 'acoes') {
-            html += `<th>${col.nome}</th>`;
-        }
+    // Cabeçalho com as colunas visíveis
+    colunasVisiveis.forEach(col => {
+        html += `<th>${col.nome}</th>`;
     });
     html += `</tr></thead><tbody>`;
 
+    // Dados
     dadosFiltrados.forEach(item => {
         html += `<tr>`;
-        COLUNAS.forEach(col => {
-            if (colunasVisiveis[col.id] !== false && col.id !== 'acoes') {
-                let valor = item[col.id] || '';
-                if (col.id === 'nivel' && valor) {
-                    const nivelMap = {
-                        '1': 'COMUM',
-                        '2': 'RELEVANTE',
-                        '3': 'LÍDER'
-                    };
-                    valor = nivelMap[valor] || valor;
-                }
-                html += `<td>${valor}</td>`;
+        colunasVisiveis.forEach(col => {
+            let valor = item[col.id] || '';
+            
+            // Formatação especial para nível
+            if (col.id === 'nivel' && valor) {
+                const nivelMap = {
+                    '1': 'COMUM',
+                    '2': 'RELEVANTE',
+                    '3': 'LÍDER'
+                };
+                valor = nivelMap[valor] || valor;
             }
+            
+            // Trunca textos longos
+            if (typeof valor === 'string' && valor.length > 50) {
+                valor = valor.substring(0, 47) + '...';
+            }
+            
+            html += `<td>${valor}</td>`;
         });
         html += `</tr>`;
     });
 
     html += `
-            </tbody></table>
-            <div class="footer">Relatório gerado pelo Sistema PV43 - Partido Verde</div>
-        </body>
-        </html>`;
+            </tbody>
+        </table>
+        <div class="footer">
+            Relatório gerado pelo Sistema PV43 - Partido Verde
+        </div>
+        <div class="no-print" style="text-align:center; margin-top:15px;">
+            <button onclick="window.print()" style="padding:8px 20px; background:#00562e; color:white; border:none; border-radius:4px; cursor:pointer;">
+                🖨️ IMPRIMIR / SALVAR PDF
+            </button>
+            <button onclick="window.close()" style="padding:8px 20px; background:#dc3545; color:white; border:none; border-radius:4px; cursor:pointer; margin-left:10px;">
+                ❌ FECHAR
+            </button>
+        </div>
+        <script>
+            // Auto-print após carregar
+            window.onload = function() {
+                // Aguarda 1 segundo e abre a impressão
+                setTimeout(function() {
+                    window.print();
+                }, 1000);
+            };
+        <\/script>
+    </body>
+    </html>`;
 
     janela.document.write(html);
     janela.document.close();
-    
-    setTimeout(function() {
-        janela.print();
-        janela.onafterprint = function() { janela.close(); };
-    }, 500);
 }
 
 // ==========================================
