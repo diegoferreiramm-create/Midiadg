@@ -422,12 +422,13 @@ function renderizarTabela() {
                         partes.forEach(parte => {
                             let p = parte.trim();
                             if (p !== '') {
-                                if (p.toUpperCase().includes('FEDERAL')) {
-                                    htmlCandidatos += `<span class="badge-candidato-federal">${p}</span> `;
-                                } else if (p.toUpperCase().includes('ESTADUAL')) {
-                                    htmlCandidatos += `<span class="badge-candidato-estadual">${p}</span> `;
+                                let textoUpper = p.toUpperCase();
+                                if (textoUpper.includes('FEDERAL') || textoUpper.includes('(FED')) {
+                                    htmlCandidatos += `<span class="badge-candidato badge-candidato-federal">${p}</span> `;
+                                } else if (textoUpper.includes('ESTADUAL') || textoUpper.includes('(EST')) {
+                                    htmlCandidatos += `<span class="badge-candidato badge-candidato-estadual">${p}</span> `;
                                 } else {
-                                    htmlCandidatos += `<span class="badge-candidato-federal">${p}</span> `;
+                                    htmlCandidatos += `<span class="badge-candidato badge-candidato-federal">${p}</span> `;
                                 }
                             }
                         });
