@@ -163,11 +163,39 @@ function popularFiltrosSelects() {
 
     preencherSelect('fBairro', 'bairro');
     preencherSelect('fCidade', 'cidade');
-    preencherSelect('fCandidato', 'candidato');
+    
+    // Tratamento especial para o Candidato (caso venha separado por vírgula na mesma célula)
+    const selectCand = document.getElementById('fCandidato');
+    if (selectCand) {
+        const valorAtualCand = selectCand.value;
+        const candidatosSet = new Set();
+        todosOsDados.forEach(item => {
+            if (item.candidato) {
+                item.candidato.split(',').forEach(parte => {
+                    const limpo = parte.trim();
+                    if (limpo) candidatosSet.add(limpo);
+                });
+            }
+        });
+        selectCand.innerHTML = '<option value="">Todos os Candidato</option>';
+        [...candidatosSet].sort().forEach(val => {
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.textContent = val;
+            selectCand.appendChild(opt);
+        });
+        selectCand.value = valorAtualCand;
+    }
+
     preencherSelect('fZona', 'zona');
     preencherSelect('fNivel', 'nivel');
+    
+    // CORRIGIDO: Responsável agora puxa a Coluna C (numero_sec)
     preencherSelect('fResponsavel', 'numero_sec');
-    preencherSelect('fAdmin', 'numero_cha');
+    
+    // CORRIGIDO: Administrador agora puxa a Coluna B (vamos usar a chave correspondente da coluna B, ex: numero_cha ou admin)
+    // Se o seu script do Apps Script mapeia a coluna B como 'numero_cha' ou 'admin', ajuste aqui:
+    preencherSelect('fAdmin', 'numero_cha'); 
 }
 
 // ==========================================
@@ -182,8 +210,11 @@ function filtrarDashboard() {
     const fSecao = document.getElementById('fSecao')?.value?.trim() || '';
     const fLocalVot = document.getElementById('fLocalVot')?.value?.trim().toUpperCase() || '';
     const fNivel = document.getElementById('fNivel')?.value?.trim() || '';
-    const fResponsavel = document.getElementById('fResponsavel')?.value?.trim().toUpperCase() || '';
-    const fAdmin = document.getElementById('fAdmin')?.value?.trim().toUpperCase() || '';
+    
+    // Valores dos filtros corrigidos
+    const fResponsavel = document.getElementById('fResponsavel')?.value?.trim() || '';
+    const fAdmin = document.getElementById('fAdmin')?.value?.trim() || '';
+    
     const fDataInicio = document.getElementById('fDataInicio')?.value || '';
     const fDataFim = document.getElementById('fDataFim')?.value || '';
 
@@ -191,13 +222,22 @@ function filtrarDashboard() {
         if (fNome && !String(item.nome || '').toUpperCase().includes(fNome)) return false;
         if (fBairro && !String(item.bairro || '').toUpperCase().includes(fBairro)) return false;
         if (fCidade && !String(item.cidade || '').toUpperCase().includes(fCidade)) return false;
-        if (fCandidato && !String(item.candidato || '').toUpperCase().includes(fCandidato)) return false;
+        
+        if (fCandidato) {
+            const candItem = String(item.candidato || '').toUpperCase();
+            if (!candItem.includes(fCandidato)) return false;
+        }
+
         if (fZona && String(item.zona || '') !== fZona) return false;
         if (fSecao && !String(item.secao || '').includes(fSecao)) return false;
         if (fLocalVot && !String(item.local_vot || '').toUpperCase().includes(fLocalVot)) return false;
         if (fNivel && String(item.nivel || '') !== fNivel) return false;
-        if (fResponsavel && !String(item.numero_sec || '').toUpperCase().includes(fResponsavel)) return false;
-        if (fAdmin && !String(item.numero_cha || '').toUpperCase().includes(fAdmin)) return false;
+        
+        // CORRIGIDO: Responsável valida estritamente a Coluna C (numero_sec)
+        if (fResponsavel && String(item.numero_sec || '').trim() !== fResponsavel) return false;
+        
+        // CORRIGIDO: Administrador valida estritamente a Coluna B (numero_cha)
+        if (fAdmin && String(item.numero_cha || '').trim() !== fAdmin) return false;
 
         if (fDataInicio || fDataFim) {
             const dataItem = converterDataParaTimestamp(item.data);
