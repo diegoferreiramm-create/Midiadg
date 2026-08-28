@@ -16,6 +16,31 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             transform: translateY(-2px);
         }
+        .agenda-card.vencido {
+            opacity: 0.6;
+            border-left-color: #999 !important;
+            background: #f5f5f5 !important;
+            cursor: default;
+        }
+        .agenda-card.vencido:hover {
+            transform: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .agenda-card.vencido .btn-confirmar,
+        .agenda-card.vencido .btn-abrir-calendario {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .badge-vencido {
+            background: #dc3545;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 8px;
+        }
         .btn-excluir {
             background: #dc3545;
             color: white;
@@ -135,6 +160,10 @@
             border-radius: 4px;
             font-weight: bold;
         }
+        .data-corrigida.vencido {
+            background: #f8d7da;
+            color: #721c24;
+        }
         .badge-proximo {
             background: #ff9800;
             color: white;
@@ -228,6 +257,34 @@
             background: #0D47A1;
             transform: scale(1.05);
         }
+        .filtro-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .filtro-container button {
+            padding: 6px 16px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .filtro-container button:hover {
+            background: #e8f5e9;
+        }
+        .filtro-container button.ativo {
+            background: #2e7d32;
+            color: white;
+            border-color: #2e7d32;
+        }
+        .contador-eventos {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -319,6 +376,16 @@
             <!-- Coluna da Direita: Lista -->
             <div class="list-card" style="flex: 1.5; min-width: 350px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <h3>Agendamentos Cadastrados</h3>
+                
+                <!-- Filtros -->
+                <div class="filtro-container">
+                    <button class="ativo" data-filtro="todos" onclick="filtrarEventos('todos')">📋 Todos</button>
+                    <button data-filtro="ativos" onclick="filtrarEventos('ativos')">✅ Ativos</button>
+                    <button data-filtro="vencidos" onclick="filtrarEventos('vencidos')">⏰ Vencidos</button>
+                </div>
+                
+                <div id="contador-eventos" class="contador-eventos"></div>
+                
                 <div id="container-cards-agendamentos" style="margin-top: 15px; max-height: 600px; overflow-y: auto;"></div>
             </div>
 
@@ -360,6 +427,7 @@
         const isAdmin = tipoUsuario && tipoUsuario.toLowerCase() === 'admin';
         let idEventoParaExcluir = null;
         let agendamentosCache = [];
+        let filtroAtual = 'todos';
 
         console.log('=== DEBUG ===');
         console.log('Nome usuário:', nomeUsuario);
@@ -383,6 +451,40 @@
         }
 
         // ============================================================
+        // VERIFICAR SE O EVENTO ESTÁ VENCIDO
+        // ============================================================
+        function isEventoVencido(dataStr, horarioStr) {
+            try {
+                let dataEvento;
+                if (typeof dataStr === 'number' || !isNaN(Number(dataStr))) {
+                    dataEvento = new Date((dataStr - 25569) * 86400 * 1000);
+                } else {
+                    dataEvento = new Date(dataStr);
+                }
+                
+                let horaEvento;
+                if (typeof horarioStr === 'number' || !isNaN(Number(horarioStr))) {
+                    horaEvento = new Date((horarioStr - 25569) * 86400 * 1000);
+                } else if (horarioStr && horarioStr.includes('T')) {
+                    horaEvento = new Date(horarioStr);
+                } else if (horarioStr) {
+                    const [h, m] = horarioStr.split(':');
+                    horaEvento = new Date();
+                    horaEvento.setHours(parseInt(h) || 0, parseInt(m) || 0, 0, 0);
+                } else {
+                    return false;
+                }
+                
+                const dataCompleta = new Date(dataEvento);
+                dataCompleta.setHours(horaEvento.getHours(), horaEvento.getMinutes(), 0, 0);
+                
+                return dataCompleta.getTime() < new Date().getTime();
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // ============================================================
         // VERIFICAR NOTIFICAÇÕES (30 min e 5 min antes)
         // ============================================================
         function verificarNotificacoes(agendamentos) {
@@ -400,12 +502,14 @@
                     let horaEvento;
                     if (typeof item.horario === 'number' || !isNaN(Number(item.horario))) {
                         horaEvento = new Date((item.horario - 25569) * 86400 * 1000);
-                    } else if (item.horario.includes('T')) {
+                    } else if (item.horario && item.horario.includes('T')) {
                         horaEvento = new Date(item.horario);
-                    } else {
+                    } else if (item.horario) {
                         const [h, m] = item.horario.split(':');
                         horaEvento = new Date();
                         horaEvento.setHours(parseInt(h) || 0, parseInt(m) || 0, 0, 0);
+                    } else {
+                        return;
                     }
                     
                     const dataCompleta = new Date(dataEvento);
@@ -420,6 +524,8 @@
                         (item.part_outros && item.part_outros.includes(nomeUsuario));
                     
                     if (!ehParticipante) return;
+                    
+                    if (diffMin < 0) return;
                     
                     if (diffMin <= 30 && diffMin > 25 && !localStorage.getItem(`notif_30_${item.id_evento}`)) {
                         mostrarToast(`🔔 "${item.titulo}" começa em 30 minutos!`, 'warning');
@@ -491,7 +597,7 @@
                     return data.toLocaleDateString('pt-BR');
                 } catch (e) { return String(dataStr); }
             }
-            if (dataStr.includes('-') && dataStr.length === 10) {
+            if (dataStr && dataStr.includes('-') && dataStr.length === 10) {
                 const partes = dataStr.split('-');
                 return `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
@@ -510,7 +616,7 @@
                     return data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 } catch (e) { return String(horarioStr); }
             }
-            if (horarioStr.includes('T')) {
+            if (horarioStr && horarioStr.includes('T')) {
                 try {
                     const data = new Date(horarioStr);
                     if (!isNaN(data.getTime())) {
@@ -518,7 +624,7 @@
                     }
                 } catch (e) {}
             }
-            if (horarioStr.includes(':')) return horarioStr.substring(0, 5);
+            if (horarioStr && horarioStr.includes(':')) return horarioStr.substring(0, 5);
             return horarioStr;
         }
 
@@ -534,12 +640,14 @@
                 let horaEvento;
                 if (typeof horarioStr === 'number' || !isNaN(Number(horarioStr))) {
                     horaEvento = new Date((horarioStr - 25569) * 86400 * 1000);
-                } else if (horarioStr.includes('T')) {
+                } else if (horarioStr && horarioStr.includes('T')) {
                     horaEvento = new Date(horarioStr);
-                } else {
+                } else if (horarioStr) {
                     const [h, m] = horarioStr.split(':');
                     horaEvento = new Date();
                     horaEvento.setHours(parseInt(h) || 0, parseInt(m) || 0, 0, 0);
+                } else {
+                    return '';
                 }
                 
                 const dataCompleta = new Date(dataEvento);
@@ -548,7 +656,7 @@
                 const diffMs = dataCompleta.getTime() - new Date().getTime();
                 const diffMin = Math.floor(diffMs / (1000 * 60));
                 
-                if (diffMin < 0) return '⏰ Evento já passou';
+                if (diffMin < 0) return '⏰ Vencido';
                 if (diffMin < 60) return `⏰ Em ${diffMin} minutos`;
                 if (diffMin < 1440) return `⏰ Em ${Math.floor(diffMin / 60)}h ${diffMin % 60}min`;
                 return `⏰ Em ${Math.floor(diffMin / 1440)} dias`;
@@ -562,7 +670,6 @@
         // ============================================================
         function gerarLinkGoogleCalendar(evento) {
             try {
-                // Formata data para o Google Calendar (YYYYMMDD)
                 let dataObj;
                 if (typeof evento.data === 'number' || !isNaN(Number(evento.data))) {
                     dataObj = new Date((evento.data - 25569) * 86400 * 1000);
@@ -570,27 +677,25 @@
                     dataObj = new Date(evento.data);
                 }
                 
-                // Formata horário
                 let horaObj;
                 if (typeof evento.horario === 'number' || !isNaN(Number(evento.horario))) {
                     horaObj = new Date((evento.horario - 25569) * 86400 * 1000);
-                } else if (evento.horario.includes('T')) {
+                } else if (evento.horario && evento.horario.includes('T')) {
                     horaObj = new Date(evento.horario);
-                } else {
+                } else if (evento.horario) {
                     const [h, m] = evento.horario.split(':');
                     horaObj = new Date();
                     horaObj.setHours(parseInt(h) || 0, parseInt(m) || 0, 0, 0);
+                } else {
+                    return null;
                 }
                 
-                // Data e hora de início
                 const dataInicio = new Date(dataObj);
                 dataInicio.setHours(horaObj.getHours(), horaObj.getMinutes(), 0, 0);
                 
-                // Data e hora de fim (1 hora depois)
                 const dataFim = new Date(dataInicio);
                 dataFim.setHours(dataFim.getHours() + 1);
                 
-                // Formata para YYYYMMDDTHHMMSS
                 function formatarDataGoogle(d) {
                     const ano = d.getFullYear();
                     const mes = String(d.getMonth() + 1).padStart(2, '0');
@@ -600,11 +705,10 @@
                     return `${ano}${mes}${dia}T${hora}${min}00`;
                 }
                 
-                const titulo = encodeURIComponent(evento.titulo);
-                const detalhes = encodeURIComponent(evento.conteudo + (evento.obs ? '\nObs: ' + evento.obs : ''));
+                const titulo = encodeURIComponent(evento.titulo || 'Evento');
+                const detalhes = encodeURIComponent((evento.conteudo || '') + (evento.obs ? '\nObs: ' + evento.obs : ''));
                 const local = encodeURIComponent(evento.link || '');
                 
-                // Link com notificações (30 min e 5 min)
                 const url = 
                     `https://calendar.google.com/calendar/render?action=TEMPLATE` +
                     `&text=${titulo}` +
@@ -620,6 +724,149 @@
                 console.error('Erro ao gerar link do Google Calendar:', e);
                 return null;
             }
+        }
+
+        // ============================================================
+        // FILTRAR EVENTOS
+        // ============================================================
+        function filtrarEventos(filtro) {
+            filtroAtual = filtro;
+            
+            document.querySelectorAll('.filtro-container button').forEach(btn => {
+                btn.classList.remove('ativo');
+                if (btn.dataset.filtro === filtro) {
+                    btn.classList.add('ativo');
+                }
+            });
+            
+            renderizarCards(agendamentosCache);
+        }
+
+        // ============================================================
+        // RENDERIZAR CARDS (CORRIGIDO - SEM DUPLICAÇÃO)
+        // ============================================================
+        function renderizarCards(agendamentos) {
+            const container = document.getElementById('container-cards-agendamentos');
+            
+            // LIMPAR O CONTAINER ANTES DE RENDERIZAR
+            container.innerHTML = '';
+            
+            // Se não tem agendamentos, mostra mensagem
+            if (!agendamentos || agendamentos.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">📭 Nenhum agendamento cadastrado.</p>';
+                document.getElementById('contador-eventos').textContent = '📊 0 eventos cadastrados';
+                return;
+            }
+            
+            // Aplicar filtro (CRIAR UMA CÓPIA PARA NÃO MODIFICAR O ORIGINAL)
+            let eventosFiltrados = [...agendamentos];
+            
+            if (filtroAtual === 'ativos') {
+                eventosFiltrados = eventosFiltrados.filter(item => !isEventoVencido(item.data, item.horario));
+            } else if (filtroAtual === 'vencidos') {
+                eventosFiltrados = eventosFiltrados.filter(item => isEventoVencido(item.data, item.horario));
+            }
+            
+            // Atualizar contador
+            document.getElementById('contador-eventos').textContent = 
+                `📊 ${eventosFiltrados.length} evento(s) ${filtroAtual === 'todos' ? 'cadastrados' : filtroAtual === 'ativos' ? 'ativos' : 'vencidos'}`;
+            
+            if (eventosFiltrados.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">📭 Nenhum agendamento ' + 
+                    (filtroAtual === 'ativos' ? 'ativo' : filtroAtual === 'vencidos' ? 'vencido' : 'cadastrado') + 
+                    '.</p>';
+                return;
+            }
+
+            // ORDENAR: MAIS RECENTE PRIMEIRO (CRIAR UMA CÓPIA)
+            const eventosOrdenados = [...eventosFiltrados].reverse();
+
+            eventosOrdenados.forEach(item => {
+                const vencido = isEventoVencido(item.data, item.horario);
+                const dataFormatada = formatarData(item.data);
+                const horarioFormatado = formatarHorario(item.horario);
+                const tempoRestante = calcularTempoRestante(item.data, item.horario);
+                
+                const jaConfirmou = item.confirmados && item.confirmados.includes(nomeUsuario);
+
+                let listaConfirmadosHTML = (item.confirmados && item.confirmados.length > 0) 
+                    ? item.confirmados.join(', ') 
+                    : '<span style="color: #888; font-style: italic;">Nenhuma confirmação ainda</span>';
+
+                let botaoConfirmacaoHTML = '';
+                if (vencido) {
+                    botaoConfirmacaoHTML = `
+                        <span style="color: #999; font-size: 0.8rem;">⏰ Evento encerrado</span>
+                    `;
+                } else if (jaConfirmou) {
+                    botaoConfirmacaoHTML = `
+                        <span class="btn-confirmado">✔ Confirmado por você</span>
+                        <button class="btn-abrir-calendario" onclick="event.stopPropagation(); abrirCalendario('${item.id_evento}')">
+                            📅 Abrir Agenda
+                        </button>
+                    `;
+                } else {
+                    botaoConfirmacaoHTML = `
+                        <button class="btn-confirmar" onclick="event.stopPropagation(); confirmarPresenca('${item.id_evento}')">
+                            ✅ Confirmar e abrir Agenda
+                        </button>
+                    `;
+                }
+
+                let botaoExcluirHTML = '';
+                if (isAdmin) {
+                    botaoExcluirHTML = `
+                        <button class="btn-excluir" onclick="event.stopPropagation(); abrirModalExcluir('${item.id_evento}', '${item.titulo}')">
+                            🗑️ Excluir
+                        </button>
+                    `;
+                }
+
+                let badgeStatus = '';
+                if (vencido) {
+                    badgeStatus = `<span class="badge-vencido">⏰ Vencido</span>`;
+                } else if (tempoRestante && !tempoRestante.includes('Vencido')) {
+                    badgeStatus = `<span class="badge-proximo">${tempoRestante}</span>`;
+                }
+
+                const classeCard = vencido ? 'agenda-card vencido' : 'agenda-card';
+                const classeData = vencido ? 'data-corrigida vencido' : 'data-corrigida';
+
+                container.innerHTML += `
+                    <div class="${classeCard}" onclick="${!vencido ? `abrirModal('${item.link || '#'}', event)` : 'event.stopPropagation()'}" style="background: #fdfdfd; border: 1px solid #e0e0e0; border-left: 5px solid ${vencido ? '#999' : '#2e7d32'}; padding: 15px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
+                            <h4 style="margin: 0; color: ${vencido ? '#999' : '#333'}; font-size: 1.1rem;">
+                                ${item.titulo}
+                                ${badgeStatus}
+                            </h4>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <span class="${classeData}">📅 ${dataFormatada} às ${horarioFormatado}</span>
+                                ${botaoExcluirHTML}
+                            </div>
+                        </div>
+                        
+                        <p style="margin: 10px 0 6px 0; font-size: 0.95rem; color: ${vencido ? '#999' : '#444'};"><strong>Conteúdo:</strong> ${item.conteudo}</p>
+                        ${item.obs ? `<p style="margin: 4px 0; font-size: 0.9rem; color: ${vencido ? '#999' : '#666'};"><strong>Observação:</strong> ${item.obs}</p>` : ''}
+                        
+                        <div style="font-size: 0.85rem; margin-top: 10px; background: ${vencido ? '#f0f0f0' : '#f9f9f9'}; padding: 8px; border-radius: 4px; border: 1px solid ${vencido ? '#ddd' : '#eee'};">
+                            ${item.part_admin ? `<div><strong>Admin(s):</strong> ${item.part_admin}</div>` : ''}
+                            ${item.part_resp ? `<div><strong>Responsável(eis):</strong> ${item.part_resp}</div>` : ''}
+                            ${item.part_outros ? `<div><strong>Outros:</strong> ${item.part_outros} (${item.contato_outros})</div>` : ''}
+                        </div>
+
+                        <div style="margin-top: 10px; font-size: 0.85rem; color: ${vencido ? '#999' : '#333'};">
+                            <strong>Quem já confirmou:</strong> ${listaConfirmadosHTML}
+                        </div>
+
+                        <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <span style="font-size: 0.7rem; color: #999;">${!vencido ? '🔗 Clique no card para copiar link' : '⏰ Evento encerrado'}</span>
+                            <div class="acoes-card">
+                                ${botaoConfirmacaoHTML}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
         }
 
         // ============================================================
@@ -797,96 +1044,12 @@
                 const agendamentos = await chamarAPI_GET('carregarAgendamentosComConfirmados', {});
                 console.log('✅ Agendamentos carregados:', agendamentos);
                 
-                agendamentosCache = agendamentos;
+                // ARMAZENAR UMA CÓPIA PARA NÃO MODIFICAR O ORIGINAL
+                agendamentosCache = [...agendamentos];
                 verificarNotificacoes(agendamentos);
                 
-                container.innerHTML = '';
-
-                if (!agendamentos || agendamentos.length === 0) {
-                    container.innerHTML = '<p style="color: #666; font-style: italic;">📭 Nenhum agendamento cadastrado.</p>';
-                    return;
-                }
-
-                agendamentos.reverse().forEach(item => {
-                    const dataFormatada = formatarData(item.data);
-                    const horarioFormatado = formatarHorario(item.horario);
-                    const tempoRestante = calcularTempoRestante(item.data, item.horario);
-                    
-                    const jaConfirmou = item.confirmados && item.confirmados.includes(nomeUsuario);
-                    const linkCalendario = gerarLinkGoogleCalendar(item);
-
-                    let listaConfirmadosHTML = (item.confirmados && item.confirmados.length > 0) 
-                        ? item.confirmados.join(', ') 
-                        : '<span style="color: #888; font-style: italic;">Nenhuma confirmação ainda</span>';
-
-                    // Botão Confirmar com abertura do Google Calendar
-                    let botaoConfirmacaoHTML = '';
-                    if (jaConfirmou) {
-                        botaoConfirmacaoHTML = `
-                            <span class="btn-confirmado">✔ Confirmado por você</span>
-                            <button class="btn-abrir-calendario" onclick="event.stopPropagation(); abrirCalendario('${item.id_evento}')">
-                                📅 Abrir Agenda
-                            </button>
-                        `;
-                    } else {
-                        botaoConfirmacaoHTML = `
-                            <button class="btn-confirmar" onclick="event.stopPropagation(); confirmarPresenca('${item.id_evento}')">
-                                ✅ Confirmar e abrir Agenda
-                            </button>
-                        `;
-                    }
-
-                    // Botão Excluir (apenas admin)
-                    let botaoExcluirHTML = '';
-                    if (isAdmin) {
-                        botaoExcluirHTML = `
-                            <button class="btn-excluir" onclick="event.stopPropagation(); abrirModalExcluir('${item.id_evento}', '${item.titulo}')">
-                                🗑️ Excluir
-                            </button>
-                        `;
-                    }
-
-                    // Badge de tempo restante
-                    let badgeTempo = '';
-                    if (tempoRestante && !tempoRestante.includes('passou')) {
-                        badgeTempo = `<span class="badge-proximo">${tempoRestante}</span>`;
-                    }
-
-                    container.innerHTML += `
-                        <div class="agenda-card" onclick="abrirModal('${item.link || '#'}', event)" style="background: #fdfdfd; border: 1px solid #e0e0e0; border-left: 5px solid #2e7d32; padding: 15px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
-                                <h4 style="margin: 0; color: #333; font-size: 1.1rem;">
-                                    ${item.titulo}
-                                    ${badgeTempo}
-                                </h4>
-                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                                    <span class="data-corrigida">📅 ${dataFormatada} às ${horarioFormatado}</span>
-                                    ${botaoExcluirHTML}
-                                </div>
-                            </div>
-                            
-                            <p style="margin: 10px 0 6px 0; font-size: 0.95rem; color: #444;"><strong>Conteúdo:</strong> ${item.conteudo}</p>
-                            ${item.obs ? `<p style="margin: 4px 0; font-size: 0.9rem; color: #666;"><strong>Observação:</strong> ${item.obs}</p>` : ''}
-                            
-                            <div style="font-size: 0.85rem; margin-top: 10px; background: #f9f9f9; padding: 8px; border-radius: 4px; border: 1px solid #eee;">
-                                ${item.part_admin ? `<div><strong>Admin(s):</strong> ${item.part_admin}</div>` : ''}
-                                ${item.part_resp ? `<div><strong>Responsável(eis):</strong> ${item.part_resp}</div>` : ''}
-                                ${item.part_outros ? `<div><strong>Outros:</strong> ${item.part_outros} (${item.contato_outros})</div>` : ''}
-                            </div>
-
-                            <div style="margin-top: 10px; font-size: 0.85rem; color: #333;">
-                                <strong>Quem já confirmou:</strong> ${listaConfirmadosHTML}
-                            </div>
-
-                            <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                                <span style="font-size: 0.7rem; color: #999;">🔗 Clique no card para copiar link</span>
-                                <div class="acoes-card">
-                                    ${botaoConfirmacaoHTML}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
+                renderizarCards(agendamentosCache);
+                
             } catch (erro) {
                 console.error('❌ Erro ao carregar agendamentos:', erro);
                 container.innerHTML = '<p style="color: red;">❌ Erro ao carregar agendamentos: ' + erro.message + '</p>';
@@ -898,21 +1061,23 @@
         // ============================================================
         async function confirmarPresenca(id_evento) {
             try {
-                // Busca o evento no cache
                 const evento = agendamentosCache.find(item => item.id_evento === id_evento);
                 if (!evento) {
                     mostrarToast('❌ Evento não encontrado', 'danger');
                     return;
                 }
 
-                // Confirma presença no sistema
+                if (isEventoVencido(evento.data, evento.horario)) {
+                    mostrarToast('⏰ Este evento já passou! Não é possível confirmar presença.', 'warning');
+                    return;
+                }
+
                 const dados = { id_evento: id_evento, nomeUsuarioLogado: nomeUsuario };
                 const resposta = await chamarAPI_POST('confirmarPresencaNoEvento', dados);
                 
                 if (resposta && !resposta.sucesso === false) {
                     mostrarToast('✅ Presença confirmada! Abrindo Google Calendar...', 'success');
                     
-                    // Gera e abre o link do Google Calendar
                     const linkCalendario = gerarLinkGoogleCalendar(evento);
                     if (linkCalendario) {
                         window.open(linkCalendario, '_blank');
@@ -937,6 +1102,11 @@
             const evento = agendamentosCache.find(item => item.id_evento === id_evento);
             if (!evento) {
                 mostrarToast('❌ Evento não encontrado', 'danger');
+                return;
+            }
+            
+            if (isEventoVencido(evento.data, evento.horario)) {
+                mostrarToast('⏰ Este evento já passou!', 'warning');
                 return;
             }
             
