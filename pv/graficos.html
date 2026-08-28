@@ -591,9 +591,24 @@
         function atualizarFiltroResponsaveis() {
             const admin = document.getElementById('filtroAdmin').value;
             let base = dadosEleitores;
-            if (admin) base = dadosEleitores.filter(i => i.numero_sec === admin);
-            preencherSelect('filtroResponsavel', [...new Set(base.map(i => i.nome).filter(Boolean))]);
-        }
+            
+            // Se um administrador (numero_cha) estiver selecionado, filtra os responsáveis pertencentes a ele
+            if (admin) {
+                base = dadosEleitores.filter(i => i.numero_cha === admin);
+            }
+    
+    // Pega unicamente os valores da coluna C (numero_sec)
+    const responsaveis = [...new Set(base.map(i => i.numero_sec).filter(Boolean))].sort();
+    
+    const selectResp = document.getElementById('filtroResponsavel');
+    selectResp.innerHTML = '<option value="">Todos os Responsáveis</option>';
+    responsaveis.forEach(resp => {
+        const opt = document.createElement('option');
+        opt.value = resp;
+        opt.textContent = resp;
+        selectResp.appendChild(opt);
+    });
+}
 
         function zerarFiltros() {
             document.getElementById('filtroAdmin').value = "";
