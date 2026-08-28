@@ -93,47 +93,43 @@ document.addEventListener('DOMContentLoaded', function() {
     secaoInput.addEventListener('input', buscarDadosVotacao);
 
     // ==========================================
-    // CARREGAR CANDIDATOS DINAMICAMENTE DA ABA ANEXO
+    // CARREGAR CANDIDATOS USANDO A SUA API.JS
     // ==========================================
     function carregarCandidatosDinamicamente() {
-        const urlApi = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
-            ? API_CONFIG.BASE_URL 
-            : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
+        console.log("🔍 [CANDIDATOS] Buscando candidatos via API.JS...");
     
-        var url = urlApi + '?acao=buscarCandidatos';
-        
-        fetch(url, { method: 'GET' })
-        .then(response => response.json())
+        // Usa a sua função padrão que já monta a URL e trata o fetch/JSON
+        chamarAPI_GET("buscarCandidatos")
         .then(resposta => {
             const container = document.getElementById('container-candidatos');
             if (!container) return;
     
-            container.innerHTML = ''; // Limpa o "Carregando..."
+            container.innerHTML = ''; // Limpa o conteúdo
     
             if (resposta.sucesso && resposta.candidatos && resposta.candidatos.length > 0) {
-                resposta.candidatos.forEach(function(nomeCandidato, index) {
-                    // Cria a estrutura do checkbox para cada item encontrado na aba anexo
+                resposta.candidatos.forEach(function(nomeCandidato) {
                     const label = document.createElement('label');
-                    label.style.display = 'block';
-                    label.style.marginBottom = '5px';
+                    label.style.display = 'flex';
+                    label.style.alignItems = 'center';
+                    label.style.gap = '8px';
                     label.style.cursor = 'pointer';
     
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.name = 'candidato';
                     checkbox.value = nomeCandidato;
-                    checkbox.style.marginRight = '8px';
     
                     label.appendChild(checkbox);
                     label.appendChild(document.createTextNode(nomeCandidato));
                     container.appendChild(label);
                 });
+                console.log("🎉 [CANDIDATOS] Carregados com sucesso pela API!");
             } else {
                 container.innerHTML = '<span style="color: #666; font-size: 13px;">Nenhum candidato cadastrado na aba anexo.</span>';
             }
         })
         .catch(err => {
-            console.error('❌ Erro ao carregar candidatos:', err);
+            console.error('❌ [CANDIDATOS] Erro ao buscar via API:', err);
             const container = document.getElementById('container-candidatos');
             if (container) {
                 container.innerHTML = '<span style="color: red; font-size: 13px;">Erro ao carregar candidatos.</span>';
@@ -141,13 +137,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Dispara com segurança assim que o documento estiver pronto para o elemento existir
+    // Dispara o carregamento assim que o DOM estiver pronto
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', carregarCandidatosDinamicamente);
     } else {
         carregarCandidatosDinamicamente();
     }
-
     // ==========================================
     // VALIDAÇÃO DO TÍTULO DE ELEITOR
     // ==========================================
