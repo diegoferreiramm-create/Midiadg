@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         localStorage.setItem("pv43_nome_usuario", response.nome || usuario);
                         localStorage.setItem("pv43_tipo_usuario", response.tipo || "usuario");
                         
-                        alert("✅ Login realizado com sucesso!");
+
                         window.location.href = "menu.html";
                     } else {
                         alert("⚠️ " + (response.mensagem || "Usuário ou senha inválidos."));
