@@ -5,6 +5,230 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PV43 - Agendamentos</title>
     <link rel="stylesheet" href="style.css">
+    <script src="api.js"></script>
+    <style>
+        .agenda-card {
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .agenda-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        .btn-excluir {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-excluir:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+        .link-copiar {
+            background: #f0f0f0;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+        .link-copiar input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 4px;
+            font-size: 0.85rem;
+            color: #333;
+            outline: none;
+        }
+        .link-copiar button {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        .link-copiar button:hover {
+            background: #1b5e20;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .modal-content .link-box {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .modal-content .link-box input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .modal-content .link-box button {
+            padding: 10px 20px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .modal-content .link-box button:hover {
+            background: #1b5e20;
+        }
+        .modal-content .btn-fechar {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+        }
+        .modal-content .btn-fechar:hover {
+            background: #5a6268;
+        }
+        .data-corrigida {
+            font-size: 0.85rem;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .badge-proximo {
+            background: #ff9800;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 8px;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+        }
+        .toast-info {
+            background: #2196F3;
+        }
+        .toast-warning {
+            background: #ff9800;
+        }
+        .toast-success {
+            background: #4CAF50;
+        }
+        .toast-danger {
+            background: #dc3545;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .acoes-card {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .btn-confirmar {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-confirmar:hover {
+            background: #1b5e20;
+            transform: scale(1.05);
+        }
+        .btn-confirmado {
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .btn-abrir-calendario {
+            background: #1565C0;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-abrir-calendario:hover {
+            background: #0D47A1;
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
 
@@ -18,9 +242,12 @@
             <button class="btn-secondary" onclick="voltarMenu()">Voltar ao Menu</button>
         </div>
 
+        <!-- Container para Toasts -->
+        <div id="toast-container" class="toast-container"></div>
+
         <div class="content-layout" style="display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap;">
             
-            <!-- Coluna da Esquerda: Formulário de Criação de Agendamento -->
+            <!-- Coluna da Esquerda: Formulário -->
             <div class="form-card" style="flex: 1; min-width: 320px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <h3>Criar Agendamento</h3>
                 <form id="form-agendamento" onsubmit="salvarAgendamento(event)">
@@ -41,7 +268,7 @@
 
                     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                         <div style="flex: 1;">
-                            <label for="data">Data (dd/mm/aaaa):</label>
+                            <label for="data">Data:</label>
                             <input type="date" id="data" required style="width: 100%; padding: 8px; margin-top: 5px;">
                         </div>
                         <div style="flex: 1;">
@@ -50,37 +277,30 @@
                         </div>
                     </div>
 
-                    <!-- Seção de Participantes -->
+                    <!-- Participantes -->
                     <div class="participantes-section" style="border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
                         <label style="font-weight: bold; display: block; margin-bottom: 10px;">Participantes:</label>
                         
-                        <!-- Checkbox Administrador -->
                         <div style="margin-bottom: 10px;">
                             <label style="cursor: pointer;">
                                 <input type="checkbox" id="check-admin" onclick="toggleLista('admin')"> Administrador
                             </label>
                             <div id="box-admin" style="display: none; margin-top: 8px; padding-left: 20px;">
                                 <label><input type="checkbox" id="admin-todos" onclick="marcarTodos('admin')"> <strong>Todos os Administradores</strong></label>
-                                <div id="lista-admins-checkboxes" style="max-height: 100px; overflow-y: auto; margin-top: 5px; border: 1px solid #eee; padding: 5px;">
-                                    <!-- Inserido via JS -->
-                                </div>
+                                <div id="lista-admins-checkboxes" style="max-height: 100px; overflow-y: auto; margin-top: 5px; border: 1px solid #eee; padding: 5px;"></div>
                             </div>
                         </div>
 
-                        <!-- Checkbox Responsável -->
                         <div style="margin-bottom: 10px;">
                             <label style="cursor: pointer;">
                                 <input type="checkbox" id="check-resp" onclick="toggleLista('resp')"> Responsável
                             </label>
                             <div id="box-resp" style="display: none; margin-top: 8px; padding-left: 20px;">
                                 <label><input type="checkbox" id="resp-todos" onclick="marcarTodos('resp')"> <strong>Todos os Responsáveis</strong></label>
-                                <div id="lista-resps-checkboxes" style="max-height: 100px; overflow-y: auto; margin-top: 5px; border: 1px solid #eee; padding: 5px;">
-                                    <!-- Inserido via JS -->
-                                </div>
+                                <div id="lista-resps-checkboxes" style="max-height: 100px; overflow-y: auto; margin-top: 5px; border: 1px solid #eee; padding: 5px;"></div>
                             </div>
                         </div>
 
-                        <!-- Checkbox Outros -->
                         <div style="margin-bottom: 5px;">
                             <label style="cursor: pointer;">
                                 <input type="checkbox" id="check-outros" onclick="toggleLista('outros')"> Outros
@@ -96,30 +316,142 @@
                 </form>
             </div>
 
-            <!-- Coluna da Direita: Lista de Agendamentos (Cards) -->
+            <!-- Coluna da Direita: Lista -->
             <div class="list-card" style="flex: 1.5; min-width: 350px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 <h3>Agendamentos Cadastrados</h3>
-                <div id="container-cards-agendamentos" style="margin-top: 15px; max-height: 600px; overflow-y: auto;">
-                    <!-- Os cards serão injetados dinamicamente aqui -->
-                </div>
+                <div id="container-cards-agendamentos" style="margin-top: 15px; max-height: 600px; overflow-y: auto;"></div>
             </div>
 
         </div>
     </div>
 
+    <!-- MODAL LINK -->
+    <div id="modal-link" class="modal-overlay">
+        <div class="modal-content">
+            <h3>🔗 Link do Agendamento</h3>
+            <p>Copie o link abaixo para convidar os participantes:</p>
+            <div class="link-box">
+                <input type="text" id="link-agendamento" readonly>
+                <button onclick="copiarLink()">📋 Copiar</button>
+            </div>
+            <button class="btn-fechar" onclick="fecharModal()">Fechar</button>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR EXCLUSÃO -->
+    <div id="modal-excluir" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="color: #dc3545;">⚠️ Confirmar Exclusão</h3>
+            <p>Tem certeza que deseja excluir este agendamento?</p>
+            <p style="color: #666; font-size: 0.9rem;" id="texto-excluir"></p>
+            <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                <button class="btn-fechar" onclick="fecharModalExcluir()">Cancelar</button>
+                <button onclick="confirmarExclusao()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Sim, Excluir</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // 🔒 Verificação de Segurança
+        // ============================================================
+        // VARIÁVEIS GLOBAIS
+        // ============================================================
         const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
         const tipoUsuario = localStorage.getItem('pv43_tipo_usuario');
+        const isAdmin = tipoUsuario && tipoUsuario.toLowerCase() === 'admin';
+        let idEventoParaExcluir = null;
+        let agendamentosCache = [];
 
+        console.log('=== DEBUG ===');
+        console.log('Nome usuário:', nomeUsuario);
+        console.log('Tipo usuário:', tipoUsuario);
+        console.log('É admin?', isAdmin);
+
+        // ============================================================
+        // TOAST (NOTIFICAÇÕES)
+        // ============================================================
+        function mostrarToast(mensagem, tipo = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${tipo}`;
+            toast.textContent = mensagem;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // ============================================================
+        // VERIFICAR NOTIFICAÇÕES (30 min e 5 min antes)
+        // ============================================================
+        function verificarNotificacoes(agendamentos) {
+            const agora = new Date();
+            
+            agendamentos.forEach(item => {
+                try {
+                    let dataEvento;
+                    if (typeof item.data === 'number' || !isNaN(Number(item.data))) {
+                        dataEvento = new Date((item.data - 25569) * 86400 * 1000);
+                    } else {
+                        dataEvento = new Date(item.data);
+                    }
+                    
+                    let horaEvento;
+                    if (typeof item.horario === 'number' || !isNaN(Number(item.horario))) {
+                        horaEvento = new Date((item.horario - 25569) * 86400 * 1000);
+                    } else if (item.horario.includes('T')) {
+                        horaEvento = new Date(item.horario);
+                    } else {
+                        const [h, m] = item.horario.split(':');
+                        horaEvento = new Date();
+                        horaEvento.setHours(parseInt(h) || 0, parseInt(m) || 0, 0, 0);
+                    }
+                    
+                    const dataCompleta = new Date(dataEvento);
+                    dataCompleta.setHours(horaEvento.getHours(), horaEvento.getMinutes(), 0, 0);
+                    
+                    const diffMs = dataCompleta.getTime() - agora.getTime();
+                    const diffMin = Math.floor(diffMs / (1000 * 60));
+                    
+                    const ehParticipante = 
+                        (item.part_admin && item.part_admin.includes(nomeUsuario)) ||
+                        (item.part_resp && item.part_resp.includes(nomeUsuario)) ||
+                        (item.part_outros && item.part_outros.includes(nomeUsuario));
+                    
+                    if (!ehParticipante) return;
+                    
+                    if (diffMin <= 30 && diffMin > 25 && !localStorage.getItem(`notif_30_${item.id_evento}`)) {
+                        mostrarToast(`🔔 "${item.titulo}" começa em 30 minutos!`, 'warning');
+                        localStorage.setItem(`notif_30_${item.id_evento}`, 'true');
+                    }
+                    
+                    if (diffMin <= 5 && diffMin > 0 && !localStorage.getItem(`notif_5_${item.id_evento}`)) {
+                        mostrarToast(`🚨 "${item.titulo}" começa em 5 minutos! Prepare-se!`, 'danger');
+                        localStorage.setItem(`notif_5_${item.id_evento}`, 'true');
+                    }
+                    
+                    if (diffMin < -60) {
+                        localStorage.removeItem(`notif_30_${item.id_evento}`);
+                        localStorage.removeItem(`notif_5_${item.id_evento}`);
+                    }
+                    
+                } catch (e) {
+                    console.error('Erro ao verificar notificações:', e);
+                }
+            });
+        }
+
+        // ============================================================
+        // VERIFICAR PERMISSÕES
+        // ============================================================
         if (!nomeUsuario || !tipoUsuario) {
             alert('⚠️ Acesso negado! Faça o login pelo sistema.');
             window.location.href = 'pv43.html';
         } else {
             document.getElementById('usuario-logado-texto').innerText = `Logado como: ${nomeUsuario} (${tipoUsuario.toUpperCase()})`;
             
-            // 🛡️ CONTROLE DE HIERARQUIA: Se não for admin, bloqueia/oculta o formulário de criação
-            if (tipoUsuario.toLowerCase() !== 'admin') {
+            if (!isAdmin) {
                 const formCard = document.querySelector('.form-card');
                 if (formCard) {
                     formCard.innerHTML = `
@@ -137,55 +469,267 @@
             window.location.href = 'menu.html';
         }
 
-        // Funções para abrir/fechar as caixas de seleção condicional
         function toggleLista(tipo) {
             const checkbox = document.getElementById(`check-${tipo}`);
             const box = document.getElementById(`box-${tipo}`);
             box.style.display = checkbox.checked ? 'block' : 'none';
         }
 
-        // Carrega dinamicamente os usuários da aba User do Google Sheets
-        function carregarListasUsuarios() {
-            google.script.run
-                .withSuccessHandler(function(resposta) {
-                    const admins = resposta.admins || [];
-                    const resps = resposta.responsaveis || [];
-
-                    // Preencher Administradores
-                    const containerAdmin = document.getElementById('lista-admins-checkboxes');
-                    containerAdmin.innerHTML = '';
-                    if (admins.length === 0) {
-                        containerAdmin.innerHTML = '<span style="font-size: 0.8rem; color: #999;">Nenhum admin encontrado</span>';
-                    } else {
-                        admins.forEach((adm) => {
-                            containerAdmin.innerHTML += `<label style="display:block; font-size: 0.9rem; margin-bottom: 3px;"><input type="checkbox" class="chk-item-admin" value="${adm}"> ${adm}</label>`;
-                        });
-                    }
-
-                    // Preencher Responsáveis
-                    const containerResp = document.getElementById('lista-resps-checkboxes');
-                    containerResp.innerHTML = '';
-                    if (resps.length === 0) {
-                        containerResp.innerHTML = '<span style="font-size: 0.8rem; color: #999;">Nenhum responsável encontrado</span>';
-                    } else {
-                        resps.forEach((resp) => {
-                            containerResp.innerHTML += `<label style="display:block; font-size: 0.9rem; margin-bottom: 3px;"><input type="checkbox" class="chk-item-resp" value="${resp}"> ${resp}</label>`;
-                        });
-                    }
-                })
-                .buscarUsuariosParaAgendamento();
-        }
-
         function marcarTodos(tipo) {
             const masterCheck = document.getElementById(`${tipo}-todos`);
-            const itens = document.querySelectorAll(`.chk-item-${tipo}`);
-            itens.forEach(chk => {
-                chk.checked = masterCheck.checked;
-            });
+            document.querySelectorAll(`.chk-item-${tipo}`).forEach(chk => chk.checked = masterCheck.checked);
         }
 
-        // Envio do formulário salvando via Google Apps Script (.gs)
-        function salvarAgendamento(event) {
+        // ============================================================
+        // FUNÇÕES DE FORMATAÇÃO
+        // ============================================================
+        function formatarData(dataStr) {
+            if (!dataStr) return 'Data não informada';
+            if (typeof dataStr === 'number' || !isNaN(Number(dataStr))) {
+                try {
+                    const data = new Date((dataStr - 25569) * 86400 * 1000);
+                    return data.toLocaleDateString('pt-BR');
+                } catch (e) { return String(dataStr); }
+            }
+            if (dataStr.includes('-') && dataStr.length === 10) {
+                const partes = dataStr.split('-');
+                return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+            try {
+                const data = new Date(dataStr);
+                if (!isNaN(data.getTime())) return data.toLocaleDateString('pt-BR');
+            } catch (e) {}
+            return dataStr;
+        }
+
+        function formatarHorario(horarioStr) {
+            if (!horarioStr) return 'Horário não informado';
+            if (typeof horarioStr === 'number' || !isNaN(Number(horarioStr))) {
+                try {
+                    const data = new Date((horarioStr - 25569) * 86400 * 1000);
+                    return data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                } catch (e) { return String(horarioStr); }
+            }
+            if (horarioStr.includes('T')) {
+                try {
+                    const data = new Date(horarioStr);
+                    if (!isNaN(data.getTime())) {
+                        return data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                    }
+                } catch (e) {}
+            }
+            if (horarioStr.includes(':')) return horarioStr.substring(0, 5);
+            return horarioStr;
+        }
+
+        function calcularTempoRestante(dataStr, horarioStr) {
+            try {
+                let dataEvento;
+                if (typeof dataStr === 'number' || !isNaN(Number(dataStr))) {
+                    dataEvento = new Date((dataStr - 25569) * 86400 * 1000);
+                } else {
+                    dataEvento = new Date(dataStr);
+                }
+                
+                let horaEvento;
+                if (typeof horarioStr === 'number' || !isNaN(Number(horarioStr))) {
+                    horaEvento = new Date((horarioStr - 25569) * 86400 * 1000);
+                } else if (horarioStr.includes('T')) {
+                    horaEvento = new Date(horarioStr);
+                } else {
+                    const [h, m] = horarioStr.split(':');
+                    horaEvento = new Date();
+                    horaEvento.setHours(parseInt(h) || 0, parseInt(m) || 0, 0, 0);
+                }
+                
+                const dataCompleta = new Date(dataEvento);
+                dataCompleta.setHours(horaEvento.getHours(), horaEvento.getMinutes(), 0, 0);
+                
+                const diffMs = dataCompleta.getTime() - new Date().getTime();
+                const diffMin = Math.floor(diffMs / (1000 * 60));
+                
+                if (diffMin < 0) return '⏰ Evento já passou';
+                if (diffMin < 60) return `⏰ Em ${diffMin} minutos`;
+                if (diffMin < 1440) return `⏰ Em ${Math.floor(diffMin / 60)}h ${diffMin % 60}min`;
+                return `⏰ Em ${Math.floor(diffMin / 1440)} dias`;
+            } catch (e) {
+                return '';
+            }
+        }
+
+        // ============================================================
+        // GERAR LINK DO GOOGLE CALENDAR
+        // ============================================================
+        function gerarLinkGoogleCalendar(evento) {
+            try {
+                // Formata data para o Google Calendar (YYYYMMDD)
+                let dataObj;
+                if (typeof evento.data === 'number' || !isNaN(Number(evento.data))) {
+                    dataObj = new Date((evento.data - 25569) * 86400 * 1000);
+                } else {
+                    dataObj = new Date(evento.data);
+                }
+                
+                // Formata horário
+                let horaObj;
+                if (typeof evento.horario === 'number' || !isNaN(Number(evento.horario))) {
+                    horaObj = new Date((evento.horario - 25569) * 86400 * 1000);
+                } else if (evento.horario.includes('T')) {
+                    horaObj = new Date(evento.horario);
+                } else {
+                    const [h, m] = evento.horario.split(':');
+                    horaObj = new Date();
+                    horaObj.setHours(parseInt(h) || 0, parseInt(m) || 0, 0, 0);
+                }
+                
+                // Data e hora de início
+                const dataInicio = new Date(dataObj);
+                dataInicio.setHours(horaObj.getHours(), horaObj.getMinutes(), 0, 0);
+                
+                // Data e hora de fim (1 hora depois)
+                const dataFim = new Date(dataInicio);
+                dataFim.setHours(dataFim.getHours() + 1);
+                
+                // Formata para YYYYMMDDTHHMMSS
+                function formatarDataGoogle(d) {
+                    const ano = d.getFullYear();
+                    const mes = String(d.getMonth() + 1).padStart(2, '0');
+                    const dia = String(d.getDate()).padStart(2, '0');
+                    const hora = String(d.getHours()).padStart(2, '0');
+                    const min = String(d.getMinutes()).padStart(2, '0');
+                    return `${ano}${mes}${dia}T${hora}${min}00`;
+                }
+                
+                const titulo = encodeURIComponent(evento.titulo);
+                const detalhes = encodeURIComponent(evento.conteudo + (evento.obs ? '\nObs: ' + evento.obs : ''));
+                const local = encodeURIComponent(evento.link || '');
+                
+                // Link com notificações (30 min e 5 min)
+                const url = 
+                    `https://calendar.google.com/calendar/render?action=TEMPLATE` +
+                    `&text=${titulo}` +
+                    `&dates=${formatarDataGoogle(dataInicio)}/${formatarDataGoogle(dataFim)}` +
+                    `&details=${detalhes}` +
+                    `&location=${local}` +
+                    `&sf=true&output=xml` +
+                    `&reminder=Notification+30+minutes` +
+                    `&reminder=Notification+5+minutes`;
+                
+                return url;
+            } catch (e) {
+                console.error('Erro ao gerar link do Google Calendar:', e);
+                return null;
+            }
+        }
+
+        // ============================================================
+        // MODAL LINK
+        // ============================================================
+        let linkAtual = '';
+
+        function abrirModal(link, event) {
+            if (event) event.stopPropagation();
+            linkAtual = link;
+            document.getElementById('link-agendamento').value = link;
+            document.getElementById('modal-link').classList.add('active');
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-link').classList.remove('active');
+        }
+
+        function copiarLink() {
+            const input = document.getElementById('link-agendamento');
+            input.select();
+            try {
+                navigator.clipboard.writeText(input.value);
+                mostrarToast('✅ Link copiado para a área de transferência!', 'success');
+            } catch (e) {
+                document.execCommand('copy');
+                mostrarToast('✅ Link copiado!', 'success');
+            }
+        }
+
+        document.getElementById('modal-link').addEventListener('click', function(e) {
+            if (e.target === this) fecharModal();
+        });
+
+        // ============================================================
+        // MODAL EXCLUIR
+        // ============================================================
+        function abrirModalExcluir(id_evento, titulo) {
+            idEventoParaExcluir = id_evento;
+            document.getElementById('texto-excluir').textContent = `"${titulo}"`;
+            document.getElementById('modal-excluir').classList.add('active');
+        }
+
+        function fecharModalExcluir() {
+            document.getElementById('modal-excluir').classList.remove('active');
+            idEventoParaExcluir = null;
+        }
+
+        document.getElementById('modal-excluir').addEventListener('click', function(e) {
+            if (e.target === this) fecharModalExcluir();
+        });
+
+        async function confirmarExclusao() {
+            if (!idEventoParaExcluir) return;
+            
+            try {
+                const resposta = await chamarAPI_POST('excluirAgendamento', { id: idEventoParaExcluir });
+                console.log('✅ Excluído:', resposta);
+                
+                if (resposta.sucesso === false) {
+                    mostrarToast('❌ ' + (resposta.mensagem || 'Erro ao excluir'), 'danger');
+                    return;
+                }
+                
+                mostrarToast('✅ Agendamento excluído com sucesso!', 'success');
+                fecharModalExcluir();
+                carregarCardsAgendamentos();
+            } catch (erro) {
+                console.error('❌ Erro ao excluir:', erro);
+                mostrarToast('❌ Erro ao excluir: ' + erro.message, 'danger');
+            }
+        }
+
+        // ============================================================
+        // CARREGAR USUÁRIOS
+        // ============================================================
+        async function carregarListasUsuarios() {
+            try {
+                const resposta = await chamarAPI_GET('buscarUsuariosParaAgendamento', {});
+                const admins = resposta.admins || [];
+                const resps = resposta.responsaveis || [];
+
+                const containerAdmin = document.getElementById('lista-admins-checkboxes');
+                containerAdmin.innerHTML = '';
+                if (admins.length === 0) {
+                    containerAdmin.innerHTML = '<span style="font-size: 0.8rem; color: #999;">Nenhum admin encontrado</span>';
+                } else {
+                    admins.forEach((adm) => {
+                        containerAdmin.innerHTML += `<label style="display:block; font-size: 0.9rem; margin-bottom: 3px;"><input type="checkbox" class="chk-item-admin" value="${adm}"> ${adm}</label>`;
+                    });
+                }
+
+                const containerResp = document.getElementById('lista-resps-checkboxes');
+                containerResp.innerHTML = '';
+                if (resps.length === 0) {
+                    containerResp.innerHTML = '<span style="font-size: 0.8rem; color: #999;">Nenhum responsável encontrado</span>';
+                } else {
+                    resps.forEach((resp) => {
+                        containerResp.innerHTML += `<label style="display:block; font-size: 0.9rem; margin-bottom: 3px;"><input type="checkbox" class="chk-item-resp" value="${resp}"> ${resp}</label>`;
+                    });
+                }
+            } catch (erro) {
+                console.error('❌ Erro ao carregar usuários:', erro);
+            }
+        }
+
+        // ============================================================
+        // SALVAR AGENDAMENTO
+        // ============================================================
+        async function salvarAgendamento(event) {
             event.preventDefault();
 
             const titulo = document.getElementById('titulo').value;
@@ -194,21 +738,16 @@
             const data = document.getElementById('data').value;
             const horario = document.getElementById('horario').value;
 
-            // Coletar Administradores selecionados
             let partAdminArr = [];
             if(document.getElementById('check-admin').checked) {
-                const checkedAdmins = document.querySelectorAll('.chk-item-admin:checked');
-                checkedAdmins.forEach(c => partAdminArr.push(c.value));
+                document.querySelectorAll('.chk-item-admin:checked').forEach(c => partAdminArr.push(c.value));
             }
 
-            // Coletar Responsáveis selecionados
             let partRespArr = [];
             if(document.getElementById('check-resp').checked) {
-                const checkedResps = document.querySelectorAll('.chk-item-resp:checked');
-                checkedResps.forEach(c => partRespArr.push(c.value));
+                document.querySelectorAll('.chk-item-resp:checked').forEach(c => partRespArr.push(c.value));
             }
 
-            // Coletar Outros
             let partOutros = '';
             let contatoOutros = '';
             if(document.getElementById('check-outros').checked) {
@@ -216,74 +755,114 @@
                 contatoOutros = document.getElementById('outro-contato').value;
             }
 
+            const id_evento = 'EVT-' + Date.now();
+            const linkGerado = window.location.origin + window.location.pathname + '?evento=' + id_evento;
+
             const novoAgendamento = {
-                id_evento: 'EVT-' + Date.now(),
-                titulo,
-                conteudo,
-                obs,
-                data,
-                horario,
+                id_evento: id_evento,
+                titulo: titulo,
+                conteudo: conteudo,
+                obs: obs,
+                data: data,
+                horario: horario,
                 part_admin: partAdminArr.join(', '),
                 part_resp: partRespArr.join(', '),
                 part_outros: partOutros,
-                contato_outros: contatoOutros
+                contato_outros: contatoOutros,
+                link: linkGerado
             };
 
-            google.script.run
-                .withSuccessHandler(function(resposta) {
-                    alert('Agendamento criado com sucesso!');
-                    document.getElementById('form-agendamento').reset();
-                    document.getElementById('box-admin').style.display = 'none';
-                    document.getElementById('box-resp').style.display = 'none';
-                    document.getElementById('box-outros').style.display = 'none';
-                    carregarCardsAgendamentos();
-                })
-                .salvarAgendamento(novoAgendamento);
+            try {
+                const resposta = await chamarAPI_POST('salvarAgendamento', novoAgendamento);
+                mostrarToast('✅ Agendamento criado com sucesso!', 'success');
+                document.getElementById('form-agendamento').reset();
+                document.getElementById('box-admin').style.display = 'none';
+                document.getElementById('box-resp').style.display = 'none';
+                document.getElementById('box-outros').style.display = 'none';
+                carregarCardsAgendamentos();
+            } catch (erro) {
+                console.error('❌ Erro ao salvar:', erro);
+                mostrarToast('❌ Erro ao salvar: ' + erro.message, 'danger');
+            }
         }
 
-        // Renderizar os agendamentos em formato de cards na tela com link e confirmação dinâmica
-        function carregarCardsAgendamentos() {
+        // ============================================================
+        // CARREGAR CARDS
+        // ============================================================
+        async function carregarCardsAgendamentos() {
             const container = document.getElementById('container-cards-agendamentos');
+            container.innerHTML = '<p style="color: #666;">🔄 Carregando agendamentos...</p>';
             
-            google.script.run.withSuccessHandler(function(agendamentos) {
+            try {
+                const agendamentos = await chamarAPI_GET('carregarAgendamentosComConfirmados', {});
+                console.log('✅ Agendamentos carregados:', agendamentos);
+                
+                agendamentosCache = agendamentos;
+                verificarNotificacoes(agendamentos);
+                
                 container.innerHTML = '';
 
                 if (!agendamentos || agendamentos.length === 0) {
-                    container.innerHTML = '<p style="color: #666; font-style: italic;">Nenhum agendamento cadastrado.</p>';
+                    container.innerHTML = '<p style="color: #666; font-style: italic;">📭 Nenhum agendamento cadastrado.</p>';
                     return;
                 }
 
                 agendamentos.reverse().forEach(item => {
-                    const dataSplit = item.data.split('-');
-                    const dataFormatada = dataSplit.length === 3 ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : item.data;
+                    const dataFormatada = formatarData(item.data);
+                    const horarioFormatado = formatarHorario(item.horario);
+                    const tempoRestante = calcularTempoRestante(item.data, item.horario);
+                    
+                    const jaConfirmou = item.confirmados && item.confirmados.includes(nomeUsuario);
+                    const linkCalendario = gerarLinkGoogleCalendar(item);
 
-                    const jaConfirmou = item.confirmados.includes(nomeUsuario);
+                    let listaConfirmadosHTML = (item.confirmados && item.confirmados.length > 0) 
+                        ? item.confirmados.join(', ') 
+                        : '<span style="color: #888; font-style: italic;">Nenhuma confirmação ainda</span>';
 
-                    // Formatar link para o Google Agenda pessoal
-                    const dataClean = item.data.replace(/-/g, '');
-                    const horaClean = item.horario.replace(':', '') + '00';
-                    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(item.titulo)}&dates=${dataClean}T${horaClean}/${dataClean}T${horaClean}&details=${encodeURIComponent(item.conteudo + (item.obs ? '\nObs: ' + item.obs : ''))}`;
-
+                    // Botão Confirmar com abertura do Google Calendar
                     let botaoConfirmacaoHTML = '';
                     if (jaConfirmou) {
-                        botaoConfirmacaoHTML = `<span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">✔ Presença Confirmada por você</span>`;
+                        botaoConfirmacaoHTML = `
+                            <span class="btn-confirmado">✔ Confirmado por você</span>
+                            <button class="btn-abrir-calendario" onclick="event.stopPropagation(); abrirCalendario('${item.id_evento}')">
+                                📅 Abrir Agenda
+                            </button>
+                        `;
                     } else {
                         botaoConfirmacaoHTML = `
-                            <button onclick="confirmarPresenca('${item.id_evento}', '${googleCalendarUrl}')" style="background: #2e7d32; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold;">
-                                ✅ Confirmar Presença e Abrir Agenda
+                            <button class="btn-confirmar" onclick="event.stopPropagation(); confirmarPresenca('${item.id_evento}')">
+                                ✅ Confirmar e abrir Agenda
                             </button>
                         `;
                     }
 
-                    let listaConfirmadosHTML = item.confirmados.length > 0 
-                        ? item.confirmados.join(', ') 
-                        : '<span style="color: #888; font-style: italic;">Nenhuma confirmação ainda</span>';
+                    // Botão Excluir (apenas admin)
+                    let botaoExcluirHTML = '';
+                    if (isAdmin) {
+                        botaoExcluirHTML = `
+                            <button class="btn-excluir" onclick="event.stopPropagation(); abrirModalExcluir('${item.id_evento}', '${item.titulo}')">
+                                🗑️ Excluir
+                            </button>
+                        `;
+                    }
+
+                    // Badge de tempo restante
+                    let badgeTempo = '';
+                    if (tempoRestante && !tempoRestante.includes('passou')) {
+                        badgeTempo = `<span class="badge-proximo">${tempoRestante}</span>`;
+                    }
 
                     container.innerHTML += `
-                        <div class="agenda-card" style="background: #fdfdfd; border: 1px solid #e0e0e0; border-left: 5px solid #2e7d32; padding: 15px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h4 style="margin: 0; color: #333; font-size: 1.1rem;">${item.titulo}</h4>
-                                <span style="font-size: 0.85rem; background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 4px; font-weight: bold;">📅 ${dataFormatada} às ${item.horario}</span>
+                        <div class="agenda-card" onclick="abrirModal('${item.link || '#'}', event)" style="background: #fdfdfd; border: 1px solid #e0e0e0; border-left: 5px solid #2e7d32; padding: 15px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
+                                <h4 style="margin: 0; color: #333; font-size: 1.1rem;">
+                                    ${item.titulo}
+                                    ${badgeTempo}
+                                </h4>
+                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <span class="data-corrigida">📅 ${dataFormatada} às ${horarioFormatado}</span>
+                                    ${botaoExcluirHTML}
+                                </div>
                             </div>
                             
                             <p style="margin: 10px 0 6px 0; font-size: 0.95rem; color: #444;"><strong>Conteúdo:</strong> ${item.conteudo}</p>
@@ -293,33 +872,93 @@
                                 ${item.part_admin ? `<div><strong>Admin(s):</strong> ${item.part_admin}</div>` : ''}
                                 ${item.part_resp ? `<div><strong>Responsável(eis):</strong> ${item.part_resp}</div>` : ''}
                                 ${item.part_outros ? `<div><strong>Outros:</strong> ${item.part_outros} (${item.contato_outros})</div>` : ''}
-                                <div style="margin-top: 5px; word-break: break-all;"><strong>Link do Evento:</strong> <a href="${item.link}" target="_blank" style="color: #1976d2;">${item.link}</a></div>
                             </div>
 
                             <div style="margin-top: 10px; font-size: 0.85rem; color: #333;">
                                 <strong>Quem já confirmou:</strong> ${listaConfirmadosHTML}
                             </div>
 
-                            <div style="margin-top: 12px; display: flex; justify-content: flex-end; align-items: center;">
-                                ${botaoConfirmacaoHTML}
+                            <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                <span style="font-size: 0.7rem; color: #999;">🔗 Clique no card para copiar link</span>
+                                <div class="acoes-card">
+                                    ${botaoConfirmacaoHTML}
+                                </div>
                             </div>
                         </div>
                     `;
                 });
-            }).carregarAgendamentosComConfirmados();
+            } catch (erro) {
+                console.error('❌ Erro ao carregar agendamentos:', erro);
+                container.innerHTML = '<p style="color: red;">❌ Erro ao carregar agendamentos: ' + erro.message + '</p>';
+            }
         }
 
-        function confirmarPresenca(id_evento, googleCalendarUrl) {
-            google.script.run
-                .withSuccessHandler(function(resposta) {
-                    alert(resposta);
-                    window.open(googleCalendarUrl, '_blank');
+        // ============================================================
+        // CONFIRMAR PRESENÇA (com abertura do Google Calendar)
+        // ============================================================
+        async function confirmarPresenca(id_evento) {
+            try {
+                // Busca o evento no cache
+                const evento = agendamentosCache.find(item => item.id_evento === id_evento);
+                if (!evento) {
+                    mostrarToast('❌ Evento não encontrado', 'danger');
+                    return;
+                }
+
+                // Confirma presença no sistema
+                const dados = { id_evento: id_evento, nomeUsuarioLogado: nomeUsuario };
+                const resposta = await chamarAPI_POST('confirmarPresencaNoEvento', dados);
+                
+                if (resposta && !resposta.sucesso === false) {
+                    mostrarToast('✅ Presença confirmada! Abrindo Google Calendar...', 'success');
+                    
+                    // Gera e abre o link do Google Calendar
+                    const linkCalendario = gerarLinkGoogleCalendar(evento);
+                    if (linkCalendario) {
+                        window.open(linkCalendario, '_blank');
+                    } else {
+                        mostrarToast('⚠️ Erro ao gerar link do Google Calendar', 'warning');
+                    }
+                    
                     carregarCardsAgendamentos();
-                })
-                .confirmarPresencaNoEvento(id_evento, nomeUsuario);
+                } else {
+                    mostrarToast('❌ ' + (resposta || 'Erro ao confirmar presença'), 'danger');
+                }
+            } catch (erro) {
+                console.error('❌ Erro ao confirmar presença:', erro);
+                mostrarToast('❌ Erro ao confirmar presença: ' + erro.message, 'danger');
+            }
         }
 
-        // Inicializar dados ao carregar a página
+        // ============================================================
+        // ABRIR CALENDARIO (para quem já confirmou)
+        // ============================================================
+        function abrirCalendario(id_evento) {
+            const evento = agendamentosCache.find(item => item.id_evento === id_evento);
+            if (!evento) {
+                mostrarToast('❌ Evento não encontrado', 'danger');
+                return;
+            }
+            
+            const linkCalendario = gerarLinkGoogleCalendar(evento);
+            if (linkCalendario) {
+                window.open(linkCalendario, '_blank');
+            } else {
+                mostrarToast('⚠️ Erro ao gerar link do Google Calendar', 'warning');
+            }
+        }
+
+        // ============================================================
+        // VERIFICAR NOTIFICAÇÕES A CADA 30 SEGUNDOS
+        // ============================================================
+        setInterval(() => {
+            carregarCardsAgendamentos();
+        }, 30000);
+
+        // ============================================================
+        // INICIALIZAR
+        // ============================================================
+        console.log('🚀 Inicializando página de agendamentos...');
         carregarListasUsuarios();
         carregarCardsAgendamentos();
     </script>
