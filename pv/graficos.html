@@ -719,7 +719,7 @@
         
             // 1. Administrador (Barras Horizontais) - Limitado ao Top 15
             const cAdmin = {};
-            dados.forEach(i => { const k = i.numero_sec || 'N/D'; cAdmin[k] = (cAdmin[k] || 0) + 1; });
+            dados.forEach(i => { const k = i.numero_cha || 'N/D'; cAdmin[k] = (cAdmin[k] || 0) + 1; });
             dadosGlobaisCache['graficoAdmin'] = { type: 'bar', data: cAdmin, color: '#3b82f6', horizontal: true };
             chartAdmin = criarGraficoBarra('graficoAdmin', pegarTop15(cAdmin), '#3b82f6', (val) => {
                 document.getElementById('filtroAdmin').value = val;
