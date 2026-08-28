@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const urlApi = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
             ? API_CONFIG.BASE_URL 
             : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
-
+    
         var url = urlApi + '?acao=buscarCandidatos';
         
         fetch(url, { method: 'GET' })
@@ -107,9 +107,9 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(resposta => {
             const container = document.getElementById('container-candidatos');
             if (!container) return;
-
+    
             container.innerHTML = ''; // Limpa o "Carregando..."
-
+    
             if (resposta.sucesso && resposta.candidatos && resposta.candidatos.length > 0) {
                 resposta.candidatos.forEach(function(nomeCandidato, index) {
                     // Cria a estrutura do checkbox para cada item encontrado na aba anexo
@@ -117,13 +117,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     label.style.display = 'block';
                     label.style.marginBottom = '5px';
                     label.style.cursor = 'pointer';
-
+    
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.name = 'candidato';
                     checkbox.value = nomeCandidato;
                     checkbox.style.marginRight = '8px';
-
+    
                     label.appendChild(checkbox);
                     label.appendChild(document.createTextNode(nomeCandidato));
                     container.appendChild(label);
@@ -140,9 +140,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    // Chama a função logo que a página abre
-    carregarCandidatosDinamicamente();
+    
+    // Dispara com segurança assim que o documento estiver pronto para o elemento existir
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', carregarCandidatosDinamicamente);
+    } else {
+        carregarCandidatosDinamicamente();
+    }
 
     // ==========================================
     // VALIDAÇÃO DO TÍTULO DE ELEITOR
