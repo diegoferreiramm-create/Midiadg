@@ -1,25 +1,25 @@
 document.addEventListener('DOMContentLoaded', function() {
     // 🔒 Trava de segurança: Impede acesso direto sem passar pelo login/menu
     const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
-    const tipoUsuario = localStorage.getItem('pv43_tipo_usuario');
-
+    
     if (!nomeUsuario) {
         alert('Acesso restrito! Redirecionando para a tela de login.');
         window.location.href = 'pv43.html';
         return;
     }
 
-    let numeroCha = '';
-    let numeroSec = '';
-
-    if (tipoUsuario === 'admin') {
-        numeroCha = nomeUsuario;
-        document.getElementById('info-responsavel').innerText = `Cadastrando via Administrador: ${nomeUsuario}`;
-    } else {
-        numeroSec = nomeUsuario;
-        document.getElementById('info-responsavel').innerText = `Cadastrando via Operador: ${nomeUsuario}`;
+    // Se o elemento info-responsavel existir na sua página de gráficos, você pode manter isso:
+    const tipoUsuario = localStorage.getItem('pv43_tipo_usuario');
+    const elementoResponsavel = document.getElementById('info-responsavel');
+    
+    if (elementoResponsavel) {
+        if (tipoUsuario === 'admin') {
+            elementoResponsavel.innerText = `Acessando via Administrador: ${nomeUsuario}`;
+        } else {
+            elementoResponsavel.innerText = `Acessando via Operador: ${nomeUsuario}`;
+        }
     }
-
+});
 
 
 // ============================================================
