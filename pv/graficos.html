@@ -765,14 +765,14 @@
                 atualizarDashboard();
             }, true);
         
-            // 6. Bairro do Local de Votação (Colunas Verticais) - Limitado ao Top 15
+            // 6. Bairro do Local de Votação (Barras Horizontais) - Limitado ao Top 15
             const cBairroVot = {};
             dados.forEach(i => { const k = i.bairro_vot || i.bairro || 'N/D'; cBairroVot[k] = (cBairroVot[k] || 0) + 1; });
-            dadosGlobaisCache['graficoBairroVotacao'] = { type: 'bar', data: cBairroVot, color: '#ec4899', horizontal: false }; // <--- Mude aqui para true
+            dadosGlobaisCache['graficoBairroVotacao'] = { type: 'bar', data: cBairroVot, color: '#ec4899', horizontal: true }; // <--- Alterado para true
             chartBairroVotacao = criarGraficoBarra('graficoBairroVotacao', pegarTop15(cBairroVot), '#ec4899', (val) => {
                 document.getElementById('filtroBairroVot').value = val;
                 atualizarDashboard();
-            }, false); // <--- E mude aqui para true
+            }, true); // <--- Alterado para true
         
             // 7. Local de Votação / Escola (Barras Horizontais) - Limitado ao Top 15
             const cLocalVot = {};
