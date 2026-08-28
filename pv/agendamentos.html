@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PV43 - Agendamentos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Cabeçalho do Módulo -->
+        <div class="module-header">
+            <div class="header-titles">
+                <h2>Gerenciamento de Agendamentos</h2>
+                <p id="usuario-logado-texto">Carregando usuário...</p>
+            </div>
+            <button class="btn-secondary" onclick="voltarMenu()">Voltar ao Menu</button>
+        </div>
+
+        <div class="content-layout" style="display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap;">
+            
+            <!-- Coluna da Esquerda: Formulário de Criação de Agendamento -->
+            <div class="form-card" style="flex: 1; min-width: 320px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h3>Criar Agendamento</h3>
+                <form id="form-agendamento" onsubmit="salvarAgendamento(event)">
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label for="titulo">Título:</label>
+                        <input type="text" id="titulo" required style="width: 100%; padding: 8px; margin-top: 5px;">
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label for="conteudo">Conteúdo:</label>
+                        <textarea id="conteudo" rows="3" required style="width: 100%; padding: 8px; margin-top: 5px;"></textarea>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label for="observacao">Observação:</label>
+                        <textarea id="observacao" rows="2" style="width: 100%; padding: 8px; margin-top: 5px;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <label for="data">Data (dd/mm/aaaa):</label>
+                            <input type="date" id="data" required style="width: 100%; padding: 8px; margin-top: 5px;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="horario">Horário:</label>
+                            <input type="time" id="horario" required style="width: 100%; padding: 8px; margin-top: 5px;">
+                        </div>
+                    </div>
+
+                    <!-- Seção de Participantes -->
+                    <div class="participantes-section" style="border: 1px solid #ddd; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                        <label style="font-weight: bold; display: block; margin-bottom: 10px;">Participantes:</label>
+                        
+                        <!-- Checkbox Administrador -->
+                        <div style="margin-bottom: 10px;">
+                            <label style="cursor: pointer;">
+                                <input type="checkbox" id="check-admin" onclick="toggleLista('admin')"> Administrador
+                            </label>
+                            <div id="box-admin" style="display: none; margin-top: 8px; padding-left: 20px;">
+                                <label><input type="checkbox" id="admin-todos" onclick="marcarTodos('admin')"> <strong>Todos os Administradores</strong></label>
+                                <div id="lista-admins-checkboxes" style="max-height: 100px; overflow-y: auto; margin-top: 5px; border: 1px solid #eee; padding: 5px;">
+                                    <!-- Inserido via JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Checkbox Responsável -->
+                        <div style="margin-bottom: 10px;">
+                            <label style="cursor: pointer;">
+                                <input type="checkbox" id="check-resp" onclick="toggleLista('resp')"> Responsável
+                            </label>
+                            <div id="box-resp" style="display: none; margin-top: 8px; padding-left: 20px;">
+                                <label><input type="checkbox" id="resp-todos" onclick="marcarTodos('resp')"> <strong>Todos os Responsáveis</strong></label>
+                                <div id="lista-resps-checkboxes" style="max-height: 100px; overflow-y: auto; margin-top: 5px; border: 1px solid #eee; padding: 5px;">
+                                    <!-- Inserido via JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Checkbox Outros -->
+                        <div style="margin-bottom: 5px;">
+                            <label style="cursor: pointer;">
+                                <input type="checkbox" id="check-outros" onclick="toggleLista('outros')"> Outros
+                            </label>
+                            <div id="box-outros" style="display: none; margin-top: 8px; padding-left: 20px;">
+                                <input type="text" id="outro-nome" placeholder="Nome do participante" style="width: 100%; padding: 6px; margin-bottom: 5px;">
+                                <input type="text" id="outro-contato" placeholder="Contato (Telefone/E-mail)" style="width: 100%; padding: 6px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 10px; background: #2e7d32; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Salvar Agendamento</button>
+                </form>
+            </div>
+
+            <!-- Coluna da Direita: Lista de Agendamentos (Cards) -->
+            <div class="list-card" style="flex: 1.5; min-width: 350px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h3>Agendamentos Cadastrados</h3>
+                <div id="container-cards-agendamentos" style="margin-top: 15px; max-height: 600px; overflow-y: auto;">
+                    <!-- Os cards serão injetados dinamicamente aqui -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 🔒 Verificação de Segurança
+        const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
+        const tipoUsuario = localStorage.getItem('pv43_tipo_usuario');
+
+        if (!nomeUsuario || !tipoUsuario) {
+            alert('⚠️ Acesso negado! Faça o login pelo sistema.');
+            window.location.href = 'pv43.html';
+        } else {
+            document.getElementById('usuario-logado-texto').innerText = `Logado como: ${nomeUsuario} (${tipoUsuario.toUpperCase()})`;
+        }
+
+        function voltarMenu() {
+            window.location.href = 'menu.html'; // Ajuste conforme o nome da sua página de menu principal
+        }
+
+        // Funções para abrir/fechar as caixas de seleção condicional
+        function toggleLista(tipo) {
+            const checkbox = document.getElementById(`check-${tipo}`);
+            const box = document.getElementById(`box-${tipo}`);
+            box.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        // Simulação de carregar listas de usuários do sistema (poderia vir do localStorage ou API)
+        function carregarListasUsuarios() {
+            // Mock de exemplo - Em um sistema real integrado, você buscaria da base geral
+            const admins = ['Ana Administradora', 'Carlos Gestor', 'Admin Master'];
+            const resps = ['Bruno Responsável', 'Daniela Líder', 'Eduardo Setor'];
+
+            const containerAdmin = document.getElementById('lista-admins-checkboxes');
+            containerAdmin.innerHTML = '';
+            admins.forEach((adm, idx) => {
+                containerAdmin.innerHTML += `<label style="display:block; font-size: 0.9rem;"><input type="checkbox" class="chk-item-admin" value="${adm}"> ${adm}</label>`;
+            });
+
+            const containerResp = document.getElementById('lista-resps-checkboxes');
+            containerResp.innerHTML = '';
+            resps.forEach((resp, idx) => {
+                containerResp.innerHTML += `<label style="display:block; font-size: 0.9rem;"><input type="checkbox" class="chk-item-resp" value="${resp}"> ${resp}</label>`;
+            });
+        }
+
+        function marcarTodos(tipo) {
+            const masterCheck = document.getElementById(`${tipo}-todos`);
+            const itens = document.querySelectorAll(`.chk-item-${tipo}`);
+            itens.forEach(chk => {
+                chk.checked = masterCheck.checked;
+            });
+        }
+
+        // Simulação do salvamento na estrutura correspondente à aba agenda (id_evento, titulo, conteudo, obs, data, horario, part_admin, part_resp, part_outros, contato_outros)
+        function salvarAgendamento(event) {
+            event.preventDefault();
+
+            const titulo = document.getElementById('titulo').value;
+            const conteudo = document.getElementById('conteudo').value;
+            const obs = document.getElementById('observacao').value;
+            const data = document.getElementById('data').value;
+            const horario = document.getElementById('horario').value;
+
+            // Coletar Administradores selecionados
+            let partAdminArr = [];
+            if(document.getElementById('check-admin').checked) {
+                const checkedAdmins = document.querySelectorAll('.chk-item-admin:checked');
+                checkedAdmins.forEach(c => partAdminArr.push(c.value));
+            }
+
+            // Coletar Responsáveis selecionados
+            let partRespArr = [];
+            if(document.getElementById('check-resp').checked) {
+                const checkedResps = document.querySelectorAll('.chk-item-resp:checked');
+                checkedResps.forEach(c => partRespArr.push(c.value));
+            }
+
+            // Coletar Outros
+            let partOutros = '';
+            let contatoOutros = '';
+            if(document.getElementById('check-outros').checked) {
+                partOutros = document.getElementById('outro-nome').value;
+                contatoOutros = document.getElementById('outro-contato').value;
+            }
+
+            const novoAgendamento = {
+                id_evento: 'EVT-' + Date.now(),
+                titulo,
+                conteudo,
+                obs,
+                data,
+                horario,
+                part_admin: partAdminArr.join(', '),
+                part_resp: partRespArr.join(', '),
+                part_outros: partOutros,
+                contato_outros: contatoOutros
+            };
+
+            // Salvar no localStorage (Simulando a base de dados da aba agenda)
+            let agendamentos = JSON.parse(localStorage.getItem('pv43_agenda') || '[]');
+            agendamentos.push(novoAgendamento);
+            localStorage.setItem('pv43_agenda', JSON.stringify(agendamentos));
+
+            alert('Agendamento criado com sucesso!');
+            document.getElementById('form-agendamento').reset();
+            document.getElementById('box-admin').style.display = 'none';
+            document.getElementById('box-resp').style.display = 'none';
+            document.getElementById('box-outros').style.display = 'none';
+            
+            carregarAgendamentosCards();
+        }
+
+        // Renderizar os agendamentos em formato de cards na tela
+        function carregarAgendamentosCards() {
+            const container = document.getElementById('container-cards-agendamentos');
+            const agendamentos = JSON.parse(localStorage.getItem('pv43_agenda') || '[]');
+
+            container.innerHTML = '';
+
+            if (agendamentos.length === 0) {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">Nenhum agendamento cadastrado.</p>';
+                return;
+            }
+
+            agendamentos.reverse().forEach(item => {
+                // Formatar data para exibição (aaaa-mm-dd para dd/mm/aaaa)
+                const dataSplit = item.data.split('-');
+                const dataFormatada = dataSplit.length === 3 ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : item.data;
+
+                container.innerHTML += `
+                    <div class="agenda-card" style="background: #f9f9f9; border-left: 4px solid #2e7d32; padding: 12px; margin-bottom: 12px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h4 style="margin: 0; color: #333;">${item.titulo}</h4>
+                            <span style="font-size: 0.8rem; background: #e8f5e9; color: #2e7d32; padding: 2px 6px; border-radius: 4px; font-weight: bold;">📅 ${dataFormatada} às ${item.horario}</span>
+                        </div>
+                        <p style="margin: 8px 0 4px 0; font-size: 0.9rem; color: #555;"><strong>Conteúdo:</strong> ${item.conteudo}</p>
+                        ${item.obs ? `<p style="margin: 4px 0; font-size: 0.85rem; color: #777;"><strong>Obs:</strong> ${item.obs}</p>` : ''}
+                        
+                        <div style="font-size: 0.8rem; margin-top: 8px; border-top: 1px dashed #ddd; padding-top: 6px; color: #444;">
+                            ${item.part_admin ? `<div><strong>Admin(s):</strong> ${item.part_admin}</div>` : ''}
+                            ${item.part_resp ? `<div><strong>Responsável(eis):</strong> ${item.part_resp}</div>` : ''}
+                            ${item.part_outros ? `<div><strong>Outro:</strong> ${item.part_outros} (${item.contato_outros})</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Inicializar dados ao carregar a página
+        carregarListasUsuarios();
+        carregarAgendamentosCards();
+    </script>
+</body>
+</html>
