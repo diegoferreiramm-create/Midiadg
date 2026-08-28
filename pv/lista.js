@@ -519,9 +519,7 @@ function renderizarTabela() {
                     if (podeEditar) {
                         valor = `
                             <div style="display: flex; gap: 3px; flex-wrap: wrap;">
-                                <button class="btn-editar" onclick="editarRegistro('${id}')" title="Editar">✏️</button>
                                 <button class="btn-excluir" onclick="excluirRegistro('${id}')" title="Excluir">🗑️</button>
-                                <button class="btn-visualizar" onclick="visualizarRegistro('${id}')" title="Visualizar">👁️</button>
                             </div>
                         `;
                     } else {
