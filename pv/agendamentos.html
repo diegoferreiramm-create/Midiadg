@@ -184,7 +184,7 @@
             });
         }
 
-        // Simulação do salvamento na estrutura correspondente à aba agenda (id_evento, titulo, conteudo, obs, data, horario, part_admin, part_resp, part_outros, contato_outros)
+        // Envio do formulário salvando via Google Apps Script (.gs)
         function salvarAgendamento(event) {
             event.preventDefault();
 
@@ -229,59 +229,99 @@
                 contato_outros: contatoOutros
             };
 
-            // Salvar no localStorage (Simulando a base de dados da aba agenda)
-            let agendamentos = JSON.parse(localStorage.getItem('pv43_agenda') || '[]');
-            agendamentos.push(novoAgendamento);
-            localStorage.setItem('pv43_agenda', JSON.stringify(agendamentos));
-
-            alert('Agendamento criado com sucesso!');
-            document.getElementById('form-agendamento').reset();
-            document.getElementById('box-admin').style.display = 'none';
-            document.getElementById('box-resp').style.display = 'none';
-            document.getElementById('box-outros').style.display = 'none';
-            
-            carregarAgendamentosCards();
+            google.script.run
+                .withSuccessHandler(function(resposta) {
+                    alert('Agendamento criado com sucesso!');
+                    document.getElementById('form-agendamento').reset();
+                    document.getElementById('box-admin').style.display = 'none';
+                    document.getElementById('box-resp').style.display = 'none';
+                    document.getElementById('box-outros').style.display = 'none';
+                    carregarCardsAgendamentos();
+                })
+                .salvarAgendamento(novoAgendamento);
         }
 
-        // Renderizar os agendamentos em formato de cards na tela
-        function carregarAgendamentosCards() {
+        // Renderizar os agendamentos em formato de cards na tela com link e confirmação dinâmica
+        function carregarCardsAgendamentos() {
             const container = document.getElementById('container-cards-agendamentos');
-            const agendamentos = JSON.parse(localStorage.getItem('pv43_agenda') || '[]');
+            
+            google.script.run.withSuccessHandler(function(agendamentos) {
+                container.innerHTML = '';
 
-            container.innerHTML = '';
+                if (!agendamentos || agendamentos.length === 0) {
+                    container.innerHTML = '<p style="color: #666; font-style: italic;">Nenhum agendamento cadastrado.</p>';
+                    return;
+                }
 
-            if (agendamentos.length === 0) {
-                container.innerHTML = '<p style="color: #666; font-style: italic;">Nenhum agendamento cadastrado.</p>';
-                return;
-            }
+                agendamentos.reverse().forEach(item => {
+                    const dataSplit = item.data.split('-');
+                    const dataFormatada = dataSplit.length === 3 ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : item.data;
 
-            agendamentos.reverse().forEach(item => {
-                // Formatar data para exibição (aaaa-mm-dd para dd/mm/aaaa)
-                const dataSplit = item.data.split('-');
-                const dataFormatada = dataSplit.length === 3 ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : item.data;
+                    const jaConfirmou = item.confirmados.includes(nomeUsuario);
 
-                container.innerHTML += `
-                    <div class="agenda-card" style="background: #f9f9f9; border-left: 4px solid #2e7d32; padding: 12px; margin-bottom: 12px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h4 style="margin: 0; color: #333;">${item.titulo}</h4>
-                            <span style="font-size: 0.8rem; background: #e8f5e9; color: #2e7d32; padding: 2px 6px; border-radius: 4px; font-weight: bold;">📅 ${dataFormatada} às ${item.horario}</span>
+                    // Formatar link para o Google Agenda pessoal
+                    const dataClean = item.data.replace(/-/g, '');
+                    const horaClean = item.horario.replace(':', '') + '00';
+                    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(item.titulo)}&dates=${dataClean}T${horaClean}/${dataClean}T${horaClean}&details=${encodeURIComponent(item.conteudo + (item.obs ? '\nObs: ' + item.obs : ''))}`;
+
+                    let botaoConfirmacaoHTML = '';
+                    if (jaConfirmou) {
+                        botaoConfirmacaoHTML = `<span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">✔ Presença Confirmada por você</span>`;
+                    } else {
+                        botaoConfirmacaoHTML = `
+                            <button onclick="confirmarPresenca('${item.id_evento}', '${googleCalendarUrl}')" style="background: #2e7d32; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold;">
+                                ✅ Confirmar Presença e Abrir Agenda
+                            </button>
+                        `;
+                    }
+
+                    let listaConfirmadosHTML = item.confirmados.length > 0 
+                        ? item.confirmados.join(', ') 
+                        : '<span style="color: #888; font-style: italic;">Nenhuma confirmação ainda</span>';
+
+                    container.innerHTML += `
+                        <div class="agenda-card" style="background: #fdfdfd; border: 1px solid #e0e0e0; border-left: 5px solid #2e7d32; padding: 15px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h4 style="margin: 0; color: #333; font-size: 1.1rem;">${item.titulo}</h4>
+                                <span style="font-size: 0.85rem; background: #e8f5e9; color: #2e7d32; padding: 3px 8px; border-radius: 4px; font-weight: bold;">📅 ${dataFormatada} às ${item.horario}</span>
+                            </div>
+                            
+                            <p style="margin: 10px 0 6px 0; font-size: 0.95rem; color: #444;"><strong>Conteúdo:</strong> ${item.conteudo}</p>
+                            ${item.obs ? `<p style="margin: 4px 0; font-size: 0.9rem; color: #666;"><strong>Observação:</strong> ${item.obs}</p>` : ''}
+                            
+                            <div style="font-size: 0.85rem; margin-top: 10px; background: #f9f9f9; padding: 8px; border-radius: 4px; border: 1px solid #eee;">
+                                ${item.part_admin ? `<div><strong>Admin(s):</strong> ${item.part_admin}</div>` : ''}
+                                ${item.part_resp ? `<div><strong>Responsável(eis):</strong> ${item.part_resp}</div>` : ''}
+                                ${item.part_outros ? `<div><strong>Outros:</strong> ${item.part_outros} (${item.contato_outros})</div>` : ''}
+                                <div style="margin-top: 5px; word-break: break-all;"><strong>Link do Evento:</strong> <a href="${item.link}" target="_blank" style="color: #1976d2;">${item.link}</a></div>
+                            </div>
+
+                            <div style="margin-top: 10px; font-size: 0.85rem; color: #333;">
+                                <strong>Quem já confirmou:</strong> ${listaConfirmadosHTML}
+                            </div>
+
+                            <div style="margin-top: 12px; display: flex; justify-content: flex-end; align-items: center;">
+                                ${botaoConfirmacaoHTML}
+                            </div>
                         </div>
-                        <p style="margin: 8px 0 4px 0; font-size: 0.9rem; color: #555;"><strong>Conteúdo:</strong> ${item.conteudo}</p>
-                        ${item.obs ? `<p style="margin: 4px 0; font-size: 0.85rem; color: #777;"><strong>Obs:</strong> ${item.obs}</p>` : ''}
-                        
-                        <div style="font-size: 0.8rem; margin-top: 8px; border-top: 1px dashed #ddd; padding-top: 6px; color: #444;">
-                            ${item.part_admin ? `<div><strong>Admin(s):</strong> ${item.part_admin}</div>` : ''}
-                            ${item.part_resp ? `<div><strong>Responsável(eis):</strong> ${item.part_resp}</div>` : ''}
-                            ${item.part_outros ? `<div><strong>Outro:</strong> ${item.part_outros} (${item.contato_outros})</div>` : ''}
-                        </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            }).carregarAgendamentosComConfirmados();
+        }
+
+        function confirmarPresenca(id_evento, googleCalendarUrl) {
+            google.script.run
+                .withSuccessHandler(function(resposta) {
+                    alert(resposta);
+                    window.open(googleCalendarUrl, '_blank');
+                    carregarCardsAgendamentos();
+                })
+                .confirmarPresencaNoEvento(id_evento, nomeUsuario);
         }
 
         // Inicializar dados ao carregar a página
         carregarListasUsuarios();
-        carregarAgendamentosCards();
+        carregarCardsAgendamentos();
     </script>
 </body>
 </html>
