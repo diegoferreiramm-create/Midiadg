@@ -1130,5 +1130,15 @@
 
         
     </script>
+    <body>
+
+    <!-- 🔒 TRAVA DE BLOQUEIO TOTAL -->
+    <script>
+        if (!localStorage.getItem('pv43_nome_usuario')) {
+            alert('Acesso restrito! Faça o login.');
+            window.location.replace('pv43.html');
+            throw new Error('Acesso negado');
+        }
+    </script>
 </body>
 </html>
