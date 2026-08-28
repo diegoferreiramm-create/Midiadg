@@ -6,6 +6,9 @@
     <title>PV43 - Cadastramento</title>
     <link rel="stylesheet" href="style.css">
     
+    <!-- 🔌 IMPORTAÇÃO DA CONFIGURAÇÃO DA API (SE HOUVER) -->
+    <script src="api.js"></script>
+
     <!-- 🔒 BLOQUEIO DE SEGURANÇA IMEDIATO (IMPEDE ACESSO DIRETO VIA URL) -->
     <script>
         (function() {
@@ -93,7 +96,6 @@
             <!-- Candidatos -->
             <div class="form-group candidatos-box">
                 <label>Candidato(s):</label>
-                <!-- Adicionamos o id="container-candidatos" aqui embaixo -->
                 <div id="container-candidatos" class="candidatos-opcoes" style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
                     <!-- Os checkboxes vão aparecer aqui automaticamente vindos da aba anexo -->
                 </div>
@@ -244,6 +246,60 @@
 
             zonaInput.addEventListener('input', acionarBuscaComAtraso);
             secaoInput.addEventListener('input', acionarBuscaComAtraso);
+
+            // ==========================================
+            // CARREGAMENTO AUTOMÁTICO DOS CANDIDATOS (VIA ABA ANEXO)
+            // ==========================================
+            function carregarCandidatos() {
+                const urlApi = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
+                    ? API_CONFIG.BASE_URL 
+                    : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
+
+                const urlCompleta = `${urlApi}?acao=buscarCandidatos`;
+
+                fetch(urlCompleta, {
+                    method: 'GET',
+                    redirect: 'follow'
+                })
+                .then(response => response.json())
+                .then(resposta => {
+                    const container = document.getElementById('container-candidatos');
+                    if (!container) return;
+
+                    container.innerHTML = ''; // Limpa antes de carregar
+
+                    if (resposta.sucesso && Array.isArray(resposta.candidatos) && resposta.candidatos.length > 0) {
+                        resposta.candidatos.forEach(function(candidato) {
+                            const label = document.createElement('label');
+                            label.style.cssText = "cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: normal;";
+                            
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.name = 'candidato';
+                            checkbox.value = candidato;
+
+                            const span = document.createElement('span');
+                            span.innerText = candidato;
+
+                            label.appendChild(checkbox);
+                            label.appendChild(span);
+                            container.appendChild(label);
+                        });
+                    } else {
+                        container.innerHTML = '<span style="color: #888; font-size: 0.85rem;">Nenhum candidato encontrado.</span>';
+                    }
+                })
+                .catch(err => {
+                    console.error('❌ Erro ao carregar candidatos:', err);
+                    const container = document.getElementById('container-candidatos');
+                    if (container) {
+                        container.innerHTML = '<span style="color: red; font-size: 0.85rem;">Erro ao carregar candidatos.</span>';
+                    }
+                });
+            }
+
+            // Executa a busca dos candidatos ao abrir a página
+            carregarCandidatos();
 
             // ==========================================
             // VALIDAÇÃO DO TÍTULO DE ELEITOR
