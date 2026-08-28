@@ -147,7 +147,7 @@
             margin-top: 5px;
         }
 
-        /* Grade de Gráficos com Proporções Inteligentes */
+        /* Grade de Gráficos e Tabelas */
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
@@ -194,9 +194,9 @@
         .h-medio { min-height: 200px; max-height: 240px; }
         .h-grande { min-height: 280px; max-height: 340px; }
 
-        /* Estilo da Tabela do Responsável */
+        /* Estilo das Tabelas Internas */
         .tabela-responsavel-container {
-            max-height: 320px;
+            max-height: 240px;
             overflow-y: auto;
             width: 100%;
         }
@@ -232,7 +232,6 @@
         }
 
         .barra-progresso-fill {
-            background: var(--pv-green);
             height: 100%;
             border-radius: 4px;
         }
@@ -260,11 +259,10 @@
             max-width: 900px;
             height: 80vh;
             max-height: 800px;
-            padding: 0; /* Removido o padding daqui para o header e body controlarem individualmente */
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden; /* Trava qualquer conteúdo que queira vazar para fora do modal */
+            overflow: hidden;
         }
         
         .modal-header {
@@ -291,7 +289,7 @@
             flex: 1;
             position: relative;
             padding: 20px;
-            overflow: hidden; /* O scroll interno gerado pelo JS vai cuidar daqui */
+            overflow-y: auto;
         }
 
         @media (max-width: 1024px) {
@@ -300,6 +298,15 @@
     </style>
 </head>
 <body>
+
+    <!-- 🔒 TRAVA DE BLOQUEIO TOTAL -->
+    <script>
+        if (!localStorage.getItem('pv43_nome_usuario')) {
+            alert('Acesso restrito! Faça o login.');
+            window.location.replace('pv43.html');
+            throw new Error('Acesso negado');
+        }
+    </script>
 
     <div class="dash-container">
         
@@ -385,125 +392,135 @@
             </div>
         </div>
 
-        <!-- Grade de Gráficos (Proporções Otimizadas) -->
+        <!-- Grade de Gráficos e Tabelas -->
         <div class="charts-grid">
             
-            <!-- 1. Administrador (Barras Horizontais - col-4) -->
+            <!-- 1. Administrador (Azul) -->
             <div class="chart-card col-4">
                 <div class="chart-header" onclick="abrirModal('graficoAdmin', '🛡️ Cadastros por Administrador')">🛡️ Cadastros por Administrador 🔍</div>
                 <div class="canvas-container h-pequeno"><canvas id="graficoAdmin"></canvas></div>
             </div>
 
-            <!-- 2. Candidato (Colunas Verticais - col-4) -->
+            <!-- 2. Candidato (Amarelo / Dourado) -->
             <div class="chart-card col-4" id="cardGraficoCandidato">
                 <div class="chart-header" onclick="abrirModal('graficoCandidato', '⭐ Desempenho por Candidato')">⭐ Desempenho por Candidato 🔍</div>
                 <div class="canvas-container h-pequeno"><canvas id="graficoCandidato"></canvas></div>
             </div>
 
-            <!-- 3. Engajamento por Nível (Rosca - col-4) -->
+            <!-- 3. Engajamento por Nível (Multicor / Rosca) -->
             <div class="chart-card col-4">
                 <div class="chart-header" onclick="abrirModal('graficoNivel', '🎯 Engajamento por Nível')">🎯 Engajamento por Nível 🔍</div>
                 <div class="canvas-container h-pequeno"><canvas id="graficoNivel"></canvas></div>
             </div>
 
-            <!-- 4. Zona Eleitoral (Barras Horizontais - col-6) -->
+            <!-- 4. Zona Eleitoral (Verde Esmeralda) -->
             <div class="chart-card col-6">
-                <div class="chart-header" onclick="abrirModal('graficoZona', '🗳️ Eleitores por Zona Eleitoral')">🗳️ Eleitores por Zona Eleitoral 🔍</div>
-                <div class="canvas-container h-medio"><canvas id="graficoZona"></canvas></div>
+                <div class="chart-header" onclick="abrirModalTabelaGenerica('tabelaZonaContainer', '🗳️ Eleitores por Zona Eleitoral')">🗳️ Eleitores por Zona Eleitoral 🔍</div>
+                <div class="tabela-responsavel-container" id="tabelaZonaContainer"></div>
             </div>
 
-            <!-- 5. Seção de Votação (Barras Horizontais - col-6) -->
+            <!-- 5. Seção de Votação (Roxo / Violeta) -->
             <div class="chart-card col-6">
-                <div class="chart-header" onclick="abrirModal('graficoSecao', '🏫 Eleitores por Seção de Votação')">🏫 Eleitores por Seção de Votação 🔍</div>
-                <div class="canvas-container h-medio"><canvas id="graficoSecao"></canvas></div>
+                <div class="chart-header" onclick="abrirModalTabelaGenerica('tabelaSecaoContainer', '🏫 Eleitores por Seção de Votação')">🏫 Eleitores por Seção de Votação 🔍</div>
+                <div class="tabela-responsavel-container" id="tabelaSecaoContainer"></div>
             </div>
 
-            <!-- 6. Bairro do Local de Votação (Barras Horizontais - col-6) -->
+            <!-- 6. Bairro do Local de Votação (Laranja) -->
             <div class="chart-card col-6">
-                <div class="chart-header" onclick="abrirModal('graficoBairroVotacao', '📍 Bairro do Local de Votação')">📍 Bairro do Local de Votação 🔍</div>
-                <div class="canvas-container h-medio"><canvas id="graficoBairroVotacao"></canvas></div>
+                <div class="chart-header" onclick="abrirModalTabelaGenerica('tabelaBairroVotacaoContainer', '📍 Bairro do Local de Votação')">📍 Bairro do Local de Votação 🔍</div>
+                <div class="tabela-responsavel-container" id="tabelaBairroVotacaoContainer"></div>
             </div>
 
-            <!-- 7. Local de Votação / Escola (Barras Horizontais - col-6) -->
+            <!-- 7. Local de Votação / Escola (Rosa / Magenta) -->
             <div class="chart-card col-6">
-                <div class="chart-header" onclick="abrirModal('graficoLocalVotacao', '🏫 Eleitores por Local de Votação (Escola)')">🏫 Eleitores por Local de Votação (Escola) 🔍</div>
-                <div class="canvas-container h-medio"><canvas id="graficoLocalVotacao"></canvas></div>
+                <div class="chart-header" onclick="abrirModalTabelaGenerica('tabelaLocalVotacaoContainer', '🏫 Eleitores por Local de Votação (Escola)')">🏫 Eleitores por Local de Votação (Escola) 🔍</div>
+                <div class="tabela-responsavel-container" id="tabelaLocalVotacaoContainer"></div>
             </div>
 
-            <!-- 8. Bairro do Eleitor (Barras Horizontais - col-6) -->
+            <!-- 8. Bairro do Eleitor (Azul Ciano) -->
             <div class="chart-card col-6">
-                <div class="chart-header" onclick="abrirModal('graficoBairroMorador', '🏠 Bairro do Eleitor')">🏠 Bairro do Eleitor 🔍</div>
-                <div class="canvas-container h-medio"><canvas id="graficoBairroMorador"></canvas></div>
+                <div class="chart-header" onclick="abrirModalTabelaGenerica('tabelaBairroMoradorContainer', '🏠 Bairro do Eleitor')">🏠 Bairro do Eleitor 🔍</div>
+                <div class="tabela-responsavel-container" id="tabelaBairroMoradorContainer"></div>
             </div>
 
-            <!-- 9. Faixa Etária (Colunas Verticais - col-6) -->
+            <!-- 9. Faixa Etária (Verde Limão) -->
             <div class="chart-card col-6">
                 <div class="chart-header" onclick="abrirModal('graficoFaixaEtaria', '👥 Faixa Etária (Data de Nascimento)')">👥 Faixa Etária (Data de Nascimento) 🔍</div>
                 <div class="canvas-container h-medio"><canvas id="graficoFaixaEtaria"></canvas></div>
             </div>
 
-            <!-- 10. Eleitores por Cidade (Colunas Verticais - col-6) -->
+            <!-- 10. Eleitores por Cidade (Vermelho Coral) -->
             <div class="chart-card col-6">
-                <div class="chart-header" onclick="abrirModal('graficoCidade', '🏙️ Eleitores por Cidade')">🏙️ Eleitores por Cidade 🔍</div>
-                <div class="canvas-container h-medio"><canvas id="graficoCidade"></canvas></div>
+                <div class="chart-header" onclick="abrirModalTabelaGenerica('tabelaCidadeContainer', '🏙️ Eleitores por Cidade')">🏙️ Eleitores por Cidade 🔍</div>
+                <div class="tabela-responsavel-container" id="tabelaCidadeContainer"></div>
             </div>
 
-            <!-- 11. Escala de Tempo (Gráfico de Área / Linha - col-12) -->
+            <!-- 11. Escala de Tempo (Azul Céu - Linha/Área) -->
             <div class="chart-card col-12">
                 <div class="chart-header" onclick="abrirModal('graficoTempo', '📈 Escala de Tempo (Cadastros por Data)')">📈 Escala de Tempo (Cadastros por Data) 🔍</div>
                 <div class="canvas-container h-grande"><canvas id="graficoTempo"></canvas></div>
             </div>
 
-            <!-- 12. Cadastros por Responsável (Tabela com Mini Barras - col-12) -->
+            <!-- 12. Cadastros por Responsável (Amarelo Âmbar) -->
             <div class="chart-card col-12">
-                <div class="chart-header" onclick="abrirModalTabela()">👤 Cadastros por Responsável (Top/Lista Completa) 🔍</div>
-                <div class="tabela-responsavel-container" id="tabelaResponsavelContainer">
-                    <!-- Preenchido via JS -->
-                </div>
+                <div class="chart-header" onclick="abrirModalTabelaGenerica('tabelaResponsavelContainer', '👤 Cadastros por Responsável (Top/Lista Completa)')">👤 Cadastros por Responsável (Top/Lista Completa) 🔍</div>
+                <div class="tabela-responsavel-container" id="tabelaResponsavelContainer"></div>
             </div>
 
         </div>
 
     </div>
 
-    <!-- Modal Pop-up para Gráficos -->
+    <!-- Modal Pop-up -->
     <div class="modal-overlay" id="modalGrafico">
         <div class="modal-content">
             <div class="modal-header">
-                <span id="modalTitulo">Ampliação do Gráfico</span>
+                <span id="modalTitulo" style="font-weight: bold; font-size: 0.9rem;">Ampliação</span>
                 <button class="modal-close" onclick="fecharModal()">×</button>
             </div>
-            <div class="modal-body">
-                <canvas id="canvasModal"></canvas>
+            <div class="modal-body" id="modalBodyContent">
+                <!-- Conteúdo dinâmico (Gráfico ou Tabela) -->
             </div>
         </div>
     </div>
 
     <script src="api.js"></script>
     <script>
-        let chartAdmin, chartResp, chartCandidato, chartNivel, chartCidade, chartLocalVot, chartZona, chartSecao, chartBairroMorador, chartBairroVot, chartEtaria, chartTempo;
+        let chartAdmin, chartCandidato, chartNivel, chartEtaria, chartTempo;
         let chartModalInstance = null;
         let dadosEleitores = [];
         let dadosGlobaisCache = {};
+
+        // Paleta de cores exclusiva para cada gráfico/tabela
+        const CORES = {
+            admin: '#3b82f6',          // Azul Royal
+            candidato: '#eab308',      // Dourado / Amarelo
+            nivel: ['#22c55e', '#3b82f6', '#64748b'], // Verde, Azul, Cinza
+            zona: '#10b981',           // Verde Esmeralda
+            secao: '#8b5cf6',          // Roxo / Violeta
+            bairroVot: '#f97316',      // Laranja
+            localVot: '#ec4899',       // Rosa / Magenta
+            bairroMor: '#06b6d4',      // Azul Ciano
+            etaria: '#84cc16',         // Verde Limão
+            cidade: '#ef4444',         // Vermelho Coral
+            tempo: '#0ea5e9',          // Azul Céu
+            responsavel: '#f59e0b'     // Âmbar
+        };
 
         document.addEventListener("DOMContentLoaded", function() {
             const nomeUsuario = localStorage.getItem('pv43_nome_usuario') || 'Usuário';
             document.getElementById('info-usuario').innerText = `Conectado: ${nomeUsuario}`;
             carregarDadosIniciais();
 
-            // Atualiza automaticamente a cada 30 segundos (30000 milissegundos)
             setInterval(() => {
                 carregarDadosIniciaisSilencioso();
             }, 30000);
         });
 
-        
-
         function carregarDadosIniciais() {
             const URL_API = window.API_CONFIG ? window.API_CONFIG.BASE_URL : '';
             
             if (!URL_API) {
-                // Fallback para localStorage caso não use API externa
                 const dadosSalvos = localStorage.getItem('pv43_cadastros');
                 if (dadosSalvos) {
                     dadosEleitores = JSON.parse(dadosSalvos);
@@ -513,7 +530,6 @@
                 return;
             }
 
-            // Chamada real ao Google Apps Script
             fetch(URL_API + '?acao=retornarCadastros')
                 .then(response => response.json())
                 .then(resposta => {
@@ -536,21 +552,21 @@
                 .then(response => response.json())
                 .then(resposta => {
                     if (resposta.sucesso && resposta.dados) {
-                        // Só atualiza se a quantidade de registros mudou ou se houve alteração real
                         if (JSON.stringify(dadosEleitores) !== JSON.stringify(resposta.dados)) {
                             dadosEleitores = resposta.dados;
-                            popularFiltrosGlobais(); // Atualiza os selects mantendo a lógica
-                            atualizarDashboard();    // Redesenha os gráficos e KPIs na hora
-                            console.log("Dashboard atualizado com novos dados da planilha!");
+                            popularFiltrosGlobais();
+                            atualizarDashboard();
                         }
                     }
-                }) // <-- Faltava fechar este .then()
+                })
                 .catch(erro => console.error('Erro na atualização em segundo plano:', erro));
         }
 
         function popularFiltrosGlobais() {
-            preencherSelect('filtroAdmin', [...new Set(dadosEleitores.map(i => i.numero_cha).filter(Boolean))]);
-            // Quebra candidatos separados por vírgula para listar individualmente
+            const ordenarAlfa = (a, b) => String(a).localeCompare(String(b), 'pt-BR', { numeric: true });
+
+            preencherSelect('filtroAdmin', [...new Set(dadosEleitores.map(i => i.numero_cha).filter(Boolean))].sort(ordenarAlfa));
+            
             const candidatosSet = new Set();
             dadosEleitores.forEach(i => {
                 if (i.candidato) {
@@ -560,13 +576,13 @@
                     });
                 }
             });
-            preencherSelect('filtroCandidato', [...candidatosSet]);
+            preencherSelect('filtroCandidato', [...candidatosSet].sort(ordenarAlfa));
            
-            preencherSelect('filtroCidade', [...new Set(dadosEleitores.map(i => i.cidade).filter(Boolean))]);
-            preencherSelect('filtroZona', [...new Set(dadosEleitores.map(i => i.zona).filter(Boolean))]);
-            preencherSelect('filtroSecao', [...new Set(dadosEleitores.map(i => i.secao).filter(Boolean))]);
-            preencherSelect('filtroBairroVot', [...new Set(dadosEleitores.map(i => i.bairro_vot || i.bairro).filter(Boolean))]);
-            preencherSelect('filtroBairroMor', [...new Set(dadosEleitores.map(i => i.bairro).filter(Boolean))]);
+            preencherSelect('filtroCidade', [...new Set(dadosEleitores.map(i => i.cidade).filter(Boolean))].sort(ordenarAlfa));
+            preencherSelect('filtroZona', [...new Set(dadosEleitores.map(i => i.zona).filter(Boolean))].sort(ordenarAlfa));
+            preencherSelect('filtroSecao', [...new Set(dadosEleitores.map(i => i.secao).filter(Boolean))].sort(ordenarAlfa));
+            preencherSelect('filtroBairroVot', [...new Set(dadosEleitores.map(i => i.bairro_vot || i.bairro).filter(Boolean))].sort(ordenarAlfa));
+            preencherSelect('filtroBairroMor', [...new Set(dadosEleitores.map(i => i.bairro).filter(Boolean))].sort(ordenarAlfa));
             atualizarFiltroResponsaveis();
         }
 
@@ -592,23 +608,22 @@
             const admin = document.getElementById('filtroAdmin').value;
             let base = dadosEleitores;
             
-            // Se um administrador (numero_cha) estiver selecionado, filtra os responsáveis pertencentes a ele
             if (admin) {
                 base = dadosEleitores.filter(i => i.numero_cha === admin);
             }
     
-    // Pega unicamente os valores da coluna C (numero_sec)
-    const responsaveis = [...new Set(base.map(i => i.numero_sec).filter(Boolean))].sort();
-    
-    const selectResp = document.getElementById('filtroResponsavel');
-    selectResp.innerHTML = '<option value="">Todos os Responsáveis</option>';
-    responsaveis.forEach(resp => {
-        const opt = document.createElement('option');
-        opt.value = resp;
-        opt.textContent = resp;
-        selectResp.appendChild(opt);
-    });
-}
+            const ordenarAlfa = (a, b) => String(a).localeCompare(String(b), 'pt-BR', { numeric: true });
+            const responsaveis = [...new Set(base.map(i => i.numero_sec).filter(Boolean))].sort(ordenarAlfa);
+            
+            const selectResp = document.getElementById('filtroResponsavel');
+            selectResp.innerHTML = '<option value="">Todos os Responsáveis</option>';
+            responsaveis.forEach(resp => {
+                const opt = document.createElement('option');
+                opt.value = resp;
+                opt.textContent = resp;
+                selectResp.appendChild(opt);
+            });
+        }
 
         function zerarFiltros() {
             document.getElementById('filtroAdmin').value = "";
@@ -626,22 +641,18 @@
 
         function calcularIdade(dataNasc) {
             if (!dataNasc) return 0;
+            let ano, mes = 0, dia = 1;
         
-            let ano, mes, dia;
-        
-            // Verifica se a data está no formato brasileiro (DD/MM/YYYY ou DD-MM-YYYY)
             if (dataNasc.includes('/')) {
                 const partes = dataNasc.split('/');
                 if (partes.length === 3) {
                     dia = parseInt(partes[0], 10);
-                    mes = parseInt(partes[1], 10) - 1; // Meses no JS vão de 0 a 11
+                    mes = parseInt(partes[1], 10) - 1;
                     ano = parseInt(partes[2], 10);
                 }
             } else {
-                // Assume o formato padrão (YYYY-MM-DD)
                 const partes = dataNasc.split('T')[0].split(/[-]/);
                 if (partes.length === 3) {
-                    // Se o ano vier por último (ex: DD-MM-YYYY com hífen)
                     if (partes[0].length === 2) {
                         dia = parseInt(partes[0], 10);
                         mes = parseInt(partes[1], 10) - 1;
@@ -658,17 +669,15 @@
         
             const hoje = new Date();
             const nascimento = new Date(ano, mes, dia);
-            
             let idade = hoje.getFullYear() - nascimento.getFullYear();
             const m = hoje.getMonth() - nascimento.getMonth();
         
-            // Se ainda não chegou o mês do aniversário, ou se chegou o mês mas o dia ainda não passou, diminui 1 ano
             if (m < 0 || (m === 0 && hoje.getDate() < nascimento.getDate())) {
                 idade--;
             }
-        
             return idade;
         }
+
         function atualizarDashboard() {
             const fAdmin = document.getElementById('filtroAdmin').value;
             const fResp = document.getElementById('filtroResponsavel').value;
@@ -689,7 +698,7 @@
             let filtrados = dadosEleitores.filter(i => {
                 if (fAdmin && i.numero_cha !== fAdmin) return false;
                 if (fResp && i.numero_sec !== fResp) return false;
-                if (fCand && (!i.candidato || !i.candidato.includes(fCand))) return false; // Usa includes para achar mesmo se estiver junto de outro
+                if (fCand && (!i.candidato || !i.candidato.includes(fCand))) return false;
                 if (fCidade && i.cidade !== fCidade) return false;
                 if (fZona && i.zona !== fZona) return false;
                 if (fSecao && i.secao !== fSecao) return false;
@@ -707,100 +716,70 @@
         }
 
         function renderizarGraficos(dados, fCand) {
-            // Salva dados processados para uso no modal
             dadosGlobaisCache = {};
         
-            // Função auxiliar para filtrar apenas os 15 maiores para a tela principal
             const pegarTop15 = (objDados) => {
                 return Object.fromEntries(
                     Object.entries(objDados).sort((a, b) => b[1] - a[1]).slice(0, 15)
                 );
             };
         
-            // 1. Administrador (Barras Horizontais) - Limitado ao Top 15
+            // 1. Administrador
             const cAdmin = {};
             dados.forEach(i => { const k = i.numero_cha || 'N/D'; cAdmin[k] = (cAdmin[k] || 0) + 1; });
-            dadosGlobaisCache['graficoAdmin'] = { type: 'bar', data: cAdmin, color: '#3b82f6', horizontal: true };
-            chartAdmin = criarGraficoBarra('graficoAdmin', pegarTop15(cAdmin), '#3b82f6', (val) => {
+            dadosGlobaisCache['graficoAdmin'] = { type: 'bar', data: cAdmin, color: CORES.admin, horizontal: true };
+            chartAdmin = criarGraficoBarra('graficoAdmin', pegarTop15(cAdmin), CORES.admin, (val) => {
                 document.getElementById('filtroAdmin').value = val;
                 aoMudarAdmin();
             }, true);
         
-            // 2. Candidato (Colunas Verticais) - Limitado ao Top 15
+            // 2. Candidato
             if (!fCand) {
                 const cCand = {};
                 dados.forEach(i => { const k = i.candidato || 'N/D'; cCand[k] = (cCand[k] || 0) + 1; });
-                dadosGlobaisCache['graficoCandidato'] = { type: 'bar', data: cCand, color: '#eab308', horizontal: false };
-                chartCandidato = criarGraficoBarra('graficoCandidato', pegarTop15(cCand), '#eab308', (val) => {
+                dadosGlobaisCache['graficoCandidato'] = { type: 'bar', data: cCand, color: CORES.candidato, horizontal: false };
+                chartCandidato = criarGraficoBarra('graficoCandidato', pegarTop15(cCand), CORES.candidato, (val) => {
                     document.getElementById('filtroCandidato').value = val;
                     atualizarDashboard();
                 }, false);
             }
         
-            // 3. Engajamento por Nível (Rosca) - Mantém completo (são só 3 níveis)
+            // 3. Nível
             const cNivel = { 'Nível 1': 0, 'Nível 2': 0, 'Nível 3': 0 };
             dados.forEach(i => {
                 if (i.nivel == '1') cNivel['Nível 1']++;
                 else if (i.nivel == '2') cNivel['Nível 2']++;
                 else cNivel['Nível 3']++;
             });
-            dadosGlobaisCache['graficoNivel'] = { type: 'doughnut', data: cNivel };
-            chartNivel = criarGraficoDoughnut('graficoNivel', cNivel, dados.length);
+            dadosGlobaisCache['graficoNivel'] = { type: 'doughnut', data: cNivel, colors: CORES.nivel };
+            chartNivel = criarGraficoDoughnut('graficoNivel', cNivel, dados.length, CORES.nivel);
         
-            // 4. Zona Eleitoral (Barras Horizontais) - Ajustado para o Top 15 real
+            // 4. Zona Eleitoral (Tabela)
             const cZona = {};
             dados.forEach(i => { const k = i.zona || 'N/D'; cZona[k] = (cZona[k] || 0) + 1; });
-    
-            // Salva os dados completos no cache global
-            dadosGlobaisCache['graficoZona'] = { type: 'bar', data: cZona, color: '#06b6d4', horizontal: true };
-            
-            // Cria o gráfico aplicando o filtro dos 15 maiores alinhados no topo
-            chartZona = criarGraficoBarra('graficoZona', pegarTop15Horizontal(cZona), '#06b6d4', (val) => {
-                document.getElementById('filtroZona').value = val;
-                atualizarDashboard();
-            }, true);
+            renderizarTabelaGenerica(cZona, 'tabelaZonaContainer', 'Zona Eleitoral', CORES.zona);
         
-            // 5. Seção de Votação (Barras Horizontais) - Ajustado para o Top 15 real
+            // 5. Seção de Votação (Tabela)
             const cSecao = {};
             dados.forEach(i => { const k = i.secao || 'N/D'; cSecao[k] = (cSecao[k] || 0) + 1; });
-    
-            // Salva os dados completos no cache global
-            dadosGlobaisCache['graficoSecao'] = { type: 'bar', data: cSecao, color: '#f59e0b', horizontal: true };
-            
-            // Cria o gráfico aplicando o filtro dos 15 maiores alinhados no topo
-            chartSecao = criarGraficoBarra('graficoSecao', pegarTop15Horizontal(cSecao), '#f59e0b', (val) => {
-                document.getElementById('filtroSecao').value = val;
-                atualizarDashboard();
-            }, true);
+            renderizarTabelaGenerica(cSecao, 'tabelaSecaoContainer', 'Seção de Votação', CORES.secao);
         
-            // 6. Bairro do Local de Votação (Barras Horizontais) - Limitado ao Top 15
+            // 6. Bairro do Local de Votação (Tabela)
             const cBairroVot = {};
             dados.forEach(i => { const k = i.bairro_vot || i.bairro || 'N/D'; cBairroVot[k] = (cBairroVot[k] || 0) + 1; });
-            dadosGlobaisCache['graficoBairroVotacao'] = { type: 'bar', data: cBairroVot, color: '#ec4899', horizontal: true }; // <--- Alterado para true
-            chartBairroVotacao = criarGraficoBarra('graficoBairroVotacao', pegarTop15(cBairroVot), '#ec4899', (val) => {
-                document.getElementById('filtroBairroVot').value = val;
-                atualizarDashboard();
-            }, true); // <--- Alterado para true
+            renderizarTabelaGenerica(cBairroVot, 'tabelaBairroVotacaoContainer', 'Bairro do Local de Votação', CORES.bairroVot);
         
-            // 7. Local de Votação / Escola (Barras Horizontais) - Limitado ao Top 15
+            // 7. Local de Votação / Escola (Tabela)
             const cLocalVot = {};
             dados.forEach(i => { const k = i.local_vot || 'N/D'; cLocalVot[k] = (cLocalVot[k] || 0) + 1; });
-            dadosGlobaisCache['graficoLocalVotacao'] = { type: 'bar', data: cLocalVot, color: '#6366f1', horizontal: true };
-            chartLocalVot = criarGraficoBarra('graficoLocalVotacao', pegarTop15(cLocalVot), '#6366f1', (val) => {
-                document.getElementById('filtroBairroVot').value = val;
-                atualizarDashboard();
-            }, true);
+            renderizarTabelaGenerica(cLocalVot, 'tabelaLocalVotacaoContainer', 'Local de Votação (Escola)', CORES.localVot);
         
-            // 8. Bairro do Eleitor (Barras Horizontais) - Limitado ao Top 15
+            // 8. Bairro do Eleitor (Tabela)
             const cBairroMor = {};
             dados.forEach(i => { const k = i.bairro || 'N/D'; cBairroMor[k] = (cBairroMor[k] || 0) + 1; });
-            dadosGlobaisCache['graficoBairroMorador'] = { type: 'bar', data: cBairroMor, color: '#15803d', horizontal: true };
-            chartBairroMorador = criarGraficoBarra('graficoBairroMorador', pegarTop15(cBairroMor), '#15803d', (val) => {
-                document.getElementById('filtroBairroMor').value = val;
-                atualizarDashboard();
-            }, true);
+            renderizarTabelaGenerica(cBairroMor, 'tabelaBairroMoradorContainer', 'Bairro do Eleitor', CORES.bairroMor);
         
-            // 9. Faixa Etária (Colunas Verticais Clássicas) - Mantém completo (são 4 faixas fixas)
+            // 9. Faixa Etária
             const cFaixa = { '16 a 30 anos': 0, '31 a 45 anos': 0, '46 a 60 anos': 0, 'Mais de 60 anos': 0 };
             dados.forEach(i => {
                 const idade = calcularIdade(i.data_nasc);
@@ -809,55 +788,37 @@
                 else if (idade >= 46 && idade <= 60) cFaixa['46 a 60 anos']++;
                 else if (idade > 60) cFaixa['Mais de 60 anos']++;
             });
-            dadosGlobaisCache['graficoFaixaEtaria'] = { type: 'bar', data: cFaixa, color: '#8b5cf6', horizontal: false };
-            chartEtaria = criarGraficoBarra('graficoFaixaEtaria', cFaixa, '#8b5cf6', null, false);
+            dadosGlobaisCache['graficoFaixaEtaria'] = { type: 'bar', data: cFaixa, color: CORES.etaria, horizontal: false };
+            chartEtaria = criarGraficoBarra('graficoFaixaEtaria', cFaixa, CORES.etaria, null, false);
         
-            // 10. Eleitores por Cidade (Colunas Verticais) - Limitado ao Top 15
+            // 10. Cidade (Tabela)
             const cCidade = {};
             dados.forEach(i => { const k = i.cidade || 'N/D'; cCidade[k] = (cCidade[k] || 0) + 1; });
-            dadosGlobaisCache['graficoCidade'] = { type: 'bar', data: cCidade, color: '#10b981', horizontal: false };
-            chartCidade = criarGraficoBarra('graficoCidade', pegarTop15(cCidade), '#10b981', (val) => {
-                document.getElementById('filtroCidade').value = val;
-                atualizarDashboard();
-            }, false);
+            renderizarTabelaGenerica(cCidade, 'tabelaCidadeContainer', 'Cidade', CORES.cidade);
         
-            // 11. Escala de Tempo (Gráfico de Linha) - Mantém por data cronológica
+            // 11. Tempo
             const cTempo = {};
             let dadosOrdenados = [...dados].sort((a, b) => new Date(a.data) - new Date(b.data));
             dadosOrdenados.forEach(i => { const k = i.data || 'N/D'; cTempo[k] = (cTempo[k] || 0) + 1; });
-            dadosGlobaisCache['graficoTempo'] = { type: 'line', data: cTempo, color: '#0ea5e9' };
-            chartTempo = criarGraficoArea('graficoTempo', cTempo, '#0ea5e9');
+            dadosGlobaisCache['graficoTempo'] = { type: 'line', data: cTempo, color: CORES.tempo };
+            chartTempo = criarGraficoArea('graficoTempo', cTempo, CORES.tempo);
         
-            // 12. Responsável (Tabela com Mini Barras Embutidas)
-            renderizarTabelaResponsavel(dados);
-        }
-
-        function pegarTop15Horizontal(objDados) {
-            const entries = Object.entries(objDados)
-                .filter(([key, val]) => val > 0 && key !== 'N/D')
-                .sort((a, b) => a[1] - b[1]); 
-            return Object.fromEntries(entries.slice(-15));
-        }
-
-        
-        function renderizarTabelaResponsavel(dados) {
+            // 12. Responsável (Tabela)
             const cResp = {};
-            dados.forEach(i => { 
-                // Mudado de i.nome para i.numero_sec (que é a Coluna C)
-                const k = i.numero_sec || 'N/D'; 
-                cResp[k] = (cResp[k] || 0) + 1; 
-            });
-            
-            // Ordenar do maior para o menor
-            const ordenados = Object.entries(cResp).sort((a, b) => b[1] - a[1]);
+            dados.forEach(i => { const k = i.numero_sec || 'N/D'; cResp[k] = (cResp[k] || 0) + 1; });
+            renderizarTabelaGenerica(cResp, 'tabelaResponsavelContainer', 'Responsável / Coluna C (Sec)', CORES.responsavel);
+        }
+
+        function renderizarTabelaGenerica(dadosObj, containerId, nomeColuna, corBarra) {
+            const ordenados = Object.entries(dadosObj).sort((a, b) => b[1] - a[1]);
             const maxVal = ordenados.length > 0 ? ordenados[0][1] : 1;
 
             let html = `
-                <table class="tabela-responsavel">
+                <table class="tabela-responsavel" style="width: 100%; border-collapse: collapse;">
                     <thead>
                         <tr>
-                            <th>Responsável / Coluna C (Sec)</th>
-                            <th style="width: 100px; text-align: right;">Cadastros</th>
+                            <th>${nomeColuna}</th>
+                            <th style="width: 80px; text-align: right;">Total</th>
                             <th style="width: 40%;">Proporção</th>
                         </tr>
                     </thead>
@@ -869,13 +830,29 @@
             } else {
                 ordenados.forEach(([nome, qtd]) => {
                     const pct = Math.round((qtd / maxVal) * 100);
+                    
+                    let acaoClique = "";
+                    if (containerId === 'tabelaCidadeContainer') {
+                        acaoClique = `document.getElementById('filtroCidade').value = '${nome.replace(/'/g, "\\'")}'; atualizarDashboard();`;
+                    } else if (containerId === 'tabelaZonaContainer') {
+                        acaoClique = `document.getElementById('filtroZona').value = '${nome}'; atualizarDashboard();`;
+                    } else if (containerId === 'tabelaSecaoContainer') {
+                        acaoClique = `document.getElementById('filtroSecao').value = '${nome}'; atualizarDashboard();`;
+                    } else if (containerId === 'tabelaBairroMoradorContainer') {
+                        acaoClique = `document.getElementById('filtroBairroMor').value = '${nome.replace(/'/g, "\\'")}'; atualizarDashboard();`;
+                    } else if (containerId === 'tabelaBairroVotacaoContainer') {
+                        acaoClique = `document.getElementById('filtroBairroVot').value = '${nome.replace(/'/g, "\\'")}'; atualizarDashboard();`;
+                    } else if (containerId === 'tabelaResponsavelContainer') {
+                        acaoClique = `document.getElementById('filtroResponsavel').value = '${nome}'; atualizarDashboard();`;
+                    }
+
                     html += `
-                        <tr>
+                        <tr onclick="${acaoClique}" style="cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='transparent'">
                             <td><strong>${nome}</strong></td>
                             <td style="text-align: right;">${qtd}</td>
                             <td>
                                 <div class="barra-progresso-bg">
-                                    <div class="barra-progresso-fill" style="width: ${pct}%;"></div>
+                                    <div class="barra-progresso-fill" style="width: ${pct}%; background: ${corBarra};"></div>
                                 </div>
                             </td>
                         </tr>
@@ -884,7 +861,8 @@
             }
 
             html += `</tbody></table>`;
-            document.getElementById('tabelaResponsavelContainer').innerHTML = html;
+            const container = document.getElementById(containerId);
+            if (container) container.innerHTML = html;
         }
 
         function criarGraficoBarra(canvasId, dadosObj, cor, onClickCallback, horizontal = false) {
@@ -903,14 +881,8 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { 
-                            ticks: { color: '#94a3b8', font: { size: 9 }, precision: 0 }, // Removido stepSize: 1
-                            grid: { display: false } 
-                        },
-                        y: { 
-                            ticks: { color: '#94a3b8', font: { size: 9 }, precision: 0 }, // Removido stepSize: 1
-                            grid: { color: '#334155' } 
-                        }
+                        x: { ticks: { color: '#94a3b8', font: { size: 9 }, precision: 0 }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8', font: { size: 9 }, precision: 0 }, grid: { color: '#334155' } }
                     },
                     onClick: (e, elements) => {
                         if (elements.length > 0 && onClickCallback) {
@@ -946,18 +918,17 @@
                     plugins: { legend: { display: false } },
                     scales: {
                         x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { display: false } },
-                        y: { ticks: { color: '#94a3b8', font: { size: 9 }, precision: 0 }, grid: { color: '#334155' } } // Removido stepSize: 1
+                        y: { ticks: { color: '#94a3b8', font: { size: 9 }, precision: 0 }, grid: { color: '#334155' } }
                     }
                 }
             });
             return window[canvasId+'Instance'];
         }
 
-        function criarGraficoDoughnut(canvasId, dadosObj, totalEleitores = 0) {
+        function criarGraficoDoughnut(canvasId, dadosObj, totalEleitores = 0, coresArray) {
             const ctx = document.getElementById(canvasId).getContext('2d');
             if (window[canvasId+'Instance']) window[canvasId+'Instance'].destroy();
 
-            // Plugin personalizado para exibir o total no centro da rosca
             const centerTextPlugin = {
                 id: 'centerText',
                 beforeDraw: function(chart) {
@@ -973,7 +944,6 @@
                     const text = totalEleitores.toString();
                     const textX = Math.round((width - ctx.measureText(text).width) / 2);
                     const textY = height / 2 - 6;
-
                     ctx.fillText(text, textX, textY);
 
                     ctx.font = `0.55em sans-serif`;
@@ -990,7 +960,7 @@
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(dadosObj),
-                    datasets: [{ data: Object.values(dadosObj), backgroundColor: ['#22c55e', '#3b82f6', '#64748b'], borderWidth: 0 }]
+                    datasets: [{ data: Object.values(dadosObj), backgroundColor: coresArray, borderWidth: 0 }]
                 },
                 plugins: [centerTextPlugin],
                 options: {
@@ -1004,37 +974,16 @@
 
         function abrirModal(canvasId, titulo) {
             document.getElementById('modalTitulo').innerText = titulo;
-            const modalGraficoEl = document.getElementById('modalGrafico');
-            modalGraficoEl.style.display = 'flex';
+            document.getElementById('modalGrafico').style.display = 'flex';
 
             const cfg = dadosGlobaisCache[canvasId];
             if (!cfg) return;
 
-            const modalBody = modalGraficoEl.querySelector('.modal-body');
-            
-            // Força o container do modal a ter comportamento de rolagem estrito
-            modalBody.style.overflow = 'hidden'; // Evita scroll duplo na janela
-            modalBody.style.display = 'flex';
-            modalBody.style.flexDirection = 'column';
+            const qtdItens = Object.keys(cfg.data).length;
+            const alturaDinamica = Math.max(400, qtdItens * 25);
 
-            if (cfg.type === 'bar') {
-                const qtdItens = Object.keys(cfg.data).length;
-                const alturaDinamica = Math.max(400, qtdItens * 30); // 30px por barra para dar espaçamento bom
-
-                modalBody.innerHTML = `
-                    <div style="width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; position: relative;">
-                        <div style="width: 100%; height: ${alturaDinamica}px; position: relative;">
-                            <canvas id="canvasModal"></canvas>
-                        </div>
-                    </div>
-                `;
-            } else {
-                modalBody.innerHTML = `
-                    <div style="width: 100%; height: 100%; position: relative;">
-                        <canvas id="canvasModal"></canvas>
-                    </div>
-                `;
-            }
+            const modalBody = document.getElementById('modalBodyContent');
+            modalBody.innerHTML = `<div style="height: 100%; overflow-y: auto;"><div style="height: ${alturaDinamica}px; position: relative;"><canvas id="canvasModal"></canvas></div></div>`;
 
             const ctxModal = document.getElementById('canvasModal').getContext('2d');
             if (chartModalInstance) chartModalInstance.destroy();
@@ -1043,83 +992,13 @@
                 type: cfg.type || 'bar',
                 data: {
                     labels: Object.keys(cfg.data),
-                    datasets: [{
-                        data: Object.values(cfg.data),
-                        backgroundColor: cfg.color,
-                        borderRadius: 6
-                    }]
+                    datasets: [{ data: Object.values(cfg.data), backgroundColor: cfg.color || cfg.colors, borderRadius: 4 }]
                 },
                 options: {
                     indexAxis: cfg.horizontal ? 'y' : 'x',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: { 
-                            ticks: { color: '#94a3b8', font: { size: 11 } }, 
-                            grid: { display: false } 
-                        },
-                        y: { 
-                            ticks: { color: '#94a3b8', font: { size: 11 }, precision: 0 }, 
-                            grid: { color: '#334155' } 
-                        }
-                    }
-                }
-            });
-        }
-
-        function abrirModalTabela() {
-            document.getElementById('modalTitulo').innerText = "👤 Cadastros por Responsável (Top/Lista Completa)";
-            document.getElementById('modalGrafico').style.display = 'flex';
-            
-            // Renderiza a mesma tabela com rolagem maior no modal
-            const htmlConteudo = document.getElementById('tabelaResponsavelContainer').innerHTML;
-            const modalBody = document.querySelector('.modal-body');
-            modalBody.innerHTML = `<div style="max-height: 100%; overflow-y: auto; height: 100%;">${htmlConteudo}</div>`;
-        }
-
-        function fecharModal() {
-            document.getElementById('modalGrafico').style.display = 'none';
-            if (chartModalInstance) {
-                chartModalInstance.destroy();
-                chartModalInstance = null;
-            }
-            // Restaura o container modal para canvas caso tenha sido alterado pela tabela
-            document.querySelector('.modal-body').innerHTML = '<canvas id="canvasModal"></canvas>';
-        }
-
-        function abrirModal(canvasId, titulo) {
-            document.getElementById('modalTitulo').innerText = titulo;
-            document.getElementById('modalGrafico').style.display = 'flex';
-        
-            const cfg = dadosGlobaisCache[canvasId];
-            if (!cfg) return;
-        
-            // Calcula a altura ideal com base na quantidade de barras (ex: 25px por barra)
-            const qtdItens = Object.keys(cfg.data).length;
-            const alturaDinamica = Math.max(400, qtdItens * 25); // No mínimo 400px, ou cresce se tiver muitos itens
-        
-            // Aplica a altura dinâmica no container do modal
-            const modalBody = document.querySelector('.modal-body');
-            modalBody.innerHTML = `<div style="height: 100%; overflow-y: auto;"><div style="height: ${alturaDinamica}px; position: relative;"><canvas id="canvasModal"></canvas></div></div>`;
-        
-            const ctxModal = document.getElementById('canvasModal').getContext('2d');
-            if (chartModalInstance) chartModalInstance.destroy();
-        
-            // Cria o gráfico completo no modal
-            chartModalInstance = new Chart(ctxModal, {
-                type: cfg.type || 'bar',
-                data: {
-                    labels: Object.keys(cfg.data),
-                    datasets: [{ data: Object.values(cfg.data), backgroundColor: cfg.color, borderRadius: 4 }]
-                },
-                options: {
-                    indexAxis: cfg.horizontal ? 'y' : 'x',
-                    responsive: true,
-                    maintainAspectRatio: false, // Permite ocupar a altura personalizada do container
-                    plugins: { legend: { display: false } },
+                    plugins: { legend: { display: cfg.type === 'doughnut' } },
                     scales: {
                         x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { display: false } },
                         y: { ticks: { color: '#94a3b8', font: { size: 11 }, precision: 0 }, grid: { color: '#334155' } }
@@ -1128,16 +1007,22 @@
             });
         }
 
-        
-    </script>
-    <body>
+        function abrirModalTabelaGenerica(containerId, titulo) {
+            document.getElementById('modalTitulo').innerText = titulo;
+            document.getElementById('modalGrafico').style.display = 'flex';
+            
+            const htmlConteudo = document.getElementById(containerId).innerHTML;
+            const modalBody = document.getElementById('modalBodyContent');
+            modalBody.innerHTML = `<div style="height: 100%; overflow-y: auto;">${htmlConteudo}</div>`;
+        }
 
-    <!-- 🔒 TRAVA DE BLOQUEIO TOTAL -->
-    <script>
-        if (!localStorage.getItem('pv43_nome_usuario')) {
-            alert('Acesso restrito! Faça o login.');
-            window.location.replace('pv43.html');
-            throw new Error('Acesso negado');
+        function fecharModal() {
+            document.getElementById('modalGrafico').style.display = 'none';
+            if (chartModalInstance) {
+                chartModalInstance.destroy();
+                chartModalInstance = null;
+            }
+            document.getElementById('modalBodyContent').innerHTML = '<canvas id="canvasModal"></canvas>';
         }
     </script>
 </body>
