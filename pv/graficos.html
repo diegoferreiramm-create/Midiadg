@@ -549,7 +549,7 @@
         }
 
         function popularFiltrosGlobais() {
-            preencherSelect('filtroAdmin', [...new Set(dadosEleitores.map(i => i.numero_sec).filter(Boolean))]);
+            preencherSelect('filtroAdmin', [...new Set(dadosEleitores.map(i => i.numero_cha).filter(Boolean))]);
             // Quebra candidatos separados por vírgula para listar individualmente
             const candidatosSet = new Set();
             dadosEleitores.forEach(i => {
@@ -672,8 +672,8 @@
             }
 
             let filtrados = dadosEleitores.filter(i => {
-                if (fAdmin && i.numero_sec !== fAdmin) return false;
-                if (fResp && i.nome !== fResp) return false;
+                if (fAdmin && i.numero_cha !== fAdmin) return false;
+                if (fResp && i.numero_sec !== fResp) return false;
                 if (fCand && (!i.candidato || !i.candidato.includes(fCand))) return false; // Usa includes para achar mesmo se estiver junto de outro
                 if (fCidade && i.cidade !== fCidade) return false;
                 if (fZona && i.zona !== fZona) return false;
