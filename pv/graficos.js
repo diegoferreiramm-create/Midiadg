@@ -164,7 +164,7 @@ function popularFiltrosSelects() {
     preencherSelect('fBairro', 'bairro');
     preencherSelect('fCidade', 'cidade');
     
-    // Tratamento especial para o Candidato (caso venha separado por vírgula na mesma célula)
+    // Tratamento especial para o Candidato (se separado por vírgula)
     const selectCand = document.getElementById('fCandidato');
     if (selectCand) {
         const valorAtualCand = selectCand.value;
@@ -190,12 +190,11 @@ function popularFiltrosSelects() {
     preencherSelect('fZona', 'zona');
     preencherSelect('fNivel', 'nivel');
     
-    // CORRIGIDO: Responsável agora puxa a Coluna C (numero_sec)
+    // Coluna C (Responsável)
     preencherSelect('fResponsavel', 'numero_sec');
     
-    // CORRIGIDO: Administrador agora puxa a Coluna B (vamos usar a chave correspondente da coluna B, ex: numero_cha ou admin)
-    // Se o seu script do Apps Script mapeia a coluna B como 'numero_cha' ou 'admin', ajuste aqui:
-    preencherSelect('fAdmin', 'numero_cha'); 
+    // Coluna B (Administrador)
+    preencherSelect('fAdmin', 'numero_cha');
 }
 
 // ==========================================
@@ -211,7 +210,6 @@ function filtrarDashboard() {
     const fLocalVot = document.getElementById('fLocalVot')?.value?.trim().toUpperCase() || '';
     const fNivel = document.getElementById('fNivel')?.value?.trim() || '';
     
-    // Valores dos filtros corrigidos
     const fResponsavel = document.getElementById('fResponsavel')?.value?.trim() || '';
     const fAdmin = document.getElementById('fAdmin')?.value?.trim() || '';
     
@@ -233,10 +231,10 @@ function filtrarDashboard() {
         if (fLocalVot && !String(item.local_vot || '').toUpperCase().includes(fLocalVot)) return false;
         if (fNivel && String(item.nivel || '') !== fNivel) return false;
         
-        // CORRIGIDO: Responsável valida estritamente a Coluna C (numero_sec)
+        // Validação estrita para Coluna C (Responsável)
         if (fResponsavel && String(item.numero_sec || '').trim() !== fResponsavel) return false;
         
-        // CORRIGIDO: Administrador valida estritamente a Coluna B (numero_cha)
+        // Validação estrita para Coluna B (Administrador)
         if (fAdmin && String(item.numero_cha || '').trim() !== fAdmin) return false;
 
         if (fDataInicio || fDataFim) {
