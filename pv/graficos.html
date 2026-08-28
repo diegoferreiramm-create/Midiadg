@@ -761,7 +761,11 @@
 
         function renderizarTabelaResponsavel(dados) {
             const cResp = {};
-            dados.forEach(i => { const k = i.nome || 'N/D'; cResp[k] = (cResp[k] || 0) + 1; });
+            dados.forEach(i => { 
+                // Mudado de i.nome para i.numero_sec (que é a Coluna C)
+                const k = i.numero_sec || 'N/D'; 
+                cResp[k] = (cResp[k] || 0) + 1; 
+            });
             
             // Ordenar do maior para o menor
             const ordenados = Object.entries(cResp).sort((a, b) => b[1] - a[1]);
@@ -771,7 +775,7 @@
                 <table class="tabela-responsavel">
                     <thead>
                         <tr>
-                            <th>Responsável / Liderança</th>
+                            <th>Responsável / Coluna C (Sec)</th>
                             <th style="width: 100px; text-align: right;">Cadastros</th>
                             <th style="width: 40%;">Proporção</th>
                         </tr>
