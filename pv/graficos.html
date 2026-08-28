@@ -598,32 +598,51 @@
             atualizarDashboard();
         }
 
-        function calcularIdade(dataNascStr) {
-            if (!dataNascStr) return 0;
-            
-            // Se vier no formato brasileiro DD/MM/AAAA, converte para AAAA-MM-DD
-            let dataLimpa = dataNascStr;
-            if (typeof dataNascStr === 'string' && dataNascStr.includes('/')) {
-                const partes = dataNascStr.split('/');
+        function calcularIdade(dataNasc) {
+            if (!dataNasc) return 0;
+        
+            let ano, mes, dia;
+        
+            // Verifica se a data está no formato brasileiro (DD/MM/YYYY ou DD-MM-YYYY)
+            if (dataNasc.includes('/')) {
+                const partes = dataNasc.split('/');
                 if (partes.length === 3) {
-                    dataLimpa = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                    dia = parseInt(partes[0], 10);
+                    mes = parseInt(partes[1], 10) - 1; // Meses no JS vão de 0 a 11
+                    ano = parseInt(partes[2], 10);
+                }
+            } else {
+                // Assume o formato padrão (YYYY-MM-DD)
+                const partes = dataNasc.split('T')[0].split(/[-]/);
+                if (partes.length === 3) {
+                    // Se o ano vier por último (ex: DD-MM-YYYY com hífen)
+                    if (partes[0].length === 2) {
+                        dia = parseInt(partes[0], 10);
+                        mes = parseInt(partes[1], 10) - 1;
+                        ano = parseInt(partes[2], 10);
+                    } else {
+                        ano = parseInt(partes[0], 10);
+                        mes = parseInt(partes[1], 10) - 1;
+                        dia = parseInt(partes[2], 10);
+                    }
                 }
             }
         
-            const nascimento = new Date(dataLimpa);
-            if (isNaN(nascimento.getTime())) return 0;
+            if (!ano || isNaN(ano)) return 0;
         
             const hoje = new Date();
+            const nascimento = new Date(ano, mes, dia);
+            
             let idade = hoje.getFullYear() - nascimento.getFullYear();
             const m = hoje.getMonth() - nascimento.getMonth();
-            
+        
+            // Se ainda não chegou o mês do aniversário, ou se chegou o mês mas o dia ainda não passou, diminui 1 ano
             if (m < 0 || (m === 0 && hoje.getDate() < nascimento.getDate())) {
                 idade--;
             }
-            
-            return idade > 0 && idade < 120 ? idade : 0;
+        
+            return idade;
         }
-
         function atualizarDashboard() {
             const fAdmin = document.getElementById('filtroAdmin').value;
             const fResp = document.getElementById('filtroResponsavel').value;
