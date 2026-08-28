@@ -599,16 +599,30 @@
             atualizarDashboard();
         }
 
-        function calcularIdade(dataNasc) {
-            if (!dataNasc) return 0;
+        function calcularIdade(dataNascStr) {
+            if (!dataNascStr) return 0;
+            
+            // Se vier no formato brasileiro DD/MM/AAAA, converte para AAAA-MM-DD
+            let dataLimpa = dataNascStr;
+            if (typeof dataNascStr === 'string' && dataNascStr.includes('/')) {
+                const partes = dataNascStr.split('/');
+                if (partes.length === 3) {
+                    dataLimpa = `${partes[2]}-${partes[1]}-${partes[0]}`;
+                }
+            }
+        
+            const nascimento = new Date(dataLimpa);
+            if (isNaN(nascimento.getTime())) return 0;
+        
             const hoje = new Date();
-            const nascimento = new Date(dataNasc);
             let idade = hoje.getFullYear() - nascimento.getFullYear();
             const m = hoje.getMonth() - nascimento.getMonth();
+            
             if (m < 0 || (m === 0 && hoje.getDate() < nascimento.getDate())) {
                 idade--;
             }
-            return idade;
+            
+            return idade > 0 && idade < 120 ? idade : 0;
         }
 
         function atualizarDashboard() {
