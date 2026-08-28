@@ -144,23 +144,36 @@
             box.style.display = checkbox.checked ? 'block' : 'none';
         }
 
-        // Simulação de carregar listas de usuários do sistema (poderia vir do localStorage ou API)
+        // Carrega dinamicamente os usuários da aba User do Google Sheets
         function carregarListasUsuarios() {
-            // Mock de exemplo - Em um sistema real integrado, você buscaria da base geral
-            const admins = ['Ana Administradora', 'Carlos Gestor', 'Admin Master'];
-            const resps = ['Bruno Responsável', 'Daniela Líder', 'Eduardo Setor'];
+            google.script.run
+                .withSuccessHandler(function(resposta) {
+                    const admins = resposta.admins || [];
+                    const resps = resposta.responsaveis || [];
 
-            const containerAdmin = document.getElementById('lista-admins-checkboxes');
-            containerAdmin.innerHTML = '';
-            admins.forEach((adm, idx) => {
-                containerAdmin.innerHTML += `<label style="display:block; font-size: 0.9rem;"><input type="checkbox" class="chk-item-admin" value="${adm}"> ${adm}</label>`;
-            });
+                    // Preencher Administradores
+                    const containerAdmin = document.getElementById('lista-admins-checkboxes');
+                    containerAdmin.innerHTML = '';
+                    if (admins.length === 0) {
+                        containerAdmin.innerHTML = '<span style="font-size: 0.8rem; color: #999;">Nenhum admin encontrado</span>';
+                    } else {
+                        admins.forEach((adm) => {
+                            containerAdmin.innerHTML += `<label style="display:block; font-size: 0.9rem; margin-bottom: 3px;"><input type="checkbox" class="chk-item-admin" value="${adm}"> ${adm}</label>`;
+                        });
+                    }
 
-            const containerResp = document.getElementById('lista-resps-checkboxes');
-            containerResp.innerHTML = '';
-            resps.forEach((resp, idx) => {
-                containerResp.innerHTML += `<label style="display:block; font-size: 0.9rem;"><input type="checkbox" class="chk-item-resp" value="${resp}"> ${resp}</label>`;
-            });
+                    // Preencher Responsáveis
+                    const containerResp = document.getElementById('lista-resps-checkboxes');
+                    containerResp.innerHTML = '';
+                    if (resps.length === 0) {
+                        containerResp.innerHTML = '<span style="font-size: 0.8rem; color: #999;">Nenhum responsável encontrado</span>';
+                    } else {
+                        resps.forEach((resp) => {
+                            containerResp.innerHTML += `<label style="display:block; font-size: 0.9rem; margin-bottom: 3px;"><input type="checkbox" class="chk-item-resp" value="${resp}"> ${resp}</label>`;
+                        });
+                    }
+                })
+                .buscarUsuariosParaAgendamento();
         }
 
         function marcarTodos(tipo) {
