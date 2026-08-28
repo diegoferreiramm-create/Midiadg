@@ -1017,6 +1017,46 @@
             // Restaura o container modal para canvas caso tenha sido alterado pela tabela
             document.querySelector('.modal-body').innerHTML = '<canvas id="canvasModal"></canvas>';
         }
+
+        function abrirModal(canvasId, titulo) {
+            document.getElementById('modalTitulo').innerText = titulo;
+            document.getElementById('modalGrafico').style.display = 'flex';
+        
+            const cfg = dadosGlobaisCache[canvasId];
+            if (!cfg) return;
+        
+            // Calcula a altura ideal com base na quantidade de barras (ex: 25px por barra)
+            const qtdItens = Object.keys(cfg.data).length;
+            const alturaDinamica = Math.max(400, qtdItens * 25); // No mínimo 400px, ou cresce se tiver muitos itens
+        
+            // Aplica a altura dinâmica no container do modal
+            const modalBody = document.querySelector('.modal-body');
+            modalBody.innerHTML = `<div style="height: 100%; overflow-y: auto;"><div style="height: ${alturaDinamica}px; position: relative;"><canvas id="canvasModal"></canvas></div></div>`;
+        
+            const ctxModal = document.getElementById('canvasModal').getContext('2d');
+            if (chartModalInstance) chartModalInstance.destroy();
+        
+            // Cria o gráfico completo no modal
+            chartModalInstance = new Chart(ctxModal, {
+                type: cfg.type || 'bar',
+                data: {
+                    labels: Object.keys(cfg.data),
+                    datasets: [{ data: Object.values(cfg.data), backgroundColor: cfg.color, borderRadius: 4 }]
+                },
+                options: {
+                    indexAxis: cfg.horizontal ? 'y' : 'x',
+                    responsive: true,
+                    maintainAspectRatio: false, // Permite ocupar a altura personalizada do container
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8', font: { size: 11 }, precision: 0 }, grid: { color: '#334155' } }
+                    }
+                }
+            });
+        }
+
+        
     </script>
 </body>
 </html>
