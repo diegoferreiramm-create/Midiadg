@@ -273,7 +273,7 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
-        }}
+        }
 
         .modal-close {
             background: none;
@@ -550,7 +550,18 @@
 
         function popularFiltrosGlobais() {
             preencherSelect('filtroAdmin', [...new Set(dadosEleitores.map(i => i.numero_sec).filter(Boolean))]);
-            preencherSelect('filtroCandidato', [...new Set(dadosEleitores.map(i => i.candidato).filter(Boolean))]);
+            // Quebra candidatos separados por vírgula para listar individualmente
+            const candidatosSet = new Set();
+            dadosEleitores.forEach(i => {
+                if (i.candidato) {
+                    i.candidato.split(',').forEach(parte => {
+                        const limpo = parte.trim();
+                        if (limpo) candidatosSet.add(limpo);
+                    });
+                }
+            });
+            preencherSelect('filtroCandidato', [...candidatosSet]);
+           
             preencherSelect('filtroCidade', [...new Set(dadosEleitores.map(i => i.cidade).filter(Boolean))]);
             preencherSelect('filtroZona', [...new Set(dadosEleitores.map(i => i.zona).filter(Boolean))]);
             preencherSelect('filtroSecao', [...new Set(dadosEleitores.map(i => i.secao).filter(Boolean))]);
@@ -663,7 +674,7 @@
             let filtrados = dadosEleitores.filter(i => {
                 if (fAdmin && i.numero_sec !== fAdmin) return false;
                 if (fResp && i.nome !== fResp) return false;
-                if (fCand && i.candidato !== fCand) return false;
+                if (fCand && (!i.candidato || !i.candidato.includes(fCand))) return false; // Usa includes para achar mesmo se estiver junto de outro
                 if (fCidade && i.cidade !== fCidade) return false;
                 if (fZona && i.zona !== fZona) return false;
                 if (fSecao && i.secao !== fSecao) return false;
