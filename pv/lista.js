@@ -515,6 +515,20 @@ function renderizarTabela() {
                         const usuarioLogado = String(usuarioNome).toUpperCase();
                         podeEditar = nomeResponsavel === usuarioLogado;
                     }
+                    
+                    if (podeEditar) {
+                        valor = `
+                            <div style="display: flex; gap: 3px; flex-wrap: wrap;">
+                                <button class="btn-excluir" onclick="excluirRegistro('${id}')" title="Excluir">🗑️</button>
+                            </div>
+                        `;
+                    } else {
+                        valor = `
+                            <div style="display: flex; gap: 3px; flex-wrap: wrap;">
+                                <span style="font-size: 0.5rem; color: #94a3b8; margin-left: 3px;">🔒</span>
+                            </div>
+                        `;
+                    }
                     break;
                 default: valor = '';
             }
