@@ -117,10 +117,24 @@
             window.location.href = 'pv43.html';
         } else {
             document.getElementById('usuario-logado-texto').innerText = `Logado como: ${nomeUsuario} (${tipoUsuario.toUpperCase()})`;
+            
+            // 🛡️ CONTROLE DE HIERARQUIA: Se não for admin, bloqueia/oculta o formulário de criação
+            if (tipoUsuario.toLowerCase() !== 'admin') {
+                const formCard = document.querySelector('.form-card');
+                if (formCard) {
+                    formCard.innerHTML = `
+                        <h3>Criar Agendamento</h3>
+                        <div style="padding: 20px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 4px; margin-top: 15px;">
+                            <p><strong>Aviso de Permissão:</strong> Apenas administradores podem criar novos agendamentos.</p>
+                            <p style="margin-top: 8px; font-size: 0.9rem;">Você possui permissão apenas para visualizar e consultar os eventos listados ao lado.</p>
+                        </div>
+                    `;
+                }
+            }
         }
 
         function voltarMenu() {
-            window.location.href = 'menu.html'; // Ajuste conforme o nome da sua página de menu principal
+            window.location.href = 'menu.html';
         }
 
         // Funções para abrir/fechar as caixas de seleção condicional
