@@ -747,20 +747,40 @@
             dadosGlobaisCache['graficoNivel'] = { type: 'doughnut', data: cNivel };
             chartNivel = criarGraficoDoughnut('graficoNivel', cNivel, dados.length);
         
-            // 4. Zona Eleitoral (Barras Horizontais) - Limitado ao Top 15
+            // 4. Zona Eleitoral (Barras Horizontais) - Ordenado e Limitado ao Top 15
             const cZona = {};
             dados.forEach(i => { const k = i.zona || 'N/D'; cZona[k] = (cZona[k] || 0) + 1; });
-            dadosGlobaisCache['graficoZona'] = { type: 'bar', data: cZona, color: '#06b6d4', horizontal: true };
-            chartZona = criarGraficoBarra('graficoZona', pegarTop15(cZona), '#06b6d4', (val) => {
+
+            // 4.1. Ordena do maior para o menor e remove os zerados para limpar o gráfico
+            const cZonaOrdenado = Object.fromEntries(
+                Object.entries(cZona)
+                    .filter(([key, val]) => val > 0)
+                    .sort((a, b) => b[1] - a[1])
+            );
+
+            dadosGlobaisCache['graficoZona'] = { type: 'bar', data: cZonaOrdenado, color: '#06b6d4', horizontal: true };
+            
+            // 4.2. Passa o objeto ordenado para o pegarTop15
+            chartZona = criarGraficoBarra('graficoZona', pegarTop15(cZonaOrdenado), '#06b6d4', (val) => {
                 document.getElementById('filtroZona').value = val;
                 atualizarDashboard();
             }, true);
         
-            // 5. Seção de Votação (Barras Horizontais) - Limitado ao Top 15
+            // 5. Seção de Votação (Barras Horizontais) - Ordenado e Limitado ao Top 15
             const cSecao = {};
             dados.forEach(i => { const k = i.secao || 'N/D'; cSecao[k] = (cSecao[k] || 0) + 1; });
-            dadosGlobaisCache['graficoSecao'] = { type: 'bar', data: cSecao, color: '#f59e0b', horizontal: true };
-            chartSecao = criarGraficoBarra('graficoSecao', pegarTop15(cSecao), '#f59e0b', (val) => {
+
+            // 5.1. Ordena do maior para o menor e remove os zerados
+            const cSecaoOrdenado = Object.fromEntries(
+                Object.entries(cSecao)
+                    .filter(([key, val]) => val > 0)
+                    .sort((a, b) => b[1] - a[1])
+            );
+
+            dadosGlobaisCache['graficoSecao'] = { type: 'bar', data: cSecaoOrdenado, color: '#f59e0b', horizontal: true };
+            
+            // 5.2. Passa o objeto limpo e ordenado para o pegarTop15
+            chartSecao = criarGraficoBarra('graficoSecao', pegarTop15(cSecaoOrdenado), '#f59e0b', (val) => {
                 document.getElementById('filtroSecao').value = val;
                 atualizarDashboard();
             }, true);
