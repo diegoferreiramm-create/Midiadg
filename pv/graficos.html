@@ -387,7 +387,7 @@
                 <div class="kpi-value" id="kpiSecoes">0</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-title">Lideranças (Nível 1)</div>
+                <div class="kpi-title">Total de Responsáveis Cadastrando</div>
                 <div class="kpi-value" id="kpiNivel1">0</div>
             </div>
         </div>
@@ -710,7 +710,7 @@
             document.getElementById('kpiTotal').innerText = filtrados.length;
             document.getElementById('kpiZonas').innerText = new Set(filtrados.map(i => i.zona)).size;
             document.getElementById('kpiSecoes').innerText = new Set(filtrados.map(i => i.secao)).size;
-            document.getElementById('kpiNivel1').innerText = filtrados.filter(i => i.nivel == '1').length;
+            document.getElementById('kpiNivel1').innerText = new Set(filtrados.map(i => i.numero_sec).filter(Boolean)).size;
 
             renderizarGraficos(filtrados, fCand);
         }
