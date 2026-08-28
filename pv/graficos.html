@@ -665,28 +665,35 @@
         function renderizarGraficos(dados, fCand) {
             // Salva dados processados para uso no modal
             dadosGlobaisCache = {};
-
-            // 1. Administrador (Barras Horizontais)
+        
+            // Função auxiliar para filtrar apenas os 15 maiores para a tela principal
+            const pegarTop15 = (objDados) => {
+                return Object.fromEntries(
+                    Object.entries(objDados).sort((a, b) => b[1] - a[1]).slice(0, 15)
+                );
+            };
+        
+            // 1. Administrador (Barras Horizontais) - Limitado ao Top 15
             const cAdmin = {};
             dados.forEach(i => { const k = i.numero_sec || 'N/D'; cAdmin[k] = (cAdmin[k] || 0) + 1; });
             dadosGlobaisCache['graficoAdmin'] = { type: 'bar', data: cAdmin, color: '#3b82f6', horizontal: true };
-            chartAdmin = criarGraficoBarra('graficoAdmin', cAdmin, '#3b82f6', (val) => {
+            chartAdmin = criarGraficoBarra('graficoAdmin', pegarTop15(cAdmin), '#3b82f6', (val) => {
                 document.getElementById('filtroAdmin').value = val;
                 aoMudarAdmin();
             }, true);
-
-            // 2. Candidato (Colunas Verticais)
+        
+            // 2. Candidato (Colunas Verticais) - Limitado ao Top 15
             if (!fCand) {
                 const cCand = {};
                 dados.forEach(i => { const k = i.candidato || 'N/D'; cCand[k] = (cCand[k] || 0) + 1; });
                 dadosGlobaisCache['graficoCandidato'] = { type: 'bar', data: cCand, color: '#eab308', horizontal: false };
-                chartCandidato = criarGraficoBarra('graficoCandidato', cCand, '#eab308', (val) => {
+                chartCandidato = criarGraficoBarra('graficoCandidato', pegarTop15(cCand), '#eab308', (val) => {
                     document.getElementById('filtroCandidato').value = val;
                     atualizarDashboard();
                 }, false);
             }
-
-            // 3. Engajamento por Nível (Rosca)
+        
+            // 3. Engajamento por Nível (Rosca) - Mantém completo (são só 3 níveis)
             const cNivel = { 'Nível 1': 0, 'Nível 2': 0, 'Nível 3': 0 };
             dados.forEach(i => {
                 if (i.nivel == '1') cNivel['Nível 1']++;
@@ -695,53 +702,53 @@
             });
             dadosGlobaisCache['graficoNivel'] = { type: 'doughnut', data: cNivel };
             chartNivel = criarGraficoDoughnut('graficoNivel', cNivel, dados.length);
-
-            // 4. Zona Eleitoral (Barras Horizontais)
+        
+            // 4. Zona Eleitoral (Barras Horizontais) - Limitado ao Top 15
             const cZona = {};
             dados.forEach(i => { const k = i.zona || 'N/D'; cZona[k] = (cZona[k] || 0) + 1; });
             dadosGlobaisCache['graficoZona'] = { type: 'bar', data: cZona, color: '#06b6d4', horizontal: true };
-            chartZona = criarGraficoBarra('graficoZona', cZona, '#06b6d4', (val) => {
+            chartZona = criarGraficoBarra('graficoZona', pegarTop15(cZona), '#06b6d4', (val) => {
                 document.getElementById('filtroZona').value = val;
                 atualizarDashboard();
             }, true);
-
-            // 5. Seção de Votação (Barras Horizontais)
+        
+            // 5. Seção de Votação (Barras Horizontais) - Limitado ao Top 15
             const cSecao = {};
             dados.forEach(i => { const k = i.secao || 'N/D'; cSecao[k] = (cSecao[k] || 0) + 1; });
             dadosGlobaisCache['graficoSecao'] = { type: 'bar', data: cSecao, color: '#f59e0b', horizontal: true };
-            chartSecao = criarGraficoBarra('graficoSecao', cSecao, '#f59e0b', (val) => {
+            chartSecao = criarGraficoBarra('graficoSecao', pegarTop15(cSecao), '#f59e0b', (val) => {
                 document.getElementById('filtroSecao').value = val;
                 atualizarDashboard();
             }, true);
-
-            // 6. Bairro do Local de Votação (Colunas Verticais)
+        
+            // 6. Bairro do Local de Votação (Colunas Verticais) - Limitado ao Top 15
             const cBairroVot = {};
             dados.forEach(i => { const k = i.bairro_vot || i.bairro || 'N/D'; cBairroVot[k] = (cBairroVot[k] || 0) + 1; });
             dadosGlobaisCache['graficoBairroVotacao'] = { type: 'bar', data: cBairroVot, color: '#ec4899', horizontal: false };
-            chartBairroVotacao = criarGraficoBarra('graficoBairroVotacao', cBairroVot, '#ec4899', (val) => {
+            chartBairroVotacao = criarGraficoBarra('graficoBairroVotacao', pegarTop15(cBairroVot), '#ec4899', (val) => {
                 document.getElementById('filtroBairroVot').value = val;
                 atualizarDashboard();
             }, false);
-
-            // 7. Local de Votação / Escola (Barras Horizontais)
+        
+            // 7. Local de Votação / Escola (Barras Horizontais) - Limitado ao Top 15
             const cLocalVot = {};
             dados.forEach(i => { const k = i.local_vot || 'N/D'; cLocalVot[k] = (cLocalVot[k] || 0) + 1; });
             dadosGlobaisCache['graficoLocalVotacao'] = { type: 'bar', data: cLocalVot, color: '#6366f1', horizontal: true };
-            chartLocalVot = criarGraficoBarra('graficoLocalVotacao', cLocalVot, '#6366f1', (val) => {
+            chartLocalVot = criarGraficoBarra('graficoLocalVotacao', pegarTop15(cLocalVot), '#6366f1', (val) => {
                 document.getElementById('filtroBairroVot').value = val;
                 atualizarDashboard();
             }, true);
-
-            // 8. Bairro do Eleitor (Barras Horizontais)
+        
+            // 8. Bairro do Eleitor (Barras Horizontais) - Limitado ao Top 15
             const cBairroMor = {};
             dados.forEach(i => { const k = i.bairro || 'N/D'; cBairroMor[k] = (cBairroMor[k] || 0) + 1; });
             dadosGlobaisCache['graficoBairroMorador'] = { type: 'bar', data: cBairroMor, color: '#15803d', horizontal: true };
-            chartBairroMorador = criarGraficoBarra('graficoBairroMorador', cBairroMor, '#15803d', (val) => {
+            chartBairroMorador = criarGraficoBarra('graficoBairroMorador', pegarTop15(cBairroMor), '#15803d', (val) => {
                 document.getElementById('filtroBairroMor').value = val;
                 atualizarDashboard();
             }, true);
-
-            // 9. Faixa Etária (Colunas Verticais Clássicas)
+        
+            // 9. Faixa Etária (Colunas Verticais Clássicas) - Mantém completo (são 4 faixas fixas)
             const cFaixa = { '16 a 30 anos': 0, '31 a 45 anos': 0, '46 a 60 anos': 0, 'Mais de 60 anos': 0 };
             dados.forEach(i => {
                 const idade = calcularIdade(i.data_nasc);
@@ -752,27 +759,27 @@
             });
             dadosGlobaisCache['graficoFaixaEtaria'] = { type: 'bar', data: cFaixa, color: '#8b5cf6', horizontal: false };
             chartEtaria = criarGraficoBarra('graficoFaixaEtaria', cFaixa, '#8b5cf6', null, false);
-
-            // 10. Eleitores por Cidade (Colunas Verticais)
+        
+            // 10. Eleitores por Cidade (Colunas Verticais) - Limitado ao Top 15
             const cCidade = {};
             dados.forEach(i => { const k = i.cidade || 'N/D'; cCidade[k] = (cCidade[k] || 0) + 1; });
             dadosGlobaisCache['graficoCidade'] = { type: 'bar', data: cCidade, color: '#10b981', horizontal: false };
-            chartCidade = criarGraficoBarra('graficoCidade', cCidade, '#10b981', (val) => {
+            chartCidade = criarGraficoBarra('graficoCidade', pegarTop15(cCidade), '#10b981', (val) => {
                 document.getElementById('filtroCidade').value = val;
                 atualizarDashboard();
             }, false);
-
-            // 11. Escala de Tempo (Gráfico de Área / Linha com preenchimento)
+        
+            // 11. Escala de Tempo (Gráfico de Linha) - Mantém por data cronológica
             const cTempo = {};
             let dadosOrdenados = [...dados].sort((a, b) => new Date(a.data) - new Date(b.data));
             dadosOrdenados.forEach(i => { const k = i.data || 'N/D'; cTempo[k] = (cTempo[k] || 0) + 1; });
             dadosGlobaisCache['graficoTempo'] = { type: 'line', data: cTempo, color: '#0ea5e9' };
             chartTempo = criarGraficoArea('graficoTempo', cTempo, '#0ea5e9');
-
+        
             // 12. Responsável (Tabela com Mini Barras Embutidas)
             renderizarTabelaResponsavel(dados);
         }
-
+        
         function renderizarTabelaResponsavel(dados) {
             const cResp = {};
             dados.forEach(i => { 
@@ -935,13 +942,24 @@
             return window[canvasId+'Instance'];
         }
 
-        /* Funções do Modal Pop-up */
         function abrirModal(canvasId, titulo) {
             document.getElementById('modalTitulo').innerText = titulo;
             document.getElementById('modalGrafico').style.display = 'flex';
 
             const cfg = dadosGlobaisCache[canvasId];
             if (!cfg) return;
+
+            const modalBody = document.querySelector('.modal-body');
+
+            if (cfg.type === 'bar' || cfg.type === 'line') {
+                // Calcula a altura com base na quantidade de itens (25px por barra) para habilitar a rolagem se houver muitos
+                const qtdItens = Object.keys(cfg.data).length;
+                const alturaDinamica = Math.max(450, qtdItens * 25);
+
+                modalBody.innerHTML = `<div style="height: 100%; overflow-y: auto;"><div style="height: ${alturaDinamica}px; position: relative;"><canvas id="canvasModal"></canvas></div></div>`;
+            } else {
+                modalBody.innerHTML = `<canvas id="canvasModal"></canvas>`;
+            }
 
             const ctxModal = document.getElementById('canvasModal').getContext('2d');
             if (chartModalInstance) chartModalInstance.destroy();
@@ -982,7 +1000,6 @@
                     }
                 });
             } else if (cfg.type === 'doughnut') {
-                const total = Object.values(cfg.data).reduce((a, b) => a + b, 0);
                 chartModalInstance = new Chart(ctxModal, {
                     type: 'doughnut',
                     data: {
