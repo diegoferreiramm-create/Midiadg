@@ -4,16 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PV43 - Painel Gráfico Estratégico Completo</title>
-    <link rel="stylesheet" href="style.css">
     
+    <!-- 🔒 TRAVA DE SEGURANÇA IMEDIATA (Colada direto no HTML) -->
+    <script>
+        const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
+        if (!nomeUsuario) {
+            alert('Acesso restrito! Redirecionando para a tela de login.');
+            window.location.replace('pv43.html'); // .replace impede o usuário de voltar com a seta do navegador
+        }
+    </script>
+
+    <link rel="stylesheet" href="style.css">
     <!-- Biblioteca Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Script principal com a trava de segurança de login -->
+    <!-- Seu script de gráficos (remova a trava de dentro dele se já tiver colocado lá, para não duplicar) -->
     <script src="graficos.js" defer></script>
     
     <style>
-        /* Seus estilos CSS internos continuam aqui daqui para baixo */
         :root {
             --bg-dashboard: #0f172a;
             --card-bg: #1e293b;
