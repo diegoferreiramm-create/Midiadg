@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (!nomeUsuario) {
         alert('Acesso restrito! Redirecionando para a tela de login.');
-        window.location.href = 'pv43.html';
+        window.location.href = 'idx.html';
         return;
     }
 
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (!nomeUsuario) {
         alert('⚠️ Acesso restrito! Redirecionando para a tela de login.');
-        window.location.href = 'pv43.html';
+        window.location.href = 'idx.html';
         return;
     }
     
