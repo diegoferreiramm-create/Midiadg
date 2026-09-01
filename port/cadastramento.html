@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PV43 - Cadastramento</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- 🔌 IMPORTAÇÃO DA CONFIGURAÇÃO DA API (SE HOUVER) -->
+    <script src="api.js"></script>
+
+    <!-- 🔒 BLOQUEIO DE SEGURANÇA IMEDIATO (IMPEDE ACESSO DIRETO VIA URL) -->
+    <script>
+        (function() {
+            const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
+            if (!nomeUsuario) {
+                alert('⚠️ Acesso restrito! Por favor, faça o login primeiro.');
+                window.location.href = 'pv43.html'; // Redireciona para a tela de login
+            }
+        })();
+    </script>
+</head>
+<body>
+
+    <div class="menu-container" style="max-width: 480px; margin: 20px auto;">
+        
+        <div class="welcome-header">
+            <h2>Novo Cadastramento</h2>
+            <p id="info-responsavel" style="font-size: 0.85rem; color: #555; margin-top: 4px;">Carregando...</p>
+        </div>
+
+        <form id="form-cadastramento">
+            
+            <div class="form-group">
+                <label>Nome Completo:</label>
+                <input type="text" id="nome" required class="input-field" placeholder="Digite o nome completo" style="text-transform: uppercase;">
+            </div>
+
+            <div class="form-group">
+                <label>Data de Nascimento:</label>
+                <input type="date" id="data_nasc" required class="input-field">
+            </div>
+
+            <div class="form-group">
+                <label>Endereço:</label>
+                <input type="text" id="endereco" required class="input-field" placeholder="Nome da rua, avenida..." style="text-transform: uppercase;">
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Nº Casa:</label>
+                    <input type="text" id="n_casa" class="input-field" placeholder="Nº">
+                </div>
+                <div class="form-group" style="flex: 2.5;">
+                    <label>Bairro:</label>
+                    <input type="text" id="bairro" required class="input-field" placeholder="Bairro" style="text-transform: uppercase;">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1.5;">
+                    <label>Cidade:</label>
+                    <input type="text" id="cidade" value="MARACANAÚ" required class="input-field" style="text-transform: uppercase;">
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label>Telefone / WhatsApp:</label>
+                    <input type="tel" id="telefone" required class="input-field" placeholder="(85) 9XXXX-XXXX">
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- ✅ NÍVEL DE ATUAÇÃO (SÓ UM POR VEZ) -->
+            <!-- ========================================== -->
+            <div class="form-group" style="background-color: #f0f7ff; border: 2px solid #00562e; border-radius: 8px; padding: 12px; margin-top: 5px;">
+                <label style="font-weight: bold; color: #00562e; font-size: 1rem;">⭐ NÍVEL DE ATUAÇÃO</label>
+                <p style="font-size: 0.75rem; color: #666; margin: 4px 0 10px 0;">Selecione apenas um nível</p>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: bold;">
+                        <input type="radio" name="nivel" value="1" class="nivel-radio"> 
+                        <span style="color: #dc3545;">🔴 NÍVEL 1</span>
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: bold;">
+                        <input type="radio" name="nivel" value="2" class="nivel-radio"> 
+                        <span style="color: #ffc107;">🟡 NÍVEL 2</span>
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: bold;">
+                        <input type="radio" name="nivel" value="3" class="nivel-radio"> 
+                        <span style="color: #28a745;">🟢 NÍVEL 3</span>
+                    </label>
+                </div>
+                <div style="margin-top: 8px; font-size: 0.8rem; color: #888;">
+                    <span id="nivel-selecionado">Nenhum nível selecionado</span>
+                </div>
+            </div>
+
+            <!-- Candidatos -->
+            <div class="form-group candidatos-box">
+                <label>Candidato(s):</label>
+                <div id="container-candidatos" class="candidatos-opcoes" style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+                    <!-- Os checkboxes vão aparecer aqui automaticamente vindos da aba anexo -->
+                </div>
+            </div>
+
+            <!-- Título de Eleitor -->
+            <div class="form-group">
+                <label>Número do Título de Eleitor:</label>
+                <input type="text" id="titulo" class="input-field" placeholder="12 dígitos">
+                <div style="margin-top: 6px;">
+                    <label style="font-size: 0.8rem; font-weight: normal; color: #666; cursor: pointer;">
+                        <input type="checkbox" id="titulo-antigo"> Título antigo (permitir sem cálculo de validação)
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Zona:</label>
+                    <input type="text" id="zona" class="input-field" placeholder="Ex: 001">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Seção:</label>
+                    <input type="text" id="secao" class="input-field" placeholder="Ex: 0123">
+                </div>
+            </div>
+
+            <!-- Bloco de Dados de Votação -->
+            <div class="dados-votacao-box">
+                <h4>📍 Dados de Votação (Via TRE)</h4>
+                
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label>Local de Votação:</label>
+                    <input type="text" id="local_vot" readonly class="input-field input-readonly" placeholder="Preenchimento automático" style="text-transform: uppercase;">
+                </div>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label>Bairro de Votação:</label>
+                    <input type="text" id="bairro_vot" readonly class="input-field input-readonly" placeholder="Preenchimento automático" style="text-transform: uppercase;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Endereço de Votação:</label>
+                    <input type="text" id="endereco_vot" readonly class="input-field input-readonly" placeholder="Preenchimento automático" style="text-transform: uppercase;">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 5px;">
+                <label>Nome da Mãe:</label>
+                <input type="text" id="nome_mae" class="input-field" placeholder="Nome completo da mãe" style="text-transform: uppercase;">
+            </div>
+
+            <div class="form-group">
+                <label>Observações:</label>
+                <textarea id="obs" class="input-field" rows="3" placeholder="Informações adicionais..." style="text-transform: uppercase;"></textarea>
+            </div>
+
+            <button type="submit" class="btn-menu" style="background-color: var(--pv-green-dark); color: white; justify-content: center; margin-top: 10px; border: none;">
+                Salvar Cadastramento
+            </button>
+        </form>
+
+        <div class="menu-footer" style="margin-top: 15px;">
+            <button onclick="window.location.href='menu.html'" class="btn-secondary">Voltar ao Menu</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CÓDIGO DO CADASTRAMENTO
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
+            const tipoUsuario = localStorage.getItem('pv43_tipo_usuario');
+
+            let numeroCha = '';
+            let numeroSec = '';
+
+            if (tipoUsuario === 'admin') {
+                numeroCha = nomeUsuario;
+                document.getElementById('info-responsavel').innerText = `Cadastrando via Administrador: ${nomeUsuario}`;
+            } else {
+                numeroSec = nomeUsuario;
+                document.getElementById('info-responsavel').innerText = `Cadastrando via Operador: ${nomeUsuario}`;
+            }
+
+            // ==========================================
+            // ✅ CONTROLE DOS RADIO BUTTONS (NÍVEL DE ATUAÇÃO)
+            // ==========================================
+            const radiosNivel = document.querySelectorAll('.nivel-radio');
+            const spanNivelSelecionado = document.getElementById('nivel-selecionado');
+
+            radiosNivel.forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    const valor = this.value;
+                    const textos = {
+                        '1': '🔴 NÍVEL 1 (COMUM)',
+                        '2': '🟡 NÍVEL 2 (RELEVANTE)',
+                        '3': '🟢 NÍVEL 3 (LÍDER)'
+                    };
+                    spanNivelSelecionado.innerText = `✅ Selecionado: ${textos[valor] || valor}`;
+                    spanNivelSelecionado.style.color = '#00562e';
+                    spanNivelSelecionado.style.fontWeight = 'bold';
+                });
+            });
+
+            // ==========================================
+            // BUSCA AUTOMÁTICA DE ZONA E SEÇÃO (CORRIGIDA)
+            // ==========================================
+            const zonaInput = document.getElementById('zona');
+            const secaoInput = document.getElementById('secao');
+            let timerBusca = null;
+
+            function buscarDadosVotacao() {
+                const zona = zonaInput.value.trim();
+                const secao = secaoInput.value.trim();
+
+                if (zona.length === 0 && secao.length === 0) {
+                    document.getElementById('local_vot').value = '';
+                    document.getElementById('bairro_vot').value = '';
+                    document.getElementById('endereco_vot').value = '';
+                    return;
+                }
+
+                const urlApi = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
+                    ? API_CONFIG.BASE_URL 
+                    : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
+
+                const urlCompleta = `${urlApi}?acao=buscarZona&zona=${encodeURIComponent(zona)}&secao=${encodeURIComponent(secao)}`;
+
+                fetch(urlCompleta, {
+                    method: 'GET',
+                    redirect: 'follow'
+                })
+                .then(response => response.json())
+                .then(resposta => {
+                    if (resposta.sucesso) {
+                        document.getElementById('local_vot').value = resposta.local_vot || '';
+                        document.getElementById('bairro_vot').value = resposta.bairro_vot || '';
+                        document.getElementById('endereco_vot').value = resposta.endereco_vot || '';
+                    }
+                })
+                .catch(err => console.error('❌ Erro ao buscar dados de votação:', err));
+            }
+
+            function acionarBuscaComAtraso() {
+                clearTimeout(timerBusca);
+                timerBusca = setTimeout(buscarDadosVotacao, 400);
+            }
+
+            zonaInput.addEventListener('input', acionarBuscaComAtraso);
+            secaoInput.addEventListener('input', acionarBuscaComAtraso);
+
+            // ==========================================
+            // CARREGAMENTO AUTOMÁTICO DOS CANDIDATOS (VIA ABA ANEXO)
+            // ==========================================
+            function carregarCandidatos() {
+                const urlApi = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
+                    ? API_CONFIG.BASE_URL 
+                    : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
+
+                const urlCompleta = `${urlApi}?acao=buscarCandidatos`;
+
+                fetch(urlCompleta, {
+                    method: 'GET',
+                    redirect: 'follow'
+                })
+                .then(response => response.json())
+                .then(resposta => {
+                    const container = document.getElementById('container-candidatos');
+                    if (!container) return;
+
+                    container.innerHTML = ''; // Limpa antes de carregar
+
+                    if (resposta.sucesso && Array.isArray(resposta.candidatos) && resposta.candidatos.length > 0) {
+                        resposta.candidatos.forEach(function(candidato) {
+                            const label = document.createElement('label');
+                            label.style.cssText = "cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: normal;";
+                            
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.name = 'candidato';
+                            checkbox.value = candidato;
+
+                            const span = document.createElement('span');
+                            span.innerText = candidato;
+
+                            label.appendChild(checkbox);
+                            label.appendChild(span);
+                            container.appendChild(label);
+                        });
+                    } else {
+                        container.innerHTML = '<span style="color: #888; font-size: 0.85rem;">Nenhum candidato encontrado.</span>';
+                    }
+                })
+                .catch(err => {
+                    console.error('❌ Erro ao carregar candidatos:', err);
+                    const container = document.getElementById('container-candidatos');
+                    if (container) {
+                        container.innerHTML = '<span style="color: red; font-size: 0.85rem;">Erro ao carregar candidatos.</span>';
+                    }
+                });
+            }
+
+            // Executa a busca dos candidatos ao abrir a página
+            carregarCandidatos();
+
+            // ==========================================
+            // VALIDAÇÃO DO TÍTULO DE ELEITOR
+            // ==========================================
+            function validarTituloEleitor(titulo) {
+                titulo = titulo.replace(/\D/g, '');
+                if (titulo === '') return true;
+                if (titulo.length !== 12) return false;
+                if (/^(\d)\1+$/.test(titulo)) return false;
+
+                var titulosExcecaoValidos = [
+                    "041986370779",
+                    "058018950760"
+                ];
+
+                if (titulosExcecaoValidos.includes(titulo)) {
+                    return true;
+                }
+
+                try {
+                    var uf = parseInt(titulo.substring(8, 10), 10);
+                    if (uf < 1 || uf > 28) return false;
+
+                    var soma1 = 0;
+                    for (var i = 0; i < 8; i++) {
+                        soma1 += parseInt(titulo.charAt(i), 10) * (i + 2);
+                    }
+                    var resto1 = soma1 % 11;
+
+                    var dv1Calculado;
+                    if (uf === 1 || uf === 2) {
+                        if (resto1 === 0) dv1Calculado = 0;
+                        else if (resto1 === 1) dv1Calculado = 5;
+                        else dv1Calculado = 11 - resto1;
+                    } else {
+                        if (resto1 === 10 || resto1 === 11) dv1Calculado = 0;
+                        else dv1Calculado = resto1;
+                    }
+
+                    var dv1Informado = parseInt(titulo.charAt(10), 10);
+                    if (dv1Calculado !== dv1Informado) return false;
+
+                    var soma2 = (parseInt(titulo.charAt(8), 10) * 7) + 
+                                (parseInt(titulo.charAt(9), 10) * 8) + 
+                                (dv1Calculado * 9);
+                    var resto2 = soma2 % 11;
+
+                    var dv2Calculado;
+                    if (resto2 === 10 || resto2 === 11) dv2Calculado = 0;
+                    else dv2Calculado = resto2;
+
+                    var dv2Informado = parseInt(titulo.charAt(11), 10);
+                    if (dv2Calculado !== dv2Informado) return false;
+
+                    return true;
+                } catch (erro) {
+                    return false;
+                }
+            }
+
+            // ==========================================
+            // CHECAGEM VISUAL DO TÍTULO
+            // ==========================================
+            const tituloInput = document.getElementById('titulo');
+            const tituloAntigoCheckbox = document.getElementById('titulo-antigo');
+
+            function checarVisualmenteTitulo() {
+                const valor = tituloInput.value.trim();
+                const isAntigo = tituloAntigoCheckbox ? tituloAntigoCheckbox.checked : false;
+
+                if (valor === "" || isAntigo) {
+                    tituloInput.style.borderColor = "";
+                    tituloInput.style.backgroundColor = "";
+                    return;
+                }
+
+                const apenasNumeros = valor.replace(/\D/g, '');
+
+                if (apenasNumeros.length === 12 && validarTituloEleitor(apenasNumeros)) {
+                    tituloInput.style.borderColor = "green";
+                    tituloInput.style.backgroundColor = "#e6ffe6";
+                } else {
+                    tituloInput.style.borderColor = "red";
+                    tituloInput.style.backgroundColor = "#ffe6e6";
+                }
+            }
+
+            tituloInput.addEventListener('input', checarVisualmenteTitulo);
+            if (tituloAntigoCheckbox) {
+                tituloAntigoCheckbox.addEventListener('change', checarVisualmenteTitulo);
+            }
+
+            // ==========================================
+            // SUBMISSÃO DO FORMULÁRIO
+            // ==========================================
+            const form = document.getElementById('form-cadastramento');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const nivelSelecionado = document.querySelector('input[name="nivel"]:checked');
+                const nivel = nivelSelecionado ? nivelSelecionado.value : '';
+
+                if (!nivel) {
+                    alert('⚠️ Por favor, selecione um NÍVEL DE ATUAÇÃO (1, 2 ou 3).');
+                    return;
+                }
+
+                const tituloVal = tituloInput.value.trim();
+                const isAntigo = tituloAntigoCheckbox ? tituloAntigoCheckbox.checked : false;
+
+                if (tituloVal !== "" && !isAntigo) {
+                    if (!validarTituloEleitor(tituloVal)) {
+                        alert('Erro: O Título de Eleitor precisa ter 12 dígitos válidos. Verifique os números informados.');
+                        tituloInput.focus();
+                        tituloInput.style.borderColor = "red";
+                        tituloInput.style.backgroundColor = "#ffe6e6";
+                        return;
+                    }
+                }
+
+                const checkboxesCandidatos = document.querySelectorAll('input[name="candidato"]:checked');
+                let candidatosSelecionados = [];
+                checkboxesCandidatos.forEach(function(cb) {
+                    candidatosSelecionados.push(cb.value);
+                });
+
+                const urlApiEnvio = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
+                    ? API_CONFIG.BASE_URL 
+                    : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
+
+                const dadosEnvio = {
+                    acao: 'salvarCadastro',
+                    numero_cha: numeroCha,
+                    numero_sec: numeroSec,
+                    nome: document.getElementById('nome').value,
+                    data_nasc: document.getElementById('data_nasc').value,
+                    endereco: document.getElementById('endereco').value,
+                    n_casa: document.getElementById('n_casa').value,
+                    bairro: document.getElementById('bairro').value,
+                    cidade: document.getElementById('cidade').value,
+                    telefone: document.getElementById('telefone').value,
+                    candidatos: candidatosSelecionados,
+                    titulo: tituloVal,
+                    zona: zonaInput.value,
+                    secao: secaoInput.value,
+                    nome_mae: document.getElementById('nome_mae').value,
+                    local_vot: document.getElementById('local_vot').value,
+                    bairro_vot: document.getElementById('bairro_vot').value,
+                    endereco_vot: document.getElementById('endereco_vot').value,
+                    obs: document.getElementById('obs').value,
+                    nivel: nivel
+                };
+
+                fetch(urlApiEnvio, {
+                    method: 'POST',
+                    body: JSON.stringify(dadosEnvio)
+                })
+                .then(response => response.json())
+                .then(resposta => {
+                    if (resposta.sucesso) {
+                        alert('✅ Cadastro salvo com sucesso! ID gerado: ' + resposta.id + '\nNível: ' + nivel);
+                        form.reset();
+                        tituloInput.style.borderColor = "";
+                        tituloInput.style.backgroundColor = "";
+                        document.getElementById('nivel-selecionado').innerText = 'Nenhum nível selecionado';
+                        document.getElementById('nivel-selecionado').style.color = '#888';
+                        document.getElementById('nivel-selecionado').style.fontWeight = 'normal';
+                    } else {
+                        alert('❌ Erro ao salvar: ' + resposta.mensagem);
+                    }
+                })
+                .catch(erro => {
+                    alert('❌ Erro de comunicação com o servidor: ' + erro.message);
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

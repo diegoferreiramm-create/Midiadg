@@ -1,0 +1,357 @@
+/* Variáveis de Cores baseadas no Logotipo do Partido Verde */
+:root {
+    --pv-green-dark: #00562e; /* Define a cor verde escura principal baseada no logotipo */
+    --pv-green-light: #007a41; /* Define um tom intermediário de verde para hovers e destaques */
+    --pv-green-bg: #f2f7f4;   /* Define um fundo levemente esverdeado e claro para a página */
+    --text-color: #333333; /* Define a cor padrão e escura para os textos */
+    --white: #ffffff; /* Define o branco puro para fundos de elementos e textos */
+    --gray-border: #cccccc; /* Define um cinza neutro para bordas de inputs e caixas */
+    --transition-speed: 0.3s; /* Define a velocidade padrão para animações e transições */
+}
+
+/* Estilização global aplicada a todos os elementos da página */
+* {
+    box-sizing: border-box; /* Inclui padding e borda na largura e altura total dos elementos */
+    margin: 0; /* Remove a margem externa padrão de todos os elementos */
+    padding: 0; /* Remove o espaçamento interno padrão de todos os elementos */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Define a família de fontes padrão */
+}
+
+/* Estilização do corpo principal da página */
+body {
+    background-color: var(--pv-green-bg); /* Aplica o fundo esverdeado claro na tela */
+    color: var(--text-color); /* Define a cor padrão do texto na página */
+    display: flex; /* Transforma o body em um container flexível */
+    justify-content: center; /* Centraliza horizontalmente os elementos filhos */
+    align-items: center; /* Centraliza verticalmente os elementos filhos */
+    min-height: 100vh; /* Garante que o body ocupe no mínimo toda a altura da tela */
+    padding: 20px; /* Adiciona um espaçamento interno ao redor da página */
+}
+
+/* Container Centralizado */
+.login-container {
+    background: var(--white); /* Define o fundo branco para o container de login */
+    width: 100%; /* Faz o container ocupar toda a largura disponível (até o limite) */
+    max-width: 400px; /* Limita a largura máxima do container de login a 400px */
+    padding: 30px 25px; /* Adiciona espaçamento interno superior/inferior e laterais */
+    border-radius: 12px; /* Arredonda as pontas do container */
+    box-shadow: 0 8px 24px rgba(0, 86, 46, 0.15); /* Adiciona uma sombra verde suave ao redor */
+    display: flex; /* Torna o container flexível para alinhar os itens internos */
+    flex-direction: column; /* Organiza os elementos filhos em coluna (um abaixo do outro) */
+    align-items: center; /* Centraliza horizontalmente os itens dentro do container */
+}
+
+/* Estilização do Logo */
+.logo-wrapper {
+    width: 100%; /* Faz o invólucro do logo ocupar toda a largura disponível */
+    display: flex; /* Torna o invólucro flexível */
+    justify-content: center; /* Centraliza horizontalmente a imagem do logo */
+    margin-bottom: 25px; /* Adiciona um espaçamento abaixo do logo */
+}
+
+.logo-img {
+    max-width: 180px; /* Define a largura máxima que a imagem do logo pode ter */
+    height: auto; /* Mantém a proporção automática da altura da imagem */
+    object-fit: contain; /* Garante que a imagem caiba perfeitamente sem distorcer */
+}
+
+/* Blocos de Formulário */
+.form-box {
+    width: 100%; /* Faz o bloco do formulário ocupar toda a largura disponível */
+}
+
+.form-box.hidden {
+    display: none; /* Oculta completamente o elemento quando a classe hidden é aplicada */
+}
+
+.form-box h2 {
+    color: var(--pv-green-dark); /* Aplica a cor verde escura no título do formulário */
+    font-size: 1.5rem; /* Define o tamanho da fonte do título */
+    margin-bottom: 20px; /* Adiciona margem inferior para separar dos inputs */
+    text-align: center; /* Centraliza o texto do título */
+}
+
+/* Grupos de Inputs */
+.input-group {
+    margin-bottom: 15px; /* Adiciona margem inferior para separar dos próximos campos */
+    width: 100%; /* Faz o grupo ocupar toda a largura do formulário */
+}
+
+.input-group label {
+    display: block; /* Faz o rótulo ocupar sua própria linha */
+    margin-bottom: 6px; /* Adiciona margem entre o rótulo e o campo de input */
+    font-weight: 600; /* Deixa o texto do rótulo seminegrito */
+    font-size: 0.9rem; /* Define um tamanho de fonte menor para o rótulo */
+    color: var(--pv-green-dark); /* Aplica a cor verde escura no texto do rótulo */
+}
+
+.input-group input {
+    width: 100%; /* Faz o campo de texto ocupar toda a largura disponível */
+    padding: 12px; /* Adiciona espaçamento interno para facilitar a digitação */
+    border: 1px solid var(--gray-border); /* Aplica uma borda cinza sutil ao redor do input */
+    border-radius: 6px; /* Arredonda levemente as bordas do input */
+    font-size: 1rem; /* Define o tamanho da fonte digitada no input */
+    outline: none; /* Remove a linha de foco padrão do navegador */
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed); /* Suaviza a transição de borda e sombra */
+}
+
+.input-group input:focus {
+    border-color: var(--pv-green-dark); /* Altera a cor da borda para verde escuro ao focar */
+    box-shadow: 0 0 0 3px rgba(0, 86, 46, 0.15); /* Adiciona um efeito de brilho/sombra verde ao redor ao focar */
+}
+
+/* Botões */
+.btn-primary {
+    width: 100%; /* Faz o botão principal ocupar toda a largura disponível */
+    padding: 12px; /* Adiciona espaçamento interno para o botão ficar maior */
+    background-color: var(--pv-green-dark); /* Define o fundo verde escuro padrão do botão */
+    color: var(--white); /* Define a cor do texto do botão como branca */
+    border: none; /* Remove qualquer borda padrão do botão */
+    border-radius: 6px; /* Arredonda as bordas do botão */
+    font-size: 1rem; /* Define o tamanho da fonte do texto do botão */
+    font-weight: bold; /* Deixa o texto do botão em negrito */
+    cursor: pointer; /* Muda o cursor do mouse para o ícone de clique */
+    transition: background-color var(--transition-speed); /* Suaviza a transição de cor de fundo */
+    margin-top: 10px; /* Adiciona margem superior para distanciar dos campos acima */
+}
+
+.btn-primary:hover {
+    background-color: var(--pv-green-light); /* Altera a cor de fundo para verde intermediário ao passar o mouse */
+}
+
+/* Rodapé do Formulário (Links) */
+.form-footer {
+    margin-top: 20px; /* Adiciona margem superior para distanciar do conteúdo acima */
+    text-align: center; /* Centraliza os links do rodapé do formulário */
+}
+
+.form-footer a {
+    color: var(--pv-green-dark); /* Define a cor verde escura para o link */
+    text-decoration: none; /* Remove o sublinhado padrão do link */
+    font-size: 0.85rem; /* Define um tamanho de fonte menor para o link */
+    font-weight: 600; /* Deixa o texto do link seminegrito */
+    transition: color var(--transition-speed); /* Suaviza a transição de cor */
+}
+
+.form-footer a:hover {
+    text-decoration: underline; /* Adiciona sublinhado ao passar o mouse sobre o link */
+    color: var(--pv-green-light); /* Altera a cor do link para verde intermediário ao passar o mouse */
+}
+
+/* Responsividade extra para celulares pequenos */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 20px 15px; /* Reduz o espaçamento interno do container em telas pequenas */
+        box-shadow: none; /* Remove a sombra do container para economizar espaço visual */
+        background: transparent; /* Torna o fundo do container transparente */
+    }
+    
+    body {
+        background-color: var(--white); /* Altera o fundo da página inteira para branco em telas pequenas */
+    }
+}
+
+
+/* Container específico para o Menu (mesmo padrão centralizado) */
+.menu-container {
+    background: var(--white); /* Define o fundo branco para o container do menu */
+    width: 100%; /* Faz o container ocupar toda a largura disponível */
+    max-width: 420px; /* Limita a largura máxima do container do menu a 420px */
+    padding: 30px 25px; /* Adiciona espaçamento interno nas bordas do menu */
+    border-radius: 12px; /* Arredonda as pontas do container do menu */
+    box-shadow: 0 8px 24px rgba(0, 86, 46, 0.15); /* Adiciona uma sombra verde suave ao redor */
+    display: flex; /* Torna o container flexível para alinhar elementos em coluna */
+    flex-direction: column; /* Organiza os itens internos de cima para baixo */
+    align-items: center; /* Centraliza horizontalmente os itens do menu */
+}
+
+.welcome-header {
+    text-align: center; /* Centraliza o texto do cabeçalho de boas-vindas */
+    margin-bottom: 25px; /* Adiciona margem inferior para distancianamento */
+    width: 100%; /* Faz o cabeçalho ocupar toda a largura do container */
+}
+
+.welcome-header h2 {
+    color: var(--pv-green-dark); /* Aplica a cor verde escuro no título de boas-vindas */
+    font-size: 1.5rem; /* Define o tamanho da fonte do título */
+    margin-bottom: 5px; /* Adiciona um pequeno espaçamento inferior abaixo do título */
+}
+
+.welcome-header p {
+    color: #666666; /* Define uma cor cinza para o texto descritivo de boas-vindas */
+    font-size: 0.95rem; /* Define o tamanho da fonte do parágrafo */
+}
+
+/* Opções de Botões do Menu */
+.menu-options {
+    width: 100%; /* Faz o bloco de opções ocupar toda a largura disponível */
+    display: flex; /* Torna o container das opções flexível */
+    flex-direction: column; /* Organiza os botões em coluna */
+    gap: 12px; /* Define um espaçamento fixo de 12px entre cada botão do menu */
+}
+
+.btn-menu {
+    width: 100%; /* Faz cada botão de menu ocupar toda a largura */
+    padding: 14px 20px; /* Adiciona espaçamento interno generoso no botão */
+    background-color: var(--white); /* Define o fundo inicial do botão como branco */
+    color: var(--pv-green-dark); /* Define a cor do texto e ícone como verde escuro */
+    border: 2px solid var(--pv-green-dark); /* Adiciona uma borda espessa verde escura */
+    border-radius: 8px; /* Arredonda as bordas do botão do menu */
+    font-size: 1rem; /* Define o tamanho da fonte do texto do botão */
+    font-weight: bold; /* Deixa o texto do botão em negrito */
+    cursor: pointer; /* Altera o cursor para o formato de clique */
+    display: flex; /* Torna o conteúdo interno do botão flexível */
+    align-items: center; /* Alinha verticalmente os itens do botão */
+    justify-content: flex-start; /* Alinha os itens do botão à esquerda */
+    gap: 15px; /* Adiciona espaçamento entre o ícone e o texto do botão */
+    transition: all var(--transition-speed); /* Suaviza a transição de todas as propriedades no hover */
+}
+
+.btn-menu .icon {
+    font-size: 1.2rem; /* Define o tamanho da fonte do ícone dentro do botão */
+}
+
+.btn-menu:hover {
+    background-color: var(--pv-green-dark); /* Inverte o fundo para verde escuro ao passar o mouse */
+    color: var(--white); /* Inverte a cor do texto para branco ao passar o mouse */
+    transform: translateY(-2px); /* Desloca levemente o botão para cima ao passar o mouse */
+    box-shadow: 0 4px 12px rgba(0, 86, 46, 0.2); /* Adiciona uma sombra mais intensa ao passar o mouse */
+}
+
+/* Botão Secundário (Sair) */
+.menu-footer {
+    width: 100%; /* Faz o rodapé do menu ocupar toda a largura */
+    margin-top: 25px; /* Adiciona margem superior para separar das opções acima */
+    border-top: 1px solid #eee; /* Adiciona uma linha divisória cinza bem clara acima */
+    padding-top: 20px; /* Adiciona espaçamento interno acima do conteúdo do rodapé */
+}
+
+.btn-secondary {
+    width: 100%; /* Faz o botão secundário ocupar toda a largura disponível */
+    padding: 10px; /* Adiciona espaçamento interno no botão de sair */
+    background-color: transparent; /* Deixa o fundo do botão transparente */
+    color: #d9534f; /* Define a cor vermelha para indicar ação de alerta/saída */
+    border: 1px solid #d9534f; /* Adiciona uma borda vermelha ao redor do botão */
+    border-radius: 6px; /* Arredonda as bordas do botão secundário */
+    font-size: 0.9rem; /* Define o tamanho da fonte do botão */
+    font-weight: 600; /* Deixa o texto do botão seminegrito */
+    cursor: pointer; /* Altera o cursor para o formato de clique */
+    transition: background-color var(--transition-speed); /* Suaviza a transição da cor de fundo */
+}
+
+.btn-secondary:hover {
+    background-color: #d9534f; /* Preenche o fundo com vermelho ao passar o mouse */
+    color: var(--white); /* Altera a cor do texto para branco ao passar o mouse */
+}
+
+/* Ajuste responsivo para telas menores */
+@media (max-width: 480px) {
+    .menu-container {
+        padding: 20px 15px; /* Reduz o espaçamento interno do container em telas pequenas */
+        box-shadow: none; /* Remove a sombra do container mobile */
+        background: transparent; /* Torna o fundo do container transparente em telas pequenas */
+    }
+}
+
+
+/* --- ESTILOS DO MÓDULO DE CADASTRAMENTO --- */
+
+#form-cadastramento {
+    display: flex; /* Torna o formulário de cadastramento um container flexível */
+    flex-direction: column; /* Organiza os campos do formulário em formato de coluna */
+    gap: 14px; /* Define um espaçamento vertical consistente entre os elementos */
+    width: 100%; /* Faz o formulário ocupar toda a largura disponível */
+}
+
+.form-group {
+    display: flex; /* Torna o grupo de formulário um container flexível */
+    flex-direction: column; /* Organiza label e input em coluna */
+    text-align: left; /* Alinha o texto do grupo à esquerda */
+    width: 100%; /* Faz o grupo ocupar toda a largura */
+}
+
+.form-group label {
+    font-size: 0.9rem; /* Define o tamanho da fonte do rótulo do cadastro */
+    font-weight: 600; /* Deixa o rótulo seminegrito */
+    color: var(--pv-green-dark, #00562e); /* Define a cor verde escura com fallback */
+    margin-bottom: 5px; /* Adiciona um pequeno espaço entre o rótulo e o campo */
+}
+
+.input-field {
+    width: 100%; /* Faz o campo de entrada preencher toda a largura do grupo */
+    padding: 10px 12px; /* Adiciona espaçamento interno confortável para digitação */
+    border: 1px solid #ccc; /* Aplica uma borda cinza padrão ao campo */
+    border-radius: 6px; /* Arredonda as pontas do campo de input */
+    font-size: 0.95rem; /* Define o tamanho da fonte do texto digitado */
+    background-color: #fff; /* Define o fundo branco padrão para o campo */
+    color: #333; /* Define a cor escura para o texto digitado */
+    box-sizing: border-box; /* Garante que padding e borda não estourem a largura */
+    transition: border-color 0.2s, box-shadow 0.2s; /* Suaviza a transição de foco e borda */
+}
+
+.input-field:focus {
+    border-color: var(--pv-green-dark, #00562e); /* Altera a cor da borda para verde escuro no foco */
+    outline: none; /* Remove o contorno padrão do navegador */
+    box-shadow: 0 0 0 3px rgba(0, 86, 46, 0.1); /* Adiciona um leve brilho verde ao redor no foco */
+}
+
+/* Card moderno para Dados de Votação (Substitui o tracejado feio) */
+.dados-votacao-box {
+    background-color: #f4fbf7; /* Define um fundo verde bem claro e suave para o card */
+    border: 1px solid #d1e7dd; /* Adiciona uma borda esverdeada suave ao redor do card */
+    border-radius: 8px; /* Arredonda as bordas do card de votação */
+    padding: 15px; /* Adiciona espaçamento interno dentro do card */
+    margin-top: 5px; /* Adiciona uma pequena margem superior */
+}
+
+.dados-votacao-box h4 {
+    font-size: 0.95rem; /* Define o tamanho da fonte do subtítulo do card */
+    color: var(--pv-green-dark, #00562e); /* Define a cor verde escura para o título do card */
+    margin-bottom: 12px; /* Adiciona margem inferior para separar do conteúdo interno */
+    display: flex; /* Torna o título flexível para alinhar ícones e texto */
+    align-items: center; /* Alinha verticalmente os itens do título */
+    gap: 6px; /* Adiciona espaçamento entre o ícone e o texto do título */
+}
+
+/* Campos somente leitura */
+.input-readonly {
+    background-color: #e9ecef !important; /* Força um fundo cinza claro para indicar campo desativado */
+    color: #495057 !important; /* Força uma cor de texto mais cinza e apagada */
+    cursor: not-allowed; /* Altera o cursor do mouse para indicar que não é editável */
+    border-color: #ced4da !important; /* Força uma cor de borda neutra e mais clara */
+}
+
+/* Seção de Candidatos */
+.candidatos-box {
+    background-color: #f9f9f9; /* Define um fundo cinza bem claro para a seção de candidatos */
+    border: 1px solid #e0e0e0; /* Adiciona uma borda cinza suave ao redor da caixa */
+    padding: 12px; /* Adiciona espaçamento interno na caixa de candidatos */
+    border-radius: 8px; /* Arredonda as bordas da caixa de candidatos */
+}
+
+.candidatos-opcoes {
+    display: flex; /* Torna o container de opções de candidatos flexível */
+    gap: 20px; /* Adiciona um espaçamento horizontal de 20px entre as opções */
+    margin-top: 5px; /* Adiciona uma pequena margem superior */
+}
+
+.candidatos-opcoes label {
+    font-weight: normal; /* Define o peso da fonte como normal para as opções */
+    cursor: pointer; /* Muda o cursor para o formato de clique nas opções */
+    display: flex; /* Torna o rótulo da opção flexível */
+    align-items: center; /* Alinha verticalmente o checkbox/radio com o texto */
+    gap: 6px; /* Adiciona espaçamento entre o botão de seleção e o texto */
+}
+
+/* Estilo para o nome da cidade */
+.cidade-nome {
+    color: #2e7d32; /* Define uma cor verde viva e destacada para o nome da cidade */
+    font-size: 24px; /* Define um tamanho de fonte grande e chamativo */
+    font-weight: bold; /* Deixa o nome da cidade em forte negrito */
+    text-align: center; /* Centraliza o nome da cidade horizontalmente */
+    margin: 5px 0 15px 0; /* Define margens superior, lateral e inferior específicas */
+    letter-spacing: 3px; /* Aumenta o espaçamento entre as letras para dar destaque */
+    text-transform: uppercase; /* Força todas as letras do nome da cidade a ficarem maiúsculas */
+    font-family: 'Arial', sans-serif; /* Define a fonte Arial limpa para o nome da cidade */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Adiciona uma sombra sutil e leve no texto para profundidade */
+}

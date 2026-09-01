@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PV43 - Menu Principal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="login-container">
+        <!-- Logo do Partido Verde -->
+        <div class="logo-wrapper">
+            <img src="logo.jpg" alt="Logo Partido Verde" class="logo-img">
+            <!-- ✅ ADICIONADO: Nome da cidade abaixo da logo -->
+            <h3 class="cidade-nome">MARACANAÚ</h3>
+        </div>
+
+        <!-- Cabeçalho de Boas-vindas -->
+        <div class="welcome-header">
+            <h2>Menu Principal</h2>
+            <p id="usuario-logado-texto">Bem-vindo(a)</p>
+        </div>
+
+        <!-- Opções do Menu (Ordem atualizada) -->
+        <div class="menu-options">
+            <button class="btn-menu" onclick="redirecionar('cadastramento')">
+                <span class="icon">📝</span> CADASTRAMENTO
+            </button>
+            <button class="btn-menu" onclick="redirecionar('lista')">
+                <span class="icon">📋</span> LISTA GERAL
+            </button>
+            <button class="btn-menu" onclick="redirecionar('graficos')">
+                <span class="icon">📊</span> GRÁFICOS ESTRATÉGICOS
+            </button>
+            <button class="btn-menu" onclick="redirecionar('agendamentos')">
+                <span class="icon">📅</span> AGENDAMENTOS
+            </button>
+            <button class="btn-menu" onclick="redirecionar('configuracoes')">
+                <span class="icon">⚙️</span> CONFIGURAÇÕES
+            </button>
+        </div>
+
+        <!-- Rodapé / Sair -->
+        <div class="menu-footer">
+            <button id="btn-sair" class="btn-secondary">Sair do Sistema</button>
+        </div>
+    </div>
+
+    <script>
+        // 🔒 VERIFICAÇÃO DE SEGURANÇA (executada imediatamente)
+        (function() {
+            const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
+            const tipoUsuario = localStorage.getItem('pv43_tipo_usuario');
+
+            // Se não houver dados salvos, expulsa de volta para o login
+            if (!nomeUsuario || !tipoUsuario) {
+                alert('⚠️ Acesso negado! Faça o login pelo sistema.');
+                window.location.href = 'pv43.html';
+                return;
+            }
+
+            // Exibe o nome e o tipo do usuário autenticado no menu
+            document.getElementById('usuario-logado-texto').innerText = `Logado como: ${nomeUsuario} (${tipoUsuario.toUpperCase()})`;
+
+            // Ação do botão Sair
+            document.getElementById('btn-sair').addEventListener('click', function() {
+                localStorage.removeItem('pv43_nome_usuario');
+                localStorage.removeItem('pv43_tipo_usuario');
+                window.location.href = 'pv43.html';
+            });
+        })();
+
+        // Função que direciona para os módulos internos a partir do menu
+        function redirecionar(modulo) {
+            switch(modulo) {
+                case 'cadastramento':
+                    window.location.href = 'cadastramento.html';
+                    break;
+                case 'agendamentos':
+                    window.location.href = 'agendamentos.html';
+                    break;
+                case 'lista':
+                    window.location.href = 'lista.html';
+                    break;
+                case 'graficos':
+                    window.location.href = 'graficos.html';
+                    break;
+                case 'configuracoes':
+                    window.location.href = 'configuracoes.html';
+                    break;
+                default:
+                    alert('Módulo em desenvolvimento.');
+            }
+        }
+    </script>
+</body>
+</html>
