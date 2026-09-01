@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Se não houver dados salvos, expulsa de volta para o login
     if (!nomeUsuario || !tipoUsuario) {
         alert('Acesso negado! Faça o login pelo sistema.');
-        window.location.href = 'pv43.html';
+        window.location.href = 'idx.html';
         return;
     }
 
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-sair').addEventListener('click', function() {
         localStorage.removeItem('pv43_nome_usuario');
         localStorage.removeItem('pv43_tipo_usuario');
-        window.location.href = 'pv43.html';
+        window.location.href = 'idx.html';
     });
 });
 
