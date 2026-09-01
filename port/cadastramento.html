@@ -15,7 +15,7 @@
             const nomeUsuario = localStorage.getItem('pv43_nome_usuario');
             if (!nomeUsuario) {
                 alert('⚠️ Acesso restrito! Por favor, faça o login primeiro.');
-                window.location.href = 'pv43.html'; // Redireciona para a tela de login
+                window.location.href = 'idx.html'; // Redireciona para a tela de login
             }
         })();
     </script>
@@ -220,7 +220,7 @@
 
                 const urlApi = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
                     ? API_CONFIG.BASE_URL 
-                    : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
+                    : "https://script.google.com/macros/s/AKfycbzsx4grhhFwT5HH5-72V-OrPWuC8D_dKbfkd_MkdvxRwwHRBagehiaevS1nA0Lmq2FT/execc";
 
                 const urlCompleta = `${urlApi}?acao=buscarZona&zona=${encodeURIComponent(zona)}&secao=${encodeURIComponent(secao)}`;
 
@@ -253,7 +253,7 @@
             function carregarCandidatos() {
                 const urlApi = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
                     ? API_CONFIG.BASE_URL 
-                    : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
+                    : "https://script.google.com/macros/s/AKfycbzsx4grhhFwT5HH5-72V-OrPWuC8D_dKbfkd_MkdvxRwwHRBagehiaevS1nA0Lmq2FT/exec";
 
                 const urlCompleta = `${urlApi}?acao=buscarCandidatos`;
 
@@ -428,7 +428,7 @@
 
                 const urlApiEnvio = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
                     ? API_CONFIG.BASE_URL 
-                    : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
+                    : "https://script.google.com/macros/s/AKfycbzsx4grhhFwT5HH5-72V-OrPWuC8D_dKbfkd_MkdvxRwwHRBagehiaevS1nA0Lmq2FT/exec";
 
                 const dadosEnvio = {
                     acao: 'salvarCadastro',
