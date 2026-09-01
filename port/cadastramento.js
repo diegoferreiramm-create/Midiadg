@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!nomeUsuario) {
         alert('Acesso restrito! Redirecionando para a tela de login.');
-        window.location.href = 'pv43.html';
+        window.location.href = 'idx.html';
         return;
     }
 
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const urlApi = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
             ? API_CONFIG.BASE_URL 
-            : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
+            : "https://script.google.com/macros/s/AKfycbzsx4grhhFwT5HH5-72V-OrPWuC8D_dKbfkd_MkdvxRwwHRBagehiaevS1nA0Lmq2FT/exec";
 
         if (zona.length > 0 || secao.length > 0) {
             // 🔥 CORREÇÃO: Usar GET com parâmetros na URL
@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const urlApiEnvio = (typeof API_CONFIG !== 'undefined' && API_CONFIG.BASE_URL) 
             ? API_CONFIG.BASE_URL 
-            : "https://script.google.com/macros/s/AKfycbzYQYsCt9aW2r7y0KITNIVFtAKE1iM2k457iFvlwOYNLG25Cb3HVJesbKDLqFX2p93K1A/exec";
+            : "https://script.google.com/macros/s/AKfycbzsx4grhhFwT5HH5-72V-OrPWuC8D_dKbfkd_MkdvxRwwHRBagehiaevS1nA0Lmq2FT/exec";
 
         const dadosEnvio = {
             acao: 'salvarCadastro',
