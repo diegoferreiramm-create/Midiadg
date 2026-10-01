@@ -1171,3 +1171,86 @@ function reabrirChamadoAdmin(id) {
         }
     });
 }
+
+
+// ============================================================
+// SISTEMA DE NOTIFICAÇÕES CHATO (ALERTS & PUSH)
+// ============================================================
+
+// Solicita permissão para notificações nativas do navegador ao logar
+function solicitarPermissaoNotificacao() {
+    if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
+}
+
+// Função que executa a verificação "chata" periodicamente
+function iniciarSistemaNotificacaoChata() {
+    solicitamPermissaoNotificacao();
+
+    // Roda a verificação a cada 2 minutos (120000 ms)
+    setInterval(() => {
+        if (!usuarioLogado || !cacheChamadosGlobal.length) return;
+
+        const usuarioLower = usuarioLogado.trim().toLowerCase();
+        let chamadosComigoPendentes = 0;
+        let chamadosVencendoOuVencidos = 0;
+        let listaTitulosCriticos = [];
+
+        cacheChamadosGlobal.forEach(c => {
+            if (c.status === "concluido") return;
+
+            // Verifica se está com o usuário logado (quemEstaCom ou na lista de membros da vez)
+            const responsavelAtual = (c.quemEstaCom || "").toLowerCase();
+            const ehMeu = responsavelAtual.includes(usuarioLower);
+
+            if (ehMeu) {
+                chamadosComigoPendentes++;
+
+                // Checa se está vencido ou vence hoje
+                if (c.datalimite) {
+                    let prazoLimite = parseDataBr(c.datalimite);
+                    if (prazoLimite) {
+                        const hoje = new Date();
+                        hoje.setHours(0, 0, 0, 0);
+                        prazoLimite.setHours(0, 0, 0, 0);
+
+                        const diffTime = prazoLimite - hoje;
+                        const diffDias = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                        // Se venceu (<= 0 dias) ou vence em até 1 dia
+                        if (diffDias <= 1) {
+                            chamadosVencendoOuVencidos++;
+                            listaTitulosCriticos.push(`[${c.id}] ${c.titulo} (${diffDias < 0 ? 'VENCIDO' : 'Vence Hoje'})`);
+                        }
+                    }
+                }
+            }
+        });
+
+        // SE HOUVER CHAMADOS CRÍTICOS COM VOCÊ, SEJA MUITO CHATO:
+        if (chamadosVencendoOuVencidos > 0) {
+            dispararAlertaChato(
+                `🚨 ALERTA CRÍTICO DE PRAZO (${chamadosVencendoOuVencidos})`, 
+                `Você tem ${chamadosVencendoOuVencidos} chamado(s) sob sua responsabilidade prestes a vencer ou vencidos!\n\n${listaTitulosCriticos.join('\n')}`
+            );
+        } else if (chamadosComigoPendentes > 0) {
+            // Apenas lembrete normal se houver chamados parados com você
+            console.log(`Lembrete chato: Você tem ${chamadosComigoPendentes} chamado(s) aguardando sua ação.`);
+        }
+
+    }, 120000); // A cada 2 minutos
+}
+
+function dispararAlertaChato(titulo, mensagem) {
+    // 1. Notificação Nativa do Sistema Operacional / Navegador
+    if ("Notification" in window && Notification.permission === "granted") {
+        new Notification(titulo, {
+            body: mensagem,
+            icon: "https://cdn-icons-png.flaticon.com/512/565/565547.png" // Ícone genérico de alerta
+        });
+    }
+
+    // 2. Alerta visual agressivo no console / opcionalmente um pop-up interno se quiser
+    console.warn(titulo + "\n" + mensagem);
+}
