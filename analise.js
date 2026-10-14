@@ -1,0 +1,313 @@
+/* ============================================================
+   LOTOFÁCIL — ANÁLISE EM JAVASCRIPT PURO
+   Converte o script Python pra rodar 100% no navegador.
+   ============================================================ */
+
+const ID_PLANILHA = "1BSH8N7qhWI_4GS5O5iIH81DCfIcdknhV0LTPDEeX3yQ";
+const SHEET_NAME = "Sorteios";
+
+const FIBONACCI_DEZENAS = [1, 2, 3, 5, 8, 13, 21];
+const FIBONACCI_CICLO = [1, 2, 3, 5, 8, 13, 21];
+
+/* ------------------------------------------------------------
+   PARSE CSV ROBUSTO (trata aspas, vírgulas internas, quebras)
+   ------------------------------------------------------------ */
+function parseCSV(text) {
+    const rows = [];
+    let cur = [], field = "", inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQuotes) {
+            if (c === '"') {
+                if (text[i + 1] === '"') { field += '"'; i++; }
+                else inQuotes = false;
+            } else field += c;
+        } else {
+            if (c === '"') inQuotes = true;
+            else if (c === ",") { cur.push(field); field = ""; }
+            else if (c === "\n") { cur.push(field); rows.push(cur); cur = []; field = ""; }
+            else if (c === "\r") { /* ignora */ }
+            else field += c;
+        }
+    }
+    if (field.length > 0 || cur.length > 0) { cur.push(field); rows.push(cur); }
+    return rows.filter(r => r.some(v => v && v.trim() !== ""));
+}
+
+/* ------------------------------------------------------------
+   BAIXA E PROCESSA OS DADOS DA PLANILHA
+   ------------------------------------------------------------ */
+async function carregarDados() {
+    const url = `https://docs.google.com/spreadsheets/d/${ID_PLANILHA}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status} — verifique se a planilha é pública`);
+    const csvText = await response.text();
+    return processarCSV(csvText);
+}
+
+/* ------------------------------------------------------------
+   CONVERTE O CSV EM OBJETO DE ANÁLISE
+   ------------------------------------------------------------ */
+function processarCSV(csv) {
+    const linhas = parseCSV(csv);
+    if (linhas.length < 2) throw new Error("CSV vazio ou inválido.");
+
+    const cabecalho = linhas[0].map(c => String(c).trim());
+    const dados = linhas.slice(1).map(r => {
+        // Garante que cada linha tenha o mesmo número de colunas
+        const linha = [];
+        for (let i = 0; i < cabecalho.length; i++) linha.push(r[i] !== undefined ? r[i] : "");
+        return linha;
+    });
+
+    // Detectar colunas de dezenas (valores 1-25)
+    const numCols = [];
+    for (let i = 0; i < cabecalho.length; i++) {
+        const nome = cabecalho[i].toLowerCase();
+        if (nome.includes("concurso") || nome.includes("data")) continue;
+        let validos = 0, total = 0;
+        for (let r = 0; r < Math.min(dados.length, 30); r++) {
+            const v = parseInt(dados[r][i]);
+            if (!isNaN(v) && v >= 1 && v <= 25) validos++;
+            total++;
+        }
+        if (total > 0 && validos / total > 0.8) numCols.push(i);
+    }
+    if (numCols.length < 15) throw new Error(`Apenas ${numCols.length} colunas de dezenas detectadas. Esperado 15.`);
+
+    // Detectar coluna Concurso
+    let idxConcurso = cabecalho.findIndex(c => c.toLowerCase() === "concurso");
+    if (idxConcurso === -1) idxConcurso = 0;
+
+    // Detectar coluna Data
+    let idxData = cabecalho.findIndex(c =>
+        ["data", "data sorteio", "data do sorteio", "dt", "date"].includes(c.toLowerCase())
+    );
+
+    // Monta DataFrame
+    const df = [];
+    for (const row of dados) {
+        const concurso = parseInt(row[idxConcurso]);
+        if (isNaN(concurso)) continue;
+        const dezenas = [];
+        for (const idx of numCols.slice(0, 15)) {
+            const v = parseInt(row[idx]);
+            if (!isNaN(v) && v >= 1 && v <= 25) dezenas.push(v);
+        }
+        if (dezenas.length !== 15) continue;
+
+        const item = { concurso, dezenas: dezenas.sort((a, b) => a - b) };
+        if (idxData !== -1 && row[idxData] && String(row[idxData]).trim()) {
+            item.data = String(row[idxData]).trim();
+        }
+        df.push(item);
+    }
+
+    // Ordena por concurso decrescente
+    df.sort((a, b) => b.concurso - a.concurso);
+    return df;
+}
+
+/* ------------------------------------------------------------
+   ANÁLISE DE UMA JANELA (últimos N concursos)
+   ------------------------------------------------------------ */
+function analisarJanela(dfJanela, rotulo) {
+    const n = dfJanela.length;
+
+    // Frequência
+    const contagem = new Array(26).fill(0);
+    for (const c of dfJanela) for (const d of c.dezenas) contagem[d]++;
+
+    const freqLista = [];
+    for (let i = 1; i <= 25; i++) {
+        freqLista.push({
+            dezena: i,
+            frequencia: contagem[i],
+            percentual: Math.round((contagem[i] / Math.max(n, 1)) * 100 * 100) / 100
+        });
+    }
+    freqLista.sort((a, b) => b.frequencia - a.frequencia || a.dezena - b.dezena);
+
+    const grupoA = freqLista.slice(0, 9).map(x => x.dezena);
+    const grupoC = freqLista.slice(9, 18).map(x => x.dezena);
+    const grupoB = freqLista.slice(18, 25).map(x => x.dezena);
+
+    // Estatísticas
+    let paresTotal = 0;
+    const faixas = { "01-05": 0, "06-10": 0, "11-15": 0, "16-20": 0, "21-25": 0 };
+    let somaTotal = 0;
+    for (const c of dfJanela) {
+        for (const d of c.dezenas) {
+            if (d % 2 === 0) paresTotal++;
+            if (d <= 5) faixas["01-05"]++;
+            else if (d <= 10) faixas["06-10"]++;
+            else if (d <= 15) faixas["11-15"]++;
+            else if (d <= 20) faixas["16-20"]++;
+            else faixas["21-25"]++;
+            somaTotal += d;
+        }
+    }
+
+    const mediaPares = Math.round((paresTotal / Math.max(n, 1)) * 100) / 100;
+    const mediaImpares = Math.round((15 - mediaPares) * 100) / 100;
+    const somaMedia = Math.round((somaTotal / Math.max(n, 1)) * 100) / 100;
+
+    // Repetições (entre concursos consecutivos)
+    const reps = [];
+    for (let i = 0; i < dfJanela.length - 1; i++) {
+        const a = new Set(dfJanela[i].dezenas);
+        const b = new Set(dfJanela[i + 1].dezenas);
+        let inter = 0;
+        for (const d of a) if (b.has(d)) inter++;
+        reps.push(inter);
+    }
+    const mediaRepetidas = reps.length > 0
+        ? Math.round((reps.reduce((s, x) => s + x, 0) / reps.length) * 100) / 100
+        : 0;
+
+    // Sequências (streak do último pra trás)
+    const sequencias = [];
+    for (let dez = 1; dez <= 25; dez++) {
+        let streak = 0;
+        for (const c of dfJanela) {
+            if (c.dezenas.includes(dez)) streak++;
+            else break;
+        }
+        if (streak >= 2) sequencias.push({ dezena: dez, streak });
+    }
+    sequencias.sort((a, b) => b.streak - a.streak || a.dezena - b.dezena);
+    const sequenciasMax = sequencias.length > 0 ? Math.max(...sequencias.map(s => s.streak)) : 0;
+
+    // Atrasos
+    const atrasos = [];
+    for (let dez = 1; dez <= 25; dez++) {
+        let atraso = 0;
+        for (const c of dfJanela) {
+            if (c.dezenas.includes(dez)) break;
+            atraso++;
+        }
+        atrasos.push({ dezena: dez, atraso });
+    }
+    atrasos.sort((a, b) => b.atraso - a.atraso || a.dezena - b.dezena);
+
+    // Últimos 10
+    const ultimos10 = dfJanela.slice(0, 10).map(c => ({
+        concurso: c.concurso,
+        dezenas: c.dezenas
+    }));
+
+    // Fibonacci
+    const fibonacci = analisarFibonacci(dfJanela);
+
+    return {
+        rotulo,
+        n_concursos: n,
+        frequencias: freqLista,
+        grupo_a: grupoA,
+        grupo_b: grupoB,
+        grupo_c: grupoC,
+        media_pares: mediaPares,
+        media_impares: mediaImpares,
+        media_repetidas: mediaRepetidas,
+        faixas,
+        dezena_mais_quente: freqLista[0].dezena,
+        dezena_mais_fria: freqLista[freqLista.length - 1].dezena,
+        sequencias,
+        sequencias_max: sequenciasMax,
+        atrasos,
+        ultimos_10: ultimos10,
+        soma_media: somaMedia,
+        fibonacci
+    };
+}
+
+/* ------------------------------------------------------------
+   ANÁLISE FIBONACCI
+   ------------------------------------------------------------ */
+function analisarFibonacci(dfJanela) {
+    const resultados = [];
+    for (const dez of FIBONACCI_DEZENAS) {
+        let atraso = 0;
+        let apareceu = false;
+        for (const c of dfJanela) {
+            if (c.dezenas.includes(dez)) { apareceu = true; break; }
+            atraso++;
+        }
+
+        let status, cor, emoji;
+        if (!apareceu) { status = "Ausente na janela"; cor = "cinza"; emoji = "⚫"; }
+        else if (atraso <= 2) { status = "Ativo"; cor = "verde"; emoji = "🟢"; }
+        else if ([3, 5, 8].includes(atraso)) { status = "No ciclo"; cor = "verde"; emoji = "🟢"; }
+        else if (atraso < 13) { status = "Quase saindo"; cor = "amarelo"; emoji = "🟡"; }
+        else if (atraso < 21) { status = "Atrasada"; cor = "laranja"; emoji = "🟠"; }
+        else { status = "Muito atrasada"; cor = "vermelho"; emoji = "🔴"; }
+
+        resultados.push({ dezena: dez, atraso, status, cor, emoji, apareceu });
+    }
+    resultados.sort((a, b) => b.atraso - a.atraso || a.dezena - b.dezena);
+
+    const resumo = {
+        ativas: resultados.filter(r => r.status === "Ativo").length,
+        no_ciclo: resultados.filter(r => r.status === "No ciclo").length,
+        quase_saindo: resultados.filter(r => r.status === "Quase saindo").length,
+        atrasadas: resultados.filter(r => ["Atrasada", "Muito atrasada"].includes(r.status)).length
+    };
+
+    return {
+        dezenas: resultados,
+        resumo,
+        lista_fibonacci: FIBONACCI_DEZENAS,
+        ciclo: FIBONACCI_CICLO
+    };
+}
+
+/* ------------------------------------------------------------
+   ANÁLISE PRINCIPAL — monta o objeto final (mesmo formato do Python)
+   ------------------------------------------------------------ */
+function analisarTudo(df) {
+    const total = df.length;
+    const ultimoConcurso = df[0].concurso;
+
+    const janelas = {
+        geral: df.slice(),
+        ultimos_30: df.slice(0, 30),
+        ultimos_20: df.slice(0, 20),
+        ultimos_10: df.slice(0, 10)
+    };
+
+    const rotulos = {
+        geral: `Geral (${total} concursos)`,
+        ultimos_30: "Últimos 30",
+        ultimos_20: "Últimos 20",
+        ultimos_10: "Últimos 10"
+    };
+
+    const analises = {};
+    for (const chave of Object.keys(janelas)) {
+        analises[chave] = analisarJanela(janelas[chave], rotulos[chave]);
+    }
+
+    // Histórico para conferência
+    const historico = df.map(c => {
+        const item = { c: c.concurso, d: c.dezenas };
+        if (c.data) item.dt = c.data;
+        return item;
+    });
+
+    return {
+        total_concursos: total,
+        ultimo_concurso: ultimoConcurso,
+        analises,
+        historico_conferencia: historico
+    };
+}
+
+/* ------------------------------------------------------------
+   EXPORTA PRA USO GLOBAL
+   ------------------------------------------------------------ */
+window.LotofacilAPI = {
+    carregarDados,
+    analisarTudo,
+    FIBONACCI_DEZENAS,
+    FIBONACCI_CICLO
+};
