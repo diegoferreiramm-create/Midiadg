@@ -1,5 +1,5 @@
 /* ============================================================
-   LOTOFÁCIL — ANÁLISE EM JAVASCRIPT PURO
+   LOTOFÁCIL — ANÁLISE EM JAVASCRIPT PURO v2
    ============================================================ */
 
 const ID_PLANILHA = "1BSH8N7qhWI_4GS5O5iIH81DCfIcdknhV0LTPDEeX3yQ";
@@ -9,7 +9,7 @@ const FIBONACCI_DEZENAS = [1, 2, 3, 5, 8, 13, 21];
 const FIBONACCI_CICLO = [1, 2, 3, 5, 8, 13, 21];
 
 /* ------------------------------------------------------------
-   PARSE CSV ROBUSTO
+   PARSE CSV
    ------------------------------------------------------------ */
 function parseCSV(text) {
     const rows = [];
@@ -34,7 +34,7 @@ function parseCSV(text) {
 }
 
 /* ------------------------------------------------------------
-   BAIXA E PROCESSA OS DADOS
+   BAIXA E PROCESSA
    ------------------------------------------------------------ */
 async function carregarDados() {
     const url = `https://docs.google.com/spreadsheets/d/${ID_PLANILHA}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
@@ -99,9 +99,157 @@ function processarCSV(csv) {
 }
 
 /* ------------------------------------------------------------
+   ANÁLISE DE ATRASO HISTÓRICO POR DEZENA
+   ------------------------------------------------------------ */
+function analisarAtrasosHistoricos(dfCompleto) {
+    const resultado = [];
+
+    for (let dez = 1; dez <= 25; dez++) {
+        const atrasos = [];
+        let atrasoAtual = 0;
+        let emAtraso = true;
+
+        for (let i = 0; i < dfCompleto.length; i++) {
+            if (dfCompleto[i].dezenas.includes(dez)) {
+                if (emAtraso && atrasoAtual > 0) atrasos.push(atrasoAtual);
+                atrasoAtual = 0;
+                emAtraso = false;
+            } else if (emAtraso) {
+                atrasoAtual++;
+            }
+        }
+
+        const atrasoMax = atrasos.length > 0 ? Math.max(...atrasos) : 0;
+        const atrasoMedio = atrasos.length > 0
+            ? Math.round((atrasos.reduce((s, x) => s + x, 0) / atrasos.length) * 10) / 10
+            : 0;
+
+        // atraso atual (do último concurso pra trás)
+        let atrasoAtualReal = 0;
+        for (const c of dfCompleto) {
+            if (c.dezenas.includes(dez)) break;
+            atrasoAtualReal++;
+        }
+
+        // % do máximo
+        const pctMax = atrasoMax > 0 ? Math.round((atrasoAtualReal / atrasoMax) * 100) : 0;
+
+        let status;
+        if (pctMax >= 90) status = "🔴 No limite";
+        else if (pctMax >= 70) status = "🟠 Bem atrasada";
+        else if (pctMax >= 50) status = "🟡 Acima da média";
+        else if (pctMax >= 25) status = "🟢 Normal";
+        else status = "🟢 Recente";
+
+        resultado.push({
+            dezena: dez,
+            atraso_atual: atrasoAtualReal,
+            atraso_max: atrasoMax,
+            atraso_medio: atrasoMedio,
+            pct_max: pctMax,
+            status
+        });
+    }
+
+    return resultado;
+}
+
+/* ------------------------------------------------------------
+   PARES MAIS FREQUENTES E ÓRFÃOS
+   ------------------------------------------------------------ */
+function analisarPares(dfJanela) {
+    const contagem = {};
+    const ultimaVez = {};
+
+    for (let i = 0; i < dfJanela.length; i++) {
+        const c = dfJanela[i];
+        const dezenas = c.dezenas;
+        for (let a = 0; a < dezenas.length; a++) {
+            for (let b = a + 1; b < dezenas.length; b++) {
+                const chave = `${dezenas[a]}-${dezenas[b]}`;
+                contagem[chave] = (contagem[chave] || 0) + 1;
+                if (!(chave in ultimaVez)) ultimaVez[chave] = i;
+            }
+        }
+    }
+
+    const lista = Object.entries(contagem).map(([chave, qtd]) => {
+        const [a, b] = chave.split("-").map(Number);
+        return { a, b, qtd, ultimaVez: ultimaVez[chave] };
+    });
+
+    const frequentes = [...lista].sort((x, y) => y.qtd - x.qtd).slice(0, 10);
+
+    // Órfãos: pares que já saíram muito mas nas últimas 10 rodadas não saíram
+    const ultimas10 = dfJanela.slice(0, 10);
+    const recentes = new Set();
+    for (const c of ultimas10) {
+        for (let a = 0; a < c.dezenas.length; a++) {
+            for (let b = a + 1; b < c.dezenas.length; b++) {
+                recentes.add(`${c.dezenas[a]}-${c.dezenas[b]}`);
+            }
+        }
+    }
+
+    const orfaos = lista
+        .filter(p => p.qtd >= 4 && !recentes.has(`${p.a}-${p.b}`))
+        .sort((x, y) => y.qtd - x.qtd)
+        .slice(0, 10);
+
+    return { frequentes, orfaos };
+}
+
+/* ------------------------------------------------------------
+   LINHAS E COLUNAS (5×5)
+   ------------------------------------------------------------ */
+function analisarLinhasColunas(dfJanela) {
+    const linhas = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    const colunas = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+    for (const c of dfJanela) {
+        for (const d of c.dezenas) {
+            const linha = Math.ceil(d / 5);
+            const coluna = ((d - 1) % 5) + 1;
+            linhas[linha]++;
+            colunas[coluna]++;
+        }
+    }
+    return { linhas, colunas };
+}
+
+/* ------------------------------------------------------------
+   HEATMAP 5×5 (frequência por posição)
+   ------------------------------------------------------------ */
+function analisarHeatmap(dfJanela) {
+    const matriz = [];
+    for (let linha = 1; linha <= 5; linha++) {
+        const row = [];
+        for (let col = 1; col <= 5; col++) {
+            const dez = (linha - 1) * 5 + col;
+            let freq = 0;
+            for (const c of dfJanela) if (c.dezenas.includes(dez)) freq++;
+            row.push({ dezena: dez, frequencia: freq });
+        }
+        matriz.push(row);
+    }
+    return matriz;
+}
+
+/* ------------------------------------------------------------
+   SEQUÊNCIA DE SOMA (últimos 30)
+   ------------------------------------------------------------ */
+function analisarSoma(dfJanela) {
+    const ultimos30 = dfJanela.slice(0, 30).reverse();
+    return ultimos30.map(c => ({
+        concurso: c.concurso,
+        soma: c.dezenas.reduce((s, n) => s + n, 0)
+    }));
+}
+
+/* ------------------------------------------------------------
    ANÁLISE DE UMA JANELA
    ------------------------------------------------------------ */
-function analisarJanela(dfJanela, rotulo) {
+function analisarJanela(dfJanela, rotulo, dfCompleto) {
     const n = dfJanela.length;
 
     const contagem = new Array(26).fill(0);
@@ -123,15 +271,20 @@ function analisarJanela(dfJanela, rotulo) {
 
     let paresTotal = 0;
     const faixas = { "01-05": 0, "06-10": 0, "11-15": 0, "16-20": 0, "21-25": 0 };
+    const paresFaixas = { "01-05": 0, "06-10": 0, "11-15": 0, "16-20": 0, "21-25": 0 };
     let somaTotal = 0;
     for (const c of dfJanela) {
         for (const d of c.dezenas) {
-            if (d % 2 === 0) paresTotal++;
-            if (d <= 5) faixas["01-05"]++;
-            else if (d <= 10) faixas["06-10"]++;
-            else if (d <= 15) faixas["11-15"]++;
-            else if (d <= 20) faixas["16-20"]++;
-            else faixas["21-25"]++;
+            const isPar = d % 2 === 0;
+            if (isPar) paresTotal++;
+            let fx;
+            if (d <= 5) fx = "01-05";
+            else if (d <= 10) fx = "06-10";
+            else if (d <= 15) fx = "11-15";
+            else if (d <= 20) fx = "16-20";
+            else fx = "21-25";
+            faixas[fx]++;
+            if (isPar) paresFaixas[fx]++;
             somaTotal += d;
         }
     }
@@ -140,6 +293,7 @@ function analisarJanela(dfJanela, rotulo) {
     const mediaImpares = Math.round((15 - mediaPares) * 100) / 100;
     const somaMedia = Math.round((somaTotal / Math.max(n, 1)) * 100) / 100;
 
+    // Repetições
     const reps = [];
     for (let i = 0; i < dfJanela.length - 1; i++) {
         const a = new Set(dfJanela[i].dezenas);
@@ -152,6 +306,7 @@ function analisarJanela(dfJanela, rotulo) {
         ? Math.round((reps.reduce((s, x) => s + x, 0) / reps.length) * 100) / 100
         : 0;
 
+    // Sequências
     const sequencias = [];
     for (let dez = 1; dez <= 25; dez++) {
         let streak = 0;
@@ -164,6 +319,7 @@ function analisarJanela(dfJanela, rotulo) {
     sequencias.sort((a, b) => b.streak - a.streak || a.dezena - b.dezena);
     const sequenciasMax = sequencias.length > 0 ? Math.max(...sequencias.map(s => s.streak)) : 0;
 
+    // Atrasos
     const atrasos = [];
     for (let dez = 1; dez <= 25; dez++) {
         let atraso = 0;
@@ -182,6 +338,9 @@ function analisarJanela(dfJanela, rotulo) {
     }));
 
     const fibonacci = analisarFibonacci(dfJanela);
+    const heatmap = analisarHeatmap(dfJanela);
+    const linhasColunas = analisarLinhasColunas(dfJanela);
+    const somaSerie = analisarSoma(dfJanela);
 
     return {
         rotulo,
@@ -194,6 +353,7 @@ function analisarJanela(dfJanela, rotulo) {
         media_impares: mediaImpares,
         media_repetidas: mediaRepetidas,
         faixas,
+        pares_faixas: paresFaixas,
         dezena_mais_quente: freqLista[0].dezena,
         dezena_mais_fria: freqLista[freqLista.length - 1].dezena,
         sequencias,
@@ -201,12 +361,15 @@ function analisarJanela(dfJanela, rotulo) {
         atrasos,
         ultimos_10: ultimos10,
         soma_media: somaMedia,
-        fibonacci
+        fibonacci,
+        heatmap,
+        linhas_colunas: linhasColunas,
+        soma_serie: somaSerie
     };
 }
 
 /* ------------------------------------------------------------
-   ANÁLISE FIBONACCI
+   FIBONACCI
    ------------------------------------------------------------ */
 function analisarFibonacci(dfJanela) {
     const resultados = [];
@@ -268,8 +431,15 @@ function analisarTudo(df) {
 
     const analises = {};
     for (const chave of Object.keys(janelas)) {
-        analises[chave] = analisarJanela(janelas[chave], rotulos[chave]);
+        analises[chave] = analisarJanela(janelas[chave], rotulos[chave], df);
     }
+
+    // Análise de pares usa janela de 30
+    analises.geral.pares = analisarPares(df.slice(0, 30));
+    analises.ultimos_30.pares = analises.geral.pares;
+
+    // Atraso histórico (todos)
+    const atrasosHistoricos = analisarAtrasosHistoricos(df);
 
     const historico = df.map(c => {
         const item = { c: c.concurso, d: c.dezenas };
@@ -281,6 +451,7 @@ function analisarTudo(df) {
         total_concursos: total,
         ultimo_concurso: ultimoConcurso,
         analises,
+        atrasos_historicos: atrasosHistoricos,
         historico_conferencia: historico
     };
 }
