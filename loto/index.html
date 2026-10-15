@@ -17,7 +17,7 @@
         .scroll-x::-webkit-scrollbar { height: 6px; }
         .scroll-x::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
         .scroll-x::-webkit-scrollbar-track { background: transparent; }
-        input[type="number"], input[type="text"] { font-size: 16px; }
+        input[type="number"], input[type="text"], select { font-size: 16px; }
 
         .aba { transition: all 0.2s; white-space: nowrap; }
         .aba.ativa {
@@ -33,7 +33,7 @@
         .jogo-detalhes { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
         .jogo-card.expandido .jogo-detalhes,
         .concurso-card.expandido .jogo-detalhes,
-        .memoria-card.expandido .jogo-detalhes { max-height: 3000px; }
+        .memoria-card.expandido .jogo-detalhes { max-height: 5000px; }
         .jogo-card.expandido .seta,
         .concurso-card.expandido .seta,
         .memoria-card.expandido .seta { transform: rotate(180deg); }
@@ -44,7 +44,6 @@
         details[open] .caret { transform: rotate(90deg); }
         .caret { transition: transform 0.2s; display: inline-block; }
 
-        /* TOOLTIPS */
         .tt { position: relative; cursor: help; }
         .tt::after {
             content: attr(data-tt);
@@ -202,7 +201,7 @@
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <label class="flex items-start gap-3 bg-yellow-900/20 border border-yellow-500/40 rounded-xl p-3 cursor-pointer tt"
                            data-tt="Garante as 7 dezenas Fibonacci (01, 02, 03, 05, 08, 13, 21) em TODOS os jogos gerados. Os outros 8 números vêm dos grupos A/C/B.">
                         <input type="checkbox" id="fixar-fibonacci" class="w-5 h-5 mt-0.5 accent-yellow-500 cursor-pointer">
@@ -220,6 +219,33 @@
                             <div class="text-[10px] text-slate-400 mt-0.5">Dezenas com streak ≥ 2</div>
                         </div>
                     </label>
+
+                    <label class="flex items-start gap-3 bg-sky-900/20 border border-sky-500/40 rounded-xl p-3 cursor-pointer tt"
+                           data-tt="🎯 GERAR 11 DO ÚLTIMO — Monta jogos com as 11 dezenas mais frequentes dos últimos 10 concursos que também estão no último concurso + 4 dezenas variáveis escolhidas pelo critério ao lado.">
+                        <input type="checkbox" id="gerar-11-ultimo" class="w-5 h-5 mt-0.5 accent-sky-500 cursor-pointer">
+                        <div class="min-w-0">
+                            <div class="text-xs sm:text-sm font-bold text-sky-300">🎯 Gerar 11 do Último</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">11 fixas + 4 variáveis</div>
+                        </div>
+                    </label>
+                </div>
+
+                <div id="criterio-11-container" class="hidden bg-sky-900/20 border border-sky-500/40 rounded-xl p-3">
+                    <label class="block text-xs sm:text-sm font-bold text-sky-300 mb-2">
+                        🎯 Critério das 4 dezenas variáveis:
+                    </label>
+                    <select id="criterio-11" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-sky-500">
+                        <option value="quentes">🔥 Quentes (Grupo A)</option>
+                        <option value="frias">❄️ Frias (Grupo B)</option>
+                        <option value="intermediarias">⚡ Intermediárias (Grupo C)</option>
+                        <option value="fibonacci">🔮 Fibonacci</option>
+                        <option value="sequencias">🔁 Sequências ativas</option>
+                        <option value="atrasadas">⏳ Atrasadas</option>
+                        <option value="mistas">🎲 Mistas (A/C/B balanceadas)</option>
+                    </select>
+                    <p class="text-[10px] text-slate-400 mt-1">
+                        As 11 dezenas fixas vêm do último concurso (as mais frequentes dos últimos 10). As 4 variáveis vêm deste critério.
+                    </p>
                 </div>
             </section>
 
@@ -231,19 +257,17 @@
         </footer>
     </div>
 
-    <script src="analise.js?v=5"></script>
+    <script src="analise.js?v=9"></script>
 
     <script>
         let DADOS_INJETADOS = null;
         let ABA_ATIVA = "geral";
         let jogosGerados = [];
+        let QTD_ULTIMOS = 10;
         const FIB_FIXAS = [1, 2, 3, 5, 8, 13, 21];
         const LS_MEMORIA = "lotofacil_memoria_jogos";
         const LS_RESULTADOS = "lotofacil_resultados";
 
-        // =====================================================
-        // TOOLTIPS
-        // =====================================================
         document.addEventListener("click", e => {
             const alvo = e.target.closest(".tt");
             document.querySelectorAll(".tt.ativo").forEach(el => {
@@ -255,9 +279,14 @@
             }
         });
 
-        // =====================================================
-        // MEMÓRIA (localStorage)
-        // =====================================================
+        document.addEventListener("change", e => {
+            if (e.target && e.target.id === "gerar-11-ultimo") {
+                const cont = document.getElementById("criterio-11-container");
+                if (e.target.checked) cont.classList.remove("hidden");
+                else cont.classList.add("hidden");
+            }
+        });
+
         function lerMemoria() {
             try { return JSON.parse(localStorage.getItem(LS_MEMORIA) || "[]"); }
             catch { return []; }
@@ -305,6 +334,7 @@
 
             input.value = "";
             renderMemoria();
+            renderizarPainel();
         }
 
         function removerResultado(concurso) {
@@ -312,6 +342,7 @@
             const resultados = lerResultados().filter(r => r.concurso !== concurso);
             salvarResultados(resultados);
             renderMemoria();
+            renderizarPainel();
         }
 
         function limparMemoria() {
@@ -319,17 +350,16 @@
             localStorage.removeItem(LS_MEMORIA);
             localStorage.removeItem(LS_RESULTADOS);
             renderMemoria();
+            renderizarPainel();
         }
 
         function removerJogoSalvo(id) {
             const memoria = lerMemoria().filter(j => j.id !== id);
             salvarMemoria(memoria);
             renderMemoria();
+            renderizarPainel();
         }
 
-        // =====================================================
-        // HELPERS
-        // =====================================================
         function bolinha(n, cor) {
             return `<span class="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full font-bold text-xs sm:text-sm shadow ${cor}">${String(n).padStart(2, '0')}</span>`;
         }
@@ -346,9 +376,6 @@
             document.getElementById("main-content").classList.add("hidden");
         }
 
-        // =====================================================
-        // ABAS
-        // =====================================================
         function montarAbas() {
             const ordem = [
                 { id: "geral",      label: "📊 Geral",      tt: "📊 GERAL — Análise de TODOS os concursos da planilha." },
@@ -373,9 +400,6 @@
             document.getElementById("jogos-container").innerHTML = "";
         }
 
-        // =====================================================
-        // ANÁLISE GENÉRICA
-        // =====================================================
         function analisarDezenas(dezenas, a) {
             const pares = dezenas.filter(n => n % 2 === 0).length;
             const impares = 15 - pares;
@@ -438,6 +462,35 @@
                 melhor: melhor,
                 totalConcursos: hist.length,
                 ultimos3: premiados.slice(0, 3),
+                totalPremiados: premiados.length
+            };
+        }
+
+        function conferirConcurso(concurso) {
+            const memoria = lerMemoria();
+            const setConcurso = new Set(concurso.dezenas);
+            const cont = { 11: 0, 12: 0, 13: 0, 14: 0, 15: 0 };
+            const premiados = [];
+
+            for (const jogo of memoria) {
+                let acertos = 0;
+                for (const n of jogo.dezenas) if (setConcurso.has(n)) acertos++;
+                if (acertos >= 11 && acertos <= 15) {
+                    cont[acertos]++;
+                    premiados.push({ id: jogo.id, pts: acertos });
+                }
+            }
+
+            premiados.sort((a, b) => b.pts - a.pts || a.id - b.id);
+
+            let melhor = 0;
+            for (const p of premiados) if (p.pts > melhor) melhor = p.pts;
+
+            return {
+                pontos: cont,
+                melhor: melhor,
+                totalJogos: memoria.length,
+                premiados: premiados,
                 totalPremiados: premiados.length
             };
         }
@@ -591,9 +644,6 @@
             }).join("");
         }
 
-        // =====================================================
-        // PAINEL DE ANÁLISE
-        // =====================================================
         function renderizarPainel() {
             const a = DADOS_INJETADOS.analises[ABA_ATIVA];
             if (!a) {
@@ -616,7 +666,7 @@
                 ${renderPares(a)}
                 ${renderGraficoSoma(a)}
                 ${renderDiffAbas()}
-                ${renderUltimos10(a)}
+                ${renderUltimosConcursos(a)}
             `;
         }
 
@@ -785,12 +835,10 @@
         function renderAtrasosHistoricos(a) {
             const historicos = DADOS_INJETADOS.atrasos_historicos || [];
             if (historicos.length === 0) return "";
-        
-            // Maior atraso ATUAL entre todas as dezenas — vira a régua das barras
+
             const maxAtrasoAtual = Math.max(...historicos.map(h => h.atraso_atual), 1);
-        
             const ordenados = [...historicos].sort((x, y) => y.atraso_atual - x.atraso_atual);
-        
+
             const linhas = ordenados.map(h => {
                 let corBarra, corTexto;
                 if (h.pct_max >= 90) { corBarra = "bg-rose-500"; corTexto = "text-rose-300"; }
@@ -798,10 +846,9 @@
                 else if (h.pct_max >= 50) { corBarra = "bg-amber-500"; corTexto = "text-amber-300"; }
                 else if (h.pct_max >= 25) { corBarra = "bg-emerald-500"; corTexto = "text-emerald-300"; }
                 else { corBarra = "bg-sky-500"; corTexto = "text-sky-300"; }
-        
-                // Barra proporcional ao MAIOR atraso atual (régua visual)
+
                 const pctBarra = (h.atraso_atual / maxAtrasoAtual) * 100;
-        
+
                 return `
                     <div class="bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 tt"
                          data-tt="Dezena ${String(h.dezena).padStart(2,'0')} — está há ${h.atraso_atual} sorteios sem sair. Máximo histórico dela: ${h.atraso_max}. Média: ${h.atraso_medio}. Está em ${h.pct_max}% do próprio máximo.">
@@ -822,7 +869,7 @@
                         </div>
                     </div>`;
             }).join("");
-        
+
             return `
                 <section class="bg-slate-800 border border-rose-500/40 rounded-2xl p-4 sm:p-5 shadow-lg">
                     <details open>
@@ -1127,17 +1174,25 @@
             `;
         }
 
-        function renderUltimos10(a) {
-            const ultimos = a.ultimos_10 || [];
-            if (ultimos.length === 0) return "";
+        function renderUltimosConcursos(a) {
+            const ultimos = (DADOS_INJETADOS && DADOS_INJETADOS.ultimos_concursos) || a.ultimos_10 || [];
             return `
                 <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-lg">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
                         <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider tt"
-                            data-tt="📅 ÚLTIMOS 10 CONCURSOS — os 10 sorteios mais recentes da aba.">
-                            📅 Últimos 10 Concursos
+                            data-tt="📅 ÚLTIMOS CONCURSOS — a quantidade é configurável pelo campo ao lado.">
+                            📅 Últimos ${QTD_ULTIMOS} Concursos
                         </h3>
-                        <span class="text-[10px] text-slate-500">(clique em cada um para expandir)</span>
+                        <div class="flex items-center gap-2">
+                            <label class="text-[10px] sm:text-xs text-slate-400">Mostrar:</label>
+                            <input type="number" id="qtd-ultimos-input" value="${QTD_ULTIMOS}" min="1" max="5000"
+                                   class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-white text-xs focus:outline-none focus:border-emerald-500">
+                            <button onclick="recalcularUltimos()"
+                                    class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-lg text-xs font-medium transition tt"
+                                    data-tt="Recalcula a lista de concursos com a quantidade digitada ao lado.">
+                                🔄 Atualizar
+                            </button>
+                        </div>
                     </div>
                     <div class="space-y-2">
                         ${ultimos.map((c, i) => renderConcursoCard(c, i, a)).join("")}
@@ -1149,10 +1204,72 @@
         function renderConcursoCard(concurso, idx, a) {
             const dezenas = concurso.dezenas;
             const an = analisarDezenas(dezenas, a);
+            const confJogo = conferirJogo(dezenas);
+            const confSalvos = conferirConcurso(concurso);
             const idUnico = `concurso-${ABA_ATIVA}-${idx}`;
             const corPares = an.pares >= 6 && an.pares <= 8 ? "text-emerald-400" : "text-amber-400";
             const corA = an.qtdA >= 6 && an.qtdA <= 8 ? "text-emerald-400" : "text-amber-400";
             const dataTxt = concurso.data ? ` · ${concurso.data}` : "";
+
+            const melhorPts = Math.max(confJogo.melhor, confSalvos.melhor);
+            let corPremio = "text-slate-400", txtPremio = "—";
+            if (melhorPts >= 15)       { corPremio = "text-yellow-400";  txtPremio = "🏆 15 pts"; }
+            else if (melhorPts === 14) { corPremio = "text-emerald-400"; txtPremio = "🥇 14 pts"; }
+            else if (melhorPts === 13) { corPremio = "text-teal-400";    txtPremio = "🥈 13 pts"; }
+            else if (melhorPts === 12) { corPremio = "text-sky-400";     txtPremio = "🥉 12 pts"; }
+            else if (melhorPts === 11) { corPremio = "text-slate-300";   txtPremio = "🎯 11 pts"; }
+
+            const ttConf = `🎯 CONFERÊNCIA RETROATIVA — quantas vezes ESTE conjunto de 15 dezenas teria feito 11, 12, 13, 14 ou 15 pontos nos ${confJogo.totalConcursos} concursos do histórico. Melhor: ${confJogo.melhor}.`;
+
+            let ultimos3HTML = "";
+            if (confJogo.ultimos3.length === 0) {
+                ultimos3HTML = `<p class="text-slate-500 text-xs italic text-center py-2">Nenhum concurso premiado (≥ 11 pts) no histórico.</p>`;
+            } else {
+                ultimos3HTML = confJogo.ultimos3.map(p => {
+                    const c = corPorPontos(p.pts);
+                    const dataTxt2 = p.dt ? ` · ${p.dt}` : "";
+                    return `
+                        <div class="flex items-center justify-between gap-2 ${c.bg} border ${c.borda} rounded-lg px-3 py-2 tt"
+                             data-tt="Concurso #${p.c}${p.dt ? ' (' + p.dt + ')' : ''} — teria feito ${p.pts} pontos.">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="text-base">${c.emoji}</span>
+                                <span class="text-xs sm:text-sm font-bold ${c.cor}">#${p.c}${dataTxt2}</span>
+                            </div>
+                            <span class="${c.cor} text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full ${c.bg} border ${c.borda}">
+                                ${p.pts} pts
+                            </span>
+                        </div>`;
+                }).join("");
+            }
+
+            let blocoSalvosHTML = "";
+            if (confSalvos.totalJogos === 0) {
+                blocoSalvosHTML = `<p class="text-slate-500 text-xs italic text-center py-2">Salve jogos na memória pra ver a conferência neste concurso.</p>`;
+            } else {
+                blocoSalvosHTML = `
+                    <div class="grid grid-cols-5 gap-1.5 text-center">
+                        <div class="bg-yellow-900/30 border border-yellow-500/40 rounded-lg py-2">
+                            <div class="text-[9px] text-yellow-300 uppercase font-bold">15 pts</div>
+                            <div class="text-base sm:text-lg font-bold text-yellow-200">${confSalvos.pontos[15]}</div>
+                        </div>
+                        <div class="bg-emerald-900/30 border border-emerald-500/40 rounded-lg py-2">
+                            <div class="text-[9px] text-emerald-300 uppercase font-bold">14 pts</div>
+                            <div class="text-base sm:text-lg font-bold text-emerald-200">${confSalvos.pontos[14]}</div>
+                        </div>
+                        <div class="bg-teal-900/30 border border-teal-500/40 rounded-lg py-2">
+                            <div class="text-[9px] text-teal-300 uppercase font-bold">13 pts</div>
+                            <div class="text-base sm:text-lg font-bold text-teal-200">${confSalvos.pontos[13]}</div>
+                        </div>
+                        <div class="bg-sky-900/30 border border-sky-500/40 rounded-lg py-2">
+                            <div class="text-[9px] text-sky-300 uppercase font-bold">12 pts</div>
+                            <div class="text-base sm:text-lg font-bold text-sky-200">${confSalvos.pontos[12]}</div>
+                        </div>
+                        <div class="bg-slate-800 border border-slate-600 rounded-lg py-2">
+                            <div class="text-[9px] text-slate-300 uppercase font-bold">11 pts</div>
+                            <div class="text-base sm:text-lg font-bold text-slate-200">${confSalvos.pontos[11]}</div>
+                        </div>
+                    </div>`;
+            }
 
             return `
                 <div class="concurso-card bg-slate-800 border border-slate-700/80 rounded-2xl p-3 sm:p-4 shadow-md"
@@ -1176,6 +1293,8 @@
                                   data-tt="🔮 Fibonacci — ${an.qtdFib} dezenas.">🔮 ${an.qtdFib}</span>
                             <span class="tt tt-esq bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 text-sky-400"
                                   data-tt="Σ Soma — soma das 15 dezenas = ${an.soma}.">Σ ${an.soma}</span>
+                            <span class="tt tt-esq bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 ${corPremio} font-bold"
+                                  data-tt="${ttConf}">${txtPremio}</span>
                         </div>
                     </div>
                     <div class="scroll-x">
@@ -1185,6 +1304,85 @@
                     </div>
                     <div class="jogo-detalhes">
                         <div class="pt-3 mt-3 border-t border-slate-700/60 space-y-3">
+
+                            <div class="bg-slate-900/50 border border-slate-700 rounded-xl p-3">
+                                <div class="flex items-center justify-between mb-2 flex-wrap gap-1">
+                                    <span class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider tt"
+                                          data-tt="🎯 CONFERÊNCIA RETROATIVA — quantas vezes este conjunto de 15 dezenas teria feito 11, 12, 13, 14 ou 15 pontos no histórico.">
+                                        🎯 Quantas vezes este jogo teria feito...
+                                    </span>
+                                    <span class="text-[10px] text-slate-500">
+                                        (base: ${confJogo.totalConcursos} concursos)
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-5 gap-1.5 text-center">
+                                    <div class="tt bg-yellow-900/30 border border-yellow-500/40 rounded-lg py-2"
+                                         data-tt="🏆 15 PONTOS = prêmio máximo.">
+                                        <div class="text-[9px] text-yellow-300 uppercase font-bold">15 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-yellow-200">${confJogo.pontos[15]}</div>
+                                    </div>
+                                    <div class="tt bg-emerald-900/30 border border-emerald-500/40 rounded-lg py-2"
+                                         data-tt="🥇 14 PONTOS — 1 dezena errada.">
+                                        <div class="text-[9px] text-emerald-300 uppercase font-bold">14 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-emerald-200">${confJogo.pontos[14]}</div>
+                                    </div>
+                                    <div class="tt bg-teal-900/30 border border-teal-500/40 rounded-lg py-2"
+                                         data-tt="🥈 13 PONTOS — 2 dezenas erradas.">
+                                        <div class="text-[9px] text-teal-300 uppercase font-bold">13 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-teal-200">${confJogo.pontos[13]}</div>
+                                    </div>
+                                    <div class="tt bg-sky-900/30 border border-sky-500/40 rounded-lg py-2"
+                                         data-tt="🥉 12 PONTOS — 3 dezenas erradas.">
+                                        <div class="text-[9px] text-sky-300 uppercase font-bold">12 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-sky-200">${confJogo.pontos[12]}</div>
+                                    </div>
+                                    <div class="tt bg-slate-800 border border-slate-600 rounded-lg py-2"
+                                         data-tt="🎯 11 PONTOS — 4 dezenas erradas. Mínimo que paga prêmio.">
+                                        <div class="text-[9px] text-slate-300 uppercase font-bold">11 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-slate-200">${confJogo.pontos[11]}</div>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-[10px] sm:text-xs text-slate-400 text-center">
+                                    Melhor resultado:
+                                    <b class="${corPremio}">${confJogo.melhor > 0 ? confJogo.melhor + ' pontos' : 'nenhum prêmio'}</b>
+                                    <span class="text-slate-500">·</span>
+                                    <span class="text-slate-500">${confJogo.totalPremiados} concursos premiados</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-900/50 border border-slate-700 rounded-xl p-3">
+                                <div class="flex items-center justify-between mb-2 flex-wrap gap-1">
+                                    <span class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider tt"
+                                          data-tt="📅 ÚLTIMOS 3 CONCURSOS PREMIADOS — os 3 mais recentes onde este conjunto teria feito 11+ pts.">
+                                        📅 Últimos 3 concursos premiados
+                                    </span>
+                                    <span class="text-[10px] text-slate-500">(11 pts ou mais)</span>
+                                </div>
+                                <div class="space-y-1.5">
+                                    ${ultimos3HTML}
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-900/50 border border-slate-700 rounded-xl p-3">
+                                <div class="flex items-center justify-between mb-2 flex-wrap gap-1">
+                                    <span class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider tt"
+                                          data-tt="🎯 CONFERÊNCIA — quantos dos seus JOGOS SALVOS fizeram 11, 12, 13, 14 ou 15 pontos neste concurso específico.">
+                                        🎯 Meus jogos salvos neste concurso
+                                    </span>
+                                    <span class="text-[10px] text-slate-500">
+                                        (base: ${confSalvos.totalJogos} jogo${confSalvos.totalJogos !== 1 ? 's' : ''} salvo${confSalvos.totalJogos !== 1 ? 's' : ''})
+                                    </span>
+                                </div>
+                                ${blocoSalvosHTML}
+                                ${confSalvos.totalJogos > 0 ? `
+                                <div class="mt-2 text-[10px] sm:text-xs text-slate-400 text-center">
+                                    Melhor resultado neste concurso:
+                                    <b class="${corPremio}">${confSalvos.melhor > 0 ? confSalvos.melhor + ' pontos' : 'nenhum prêmio'}</b>
+                                    <span class="text-slate-500">·</span>
+                                    <span class="text-slate-500">${confSalvos.totalPremiados} jogo${confSalvos.totalPremiados !== 1 ? 's' : ''} premiado${confSalvos.totalPremiados !== 1 ? 's' : ''}</span>
+                                </div>` : ""}
+                            </div>
+
                             ${renderBlocoDetalhes(dezenas, an, a)}
                         </div>
                     </div>
@@ -1192,9 +1390,23 @@
             `;
         }
 
-        // =====================================================
-        // MEMÓRIA DE JOGOS — RENDER
-        // =====================================================
+        async function recalcularUltimos() {
+            const input = document.getElementById("qtd-ultimos-input");
+            let qtd = parseInt(input.value);
+            if (isNaN(qtd) || qtd < 1) qtd = 10;
+            if (qtd > 5000) qtd = 5000;
+            QTD_ULTIMOS = qtd;
+
+            try {
+                const df = await LotofacilAPI.carregarDados();
+                DADOS_INJETADOS = LotofacilAPI.analisarTudo(df, QTD_ULTIMOS);
+                renderizarPainel();
+            } catch (e) {
+                console.error(e);
+                alert("Erro ao recalcular: " + e.message);
+            }
+        }
+
         function renderMemoria() {
             const memoria = lerMemoria();
             const resultados = lerResultados();
@@ -1291,9 +1503,6 @@
             }).join("");
         }
 
-        // =====================================================
-        // GERAR JOGOS
-        // =====================================================
         function amostra(arr, t) {
             const copia = [...arr], res = [];
             for (let i = 0; i < t && copia.length > 0; i++) {
@@ -1303,9 +1512,334 @@
             return res;
         }
 
+        // ====================================================
+        // ⭐ NOVO — Gerar 11 do Último (com 4 critérios)
+        // ====================================================
+        function calcularOnzeFixas() {
+            // Pega o último concurso
+            const ultimo = (DADOS_INJETADOS.ultimos_concursos && DADOS_INJETADOS.ultimos_concursos[0])
+                          || (DADOS_INJETADOS.analises.geral.ultimos_10 && DADOS_INJETADOS.analises.geral.ultimos_10[0]);
+            if (!ultimo) return null;
+
+            const dezenasUltimo = new Set(ultimo.dezenas);
+
+            // Conta frequência das dezenas nos últimos 10 concursos
+            const historico = DADOS_INJETADOS.historico_conferencia || [];
+            const ultimos10 = historico.slice(0, 10);
+
+            const freq = {};
+            for (let i = 1; i <= 25; i++) freq[i] = 0;
+            for (const c of ultimos10) {
+                for (const d of c.d) freq[d]++;
+            }
+
+            // Filtra: só dezenas que ESTÃO no último concurso
+            const candidatas = [...dezenasUltimo].map(d => ({ dezena: d, freq: freq[d] || 0 }));
+            candidatas.sort((a, b) => b.freq - a.freq || a.dezena - b.dezena);
+
+            // Pega as 11 mais frequentes
+            const fixas = candidatas.slice(0, 11).map(x => x.dezena).sort((a, b) => a - b);
+            return { ultimo, fixas, dezenasUltimo };
+        }
+
+        function sortear4Variaveis(criterio, a, fixas) {
+            const setFixas = new Set(fixas);
+            let poolCandidatas = [];
+
+            if (criterio === "quentes") {
+                poolCandidatas = (a.grupo_a || []).filter(n => !setFixas.has(n));
+            } else if (criterio === "frias") {
+                poolCandidatas = (a.grupo_b || []).filter(n => !setFixas.has(n));
+            } else if (criterio === "intermediarias") {
+                poolCandidatas = (a.grupo_c || []).filter(n => !setFixas.has(n));
+            } else if (criterio === "fibonacci") {
+                poolCandidatas = FIB_FIXAS.filter(n => !setFixas.has(n));
+            } else if (criterio === "sequencias") {
+                poolCandidatas = (a.sequencias || []).map(s => s.dezena).filter(n => !setFixas.has(n));
+            } else if (criterio === "atrasadas") {
+                const atrasos = DADOS_INJETADOS.atrasos_historicos || [];
+                const ordenadas = [...atrasos].sort((x, y) => y.atraso_atual - x.atraso_atual);
+                poolCandidatas = ordenadas.map(h => h.dezena).filter(n => !setFixas.has(n));
+            } else {
+                // mistas — pega 2A + 1C + 1B (variando)
+                const poolA = (a.grupo_a || []).filter(n => !setFixas.has(n));
+                const poolC = (a.grupo_c || []).filter(n => !setFixas.has(n));
+                const poolB = (a.grupo_b || []).filter(n => !setFixas.has(n));
+                const selA = amostra(poolA, Math.min(2, poolA.length));
+                const selC = amostra(poolC, Math.min(1, poolC.length));
+                const selB = amostra(poolB, Math.min(1, poolB.length));
+                return [...selA, ...selC, ...selB];
+            }
+
+            // Se o pool for pequeno, completa com A/C/B
+            if (poolCandidatas.length < 4) {
+                const extras = [];
+                const todos = [...(a.grupo_a || []), ...(a.grupo_c || []), ...(a.grupo_b || [])];
+                for (const n of todos) {
+                    if (!setFixas.has(n) && !poolCandidatas.includes(n)) extras.push(n);
+                }
+                poolCandidatas = [...poolCandidatas, ...extras];
+            }
+
+            return amostra(poolCandidatas, 4);
+        }
+
+        function gerarJogosOnze() {
+            const a = DADOS_INJETADOS.analises[ABA_ATIVA];
+            if (!a) return;
+
+            const qtd = parseInt(document.getElementById("qtd-jogos").value) || 5;
+            const criterio = document.getElementById("criterio-11").value;
+            const container = document.getElementById("jogos-container");
+
+            const base = calcularOnzeFixas();
+            if (!base) {
+                alert("Não foi possível encontrar o último concurso.");
+                return;
+            }
+
+            const { fixas, ultimo } = base;
+            const labelCriterio = document.getElementById("criterio-11").selectedOptions[0].textContent;
+
+            container.innerHTML = `<h3 class="text-base sm:text-lg font-bold text-slate-200 mt-2 mb-2">
+                🎯 Jogos 11 do Último (#${ultimo.concurso}) · ${labelCriterio} (${qtd})
+            </h3>
+            <div class="bg-sky-900/30 border border-sky-500/40 rounded-xl p-3 mb-3">
+                <div class="text-[10px] sm:text-xs text-sky-300 font-bold uppercase mb-1.5">11 fixas (do último concurso):</div>
+                <div class="flex flex-wrap gap-1.5">${fixas.map(n => bolinhaMini(n, "bg-sky-700 text-sky-100 border border-sky-400/70")).join("")}</div>
+            </div>`;
+
+            const unicos = new Set();
+            jogosGerados = [];
+            let tentativas = 0;
+
+            while (jogosGerados.length < qtd && tentativas < 5000) {
+                tentativas++;
+                const variaveis = sortear4Variaveis(criterio, a, fixas);
+                if (variaveis.length !== 4) continue;
+
+                const jogo = [...fixas, ...variaveis].sort((x, y) => x - y);
+                if (jogo.length !== 15 || new Set(jogo).size !== 15) continue;
+
+                const chave = jogo.join(",");
+                if (!unicos.has(chave)) {
+                    unicos.add(chave);
+                    jogosGerados.push({ dezenas: jogo, fixas: fixas.slice(), variaveis: variaveis.slice() });
+                }
+            }
+
+            jogosGerados.forEach((j, idx) => {
+                container.innerHTML += renderJogoCardOnze(j, idx, a, criterio);
+            });
+        }
+
+        function renderJogoCardOnze(jogo, idx, a, criterio) {
+            const an = analisarDezenas(jogo.dezenas, a);
+            const conf = conferirJogo(jogo.dezenas);
+            const validacoes = validarJogo(jogo.dezenas, an, a);
+            const idUnico = `jogo-${idx}`;
+
+            const setFixas = new Set(jogo.fixas);
+            const temAlertas = validacoes.some(v => v.nivel === "warn");
+            const corPares = an.pares >= 6 && an.pares <= 8 ? "text-emerald-400" : "text-amber-400";
+            const corA = an.qtdA >= 6 && an.qtdA <= 8 ? "text-emerald-400" : "text-amber-400";
+
+            let corPremio = "text-slate-400", txtPremio = "🏆 0 pts";
+            if (conf.melhor >= 15)       { corPremio = "text-yellow-400";  txtPremio = "🏆 15 pts"; }
+            else if (conf.melhor === 14) { corPremio = "text-emerald-400"; txtPremio = "🥇 14 pts"; }
+            else if (conf.melhor === 13) { corPremio = "text-teal-400";    txtPremio = "🥈 13 pts"; }
+            else if (conf.melhor === 12) { corPremio = "text-sky-400";     txtPremio = "🥉 12 pts"; }
+            else if (conf.melhor === 11) { corPremio = "text-slate-300";   txtPremio = "🎯 11 pts"; }
+
+            const ttConf = `🎯 CONFERÊNCIA RETROATIVA — quantas vezes este jogo teria feito 11, 12, 13, 14 ou 15 pontos nos ${conf.totalConcursos} concursos do histórico. Melhor: ${conf.melhor}.`;
+
+            let ultimos3HTML = "";
+            if (conf.ultimos3.length === 0) {
+                ultimos3HTML = `<p class="text-slate-500 text-xs italic text-center py-2">Nenhum concurso premiado (≥ 11 pts) no histórico.</p>`;
+            } else {
+                ultimos3HTML = conf.ultimos3.map(p => {
+                    const c = corPorPontos(p.pts);
+                    const dataTxt = p.dt ? ` · ${p.dt}` : "";
+                    return `
+                        <div class="flex items-center justify-between gap-2 ${c.bg} border ${c.borda} rounded-lg px-3 py-2 tt"
+                             data-tt="Concurso #${p.c}${p.dt ? ' (' + p.dt + ')' : ''} — teria feito ${p.pts} pontos.">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="text-base">${c.emoji}</span>
+                                <span class="text-xs sm:text-sm font-bold ${c.cor}">#${p.c}${dataTxt}</span>
+                            </div>
+                            <span class="${c.cor} text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full ${c.bg} border ${c.borda}">
+                                ${p.pts} pts
+                            </span>
+                        </div>`;
+                }).join("");
+            }
+
+            return `
+                <div class="jogo-card bg-slate-800 border border-sky-500/60 rounded-2xl p-3 sm:p-4 shadow-md ${temAlertas ? 'border-amber-500/40' : ''}"
+                     id="${idUnico}"
+                     onclick="toggleJogo('${idUnico}', event)">
+
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2.5">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-xs font-semibold text-sky-300 uppercase">🎯 Jogo #${String(idx + 1).padStart(2, '0')}</span>
+                            <span class="text-slate-500 seta text-xs">▼</span>
+                            <span class="tt text-[9px] bg-sky-700 text-white px-2 py-0.5 rounded-full font-bold"
+                                  data-tt="Este jogo foi montado com 11 dezenas fixas do último concurso + 4 variáveis do critério escolhido.">
+                                11 + 4
+                            </span>
+                            ${temAlertas ? `<span class="tt text-[9px] bg-amber-600 text-white px-2 py-0.5 rounded-full font-bold" data-tt="Este jogo está FORA do padrão histórico em algum aspecto.">⚠️ ATÍPICO</span>` : `<span class="tt text-[9px] bg-emerald-700 text-white px-2 py-0.5 rounded-full font-bold" data-tt="Este jogo está DENTRO do padrão histórico.">✓ OK</span>`}
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 text-[10px] sm:text-xs font-medium">
+                            <span class="tt tt-esq bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 ${corPares}"
+                                  data-tt="Pares vs Ímpares — ${an.pares} pares e ${an.impares} ímpares.">P ${an.pares} · I ${an.impares}</span>
+                            <span class="tt tt-esq bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 ${corA}"
+                                  data-tt="🔥 Quentes (Grupo A) — ${an.qtdA} dezenas.">🔥 ${an.qtdA}</span>
+                            <span class="tt tt-esq bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 text-amber-400"
+                                  data-tt="⚡ Intermediárias (Grupo C) — ${an.qtdC} dezenas.">⚡ ${an.qtdC}</span>
+                            <span class="tt tt-esq bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 text-rose-400"
+                                  data-tt="❄️ Frias (Grupo B) — ${an.qtdB} dezenas.">❄️ ${an.qtdB}</span>
+                            <span class="tt tt-esq bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 text-yellow-400"
+                                  data-tt="🔮 Fibonacci — ${an.qtdFib} dezenas.">🔮 ${an.qtdFib}</span>
+                            <span class="tt tt-esq bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 text-sky-400"
+                                  data-tt="Σ Soma — ${an.soma}. Média: ${an.mediaEsperada}. Desvio: ${an.desvio.toFixed(1)}.">Σ ${an.soma}</span>
+                            <span class="tt tt-esq bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 ${corPremio} font-bold"
+                                  data-tt="${ttConf}">
+                                ${txtPremio}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="scroll-x">
+                        <div class="flex gap-1.5 min-w-max pb-1">
+                            ${jogo.dezenas.map(n => {
+                                const isFixa = setFixas.has(n);
+                                let cor, tt;
+                                if (isFixa) {
+                                    cor = "bg-sky-700 text-sky-100 border-2 border-sky-400/80";
+                                    tt = `🎯 Dezena ${String(n).padStart(2,'0')} — FIXA do último concurso`;
+                                } else {
+                                    const g = classificarDezena(n, a);
+                                    const isFib = FIB_FIXAS.includes(n);
+                                    if (isFib) {
+                                        cor = "bg-yellow-700 text-yellow-100 border-2 border-yellow-400/70";
+                                        tt = `🔮 Dezena ${String(n).padStart(2,'0')} — VARIÁVEL (Fibonacci)`;
+                                    } else if (g === "A") {
+                                        cor = "bg-emerald-700 text-emerald-100 border border-emerald-500/50";
+                                        tt = `🔥 Dezena ${String(n).padStart(2,'0')} — VARIÁVEL (Quente A)`;
+                                    } else if (g === "B") {
+                                        cor = "bg-rose-700 text-rose-100 border border-rose-500/50";
+                                        tt = `❄️ Dezena ${String(n).padStart(2,'0')} — VARIÁVEL (Fria B)`;
+                                    } else {
+                                        cor = "bg-amber-700 text-amber-100 border border-amber-500/50";
+                                        tt = `⚡ Dezena ${String(n).padStart(2,'0')} — VARIÁVEL (Interm. C)`;
+                                    }
+                                }
+                                return `<span class="tt tt-baixo" data-tt="${tt}">${bolinha(n, cor)}</span>`;
+                            }).join("")}
+                        </div>
+                    </div>
+
+                    <div class="mt-2.5 flex items-center justify-between gap-2">
+                        <button onclick="event.stopPropagation(); salvarJogoNaMemoria([${jogo.dezenas.join(',')}])"
+                                class="tt flex items-center gap-1.5 bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition"
+                                data-tt="Salva este jogo na memória.">
+                            💾 Salvar na memória
+                        </button>
+                    </div>
+
+                    <div class="jogo-detalhes">
+                        <div class="pt-3 mt-3 border-t border-slate-700/60 space-y-3">
+
+                            <div class="bg-slate-900/50 border border-slate-700 rounded-xl p-3">
+                                <div class="flex items-center justify-between mb-2 flex-wrap gap-1">
+                                    <span class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider tt"
+                                          data-tt="🎯 CONFERÊNCIA RETROATIVA — quantas vezes ESTE jogo teria feito 11, 12, 13, 14 ou 15 pontos no histórico.">
+                                        🎯 Quantas vezes este jogo teria feito...
+                                    </span>
+                                    <span class="text-[10px] text-slate-500">
+                                        (base: ${conf.totalConcursos} concursos)
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-5 gap-1.5 text-center">
+                                    <div class="tt bg-yellow-900/30 border border-yellow-500/40 rounded-lg py-2"
+                                         data-tt="🏆 15 PONTOS = prêmio máximo.">
+                                        <div class="text-[9px] text-yellow-300 uppercase font-bold">15 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-yellow-200">${conf.pontos[15]}</div>
+                                    </div>
+                                    <div class="tt bg-emerald-900/30 border border-emerald-500/40 rounded-lg py-2"
+                                         data-tt="🥇 14 PONTOS.">
+                                        <div class="text-[9px] text-emerald-300 uppercase font-bold">14 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-emerald-200">${conf.pontos[14]}</div>
+                                    </div>
+                                    <div class="tt bg-teal-900/30 border border-teal-500/40 rounded-lg py-2"
+                                         data-tt="🥈 13 PONTOS.">
+                                        <div class="text-[9px] text-teal-300 uppercase font-bold">13 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-teal-200">${conf.pontos[13]}</div>
+                                    </div>
+                                    <div class="tt bg-sky-900/30 border border-sky-500/40 rounded-lg py-2"
+                                         data-tt="🥉 12 PONTOS.">
+                                        <div class="text-[9px] text-sky-300 uppercase font-bold">12 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-sky-200">${conf.pontos[12]}</div>
+                                    </div>
+                                    <div class="tt bg-slate-800 border border-slate-600 rounded-lg py-2"
+                                         data-tt="🎯 11 PONTOS — mínimo que paga prêmio.">
+                                        <div class="text-[9px] text-slate-300 uppercase font-bold">11 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-slate-200">${conf.pontos[11]}</div>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-[10px] sm:text-xs text-slate-400 text-center">
+                                    Melhor resultado:
+                                    <b class="${corPremio}">${conf.melhor > 0 ? conf.melhor + ' pontos' : 'nenhum prêmio'}</b>
+                                    <span class="text-slate-500">·</span>
+                                    <span class="text-slate-500">${conf.totalPremiados} concursos premiados</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-900/50 border border-slate-700 rounded-xl p-3">
+                                <div class="flex items-center justify-between mb-2 flex-wrap gap-1">
+                                    <span class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider tt"
+                                          data-tt="📅 ÚLTIMOS 3 CONCURSOS PREMIADOS — os 3 mais recentes onde este jogo teria feito 11+ pts.">
+                                        📅 Últimos 3 concursos premiados
+                                    </span>
+                                    <span class="text-[10px] text-slate-500">(11 pts ou mais)</span>
+                                </div>
+                                <div class="space-y-1.5">
+                                    ${ultimos3HTML}
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-900/50 border border-slate-700 rounded-xl p-3">
+                                <div class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider mb-2 tt"
+                                     data-tt="✅ VALIDAÇÃO — checa se este jogo está DENTRO do padrão histórico.">
+                                    ✅ Validação do Jogo
+                                </div>
+                                <div class="space-y-1">
+                                    ${validacoes.map(v => `
+                                        <div class="text-[10px] sm:text-xs ${v.nivel === "ok" ? "text-emerald-400" : "text-amber-400"}">
+                                            ${v.nivel === "ok" ? "✓" : "⚠️"} ${v.msg}
+                                        </div>`).join("")}
+                                </div>
+                            </div>
+
+                            ${renderBlocoDetalhes(jogo.dezenas, an, a)}
+
+                        </div>
+                    </div>
+                </div>`;
+        }
+
         function gerarJogos() {
             const a = DADOS_INJETADOS.analises[ABA_ATIVA];
             if (!a) return;
+
+            // ⭐ NOVO — se o checkbox "gerar 11 do último" estiver marcado, chama a função especial
+            const gerarOnze = document.getElementById("gerar-11-ultimo");
+            if (gerarOnze && gerarOnze.checked) {
+                gerarJogosOnze();
+                return;
+            }
+
+            // ======== comportamento normal (original) ========
             const qtd = parseInt(document.getElementById("qtd-jogos").value) || 5;
             const fixarFib = document.getElementById("fixar-fibonacci").checked;
             const fixarSeq = document.getElementById("fixar-sequencia").checked;
@@ -1379,9 +1913,6 @@
             });
         }
 
-        // =====================================================
-        // CARD DE JOGO GERADO
-        // =====================================================
         function renderJogoCard(jogo, idx, a, fixasSet) {
             const an = analisarDezenas(jogo.dezenas, a);
             const conf = conferirJogo(jogo.dezenas);
@@ -1585,6 +2116,7 @@
             memoria.push({ id: proximoId, dezenas });
             salvarMemoria(memoria);
             renderMemoria();
+            renderizarPainel();
 
             const t = document.createElement("div");
             t.className = "fixed bottom-4 right-4 bg-purple-600 text-white px-4 py-2 rounded-xl shadow-2xl z-50 font-bold text-sm";
@@ -1600,13 +2132,10 @@
             if (el) el.classList.toggle("expandido");
         }
 
-        // =====================================================
-        // INICIAR
-        // =====================================================
         async function iniciar() {
             try {
                 const df = await LotofacilAPI.carregarDados();
-                DADOS_INJETADOS = LotofacilAPI.analisarTudo(df);
+                DADOS_INJETADOS = LotofacilAPI.analisarTudo(df, QTD_ULTIMOS);
 
                 document.getElementById("info-concursos").textContent =
                     `${DADOS_INJETADOS.total_concursos} concursos · Último: #${DADOS_INJETADOS.ultimo_concurso}`;
