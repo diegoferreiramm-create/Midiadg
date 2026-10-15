@@ -1,6 +1,5 @@
 /* ============================================================
    LOTOFÁCIL — ANÁLISE EM JAVASCRIPT PURO
-   Converte o script Python pra rodar 100% no navegador.
    ============================================================ */
 
 const ID_PLANILHA = "1BSH8N7qhWI_4GS5O5iIH81DCfIcdknhV0LTPDEeX3yQ";
@@ -10,7 +9,7 @@ const FIBONACCI_DEZENAS = [1, 2, 3, 5, 8, 13, 21];
 const FIBONACCI_CICLO = [1, 2, 3, 5, 8, 13, 21];
 
 /* ------------------------------------------------------------
-   PARSE CSV ROBUSTO (trata aspas, vírgulas internas, quebras)
+   PARSE CSV ROBUSTO
    ------------------------------------------------------------ */
 function parseCSV(text) {
     const rows = [];
@@ -35,7 +34,7 @@ function parseCSV(text) {
 }
 
 /* ------------------------------------------------------------
-   BAIXA E PROCESSA OS DADOS DA PLANILHA
+   BAIXA E PROCESSA OS DADOS
    ------------------------------------------------------------ */
 async function carregarDados() {
     const url = `https://docs.google.com/spreadsheets/d/${ID_PLANILHA}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
@@ -45,22 +44,17 @@ async function carregarDados() {
     return processarCSV(csvText);
 }
 
-/* ------------------------------------------------------------
-   CONVERTE O CSV EM OBJETO DE ANÁLISE
-   ------------------------------------------------------------ */
 function processarCSV(csv) {
     const linhas = parseCSV(csv);
     if (linhas.length < 2) throw new Error("CSV vazio ou inválido.");
 
     const cabecalho = linhas[0].map(c => String(c).trim());
     const dados = linhas.slice(1).map(r => {
-        // Garante que cada linha tenha o mesmo número de colunas
         const linha = [];
         for (let i = 0; i < cabecalho.length; i++) linha.push(r[i] !== undefined ? r[i] : "");
         return linha;
     });
 
-    // Detectar colunas de dezenas (valores 1-25)
     const numCols = [];
     for (let i = 0; i < cabecalho.length; i++) {
         const nome = cabecalho[i].toLowerCase();
@@ -75,16 +69,13 @@ function processarCSV(csv) {
     }
     if (numCols.length < 15) throw new Error(`Apenas ${numCols.length} colunas de dezenas detectadas. Esperado 15.`);
 
-    // Detectar coluna Concurso
     let idxConcurso = cabecalho.findIndex(c => c.toLowerCase() === "concurso");
     if (idxConcurso === -1) idxConcurso = 0;
 
-    // Detectar coluna Data
     let idxData = cabecalho.findIndex(c =>
         ["data", "data sorteio", "data do sorteio", "dt", "date"].includes(c.toLowerCase())
     );
 
-    // Monta DataFrame
     const df = [];
     for (const row of dados) {
         const concurso = parseInt(row[idxConcurso]);
@@ -103,18 +94,16 @@ function processarCSV(csv) {
         df.push(item);
     }
 
-    // Ordena por concurso decrescente
     df.sort((a, b) => b.concurso - a.concurso);
     return df;
 }
 
 /* ------------------------------------------------------------
-   ANÁLISE DE UMA JANELA (últimos N concursos)
+   ANÁLISE DE UMA JANELA
    ------------------------------------------------------------ */
 function analisarJanela(dfJanela, rotulo) {
     const n = dfJanela.length;
 
-    // Frequência
     const contagem = new Array(26).fill(0);
     for (const c of dfJanela) for (const d of c.dezenas) contagem[d]++;
 
@@ -132,7 +121,6 @@ function analisarJanela(dfJanela, rotulo) {
     const grupoC = freqLista.slice(9, 18).map(x => x.dezena);
     const grupoB = freqLista.slice(18, 25).map(x => x.dezena);
 
-    // Estatísticas
     let paresTotal = 0;
     const faixas = { "01-05": 0, "06-10": 0, "11-15": 0, "16-20": 0, "21-25": 0 };
     let somaTotal = 0;
@@ -152,7 +140,6 @@ function analisarJanela(dfJanela, rotulo) {
     const mediaImpares = Math.round((15 - mediaPares) * 100) / 100;
     const somaMedia = Math.round((somaTotal / Math.max(n, 1)) * 100) / 100;
 
-    // Repetições (entre concursos consecutivos)
     const reps = [];
     for (let i = 0; i < dfJanela.length - 1; i++) {
         const a = new Set(dfJanela[i].dezenas);
@@ -165,7 +152,6 @@ function analisarJanela(dfJanela, rotulo) {
         ? Math.round((reps.reduce((s, x) => s + x, 0) / reps.length) * 100) / 100
         : 0;
 
-    // Sequências (streak do último pra trás)
     const sequencias = [];
     for (let dez = 1; dez <= 25; dez++) {
         let streak = 0;
@@ -178,7 +164,6 @@ function analisarJanela(dfJanela, rotulo) {
     sequencias.sort((a, b) => b.streak - a.streak || a.dezena - b.dezena);
     const sequenciasMax = sequencias.length > 0 ? Math.max(...sequencias.map(s => s.streak)) : 0;
 
-    // Atrasos
     const atrasos = [];
     for (let dez = 1; dez <= 25; dez++) {
         let atraso = 0;
@@ -190,13 +175,12 @@ function analisarJanela(dfJanela, rotulo) {
     }
     atrasos.sort((a, b) => b.atraso - a.atraso || a.dezena - b.dezena);
 
-    // Últimos 10
     const ultimos10 = dfJanela.slice(0, 10).map(c => ({
         concurso: c.concurso,
-        dezenas: c.dezenas
+        dezenas: c.dezenas,
+        data: c.data || null
     }));
 
-    // Fibonacci
     const fibonacci = analisarFibonacci(dfJanela);
 
     return {
@@ -262,7 +246,7 @@ function analisarFibonacci(dfJanela) {
 }
 
 /* ------------------------------------------------------------
-   ANÁLISE PRINCIPAL — monta o objeto final (mesmo formato do Python)
+   ANÁLISE PRINCIPAL
    ------------------------------------------------------------ */
 function analisarTudo(df) {
     const total = df.length;
@@ -287,7 +271,6 @@ function analisarTudo(df) {
         analises[chave] = analisarJanela(janelas[chave], rotulos[chave]);
     }
 
-    // Histórico para conferência
     const historico = df.map(c => {
         const item = { c: c.concurso, d: c.dezenas };
         if (c.data) item.dt = c.data;
@@ -303,7 +286,7 @@ function analisarTudo(df) {
 }
 
 /* ------------------------------------------------------------
-   EXPORTA PRA USO GLOBAL
+   EXPORTA
    ------------------------------------------------------------ */
 window.LotofacilAPI = {
     carregarDados,
