@@ -785,7 +785,12 @@
         function renderAtrasosHistoricos(a) {
             const historicos = DADOS_INJETADOS.atrasos_historicos || [];
             if (historicos.length === 0) return "";
-            const ordenados = [...historicos].sort((x, y) => y.pct_max - x.pct_max);
+        
+            // Maior atraso ATUAL entre todas as dezenas — vira a régua das barras
+            const maxAtrasoAtual = Math.max(...historicos.map(h => h.atraso_atual), 1);
+        
+            const ordenados = [...historicos].sort((x, y) => y.atraso_atual - x.atraso_atual);
+        
             const linhas = ordenados.map(h => {
                 let corBarra, corTexto;
                 if (h.pct_max >= 90) { corBarra = "bg-rose-500"; corTexto = "text-rose-300"; }
@@ -793,38 +798,41 @@
                 else if (h.pct_max >= 50) { corBarra = "bg-amber-500"; corTexto = "text-amber-300"; }
                 else if (h.pct_max >= 25) { corBarra = "bg-emerald-500"; corTexto = "text-emerald-300"; }
                 else { corBarra = "bg-sky-500"; corTexto = "text-sky-300"; }
-
+        
+                // Barra proporcional ao MAIOR atraso atual (régua visual)
+                const pctBarra = (h.atraso_atual / maxAtrasoAtual) * 100;
+        
                 return `
                     <div class="bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 tt"
-                         data-tt="Dezena ${String(h.dezena).padStart(2,'0')} — atraso atual: ${h.atraso_atual}. Máximo histórico: ${h.atraso_max}. Média: ${h.atraso_medio}. Está em ${h.pct_max}% do máximo.">
-                        <div class="flex items-center gap-2.5 sm:w-28 shrink-0">
+                         data-tt="Dezena ${String(h.dezena).padStart(2,'0')} — está há ${h.atraso_atual} sorteios sem sair. Máximo histórico dela: ${h.atraso_max}. Média: ${h.atraso_medio}. Está em ${h.pct_max}% do próprio máximo.">
+                        <div class="flex items-center gap-2.5 sm:w-32 shrink-0">
                             ${bolinhaMini(h.dezena, "bg-slate-700 text-slate-200 border border-slate-600")}
                             <span class="text-xs font-bold ${corTexto}">${h.status}</span>
                         </div>
                         <div class="flex-1 flex items-center gap-2">
-                            <div class="flex-1 bg-slate-800 rounded-full h-2 overflow-hidden">
-                                <div class="${corBarra} h-2 rounded-full" style="width: ${Math.min(h.pct_max, 100)}%"></div>
+                            <div class="flex-1 bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                                <div class="${corBarra} h-2.5 rounded-full" style="width: ${pctBarra}%"></div>
                             </div>
-                            <span class="text-[10px] sm:text-xs ${corTexto} font-bold w-24 text-right">
-                                ${h.atraso_atual}/${h.atraso_max} (${h.pct_max}%)
+                            <span class="text-xs sm:text-sm ${corTexto} font-bold w-8 text-right">
+                                ${h.atraso_atual}
                             </span>
                         </div>
-                        <div class="text-[10px] text-slate-500 sm:w-20 text-right">
-                            Média: ${h.atraso_medio}
+                        <div class="text-[10px] text-slate-500 sm:w-28 text-right">
+                            Máx: ${h.atraso_max} · Méd: ${h.atraso_medio}
                         </div>
                     </div>`;
             }).join("");
-
+        
             return `
                 <section class="bg-slate-800 border border-rose-500/40 rounded-2xl p-4 sm:p-5 shadow-lg">
                     <details open>
                         <summary class="flex items-center justify-between gap-2 mb-3">
                             <h3 class="text-rose-400 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 tt"
-                                data-tt="⏳ ATRASO HISTÓRICO — para cada dezena, mostra o atraso atual, o maior atraso histórico e a média. Ordenado por criticidade.">
+                                data-tt="⏳ ATRASO HISTÓRICO — barras proporcionais ao MAIOR atraso atual entre todas as dezenas. A dezena mais atrasada tem a barra cheia; as demais ficam proporcionais.">
                                 <span class="caret text-rose-400">▶</span>
                                 ⏳ Atraso Histórico por Dezena
                             </h3>
-                            <span class="text-[10px] text-slate-500">Ordenado por criticidade</span>
+                            <span class="text-[10px] text-slate-500">Maior atraso atual: ${maxAtrasoAtual} · Ordenado por atraso</span>
                         </summary>
                         <div class="space-y-2 mt-3">${linhas}</div>
                     </details>
