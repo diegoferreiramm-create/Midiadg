@@ -124,14 +124,12 @@ function analisarAtrasosHistoricos(dfCompleto) {
             ? Math.round((atrasos.reduce((s, x) => s + x, 0) / atrasos.length) * 10) / 10
             : 0;
 
-        // atraso atual (do último concurso pra trás)
         let atrasoAtualReal = 0;
         for (const c of dfCompleto) {
             if (c.dezenas.includes(dez)) break;
             atrasoAtualReal++;
         }
 
-        // % do máximo
         const pctMax = atrasoMax > 0 ? Math.round((atrasoAtualReal / atrasoMax) * 100) : 0;
 
         let status;
@@ -180,7 +178,6 @@ function analisarPares(dfJanela) {
 
     const frequentes = [...lista].sort((x, y) => y.qtd - x.qtd).slice(0, 10);
 
-    // Órfãos: pares que já saíram muito mas nas últimas 10 rodadas não saíram
     const ultimas10 = dfJanela.slice(0, 10);
     const recentes = new Set();
     for (const c of ultimas10) {
@@ -217,9 +214,6 @@ function analisarLinhasColunas(dfJanela) {
     return { linhas, colunas };
 }
 
-/* ------------------------------------------------------------
-   HEATMAP 5×5 (frequência por posição)
-   ------------------------------------------------------------ */
 function analisarHeatmap(dfJanela) {
     const matriz = [];
     for (let linha = 1; linha <= 5; linha++) {
@@ -235,9 +229,6 @@ function analisarHeatmap(dfJanela) {
     return matriz;
 }
 
-/* ------------------------------------------------------------
-   SEQUÊNCIA DE SOMA (últimos 30)
-   ------------------------------------------------------------ */
 function analisarSoma(dfJanela) {
     const ultimos30 = dfJanela.slice(0, 30).reverse();
     return ultimos30.map(c => ({
@@ -293,7 +284,6 @@ function analisarJanela(dfJanela, rotulo, dfCompleto) {
     const mediaImpares = Math.round((15 - mediaPares) * 100) / 100;
     const somaMedia = Math.round((somaTotal / Math.max(n, 1)) * 100) / 100;
 
-    // Repetições
     const reps = [];
     for (let i = 0; i < dfJanela.length - 1; i++) {
         const a = new Set(dfJanela[i].dezenas);
@@ -306,7 +296,6 @@ function analisarJanela(dfJanela, rotulo, dfCompleto) {
         ? Math.round((reps.reduce((s, x) => s + x, 0) / reps.length) * 100) / 100
         : 0;
 
-    // Sequências
     const sequencias = [];
     for (let dez = 1; dez <= 25; dez++) {
         let streak = 0;
@@ -319,7 +308,6 @@ function analisarJanela(dfJanela, rotulo, dfCompleto) {
     sequencias.sort((a, b) => b.streak - a.streak || a.dezena - b.dezena);
     const sequenciasMax = sequencias.length > 0 ? Math.max(...sequencias.map(s => s.streak)) : 0;
 
-    // Atrasos
     const atrasos = [];
     for (let dez = 1; dez <= 25; dez++) {
         let atraso = 0;
@@ -434,11 +422,9 @@ function analisarTudo(df) {
         analises[chave] = analisarJanela(janelas[chave], rotulos[chave], df);
     }
 
-    // Análise de pares usa janela de 30
     analises.geral.pares = analisarPares(df.slice(0, 30));
     analises.ultimos_30.pares = analises.geral.pares;
 
-    // Atraso histórico (todos)
     const atrasosHistoricos = analisarAtrasosHistoricos(df);
 
     const historico = df.map(c => {
