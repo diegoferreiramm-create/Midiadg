@@ -8,9 +8,6 @@ const SHEET_NAME = "Sorteios";
 const FIBONACCI_DEZENAS = [1, 2, 3, 5, 8, 13, 21];
 const FIBONACCI_CICLO = [1, 2, 3, 5, 8, 13, 21];
 
-/* ------------------------------------------------------------
-   PARSE CSV
-   ------------------------------------------------------------ */
 function parseCSV(text) {
     const rows = [];
     let cur = [], field = "", inQuotes = false;
@@ -25,7 +22,7 @@ function parseCSV(text) {
             if (c === '"') inQuotes = true;
             else if (c === ",") { cur.push(field); field = ""; }
             else if (c === "\n") { cur.push(field); rows.push(cur); cur = []; field = ""; }
-            else if (c === "\r") { /* ignora */ }
+            else if (c === "\r") { }
             else field += c;
         }
     }
@@ -33,9 +30,6 @@ function parseCSV(text) {
     return rows.filter(r => r.some(v => v && v.trim() !== ""));
 }
 
-/* ------------------------------------------------------------
-   BAIXA E PROCESSA
-   ------------------------------------------------------------ */
 async function carregarDados() {
     const url = `https://docs.google.com/spreadsheets/d/${ID_PLANILHA}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
     const response = await fetch(url);
@@ -98,9 +92,6 @@ function processarCSV(csv) {
     return df;
 }
 
-/* ------------------------------------------------------------
-   ANÁLISE DE ATRASO HISTÓRICO POR DEZENA
-   ------------------------------------------------------------ */
 function analisarAtrasosHistoricos(dfCompleto) {
     const resultado = [];
 
@@ -152,9 +143,6 @@ function analisarAtrasosHistoricos(dfCompleto) {
     return resultado;
 }
 
-/* ------------------------------------------------------------
-   PARES MAIS FREQUENTES E ÓRFÃOS
-   ------------------------------------------------------------ */
 function analisarPares(dfJanela) {
     const contagem = {};
     const ultimaVez = {};
@@ -196,9 +184,6 @@ function analisarPares(dfJanela) {
     return { frequentes, orfaos };
 }
 
-/* ------------------------------------------------------------
-   LINHAS E COLUNAS (5×5)
-   ------------------------------------------------------------ */
 function analisarLinhasColunas(dfJanela) {
     const linhas = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     const colunas = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
@@ -237,9 +222,6 @@ function analisarSoma(dfJanela) {
     }));
 }
 
-/* ------------------------------------------------------------
-   ANÁLISE DE UMA JANELA
-   ------------------------------------------------------------ */
 function analisarJanela(dfJanela, rotulo, dfCompleto) {
     const n = dfJanela.length;
 
@@ -356,9 +338,6 @@ function analisarJanela(dfJanela, rotulo, dfCompleto) {
     };
 }
 
-/* ------------------------------------------------------------
-   FIBONACCI
-   ------------------------------------------------------------ */
 function analisarFibonacci(dfJanela) {
     const resultados = [];
     for (const dez of FIBONACCI_DEZENAS) {
@@ -396,10 +375,7 @@ function analisarFibonacci(dfJanela) {
     };
 }
 
-/* ------------------------------------------------------------
-   ANÁLISE PRINCIPAL
-   ------------------------------------------------------------ */
-function analisarTudo(df) {
+function analisarTudo(df, qtdUltimos) {
     const total = df.length;
     const ultimoConcurso = df[0].concurso;
 
@@ -433,18 +409,23 @@ function analisarTudo(df) {
         return item;
     });
 
+    const qtd = Math.max(1, Math.min(qtdUltimos || 10, df.length));
+    const ultimosConcursos = df.slice(0, qtd).map(c => ({
+        concurso: c.concurso,
+        dezenas: c.dezenas,
+        data: c.data || null
+    }));
+
     return {
         total_concursos: total,
         ultimo_concurso: ultimoConcurso,
         analises,
         atrasos_historicos: atrasosHistoricos,
-        historico_conferencia: historico
+        historico_conferencia: historico,
+        ultimos_concursos: ultimosConcursos
     };
 }
 
-/* ------------------------------------------------------------
-   EXPORTA
-   ------------------------------------------------------------ */
 window.LotofacilAPI = {
     carregarDados,
     analisarTudo,
