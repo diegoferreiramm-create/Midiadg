@@ -131,7 +131,6 @@
 
             <div id="painel-analise" class="space-y-4 md:space-y-6"></div>
 
-            <!-- MEMÓRIA DE JOGOS -->
             <details class="bg-purple-900/20 border border-purple-500/50 rounded-2xl shadow-lg overflow-hidden" open>
                 <summary class="p-4 sm:p-5 flex items-center justify-between gap-2 hover:bg-purple-900/30 transition">
                     <div class="flex items-center gap-2">
@@ -143,7 +142,6 @@
                 </summary>
 
                 <div class="p-4 sm:p-5 pt-0 space-y-4">
-                    <!-- Inserir resultado oficial -->
                     <div class="bg-slate-900/60 border border-purple-500/40 rounded-xl p-3 sm:p-4">
                         <label class="block text-xs sm:text-sm text-purple-300 font-bold mb-2">
                             🎯 Adicionar Resultado Oficial (15 dezenas)
@@ -162,10 +160,8 @@
                         </div>
                     </div>
 
-                    <!-- Lista de resultados -->
                     <div id="resultados-lista" class="space-y-2"></div>
 
-                    <!-- Lista de jogos salvos -->
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <h3 class="text-xs sm:text-sm font-bold text-purple-300 uppercase tracking-wider">
@@ -181,7 +177,6 @@
                 </div>
             </details>
 
-            <!-- GERADOR -->
             <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4">
                 <div>
                     <h2 class="text-base sm:text-lg font-bold text-slate-200">Gerador de Jogos Balanceados</h2>
@@ -259,17 +254,15 @@
         // MEMÓRIA (localStorage)
         // =====================================================
         function lerMemoria() {
-            try {
-                return JSON.parse(localStorage.getItem(LS_MEMORIA) || "[]");
-            } catch { return []; }
+            try { return JSON.parse(localStorage.getItem(LS_MEMORIA) || "[]"); }
+            catch { return []; }
         }
         function salvarMemoria(lista) {
             localStorage.setItem(LS_MEMORIA, JSON.stringify(lista));
         }
         function lerResultados() {
-            try {
-                return JSON.parse(localStorage.getItem(LS_RESULTADOS) || "[]");
-            } catch { return []; }
+            try { return JSON.parse(localStorage.getItem(LS_RESULTADOS) || "[]"); }
+            catch { return []; }
         }
         function salvarResultados(lista) {
             localStorage.setItem(LS_RESULTADOS, JSON.stringify(lista));
@@ -280,7 +273,6 @@
             const texto = input.value.trim();
             if (!texto) return;
 
-            // Formato esperado: "3803, 01 02 03 ..."  ou "3803 01 02 ..."
             const partes = texto.replace(/,/g, " ").split(/\s+/).filter(x => x);
             if (partes.length < 16) {
                 alert("Digite: número do concurso + 15 dezenas. Ex: 3803 01 02 03 05 08 10 12 13 15 18 19 21 22 24 25");
@@ -417,7 +409,37 @@
             return { pares, impares, qtdA, qtdB, qtdC, faixas, soma, mediaEsperada, desvio, maiorSeq, qtdFib };
         }
 
-        // Validação de "jogo atípico" — retorna lista de alertas
+        // =====================================================
+        // 🎯 CONFERIR JOGO (pontos + últimos 3 premiados)
+        // =====================================================
+        function conferirJogo(dezenas) {
+            const hist = DADOS_INJETADOS.historico_conferencia || [];
+            const cont = { 11: 0, 12: 0, 13: 0, 14: 0, 15: 0 };
+            const set = new Set(dezenas);
+            let melhor = 0;
+            const premiados = [];
+
+            for (const c of hist) {
+                let acertos = 0;
+                for (const n of c.d) if (set.has(n)) acertos++;
+                if (acertos >= 11 && acertos <= 15) {
+                    cont[acertos]++;
+                    if (acertos > melhor) melhor = acertos;
+                    premiados.push({ c: c.c, dt: c.dt || null, pts: acertos });
+                }
+            }
+
+            premiados.sort((a, b) => b.c - a.c);
+
+            return {
+                pontos: cont,
+                melhor: melhor,
+                totalConcursos: hist.length,
+                ultimos3: premiados.slice(0, 3),
+                totalPremiados: premiados.length
+            };
+        }
+
         function validarJogo(dezenas, an, a) {
             const alertas = [];
             const pares = an.pares;
@@ -442,7 +464,6 @@
                 alertas.push({ nivel: "ok", msg: `${an.qtdA} dezenas quentes` });
             }
 
-            // Distribuição de faixas - verifica se alguma faixa ficou vazia ou sobrecarregada
             const vazias = Object.entries(an.faixas).filter(([_, v]) => v === 0).map(([k]) => k);
             if (vazias.length > 0) {
                 alertas.push({ nivel: "warn", msg: `Faixa vazia: ${vazias.join(", ")}` });
@@ -726,15 +747,9 @@
             `;
         }
 
-        // =====================================================
-        // ATRASO HISTÓRICO
-        // =====================================================
         function renderAtrasosHistoricos(a) {
             const historicos = DADOS_INJETADOS.atrasos_historicos || [];
-
-            // Ordena por % do máximo (mais crítico primeiro)
             const ordenados = [...historicos].sort((x, y) => y.pct_max - x.pct_max);
-
             const linhas = ordenados.map(h => {
                 let corBarra, corTexto;
                 if (h.pct_max >= 90) { corBarra = "bg-rose-500"; corTexto = "text-rose-300"; }
@@ -779,9 +794,6 @@
             `;
         }
 
-        // =====================================================
-        // HEATMAP 5×5
-        // =====================================================
         function renderHeatmap(a) {
             const maxFreq = Math.max(...a.heatmap.flat().map(x => x.frequencia));
 
@@ -822,9 +834,6 @@
             `;
         }
 
-        // =====================================================
-        // LINHAS E COLUNAS
-        // =====================================================
         function renderLinhasColunas(a) {
             const lc = a.linhas_colunas;
             const maxL = Math.max(...Object.values(lc.linhas));
@@ -905,9 +914,6 @@
             }).join("");
         }
 
-        // =====================================================
-        // PARES MAIS FREQUENTES E ÓRFÃOS
-        // =====================================================
         function renderPares(a) {
             if (!a.pares) return "";
             const { frequentes, orfaos } = a.pares;
@@ -959,9 +965,6 @@
             `;
         }
 
-        // =====================================================
-        // GRÁFICO DE SOMA
-        // =====================================================
         function renderGraficoSoma(a) {
             if (!a.soma_serie || a.soma_serie.length === 0) return "";
             const serie = a.soma_serie;
@@ -995,11 +998,8 @@
                     </div>
                     <div class="relative" style="height: ${altura + 30}px;">
                         <svg viewBox="0 0 100 ${altura}" preserveAspectRatio="none" class="w-full absolute top-0 left-0" style="height: ${altura}px;">
-                            <!-- Linha da média -->
                             <line x1="0" x2="100" y1="${mediaY}" y2="${mediaY}" stroke="#0ea5e9" stroke-width="0.5" stroke-dasharray="2,2" vector-effect="non-scaling-stroke"/>
-                            <!-- Linha do gráfico -->
                             <path d="${path}" fill="none" stroke="#10b981" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
-                            <!-- Pontos -->
                             ${pontos.map((p, i) => `
                                 <circle cx="${p.x}" cy="${p.y}" r="0.8" fill="#10b981" stroke="#064e3b" stroke-width="0.3" vector-effect="non-scaling-stroke"/>
                             `).join("")}
@@ -1013,11 +1013,8 @@
             `;
         }
 
-        // =====================================================
-        // DIFF ENTRE ABAS
-        // =====================================================
         function renderDiffAbas() {
-            if (ABA_ATIVA === "ultimos_10") return ""; // Não mostra diff na última aba
+            if (ABA_ATIVA === "ultimos_10") return "";
 
             const alvo = ABA_ATIVA === "geral" ? "ultimos_30" : "ultimos_10";
             const rotuloA = ABA_ATIVA === "geral" ? "Geral" : "Últimos 30";
@@ -1069,9 +1066,6 @@
             `;
         }
 
-        // =====================================================
-        // ÚLTIMOS 10
-        // =====================================================
         function renderUltimos10(a) {
             return `
                 <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-lg">
@@ -1135,11 +1129,9 @@
             const memoria = lerMemoria();
             const resultados = lerResultados();
 
-            // Contador
             document.getElementById("memoria-contador").textContent =
                 `${memoria.length} salvo${memoria.length !== 1 ? 's' : ''}`;
 
-            // Lista de resultados
             const resList = document.getElementById("resultados-lista");
             if (resultados.length === 0) {
                 resList.innerHTML = `<p class="text-[10px] sm:text-xs text-slate-500 italic text-center py-2">Nenhum resultado cadastrado ainda.</p>`;
@@ -1159,20 +1151,17 @@
                     </div>`).join("");
             }
 
-            // Lista de jogos salvos
             const memList = document.getElementById("memoria-lista");
             if (memoria.length === 0) {
                 memList.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-3">Nenhum jogo salvo. Gere jogos abaixo e marque "💾 Salvar na memória".</p>`;
                 return;
             }
 
-            // Ordena: mais recente primeiro
             const ordenada = [...memoria].sort((a, b) => b.id - a.id);
 
             memList.innerHTML = ordenada.map(j => {
                 const idUnico = `mem-${j.id}`;
 
-                // Concurso onde bateu mais pontos
                 let melhorPts = 0, melhorConcurso = null;
                 const conferencias = resultados.map(r => {
                     const set = new Set(r.dezenas);
@@ -1257,7 +1246,6 @@
                 Jogos Gerados (${qtd})${tags.length ? ' · ' + tags.join(' + ') + ' fixadas' : ''}
             </h3>`;
 
-            // Constrói lista de dezenas fixas
             const fixasSet = new Set();
             if (fixarFib) FIB_FIXAS.forEach(n => fixasSet.add(n));
             if (fixarSeq) a.sequencias.forEach(s => fixasSet.add(s.dezena));
@@ -1273,7 +1261,6 @@
             jogosGerados = [];
             let tentativas = 0;
 
-            // Pools sem as fixas
             const poolA = a.grupo_a.filter(n => !fixasSet.has(n));
             const poolC = a.grupo_c.filter(n => !fixasSet.has(n));
             const poolB = a.grupo_b.filter(n => !fixasSet.has(n));
@@ -1283,12 +1270,10 @@
             while (jogosGerados.length < qtd && tentativas < 8000) {
                 tentativas++;
 
-                // Proporção 7A + 6C + 2B → adapta pra slots disponíveis
                 let takeA = Math.min(Math.round((7 / 15) * slots), poolA.length);
                 let takeC = Math.min(Math.round((6 / 15) * slots), poolC.length);
                 let takeB = Math.min(Math.round((2 / 15) * slots), poolB.length);
 
-                // Ajusta se não somar slots
                 while (takeA + takeC + takeB < slots) {
                     if (takeA < poolA.length) takeA++;
                     else if (takeC < poolC.length) takeC++;
@@ -1322,10 +1307,11 @@
         }
 
         // =====================================================
-        // CARD DE JOGO GERADO (com botão salvar)
+        // CARD DE JOGO GERADO (com chip de prêmio, bloco 🎯 e 📅)
         // =====================================================
         function renderJogoCard(jogo, idx, a, fixasSet) {
             const an = analisarDezenas(jogo.dezenas, a);
+            const conf = conferirJogo(jogo.dezenas);
             const validacoes = validarJogo(jogo.dezenas, an, a);
             const idUnico = `jogo-${idx}`;
 
@@ -1333,7 +1319,6 @@
             const corPares = an.pares >= 6 && an.pares <= 8 ? "text-emerald-400" : "text-amber-400";
             const corA = an.qtdA >= 6 && an.qtdA <= 8 ? "text-emerald-400" : "text-amber-400";
 
-            // Já foi sorteado?
             const hist = DADOS_INJETADOS.historico_conferencia || [];
             const setJogo = new Set(jogo.dezenas);
             const jaSaiu = hist.some(c => {
@@ -1341,6 +1326,37 @@
                 for (const n of c.d) if (!setJogo.has(n)) return false;
                 return true;
             });
+
+            // Chip de prêmio
+            let corPremio = "text-slate-400", txtPremio = "🏆 0 pts";
+            if (conf.melhor >= 15)       { corPremio = "text-yellow-400";  txtPremio = "🏆 15 pts"; }
+            else if (conf.melhor === 14) { corPremio = "text-emerald-400"; txtPremio = "🥇 14 pts"; }
+            else if (conf.melhor === 13) { corPremio = "text-teal-400";    txtPremio = "🥈 13 pts"; }
+            else if (conf.melhor === 12) { corPremio = "text-sky-400";     txtPremio = "🥉 12 pts"; }
+            else if (conf.melhor === 11) { corPremio = "text-slate-300";   txtPremio = "🎯 11 pts"; }
+
+            const ttConf = `🎯 Conferência retroativa — quantas vezes este jogo teria feito 11, 12, 13, 14 ou 15 pontos nos ${conf.totalConcursos} concursos do histórico. Melhor: ${conf.melhor} pontos.`;
+
+            // Últimos 3 premiados
+            let ultimos3HTML = "";
+            if (conf.ultimos3.length === 0) {
+                ultimos3HTML = `<p class="text-slate-500 text-xs italic text-center py-2">Nenhum concurso premiado (≥ 11 pts) no histórico.</p>`;
+            } else {
+                ultimos3HTML = conf.ultimos3.map(p => {
+                    const c = corPorPontos(p.pts);
+                    const dataTxt = p.dt ? ` · ${p.dt}` : "";
+                    return `
+                        <div class="flex items-center justify-between gap-2 ${c.bg} border ${c.borda} rounded-lg px-3 py-2">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="text-base">${c.emoji}</span>
+                                <span class="text-xs sm:text-sm font-bold ${c.cor}">#${p.c}${dataTxt}</span>
+                            </div>
+                            <span class="${c.cor} text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full ${c.bg} border ${c.borda}">
+                                ${p.pts} pts
+                            </span>
+                        </div>`;
+                }).join("");
+            }
 
             return `
                 <div class="jogo-card bg-slate-800 border border-slate-700/80 rounded-2xl p-3 sm:p-4 shadow-md ${temAlertas ? 'border-amber-500/40' : ''}"
@@ -1361,6 +1377,10 @@
                             <span class="bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 text-rose-400">❄️ ${an.qtdB}</span>
                             <span class="bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 text-yellow-400">🔮 ${an.qtdFib}</span>
                             <span class="bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 text-sky-400">Σ ${an.soma}</span>
+                            <span class="tt tt-esq bg-slate-900/60 px-2.5 py-1 rounded-lg border border-slate-700 ${corPremio} font-bold"
+                                  data-tt="${ttConf}">
+                                ${txtPremio}
+                            </span>
                         </div>
                     </div>
 
@@ -1381,7 +1401,6 @@
                         </div>
                     </div>
 
-                    <!-- BOTÃO SALVAR -->
                     <div class="mt-2.5 flex items-center justify-between gap-2">
                         <button onclick="event.stopPropagation(); salvarJogoNaMemoria([${jogo.dezenas.join(',')}])"
                                 class="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition">
@@ -1391,6 +1410,59 @@
 
                     <div class="jogo-detalhes">
                         <div class="pt-3 mt-3 border-t border-slate-700/60 space-y-3">
+
+                            <!-- 🎯 QUANTAS VEZES ESTE JOGO TERIA FEITO -->
+                            <div class="bg-slate-900/50 border border-slate-700 rounded-xl p-3">
+                                <div class="flex items-center justify-between mb-2 flex-wrap gap-1">
+                                    <span class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider">
+                                        🎯 Quantas vezes este jogo teria feito...
+                                    </span>
+                                    <span class="text-[10px] text-slate-500">
+                                        (base: ${conf.totalConcursos} concursos)
+                                    </span>
+                                </div>
+                                <div class="grid grid-cols-5 gap-1.5 text-center">
+                                    <div class="bg-yellow-900/30 border border-yellow-500/40 rounded-lg py-2">
+                                        <div class="text-[9px] text-yellow-300 uppercase font-bold">15 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-yellow-200">${conf.pontos[15]}</div>
+                                    </div>
+                                    <div class="bg-emerald-900/30 border border-emerald-500/40 rounded-lg py-2">
+                                        <div class="text-[9px] text-emerald-300 uppercase font-bold">14 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-emerald-200">${conf.pontos[14]}</div>
+                                    </div>
+                                    <div class="bg-teal-900/30 border border-teal-500/40 rounded-lg py-2">
+                                        <div class="text-[9px] text-teal-300 uppercase font-bold">13 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-teal-200">${conf.pontos[13]}</div>
+                                    </div>
+                                    <div class="bg-sky-900/30 border border-sky-500/40 rounded-lg py-2">
+                                        <div class="text-[9px] text-sky-300 uppercase font-bold">12 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-sky-200">${conf.pontos[12]}</div>
+                                    </div>
+                                    <div class="bg-slate-800 border border-slate-600 rounded-lg py-2">
+                                        <div class="text-[9px] text-slate-300 uppercase font-bold">11 pts</div>
+                                        <div class="text-base sm:text-lg font-bold text-slate-200">${conf.pontos[11]}</div>
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-[10px] sm:text-xs text-slate-400 text-center">
+                                    Melhor resultado no período:
+                                    <b class="${corPremio}">${conf.melhor > 0 ? conf.melhor + ' pontos' : 'nenhum prêmio'}</b>
+                                    <span class="text-slate-500">·</span>
+                                    <span class="text-slate-500">${conf.totalPremiados} concursos premiados</span>
+                                </div>
+                            </div>
+
+                            <!-- 📅 ÚLTIMOS 3 CONCURSOS PREMIADOS -->
+                            <div class="bg-slate-900/50 border border-slate-700 rounded-xl p-3">
+                                <div class="flex items-center justify-between mb-2 flex-wrap gap-1">
+                                    <span class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider">
+                                        📅 Últimos 3 concursos premiados
+                                    </span>
+                                    <span class="text-[10px] text-slate-500">(11 pts ou mais)</span>
+                                </div>
+                                <div class="space-y-1.5">
+                                    ${ultimos3HTML}
+                                </div>
+                            </div>
 
                             <!-- VALIDAÇÃO -->
                             <div class="bg-slate-900/50 border border-slate-700 rounded-xl p-3">
@@ -1419,7 +1491,6 @@
             salvarMemoria(memoria);
             renderMemoria();
 
-            // Feedback visual rápido
             const t = document.createElement("div");
             t.className = "fixed bottom-4 right-4 bg-purple-600 text-white px-4 py-2 rounded-xl shadow-2xl z-50 font-bold text-sm";
             t.textContent = `💾 Jogo #MEM-${proximoId} salvo!`;
