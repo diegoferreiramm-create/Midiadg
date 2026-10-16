@@ -268,7 +268,7 @@
         </footer>
     </div>
 
-    <script src="analise.js?v=11"></script>
+    <script src="analise.js?v=12"></script>
 
     <script>
         let DADOS_INJETADOS = null;
@@ -279,10 +279,8 @@
         const LS_MEMORIA = "lotofacil_memoria_jogos";
         const LS_RESULTADOS = "lotofacil_resultados";
 
-        // ⭐ NOVO — função que retorna o dia da semana em português
         function diaDaSemana(dataStr) {
             if (!dataStr) return "";
-            // Aceita dd/mm/yyyy ou yyyy-mm-dd
             let dia, mes, ano;
             if (dataStr.includes("/")) {
                 const p = dataStr.split("/");
@@ -472,7 +470,6 @@
             return { pares, impares, qtdA, qtdB, qtdC, faixas, soma, mediaEsperada, desvio, maiorSeq, qtdFib };
         }
 
-        // ⭐ ALTERADO — salva também "dia" e "diaSemana" em cada premiado
         function conferirJogo(dezenas) {
             const hist = DADOS_INJETADOS.historico_conferencia || [];
             const cont = { 11: 0, 12: 0, 13: 0, 14: 0, 15: 0 };
@@ -582,6 +579,58 @@
             if (pts === 12) return { cor: "text-sky-300", bg: "bg-sky-900/40", borda: "border-sky-500/50", emoji: "🥉" };
             if (pts === 11) return { cor: "text-slate-300", bg: "bg-slate-800/60", borda: "border-slate-600", emoji: "🎯" };
             return { cor: "text-slate-500", bg: "bg-slate-900/40", borda: "border-slate-700", emoji: "❌" };
+        }
+
+        // ⭐ NOVO — função para renderizar o item do bloco 📅 (usada em concurso E jogo)
+        function renderItemPremiado(p, dezenasBase, a, rotulo) {
+            const c = corPorPontos(p.pts);
+            const dStr = p.dt ? ` · ${p.dt}` : "";
+            const dSem = p.diaSemana ? ` · ${p.diaSemana}` : "";
+            const setBase = new Set(dezenasBase);
+            const comuns = (p.dezenas || []).filter(n => setBase.has(n)).sort((x, y) => x - y);
+
+            return `
+                <div class="${c.bg} border ${c.borda} rounded-lg px-3 py-2">
+                    <div class="flex items-center justify-between gap-2 tt"
+                         data-tt="Concurso #${p.c}${p.dt ? ' (' + p.dt + (p.diaSemana ? ' - ' + p.diaSemana : '') + ')' : ''} — teria feito ${p.pts} pontos.">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span class="text-base">${c.emoji}</span>
+                            <span class="text-xs sm:text-sm font-bold ${c.cor}">#${p.c}${dStr}${dSem}</span>
+                        </div>
+                        <span class="${c.cor} text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full ${c.bg} border ${c.borda}">
+                            ${p.pts} pts
+                        </span>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-slate-700/50">
+                        <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                            <span>🔗 Dezenas em comum com ${rotulo}:</span>
+                            <span class="tt text-slate-300 font-bold" data-tt="${comuns.length} dezenas em comum">(${comuns.length})</span>
+                        </div>
+                        <div class="scroll-x">
+                            <div class="flex gap-1 min-w-max">
+                                ${comuns.map(n => {
+                                    const g = classificarDezena(n, a);
+                                    const isFib = FIB_FIXAS.includes(n);
+                                    let corB, ttB;
+                                    if (isFib) {
+                                        corB = "bg-yellow-700 text-yellow-100 border border-yellow-400/70";
+                                        ttB = `🔮 Dezena ${String(n).padStart(2,'0')} — Fibonacci · EM COMUM`;
+                                    } else if (g === "A") {
+                                        corB = "bg-emerald-700 text-emerald-100 border border-emerald-500/50";
+                                        ttB = `🔥 Dezena ${String(n).padStart(2,'0')} — Quente (A) · EM COMUM`;
+                                    } else if (g === "B") {
+                                        corB = "bg-rose-700 text-rose-100 border border-rose-500/50";
+                                        ttB = `❄️ Dezena ${String(n).padStart(2,'0')} — Fria (B) · EM COMUM`;
+                                    } else {
+                                        corB = "bg-amber-700 text-amber-100 border border-amber-500/50";
+                                        ttB = `⚡ Dezena ${String(n).padStart(2,'0')} — Intermediária (C) · EM COMUM`;
+                                    }
+                                    return `<span class="tt tt-baixo" data-tt="${ttB}">${bolinhaMini(n, corB)}</span>`;
+                                }).join("")}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
         }
 
         function renderBlocoDetalhes(dezenas, an, a) {
@@ -1242,7 +1291,6 @@
             `;
         }
 
-        // ⭐ ALTERADO — cabeçalho e blocos 📅 mostram dia da semana
         function renderConcursoCard(concurso, idx, a) {
             const dezenas = concurso.dezenas;
             const an = analisarDezenas(dezenas, a);
@@ -1251,8 +1299,6 @@
             const idUnico = `concurso-${ABA_ATIVA}-${idx}`;
             const corPares = an.pares >= 6 && an.pares <= 8 ? "text-emerald-400" : "text-amber-400";
             const corA = an.qtdA >= 6 && an.qtdA <= 8 ? "text-emerald-400" : "text-amber-400";
-
-            // ⭐ Cabeçalho do concurso com dia da semana
             const dia = diaDaSemana(concurso.data);
             const dataTxt = concurso.data ? ` · ${concurso.data}` : "";
             const diaTxt = dia ? ` · ${dia}` : "";
@@ -1267,61 +1313,13 @@
 
             const ttConf = `🎯 CONFERÊNCIA RETROATIVA — quantas vezes ESTE conjunto de 15 dezenas teria feito 11, 12, 13, 14 ou 15 pontos nos ${confJogo.totalConcursos} concursos do histórico. Melhor: ${confJogo.melhor}.`;
 
-            const setAtual = new Set(dezenas);
             let ultimos3HTML = "";
             if (confJogo.ultimos3.length === 0) {
                 ultimos3HTML = `<p class="text-slate-500 text-xs italic text-center py-2">Nenhum concurso premiado (≥ 11 pts) no histórico.</p>`;
             } else {
-                ultimos3HTML = confJogo.ultimos3.map((p, pIdx) => {
-                    const c = corPorPontos(p.pts);
-                    // ⭐ Data com dia da semana
-                    const dStr = p.dt ? ` · ${p.dt}` : "";
-                    const dSem = p.diaSemana ? ` · ${p.diaSemana}` : "";
-                    const comuns = (p.dezenas || []).filter(n => setAtual.has(n)).sort((x, y) => x - y);
-
-                    return `
-                        <div class="${c.bg} border ${c.borda} rounded-lg px-3 py-2">
-                            <div class="flex items-center justify-between gap-2 tt"
-                                 data-tt="Concurso #${p.c}${p.dt ? ' (' + p.dt + (p.diaSemana ? ' - ' + p.diaSemana : '') + ')' : ''} — teria feito ${p.pts} pontos.">
-                                <div class="flex items-center gap-2.5 min-w-0">
-                                    <span class="text-base">${c.emoji}</span>
-                                    <span class="text-xs sm:text-sm font-bold ${c.cor}">#${p.c}${dStr}${dSem}</span>
-                                </div>
-                                <span class="${c.cor} text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full ${c.bg} border ${c.borda}">
-                                    ${p.pts} pts
-                                </span>
-                            </div>
-                            <div class="mt-2 pt-2 border-t border-slate-700/50">
-                                <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                                    <span>🔗 Dezenas em comum com #${concurso.concurso}:</span>
-                                    <span class="tt text-slate-300 font-bold" data-tt="${comuns.length} dezenas em comum entre #${concurso.concurso} e #${p.c}">(${comuns.length})</span>
-                                </div>
-                                <div class="scroll-x">
-                                    <div class="flex gap-1 min-w-max">
-                                        ${comuns.map(n => {
-                                            const g = classificarDezena(n, a);
-                                            const isFib = FIB_FIXAS.includes(n);
-                                            let corB, ttB;
-                                            if (isFib) {
-                                                corB = "bg-yellow-700 text-yellow-100 border border-yellow-400/70";
-                                                ttB = `🔮 Dezena ${String(n).padStart(2,'0')} — Fibonacci · EM COMUM`;
-                                            } else if (g === "A") {
-                                                corB = "bg-emerald-700 text-emerald-100 border border-emerald-500/50";
-                                                ttB = `🔥 Dezena ${String(n).padStart(2,'0')} — Quente (A) · EM COMUM`;
-                                            } else if (g === "B") {
-                                                corB = "bg-rose-700 text-rose-100 border border-rose-500/50";
-                                                ttB = `❄️ Dezena ${String(n).padStart(2,'0')} — Fria (B) · EM COMUM`;
-                                            } else {
-                                                corB = "bg-amber-700 text-amber-100 border border-amber-500/50";
-                                                ttB = `⚡ Dezena ${String(n).padStart(2,'0')} — Intermediária (C) · EM COMUM`;
-                                            }
-                                            return `<span class="tt tt-baixo" data-tt="${ttB}">${bolinhaMini(n, corB)}</span>`;
-                                        }).join("")}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`;
-                }).join("");
+                ultimos3HTML = confJogo.ultimos3
+                    .map(p => renderItemPremiado(p, dezenas, a, `#${concurso.concurso}`))
+                    .join("");
             }
 
             let blocoSalvosHTML = "";
@@ -1600,7 +1598,6 @@
             if (!ultimo) return null;
 
             const dezenasUltimo = new Set(ultimo.dezenas);
-
             const historico = DADOS_INJETADOS.historico_conferencia || [];
             const ultimos10 = historico.slice(0, 10);
 
@@ -1706,7 +1703,7 @@
             });
         }
 
-        // ⭐ ALTERADO — blocos 📅 do jogo gerado com dia da semana
+        // ⭐ ALTERADO — bloco 📅 agora igual ao do concurso
         function renderJogoCardOnze(jogo, idx, a, criterio) {
             const an = analisarDezenas(jogo.dezenas, a);
             const conf = conferirJogo(jogo.dezenas);
@@ -1731,22 +1728,9 @@
             if (conf.ultimos3.length === 0) {
                 ultimos3HTML = `<p class="text-slate-500 text-xs italic text-center py-2">Nenhum concurso premiado (≥ 11 pts) no histórico.</p>`;
             } else {
-                ultimos3HTML = conf.ultimos3.map(p => {
-                    const c = corPorPontos(p.pts);
-                    const dStr = p.dt ? ` · ${p.dt}` : "";
-                    const dSem = p.diaSemana ? ` · ${p.diaSemana}` : "";
-                    return `
-                        <div class="flex items-center justify-between gap-2 ${c.bg} border ${c.borda} rounded-lg px-3 py-2 tt"
-                             data-tt="Concurso #${p.c}${p.dt ? ' (' + p.dt + (p.diaSemana ? ' - ' + p.diaSemana : '') + ')' : ''} — teria feito ${p.pts} pontos.">
-                            <div class="flex items-center gap-2.5 min-w-0">
-                                <span class="text-base">${c.emoji}</span>
-                                <span class="text-xs sm:text-sm font-bold ${c.cor}">#${p.c}${dStr}${dSem}</span>
-                            </div>
-                            <span class="${c.cor} text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full ${c.bg} border ${c.borda}">
-                                ${p.pts} pts
-                            </span>
-                        </div>`;
-                }).join("");
+                ultimos3HTML = conf.ultimos3
+                    .map(p => renderItemPremiado(p, jogo.dezenas, a, "o jogo"))
+                    .join("");
             }
 
             return `
@@ -1986,6 +1970,7 @@
             });
         }
 
+        // ⭐ ALTERADO — bloco 📅 agora igual ao do concurso
         function renderJogoCard(jogo, idx, a, fixasSet) {
             const an = analisarDezenas(jogo.dezenas, a);
             const conf = conferirJogo(jogo.dezenas);
@@ -2017,22 +2002,9 @@
             if (conf.ultimos3.length === 0) {
                 ultimos3HTML = `<p class="text-slate-500 text-xs italic text-center py-2">Nenhum concurso premiado (≥ 11 pts) no histórico.</p>`;
             } else {
-                ultimos3HTML = conf.ultimos3.map(p => {
-                    const c = corPorPontos(p.pts);
-                    const dStr = p.dt ? ` · ${p.dt}` : "";
-                    const dSem = p.diaSemana ? ` · ${p.diaSemana}` : "";
-                    return `
-                        <div class="flex items-center justify-between gap-2 ${c.bg} border ${c.borda} rounded-lg px-3 py-2 tt"
-                             data-tt="Concurso #${p.c}${p.dt ? ' (' + p.dt + (p.diaSemana ? ' - ' + p.diaSemana : '') + ')' : ''} — teria feito ${p.pts} pontos.">
-                            <div class="flex items-center gap-2.5 min-w-0">
-                                <span class="text-base">${c.emoji}</span>
-                                <span class="text-xs sm:text-sm font-bold ${c.cor}">#${p.c}${dStr}${dSem}</span>
-                            </div>
-                            <span class="${c.cor} text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full ${c.bg} border ${c.borda}">
-                                ${p.pts} pts
-                            </span>
-                        </div>`;
-                }).join("");
+                ultimos3HTML = conf.ultimos3
+                    .map(p => renderItemPremiado(p, jogo.dezenas, a, "o jogo"))
+                    .join("");
             }
 
             return `
