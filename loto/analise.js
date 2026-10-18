@@ -94,34 +94,33 @@ function processarCSV(csv) {
 
 function analisarAtrasosHistoricos(dfCompleto) {
     const resultado = [];
+    const cronologico = [...dfCompleto].reverse();
 
     for (let dez = 1; dez <= 25; dez++) {
         const atrasos = [];
         let atrasoAtual = 0;
-        let emAtraso = true;
 
-        for (let i = 0; i < dfCompleto.length; i++) {
-            if (dfCompleto[i].dezenas.includes(dez)) {
-                if (emAtraso && atrasoAtual > 0) atrasos.push(atrasoAtual);
+        for (let i = 0; i < cronologico.length; i++) {
+            if (cronologico[i].dezenas.includes(dez)) {
+                if (atrasoAtual > 0) atrasos.push(atrasoAtual);
                 atrasoAtual = 0;
-                emAtraso = false;
-            } else if (emAtraso) {
+            } else {
                 atrasoAtual++;
             }
         }
 
+        const atrasoAtualReal = atrasoAtual;
         const atrasoMax = atrasos.length > 0 ? Math.max(...atrasos) : 0;
         const atrasoMedio = atrasos.length > 0
             ? Math.round((atrasos.reduce((s, x) => s + x, 0) / atrasos.length) * 10) / 10
             : 0;
 
-        let atrasoAtualReal = 0;
-        for (const c of dfCompleto) {
-            if (c.dezenas.includes(dez)) break;
-            atrasoAtualReal++;
+        let pctMax;
+        if (atrasoMax > 0) {
+            pctMax = Math.round((atrasoAtualReal / atrasoMax) * 100);
+        } else {
+            pctMax = atrasoAtualReal > 0 ? 100 : 0;
         }
-
-        const pctMax = atrasoMax > 0 ? Math.round((atrasoAtualReal / atrasoMax) * 100) : 0;
 
         let status;
         if (pctMax >= 90) status = "🔴 No limite";
@@ -139,7 +138,6 @@ function analisarAtrasosHistoricos(dfCompleto) {
             status
         });
     }
-
     return resultado;
 }
 
@@ -285,7 +283,7 @@ function analisarJanela(dfJanela, rotulo, dfCompleto) {
             if (c.dezenas.includes(dez)) streak++;
             else break;
         }
-        if (streak >= 2) sequencias.push({ dezena: dez, streak });
+        sequencias.push({ dezena: dez, streak: streak });
     }
     sequencias.sort((a, b) => b.streak - a.streak || a.dezena - b.dezena);
     const sequenciasMax = sequencias.length > 0 ? Math.max(...sequencias.map(s => s.streak)) : 0;
@@ -312,6 +310,24 @@ function analisarJanela(dfJanela, rotulo, dfCompleto) {
     const linhasColunas = analisarLinhasColunas(dfJanela);
     const somaSerie = analisarSoma(dfJanela);
 
+    // Calcula a quantidade de sequência exata nos últimos 4 concursos para a tabela
+    const ultimos3 = dfJanela.slice(0, 4).map((c, idx) => { // <-- Alterado de 3 para 4
+        const seqNoMomento = [];
+        for (let dez = 1; dez <= 25; dez++) {
+            let streak = 0;
+            for (let i = idx; i < dfJanela.length; i++) {
+                if (dfJanela[i].dezenas.includes(dez)) streak++;
+                else break;
+            }
+            seqNoMomento.push({ dezena: dez, streak });
+        }
+        return {
+            concurso: c.concurso,
+            dezenas: c.dezenas,
+            seqNoMomento
+        };
+    });
+
     return {
         rotulo,
         n_concursos: n,
@@ -330,6 +346,7 @@ function analisarJanela(dfJanela, rotulo, dfCompleto) {
         sequencias_max: sequenciasMax,
         atrasos,
         ultimos_10: ultimos10,
+        ultimos3: ultimos3,
         soma_media: somaMedia,
         fibonacci,
         heatmap,
