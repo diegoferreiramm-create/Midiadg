@@ -55,6 +55,23 @@
         details[open] .caret { transform: rotate(90deg); }
         .caret { transition: transform 0.2s; display: inline-block; }
 
+        .painel-corpo { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.4s ease-in-out;
+        }
+        .painel-card.expandido .painel-corpo { 
+            max-height: 10000px; 
+        }
+        .painel-card.expandido .caret-painel { 
+            transform: rotate(90deg); 
+        }
+        .caret-painel { 
+            transition: transform 0.2s; 
+            display: inline-block; 
+            margin-right: 4px; 
+        }
+
         .tt { position: relative; cursor: help; }
         .tt::after {
             content: attr(data-tt);
@@ -200,19 +217,32 @@
                     </p>
                 </div>
 
-                <div class="flex flex-col sm:flex-row sm:items-end gap-3">
-                    <div class="w-full sm:flex-1">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="w-full">
                         <label class="block text-xs sm:text-sm text-slate-400 mb-1">Quantidade de jogos:</label>
                         <input type="number" id="qtd-jogos" value="5" min="1" max="50"
                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
                     </div>
+                    <div class="w-full">
+                        <label class="block text-xs sm:text-sm text-emerald-400 font-bold mb-1 tt" data-tt="Digite as dezenas que OBRIGATORIAMENTE devem aparecer em todos os jogos (separadas por espaço ou vírgula). Ex: 1 5 10">🔒 Fixar Dezenas (Opcional):</label>
+                        <input type="text" id="fixar-dezenas" placeholder="Ex: 1 5 10 22"
+                               class="w-full bg-slate-900 border border-emerald-700/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="w-full">
+                        <label class="block text-xs sm:text-sm text-rose-400 font-bold mb-1 tt" data-tt="Digite as dezenas que NUNCA devem aparecer nos jogos (separadas por espaço ou vírgula). Ex: 2 15 20">🚫 Excluir Dezenas (Opcional):</label>
+                        <input type="text" id="excluir-dezenas" placeholder="Ex: 2 15 20"
+                               class="w-full bg-slate-900 border border-rose-700/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-rose-500">
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-end gap-3 mt-2">
                     <button onclick="gerarJogos()"
-                            class="w-full sm:w-auto bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white px-6 py-2.5 rounded-xl font-medium transition shadow-lg">
+                            class="w-full bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white px-6 py-2.5 rounded-xl font-medium transition shadow-lg">
                         ✨ Gerar Jogos
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
                     <label class="flex items-start gap-3 bg-yellow-900/20 border border-yellow-500/40 rounded-xl p-3 cursor-pointer tt"
                            data-tt="Garante as 7 dezenas Fibonacci (01, 02, 03, 05, 08, 13, 21) em TODOS os jogos gerados. Os outros 8 números vêm dos grupos A/C/B.">
                         <input type="checkbox" id="fixar-fibonacci" class="w-5 h-5 mt-0.5 accent-yellow-500 cursor-pointer">
@@ -318,6 +348,17 @@
                 else cont.classList.add("hidden");
             }
         });
+
+        function togglePainel(elementoHeader) {
+            const card = elementoHeader.closest('.painel-card');
+            if (card) {
+                card.classList.toggle('expandido');
+                const span = elementoHeader.querySelector('.text-\\[10px\\]');
+                if (span) {
+                    span.textContent = card.classList.contains('expandido') ? 'Clique para minimizar' : 'Clique para expandir';
+                }
+            }
+        }
 
         function lerMemoria() {
             try { return JSON.parse(localStorage.getItem(LS_MEMORIA) || "[]"); }
@@ -581,7 +622,6 @@
             return { cor: "text-slate-500", bg: "bg-slate-900/40", borda: "border-slate-700", emoji: "❌" };
         }
 
-        // ⭐ NOVO — função para renderizar o item do bloco 📅 (usada em concurso E jogo)
         function renderItemPremiado(p, dezenasBase, a, rotulo) {
             const c = corPorPontos(p.pts);
             const dStr = p.dt ? ` · ${p.dt}` : "";
@@ -800,13 +840,23 @@
                 { label: "Maior Streak", valor: a.sequencias_max || 0, cor: "text-purple-400", tt: "MAIOR STREAK — o maior número de sorteios CONSECUTIVOS que uma dezena apareceu." }
             ];
             return `
-                <section class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-                    ${cards.map(c => `
-                        <div class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 sm:p-3 text-center tt tt-baixo"
-                             data-tt="${c.tt}">
-                            <div class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider">${c.label}</div>
-                            <div class="text-base sm:text-xl font-bold ${c.cor} mt-1">${c.valor}</div>
-                        </div>`).join("")}
+                <section class="painel-card bg-slate-800 border border-slate-700 rounded-2xl shadow-lg">
+                    <div class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-slate-700/30 transition" onclick="togglePainel(this)">
+                        <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2">
+                            <span class="caret-painel text-emerald-400">▶</span> 📊 Estatísticas Gerais
+                        </h3>
+                        <span class="text-[10px] text-slate-500">Clique para expandir</span>
+                    </div>
+                    <div class="painel-corpo px-4 sm:px-5 pb-4 sm:pb-5">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 pt-2">
+                            ${cards.map(c => `
+                                <div class="bg-slate-900/50 border border-slate-700 rounded-xl p-2.5 sm:p-3 text-center tt tt-baixo"
+                                     data-tt="${c.tt}">
+                                    <div class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider">${c.label}</div>
+                                    <div class="text-base sm:text-xl font-bold ${c.cor} mt-1">${c.valor}</div>
+                                </div>`).join("")}
+                        </div>
+                    </div>
                 </section>
             `;
         }
@@ -844,80 +894,139 @@
             }).join("");
             const r = fib.resumo || { ativas: 0, no_ciclo: 0, quase_saindo: 0, atrasadas: 0 };
             return `
-                <section class="bg-slate-800 border border-yellow-500/40 rounded-2xl p-4 sm:p-5 shadow-lg">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                        <h3 class="text-yellow-400 font-semibold text-xs sm:text-sm uppercase tracking-wider tt"
+                <section class="painel-card bg-slate-800 border border-yellow-500/40 rounded-2xl shadow-lg">
+                    <div class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-slate-700/30 transition" onclick="togglePainel(this)">
+                        <h3 class="text-yellow-400 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 tt"
                             data-tt="🔮 CICLO FIBONACCI — as 7 dezenas que são números de Fibonacci (01, 02, 03, 05, 08, 13, 21). Classificadas pela quantidade de sorteios sem sair.">
-                            🔮 Ciclo Fibonacci
+                            <span class="caret-painel">▶</span> 🔮 Ciclo Fibonacci
                         </h3>
-                        <span class="text-[10px] sm:text-xs text-slate-400">
-                            Dezenas: <b class="text-yellow-300">${(fib.lista_fibonacci || []).map(d => String(d).padStart(2,'0')).join(" · ")}</b>
-                        </span>
+                        <span class="text-[10px] text-slate-500">Clique para expandir</span>
                     </div>
-                    <div class="grid grid-cols-4 gap-2 mb-3">
-                        <div class="bg-emerald-900/30 border border-emerald-500/40 rounded-lg py-2 text-center tt tt-baixo"
-                             data-tt="ATIVAS + NO CICLO — dezenas Fibonacci que saíram recentemente.">
-                            <div class="text-[9px] sm:text-[10px] text-emerald-300 uppercase">Ativas</div>
-                            <div class="text-base sm:text-lg font-bold text-emerald-200">${r.ativas + r.no_ciclo}</div>
+                    <div class="painel-corpo px-4 sm:px-5 pb-4 sm:pb-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3 mt-2">
+                            <span class="text-[10px] sm:text-xs text-slate-400">
+                                Dezenas: <b class="text-yellow-300">${(fib.lista_fibonacci || []).map(d => String(d).padStart(2,'0')).join(" · ")}</b>
+                            </span>
                         </div>
-                        <div class="bg-amber-900/30 border border-amber-500/40 rounded-lg py-2 text-center tt tt-baixo"
-                             data-tt="QUASE SAINDO — atrasadas mais de 8 sorteios, mas ainda abaixo de 13.">
-                            <div class="text-[9px] sm:text-[10px] text-amber-300 uppercase">Quase</div>
-                            <div class="text-base sm:text-lg font-bold text-amber-200">${r.quase_saindo}</div>
+                        <div class="grid grid-cols-4 gap-2 mb-3">
+                            <div class="bg-emerald-900/30 border border-emerald-500/40 rounded-lg py-2 text-center tt tt-baixo" data-tt="ATIVAS + NO CICLO — dezenas Fibonacci que saíram recentemente.">
+                                <div class="text-[9px] sm:text-[10px] text-emerald-300 uppercase">Ativas</div>
+                                <div class="text-base sm:text-lg font-bold text-emerald-200">${r.ativas + r.no_ciclo}</div>
+                            </div>
+                            <div class="bg-amber-900/30 border border-amber-500/40 rounded-lg py-2 text-center tt tt-baixo" data-tt="QUASE SAINDO — atrasadas mais de 8 sorteios, mas ainda abaixo de 13.">
+                                <div class="text-[9px] sm:text-[10px] text-amber-300 uppercase">Quase</div>
+                                <div class="text-base sm:text-lg font-bold text-amber-200">${r.quase_saindo}</div>
+                            </div>
+                            <div class="bg-orange-900/30 border border-orange-500/40 rounded-lg py-2 text-center tt tt-baixo" data-tt="ATRASADAS — atraso entre 13 e 20 sorteios.">
+                                <div class="text-[9px] sm:text-[10px] text-orange-300 uppercase">Atras.</div>
+                                <div class="text-base sm:text-lg font-bold text-orange-200">${r.atrasadas}</div>
+                            </div>
+                            <div class="bg-slate-900/60 border border-slate-700 rounded-lg py-2 text-center tt tt-baixo" data-tt="CICLO DE REFERÊNCIA — 1, 2, 3, 5, 8, 13, 21 sorteios.">
+                                <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase">Ciclo</div>
+                                <div class="text-[10px] sm:text-xs font-bold text-slate-300 mt-1">1·2·3·5·8·13·21</div>
+                            </div>
                         </div>
-                        <div class="bg-orange-900/30 border border-orange-500/40 rounded-lg py-2 text-center tt tt-baixo"
-                             data-tt="ATRASADAS — atraso entre 13 e 20 sorteios.">
-                            <div class="text-[9px] sm:text-[10px] text-orange-300 uppercase">Atras.</div>
-                            <div class="text-base sm:text-lg font-bold text-orange-200">${r.atrasadas}</div>
-                        </div>
-                        <div class="bg-slate-900/60 border border-slate-700 rounded-lg py-2 text-center tt tt-baixo"
-                             data-tt="CICLO DE REFERÊNCIA — 1, 2, 3, 5, 8, 13, 21 sorteios.">
-                            <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase">Ciclo</div>
-                            <div class="text-[10px] sm:text-xs font-bold text-slate-300 mt-1">1·2·3·5·8·13·21</div>
-                        </div>
+                        <div class="space-y-2">${linhas}</div>
                     </div>
-                    <div class="space-y-2">${linhas}</div>
                 </section>
             `;
         }
 
         function renderSequencias(a) {
             const seqs = a.sequencias || [];
+            const ultimos3 = a.ultimos3 || []; // Mudei o nome da variável local para refletir que agora são 4 concursos
+            
             let conteudo;
             if (seqs.length === 0) {
-                conteudo = `<p class="text-slate-400 text-sm">Nenhuma dezena saiu em 2+ sorteios consecutivos.</p>`;
+                conteudo = `<p class="text-slate-400 text-sm">Nenhuma dezena saiu em sorteios consecutivos.</p>`;
             } else {
-                conteudo = seqs.map(s => {
-                    let cor;
-                    if (s.streak >= 5) cor = "bg-purple-600";
-                    else if (s.streak >= 4) cor = "bg-fuchsia-600";
-                    else if (s.streak >= 3) cor = "bg-pink-600";
-                    else cor = "bg-slate-600";
-                    return `
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 tt"
-                             data-tt="🔁 SEQUÊNCIA ATIVA — dezena ${String(s.dezena).padStart(2,'0')} saiu nos últimos ${s.streak} sorteios CONSECUTIVOS.">
-                            <div class="flex items-center gap-2.5">
-                                ${bolinhaMini(s.dezena, "bg-slate-700 text-purple-300 border border-purple-500/40")}
-                                <span class="text-xs sm:text-sm text-purple-200">
-                                    Dezena <b>${String(s.dezena).padStart(2,'0')}</b> · <b>${s.streak}</b> seguidos
-                                </span>
-                            </div>
-                            <span class="${cor} text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full">
-                                STREAK ${s.streak}
-                            </span>
-                        </div>`;
-                }).join("");
-            }
-            return `
-                <section class="bg-slate-800 border border-purple-500/40 rounded-2xl p-4 sm:p-5 shadow-lg">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-3">
-                        <h3 class="text-purple-400 font-semibold text-xs sm:text-sm uppercase tracking-wider tt"
-                            data-tt="🔁 SEQUÊNCIAS ATIVAS — dezenas que estão saindo em sorteios CONSECUTIVOS (do último pra trás).">
-                            🔁 Sequências Ativas
-                        </h3>
-                        <span class="text-xs text-slate-400">Maior: ${a.sequencias_max || 0} sorteios</span>
+                // Cabeçalhos corrigidos e expandidos para 4 concursos
+                const headerC1 = ultimos3[0] ? `#${ultimos3[0].concurso}` : "Último";
+                const headerC2 = ultimos3[1] ? `#${ultimos3[1].concurso}` : "Penúltimo";
+                const headerC3 = ultimos3[2] ? `#${ultimos3[2].concurso}` : "Antepenúltimo";
+                const headerC4 = ultimos3[3] ? `#${ultimos3[3].concurso}` : "4º atrás";
+
+                conteudo = `
+                    <div class="overflow-x-auto rounded-xl border border-slate-700 bg-slate-900/60">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm min-w-max">
+                            <thead>
+                                <tr class="bg-slate-800 text-slate-300 border-b border-slate-700">
+                                    <th class="p-3 font-semibold uppercase tracking-wider text-[10px] sm:text-xs">Dezena</th>
+                                    <th class="p-3 text-center font-semibold uppercase tracking-wider text-[10px] sm:text-xs tt" data-tt="Último concurso sorteado">Atual<br><span class="text-sky-400">${headerC1}</span></th>
+                                    <th class="p-3 text-center font-semibold uppercase tracking-wider text-[10px] sm:text-xs tt" data-tt="Penúltimo concurso sorteado">1º Anterior<br><span class="text-sky-400">${headerC2}</span></th>
+                                    <th class="p-3 text-center font-semibold uppercase tracking-wider text-[10px] sm:text-xs tt" data-tt="Antepenúltimo concurso sorteado">2º Anterior<br><span class="text-sky-400">${headerC3}</span></th>
+                                    <th class="p-3 text-center font-semibold uppercase tracking-wider text-[10px] sm:text-xs tt" data-tt="Quarto concurso para trás">3º Anterior<br><span class="text-sky-400">${headerC4}</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${seqs.map(s => {
+                                    // Função helper para pegar o streak histórico exato de uma dezena em um concurso passado
+                                    const getStreakPassado = (momentoIdx) => {
+                                        if (!ultimos3[momentoIdx]) return 0;
+                                        const item = ultimos3[momentoIdx].seqNoMomento.find(x => x.dezena === s.dezena);
+                                        return item ? item.streak : 0;
+                                    };
+
+                                    const s0 = getStreakPassado(0); // Atual (Último jogo)
+                                    const s1 = getStreakPassado(1); // 1º Anterior (Penúltimo)
+                                    const s2 = getStreakPassado(2); // 2º Anterior (Antepenúltimo)
+                                    const s3 = getStreakPassado(3); // 3º Anterior
+
+                                    // Função visual para as bolinhas históricas
+                                    const renderBolinhaHist = (val) => {
+                                        if (val === 0) return `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-800 border border-slate-700 text-slate-600 font-bold text-[10px]">0</span>`;
+                                        let c = "bg-slate-600 text-white";
+                                        if (val >= 5) c = "bg-purple-600 text-white";
+                                        else if (val >= 4) c = "bg-fuchsia-600 text-white";
+                                        else if (val >= 3) c = "bg-pink-600 text-white";
+                                        return `<span class="inline-flex items-center justify-center w-6 h-6 rounded-full ${c} font-bold text-[10px]">${val}</span>`;
+                                    };
+
+                                    // Define a cor da bolinha atual (que é o valor máximo da direita)
+                                    let corAtual = "bg-slate-800 text-slate-500 border border-slate-700";
+                                    if (s0 >= 5) corAtual = "bg-purple-600 text-white border border-purple-500";
+                                    else if (s0 >= 4) corAtual = "bg-fuchsia-600 text-white border border-fuchsia-500";
+                                    else if (s0 >= 3) corAtual = "bg-pink-600 text-white border border-pink-500";
+                                    else if (s0 >= 2) corAtual = "bg-slate-700 text-slate-200 border border-slate-600";
+
+                                    return `
+                                    <tr class="border-b border-slate-700/50 hover:bg-slate-800/50 transition">
+                                        <td class="p-2 sm:p-3">
+                                            <div class="flex items-center gap-2">
+                                                ${bolinhaMini(s.dezena, "bg-slate-700 text-slate-300 border border-slate-600")}
+                                            </div>
+                                        </td>
+                                        <td class="p-2 sm:p-3 text-center">
+                                            <span class="${corAtual} inline-flex items-center justify-center w-6 h-6 rounded-full font-bold text-[10px]">
+                                                ${s0}
+                                            </span>
+                                        </td>
+                                        <td class="p-2 sm:p-3 text-center">${renderBolinhaHist(s1)}</td>
+                                        <td class="p-2 sm:p-3 text-center">${renderBolinhaHist(s2)}</td>
+                                        <td class="p-2 sm:p-3 text-center">${renderBolinhaHist(s3)}</td>
+                                    </tr>`;
+                                }).join("")}
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="space-y-2">${conteudo}</div>
+                `;
+            }
+
+            return `
+                <section class="painel-card bg-slate-800 border border-purple-500/40 rounded-2xl shadow-lg">
+                    <div class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-slate-700/30 transition" onclick="togglePainel(this)">
+                        <h3 class="text-purple-400 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 tt"
+                            data-tt="🔁 SEQUÊNCIAS ATIVAS — exibe as 25 dezenas e a quantidade de sorteios consecutivos que cada uma acumulou nos últimos 4 concursos.">
+                            <span class="caret-painel">▶</span> 🔁 Sequências Ativas
+                        </h3>
+                        <span class="text-[10px] text-slate-500">Clique para expandir</span>
+                    </div>
+                    <div class="painel-corpo px-4 sm:px-5 pb-4 sm:pb-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-3 mt-2">
+                            <span class="text-xs text-slate-400">Maior: ${a.sequencias_max || 0} sorteios</span>
+                        </div>
+                        ${conteudo}
+                    </div>
                 </section>
             `;
         }
@@ -926,8 +1035,9 @@
             const historicos = DADOS_INJETADOS.atrasos_historicos || [];
             if (historicos.length === 0) return "";
 
-            const maxAtrasoAtual = Math.max(...historicos.map(h => h.atraso_atual), 1);
-            const ordenados = [...historicos].sort((x, y) => y.atraso_atual - x.atraso_atual);
+            const ordenados = [...historicos].sort(
+                (x, y) => y.pct_max - x.pct_max || y.atraso_atual - x.atraso_atual
+            );
 
             const linhas = ordenados.map(h => {
                 let corBarra, corTexto;
@@ -937,7 +1047,7 @@
                 else if (h.pct_max >= 25) { corBarra = "bg-emerald-500"; corTexto = "text-emerald-300"; }
                 else { corBarra = "bg-sky-500"; corTexto = "text-sky-300"; }
 
-                const pctBarra = (h.atraso_atual / maxAtrasoAtual) * 100;
+                const pctBarra = Math.min(h.pct_max, 100);
 
                 return `
                     <div class="bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 tt"
@@ -950,6 +1060,7 @@
                             <div class="flex-1 bg-slate-800 rounded-full h-2.5 overflow-hidden">
                                 <div class="${corBarra} h-2.5 rounded-full" style="width: ${pctBarra}%"></div>
                             </div>
+                            <span class="text-[10px] text-slate-400 w-10 text-right">${h.pct_max}%</span>
                             <span class="text-xs sm:text-sm ${corTexto} font-bold w-8 text-right">
                                 ${h.atraso_atual}
                             </span>
@@ -961,18 +1072,20 @@
             }).join("");
 
             return `
-                <section class="bg-slate-800 border border-rose-500/40 rounded-2xl p-4 sm:p-5 shadow-lg">
-                    <details open>
-                        <summary class="flex items-center justify-between gap-2 mb-3">
-                            <h3 class="text-rose-400 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 tt"
-                                data-tt="⏳ ATRASO HISTÓRICO — barras proporcionais ao MAIOR atraso atual entre todas as dezenas. A dezena mais atrasada tem a barra cheia; as demais ficam proporcionais.">
-                                <span class="caret text-rose-400">▶</span>
-                                ⏳ Atraso Histórico por Dezena
-                            </h3>
-                            <span class="text-[10px] text-slate-500">Maior atraso atual: ${maxAtrasoAtual} · Ordenado por atraso</span>
-                        </summary>
-                        <div class="space-y-2 mt-3">${linhas}</div>
-                    </details>
+                <section class="painel-card bg-slate-800 border border-rose-500/40 rounded-2xl shadow-lg">
+                    <div class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-slate-700/30 transition" onclick="togglePainel(this)">
+                        <h3 class="text-rose-400 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 tt"
+                            data-tt="⏳ ATRASO HISTÓRICO — cada barra mostra quanto o atraso ATUAL representa do MAIOR atraso histórico daquela dezena. Barra cheia = no limite do próprio histórico. Ordenado pelo status (mais críticas primeiro).">
+                            <span class="caret-painel">▶</span> ⏳ Atraso Histórico por Dezena
+                        </h3>
+                        <span class="text-[10px] text-slate-500">Clique para expandir</span>
+                    </div>
+                    <div class="painel-corpo px-4 sm:px-5 pb-4 sm:pb-5">
+                        <div class="flex justify-end mb-3 mt-2">
+                            <span class="text-[10px] text-slate-500">Barra = % do próprio máximo · Ordenado por criticidade</span>
+                        </div>
+                        <div class="space-y-2">${linhas}</div>
+                    </div>
                 </section>
             `;
         }
@@ -1006,15 +1119,20 @@
                 </div>`).join("");
 
             return `
-                <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-lg">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                        <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider tt"
+                <section class="painel-card bg-slate-800 border border-slate-700 rounded-2xl shadow-lg">
+                    <div class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-slate-700/30 transition" onclick="togglePainel(this)">
+                        <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 tt"
                             data-tt="🗺️ HEATMAP 5×5 — o volante da Lotofácil em grade. Cor quente (🔴) = muito sorteada, cor fria (🔵) = pouco sorteada.">
-                            🗺️ Heatmap 5×5
+                            <span class="caret-painel">▶</span> 🗺️ Heatmap 5×5
                         </h3>
-                        <span class="text-[10px] text-slate-500">🔴 quente · 🔵 fria</span>
+                        <span class="text-[10px] text-slate-500">Clique para expandir</span>
                     </div>
-                    <div class="space-y-1.5 sm:space-y-2">${linhas}</div>
+                    <div class="painel-corpo px-4 sm:px-5 pb-4 sm:pb-5">
+                        <div class="flex justify-end mb-3 mt-2">
+                            <span class="text-[10px] text-slate-500">🔴 quente · 🔵 fria</span>
+                        </div>
+                        <div class="space-y-1.5 sm:space-y-2">${linhas}</div>
+                    </div>
                 </section>
             `;
         }
@@ -1053,25 +1171,28 @@
             }).join("");
 
             return `
-                <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-lg">
-                    <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider mb-3 tt"
-                        data-tt="📐 DISTRIBUIÇÃO — mostra como as dezenas se espalham por FAIXAS (5 grupos de 5), LINHAS e COLUNAS do volante.">
-                        📐 Distribuição por Faixas, Linhas e Colunas
-                    </h3>
-
-                    <div class="mb-4">
-                        <div class="text-[10px] text-slate-500 uppercase mb-2">Por Faixas (horizontais)</div>
-                        ${renderFaixas(a.faixas || {}, a.n_concursos || 1)}
+                <section class="painel-card bg-slate-800 border border-slate-700 rounded-2xl shadow-lg">
+                    <div class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-slate-700/30 transition" onclick="togglePainel(this)">
+                        <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 tt"
+                            data-tt="📐 DISTRIBUIÇÃO — mostra como as dezenas se espalham por FAIXAS (5 grupos de 5), LINHAS e COLUNAS do volante.">
+                            <span class="caret-painel">▶</span> 📐 Distribuição por Faixas, Linhas e Colunas
+                        </h3>
+                        <span class="text-[10px] text-slate-500">Clique para expandir</span>
                     </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                        <div>
-                            <div class="text-[10px] text-slate-500 uppercase mb-2">Por Linha (5×5)</div>
-                            <div class="space-y-1.5">${linhasHTML}</div>
+                    <div class="painel-corpo px-4 sm:px-5 pb-4 sm:pb-5 pt-2">
+                        <div class="mb-4">
+                            <div class="text-[10px] text-slate-500 uppercase mb-2">Por Faixas (horizontais)</div>
+                            ${renderFaixas(a.faixas || {}, a.n_concursos || 1)}
                         </div>
-                        <div>
-                            <div class="text-[10px] text-slate-500 uppercase mb-2">Por Coluna (5×5)</div>
-                            <div class="space-y-1.5">${colunasHTML}</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <div class="text-[10px] text-slate-500 uppercase mb-2">Por Linha (5×5)</div>
+                                <div class="space-y-1.5">${linhasHTML}</div>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-slate-500 uppercase mb-2">Por Coluna (5×5)</div>
+                                <div class="space-y-1.5">${colunasHTML}</div>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -1131,29 +1252,34 @@
                 </div>`;
 
             return `
-                <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-lg">
-                    <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider mb-3 tt"
-                        data-tt="🎯 PARES — alguns pares de dezenas saem juntos mais do que o esperado. Aqui você vê os mais frequentes e os 'órfãos'.">
-                        🎯 Pares Mais Frequentes (últimos 30)
-                    </h3>
-                    <details>
-                        <summary class="text-xs text-slate-400 mb-2 cursor-pointer">
-                            <span class="caret">▶</span> Top 10 pares que saem juntos
-                        </summary>
-                        <div class="grid grid-cols-2 gap-2 mt-2">
-                            ${frequentes.map(linhaPar).join("")}
-                        </div>
-                    </details>
-                    <details class="mt-3">
-                        <summary class="text-xs text-slate-400 mb-2 cursor-pointer">
-                            <span class="caret">▶</span> 💔 Pares órfãos (não saem juntos há 10+ concursos)
-                        </summary>
-                        <div class="grid grid-cols-2 gap-2 mt-2">
-                            ${orfaos.length === 0
-                                ? `<p class="text-slate-500 text-xs italic col-span-2 text-center py-2">Nenhum par órfão no momento.</p>`
-                                : orfaos.map(linhaOrfao).join("")}
-                        </div>
-                    </details>
+                <section class="painel-card bg-slate-800 border border-slate-700 rounded-2xl shadow-lg">
+                    <div class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-slate-700/30 transition" onclick="togglePainel(this)">
+                        <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 tt"
+                            data-tt="🎯 PARES — alguns pares de dezenas saem juntos mais do que o esperado. Aqui você vê os mais frequentes e os 'órfãos'.">
+                            <span class="caret-painel">▶</span> 🎯 Pares Mais Frequentes (últimos 30)
+                        </h3>
+                        <span class="text-[10px] text-slate-500">Clique para expandir</span>
+                    </div>
+                    <div class="painel-corpo px-4 sm:px-5 pb-4 sm:pb-5 pt-2">
+                        <details open class="mb-3">
+                            <summary class="text-xs text-slate-400 mb-2 cursor-pointer">
+                                <span class="caret">▶</span> Top 10 pares que saem juntos
+                            </summary>
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                                ${frequentes.map(linhaPar).join("")}
+                            </div>
+                        </details>
+                        <details>
+                            <summary class="text-xs text-slate-400 mb-2 cursor-pointer">
+                                <span class="caret">▶</span> 💔 Pares órfãos (não saem juntos há 10+ concursos)
+                            </summary>
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                                ${orfaos.length === 0
+                                    ? `<p class="text-slate-500 text-xs italic col-span-2 text-center py-2">Nenhum par órfão no momento.</p>`
+                                    : orfaos.map(linhaOrfao).join("")}
+                            </div>
+                        </details>
+                    </div>
                 </section>
             `;
         }
@@ -1178,31 +1304,36 @@
             const mediaY = altura - ((media - min) / Math.max(max - min, 1)) * altura;
 
             return `
-                <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-lg">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                        <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider tt"
+                <section class="painel-card bg-slate-800 border border-slate-700 rounded-2xl shadow-lg">
+                    <div class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-slate-700/30 transition" onclick="togglePainel(this)">
+                        <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 tt"
                             data-tt="📉 GRÁFICO DE SOMA — soma das 15 dezenas nos últimos 30 concursos. A linha azul é a média histórica.">
-                            📉 Gráfico de Soma (últimos 30)
+                            <span class="caret-painel">▶</span> 📉 Gráfico de Soma (últimos 30)
                         </h3>
-                        <span class="text-[10px] text-slate-400">
-                            Média: <b class="text-sky-300">${media}</b> ·
-                            Mín: ${Math.min(...serie.map(x => x.soma))} ·
-                            Máx: ${Math.max(...serie.map(x => x.soma))}
-                        </span>
+                        <span class="text-[10px] text-slate-500">Clique para expandir</span>
                     </div>
-                    <div class="relative" style="height: ${altura + 30}px;">
-                        <svg viewBox="0 0 100 ${altura}" preserveAspectRatio="none" class="w-full absolute top-0 left-0" style="height: ${altura}px;">
-                            <line x1="0" x2="100" y1="${mediaY}" y2="${mediaY}" stroke="#0ea5e9" stroke-width="0.5" stroke-dasharray="2,2" vector-effect="non-scaling-stroke"/>
-                            <path d="${path}" fill="none" stroke="#10b981" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
-                            ${pontos.map((p, i) => `
-                                <circle cx="${p.x}" cy="${p.y}" r="0.8" fill="#10b981" stroke="#064e3b" stroke-width="0.3" vector-effect="non-scaling-stroke">
-                                    <title>#${p.s.concurso} — soma ${p.s.soma}</title>
-                                </circle>
-                            `).join("")}
-                        </svg>
-                        <div class="flex justify-between text-[10px] text-slate-500 absolute bottom-0 left-0 right-0">
-                            <span>#${serie[0].concurso}</span>
-                            <span>#${serie[serie.length - 1].concurso}</span>
+                    <div class="painel-corpo px-4 sm:px-5 pb-4 sm:pb-5">
+                        <div class="flex justify-end mb-3 mt-2">
+                            <span class="text-[10px] text-slate-400">
+                                Média: <b class="text-sky-300">${media}</b> ·
+                                Mín: ${Math.min(...serie.map(x => x.soma))} ·
+                                Máx: ${Math.max(...serie.map(x => x.soma))}
+                            </span>
+                        </div>
+                        <div class="relative" style="height: ${altura + 30}px;">
+                            <svg viewBox="0 0 100 ${altura}" preserveAspectRatio="none" class="w-full absolute top-0 left-0" style="height: ${altura}px;">
+                                <line x1="0" x2="100" y1="${mediaY}" y2="${mediaY}" stroke="#0ea5e9" stroke-width="0.5" stroke-dasharray="2,2" vector-effect="non-scaling-stroke"/>
+                                <path d="${path}" fill="none" stroke="#10b981" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+                                ${pontos.map((p, i) => `
+                                    <circle cx="${p.x}" cy="${p.y}" r="0.8" fill="#10b981" stroke="#064e3b" stroke-width="0.3" vector-effect="non-scaling-stroke">
+                                        <title>#${p.s.concurso} — soma ${p.s.soma}</title>
+                                    </circle>
+                                `).join("")}
+                            </svg>
+                            <div class="flex justify-between text-[10px] text-slate-500 absolute bottom-0 left-0 right-0">
+                                <span>#${serie[0].concurso}</span>
+                                <span>#${serie[serie.length - 1].concurso}</span>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -1226,37 +1357,35 @@
             const entrou = [...setB].filter(x => !setA.has(x));
 
             if (saiu.length === 0 && entrou.length === 0) {
-                return `
-                    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-lg">
-                        <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider mb-3">
-                            🔄 Diff de Grupos (${rotuloA} → ${rotuloB})
-                        </h3>
-                        <p class="text-xs text-slate-400">Grupo A não mudou entre ${rotuloA} e ${rotuloB}.</p>
-                    </section>
-                `;
+                return "";
             }
 
             return `
-                <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-lg">
-                    <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider mb-3 tt"
-                        data-tt="🔄 DIFF — compara os grupos A entre duas abas. Mostra quais dezenas SAÍRAM ou ENTRARAM no Grupo A.">
-                        🔄 Diff de Grupos (${rotuloA} → ${rotuloB})
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <div class="text-[10px] text-rose-400 uppercase mb-2 font-bold">⬇️ Saíram do Grupo A</div>
-                            <div class="flex flex-wrap gap-2">
-                                ${saiu.length === 0
-                                    ? `<span class="text-xs text-slate-500 italic">Ninguém saiu</span>`
-                                    : saiu.map(n => bolinhaMini(n, "bg-rose-900/60 text-rose-300 border border-rose-500/50 line-through")).join("")}
+                <section class="painel-card bg-slate-800 border border-slate-700 rounded-2xl shadow-lg">
+                    <div class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-slate-700/30 transition" onclick="togglePainel(this)">
+                        <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 tt"
+                            data-tt="🔄 DIFF — compara os grupos A entre duas abas. Mostra quais dezenas SAÍRAM ou ENTRARAM no Grupo A.">
+                            <span class="caret-painel">▶</span> 🔄 Diff de Grupos (${rotuloA} → ${rotuloB})
+                        </h3>
+                        <span class="text-[10px] text-slate-500">Clique para expandir</span>
+                    </div>
+                    <div class="painel-corpo px-4 sm:px-5 pb-4 sm:pb-5 pt-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <div class="text-[10px] text-rose-400 uppercase mb-2 font-bold">⬇️ Saíram do Grupo A</div>
+                                <div class="flex flex-wrap gap-2">
+                                    ${saiu.length === 0
+                                        ? `<span class="text-xs text-slate-500 italic">Ninguém saiu</span>`
+                                        : saiu.map(n => bolinhaMini(n, "bg-rose-900/60 text-rose-300 border border-rose-500/50 line-through")).join("")}
+                                </div>
                             </div>
-                        </div>
-                        <div>
-                            <div class="text-[10px] text-emerald-400 uppercase mb-2 font-bold">⬆️ Entraram no Grupo A</div>
-                            <div class="flex flex-wrap gap-2">
-                                ${entrou.length === 0
-                                    ? `<span class="text-xs text-slate-500 italic">Ninguém entrou</span>`
-                                    : entrou.map(n => bolinhaMini(n, "bg-emerald-900/60 text-emerald-200 border border-emerald-500/50")).join("")}
+                            <div>
+                                <div class="text-[10px] text-emerald-400 uppercase mb-2 font-bold">⬆️ Entraram no Grupo A</div>
+                                <div class="flex flex-wrap gap-2">
+                                    ${entrou.length === 0
+                                        ? `<span class="text-xs text-slate-500 italic">Ninguém entrou</span>`
+                                        : entrou.map(n => bolinhaMini(n, "bg-emerald-900/60 text-emerald-200 border border-emerald-500/50")).join("")}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1267,25 +1396,28 @@
         function renderUltimosConcursos(a) {
             const ultimos = (DADOS_INJETADOS && DADOS_INJETADOS.ultimos_concursos) || a.ultimos_10 || [];
             return `
-                <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-5 shadow-lg">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                        <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider tt"
+                <section class="painel-card bg-slate-800 border border-slate-700 rounded-2xl shadow-lg">
+                    <div class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-slate-700/30 transition" onclick="togglePainel(this)">
+                        <h3 class="text-slate-300 font-semibold text-xs sm:text-sm uppercase tracking-wider flex items-center gap-2 tt"
                             data-tt="📅 ÚLTIMOS CONCURSOS — a quantidade é configurável pelo campo ao lado.">
-                            📅 Últimos ${QTD_ULTIMOS} Concursos
+                            <span class="caret-painel">▶</span> 📅 Últimos ${QTD_ULTIMOS} Concursos
                         </h3>
-                        <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-slate-500">Clique para expandir</span>
+                    </div>
+                    <div class="painel-corpo px-4 sm:px-5 pb-4 sm:pb-5">
+                        <div class="flex items-center gap-2 justify-end mb-3 mt-2">
                             <label class="text-[10px] sm:text-xs text-slate-400">Mostrar:</label>
                             <input type="number" id="qtd-ultimos-input" value="${QTD_ULTIMOS}" min="1" max="5000"
-                                   class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-white text-xs focus:outline-none focus:border-emerald-500">
-                            <button onclick="recalcularUltimos()"
+                                   class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-white text-xs focus:outline-none focus:border-emerald-500" onclick="event.stopPropagation()">
+                            <button onclick="event.stopPropagation(); recalcularUltimos()"
                                     class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded-lg text-xs font-medium transition tt"
                                     data-tt="Recalcula a lista de concursos com a quantidade digitada ao lado.">
                                 🔄 Atualizar
                             </button>
                         </div>
-                    </div>
-                    <div class="space-y-2">
-                        ${ultimos.map((c, i) => renderConcursoCard(c, i, a)).join("")}
+                        <div class="space-y-2">
+                            ${ultimos.map((c, i) => renderConcursoCard(c, i, a)).join("")}
+                        </div>
                     </div>
                 </section>
             `;
@@ -1703,7 +1835,6 @@
             });
         }
 
-        // ⭐ ALTERADO — bloco 📅 agora igual ao do concurso
         function renderJogoCardOnze(jogo, idx, a, criterio) {
             const an = analisarDezenas(jogo.dezenas, a);
             const conf = conferirJogo(jogo.dezenas);
@@ -1902,17 +2033,31 @@
             const fixarSeq = document.getElementById("fixar-sequencia").checked;
             const container = document.getElementById("jogos-container");
 
+            const rawFixas = document.getElementById("fixar-dezenas").value;
+            const rawExcluidas = document.getElementById("excluir-dezenas").value;
+
+            const parseDezenas = (str) => str.replace(/,/g, " ").split(/\s+/).filter(x => x).map(Number).filter(n => n >= 1 && n <= 25);
+            
+            const fixasManuais = parseDezenas(rawFixas);
+            const excluidasSet = new Set(parseDezenas(rawExcluidas));
+
             const tags = [];
             if (fixarFib) tags.push("🔮 Fibonacci");
             if (fixarSeq) tags.push("🔁 Sequência");
+            if (fixasManuais.length > 0) tags.push(`🔒 ${fixasManuais.length} fixas`);
 
             container.innerHTML = `<h3 class="text-base sm:text-lg font-bold text-slate-200 mt-2 mb-2">
-                Jogos Gerados (${qtd})${tags.length ? ' · ' + tags.join(' + ') + ' fixadas' : ''}
+                Jogos Gerados (${qtd})${tags.length ? ' · ' + tags.join(' + ') : ''}
             </h3>`;
 
             const fixasSet = new Set();
             if (fixarFib) FIB_FIXAS.forEach(n => fixasSet.add(n));
             if (fixarSeq && a.sequencias) a.sequencias.forEach(s => fixasSet.add(s.dezena));
+            fixasManuais.forEach(n => fixasSet.add(n));
+
+            for (const n of fixasSet) {
+                if (excluidasSet.has(n)) fixasSet.delete(n);
+            }
 
             const fixas = [...fixasSet].sort((x, y) => x - y);
 
@@ -1925,9 +2070,9 @@
             jogosGerados = [];
             let tentativas = 0;
 
-            const poolA = (a.grupo_a || []).filter(n => !fixasSet.has(n));
-            const poolC = (a.grupo_c || []).filter(n => !fixasSet.has(n));
-            const poolB = (a.grupo_b || []).filter(n => !fixasSet.has(n));
+            const poolA = (a.grupo_a || []).filter(n => !fixasSet.has(n) && !excluidasSet.has(n));
+            const poolC = (a.grupo_c || []).filter(n => !fixasSet.has(n) && !excluidasSet.has(n));
+            const poolB = (a.grupo_b || []).filter(n => !fixasSet.has(n) && !excluidasSet.has(n));
 
             const slots = 15 - fixas.length;
 
@@ -1970,7 +2115,6 @@
             });
         }
 
-        // ⭐ ALTERADO — bloco 📅 agora igual ao do concurso
         function renderJogoCard(jogo, idx, a, fixasSet) {
             const an = analisarDezenas(jogo.dezenas, a);
             const conf = conferirJogo(jogo.dezenas);
