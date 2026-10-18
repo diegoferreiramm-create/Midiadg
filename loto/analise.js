@@ -1,5 +1,5 @@
 /* ============================================================
-   LOTOFÁCIL — ANÁLISE EM JAVASCRIPT PURO v2
+   LOTOFÁCIL — ANÁLISE EM JAVASCRIPT PURO v2 (CORRIGIDO)
    ============================================================ */
 
 const ID_PLANILHA = "1BSH8N7qhWI_4GS5O5iIH81DCfIcdknhV0LTPDEeX3yQ";
@@ -109,18 +109,16 @@ function analisarAtrasosHistoricos(dfCompleto) {
             }
         }
 
+        // CORREÇÃO: Inclui o atraso atual no histórico para manter percentual correto
+        if (atrasoAtual > 0) atrasos.push(atrasoAtual);
+
         const atrasoAtualReal = atrasoAtual;
         const atrasoMax = atrasos.length > 0 ? Math.max(...atrasos) : 0;
         const atrasoMedio = atrasos.length > 0
             ? Math.round((atrasos.reduce((s, x) => s + x, 0) / atrasos.length) * 10) / 10
             : 0;
 
-        let pctMax;
-        if (atrasoMax > 0) {
-            pctMax = Math.round((atrasoAtualReal / atrasoMax) * 100);
-        } else {
-            pctMax = atrasoAtualReal > 0 ? 100 : 0;
-        }
+        let pctMax = atrasoMax > 0 ? Math.min(100, Math.round((atrasoAtualReal / atrasoMax) * 100)) : 0;
 
         let status;
         if (pctMax >= 90) status = "🔴 No limite";
@@ -310,8 +308,7 @@ function analisarJanela(dfJanela, rotulo, dfCompleto) {
     const linhasColunas = analisarLinhasColunas(dfJanela);
     const somaSerie = analisarSoma(dfJanela);
 
-    // Calcula a quantidade de sequência exata nos últimos 4 concursos para a tabela
-    const ultimos3 = dfJanela.slice(0, 4).map((c, idx) => { // <-- Alterado de 3 para 4
+    const ultimos3 = dfJanela.slice(0, 4).map((c, idx) => {
         const seqNoMomento = [];
         for (let dez = 1; dez <= 25; dez++) {
             let streak = 0;
@@ -410,13 +407,14 @@ function analisarTudo(df, qtdUltimos) {
         ultimos_10: "Últimos 10"
     };
 
+    const paresGeral = analisarPares(df.slice(0, 30));
+
     const analises = {};
     for (const chave of Object.keys(janelas)) {
         analises[chave] = analisarJanela(janelas[chave], rotulos[chave], df);
+        // CORREÇÃO: Garante que o painel de pares funciona em todas as abas
+        analises[chave].pares = paresGeral; 
     }
-
-    analises.geral.pares = analisarPares(df.slice(0, 30));
-    analises.ultimos_30.pares = analises.geral.pares;
 
     const atrasosHistoricos = analisarAtrasosHistoricos(df);
 
